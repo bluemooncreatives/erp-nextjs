@@ -13,6 +13,7 @@ import { and, asc, desc, eq, gte, inArray, lte, ne, or, sql, type SQL } from 'dr
 import { db } from '@/lib/db/client';
 import {
   chartAccounts,
+  contacts,
   payments,
   productSku,
   purchaseOrders,
@@ -283,6 +284,61 @@ export async function purchasePaymentTotals(
   const amount = Number(row?.amount ?? 0);
   const returnAmount = Number(row?.returnAmount ?? 0);
   return { amount, returnAmount, net: amount - returnAmount };
+}
+
+/**
+ * Received purchase orders per month of the current year, the counterpart to
+ * `monthlySales()`. The dashboard plots the two together so a month's buying
+ * and selling can be read off one chart.
+ */
+export async function monthlyPurchases(scope: DashboardScope) {
+  const year = new Date().getUTCFullYear();
+  const conditions: SQL[] = [
+    eq(purchaseOrders.status, 1),
+    sql`year(${purchaseOrders.date}) = ${year}`,
+  ];
+  if (!isAllBranches(scope)) {
+    conditions.push(eq(purchaseOrders.purchasableType, MorphType.ShowRoom));
+    conditions.push(eq(purchaseOrders.purchasableId, scope.showroomId!));
+  }
+
+  return db
+    .select({
+      month: sql<number>`month(${purchaseOrders.date})`,
+      monthName: sql<string>`date_format(${purchaseOrders.date}, '%b')`,
+      total: sql<number>`coalesce(sum(${purchaseOrders.payableAmount}), 0)`,
+    })
+    .from(purchaseOrders)
+    .where(and(...conditions))
+    .groupBy(sql`month(${purchaseOrders.date})`, sql`date_format(${purchaseOrders.date}, '%b')`)
+    .orderBy(sql`month(${purchaseOrders.date}) asc`);
+}
+
+/** The customers with the largest approved sales total, biggest first. */
+export async function topCustomers(scope: DashboardScope, limit = 5) {
+  const conditions: SQL[] = [eq(sales.isApproved, 1)];
+  const branch = saleBranchCondition(scope);
+  if (branch) conditions.push(branch);
+
+  const rows = await db
+    .select({
+      id: contacts.id,
+      name: contacts.name,
+      total: sql<number>`coalesce(sum(${sales.payableAmount}), 0)`,
+      invoices: sql<number>`count(${sales.id})`,
+    })
+    .from(sales)
+    .innerJoin(contacts, eq(contacts.id, sales.customerId))
+    .where(and(...conditions))
+    .groupBy(contacts.id, contacts.name)
+    .orderBy(sql`sum(${sales.payableAmount}) desc`)
+    .limit(limit);
+
+  return rows.map((row) => ({
+    ...row,
+    total: Number(row.total),
+    invoices: Number(row.invoices),
+  }));
 }
 
 // ---------------------------------------------------------------------------
