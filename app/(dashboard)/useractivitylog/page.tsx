@@ -8,6 +8,8 @@ import { toDateTimeString } from '@/lib/php-date';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Activity, CircleAlert, TriangleAlert, Users } from 'lucide-react';
 
 export const metadata: Metadata = { title: 'User Activity Log' };
 
@@ -26,6 +28,10 @@ export default async function UserActivityLogPage() {
   await authorize('activity_log');
   const activities = await logActivityLists();
 
+  const errorCount = activities.filter((activity) => activity.type === 0).length;
+  const warningCount = activities.filter((activity) => activity.type === 2).length;
+  const userCount = new Set(activities.map((activity) => activity.userName).filter(Boolean)).size;
+
   return (
     <>
       <PageHeader
@@ -33,7 +39,16 @@ export default async function UserActivityLogPage() {
         breadcrumb={[{ label: 'Settings'}, { label:'User Activity Log' }]}
       />
 
-      <Card title={`Activities (${activities.length})`} bodyClassName="">
+      <ReportSummary
+        figures={[
+          { label: 'Events', value: activities.length, detail: 'Recorded in total', icon: Activity },
+          { label: 'Errors', value: errorCount, detail: 'Needing attention', icon: CircleAlert },
+          { label: 'Warnings', value: warningCount, detail: 'Logged as warnings', icon: TriangleAlert },
+          { label: 'Users', value: userCount, detail: 'Appearing in the log', icon: Users },
+        ]}
+      />
+
+      <Card title="Activity log" bodyClassName="">
         <DataTable
           columns={[
             { label: 'ID' },

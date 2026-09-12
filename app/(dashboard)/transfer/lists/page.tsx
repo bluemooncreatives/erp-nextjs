@@ -11,6 +11,8 @@ import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { ArrowLeftRight, CircleCheck, Clock, Wallet } from 'lucide-react';
 
 export const metadata: Metadata = { title: 'Money Transfer' };
 
@@ -28,6 +30,11 @@ export default async function TransferListPage() {
     })),
   );
 
+  const approvedCount = vouchers.filter((voucher) => voucher.isApprove === 1).length;
+  const totalLabel = await singlePrice(
+    vouchers.reduce((sum, voucher) => sum + Number(voucher.amount ?? 0), 0),
+  );
+
   return (
     <>
       <PageHeader
@@ -43,7 +50,21 @@ export default async function TransferListPage() {
         }
       />
 
-      <Card title={`Transfers (${rows.length})`} bodyClassName="">
+      <ReportSummary
+        figures={[
+          { label: 'Transfers', value: rows.length, detail: 'Between branches', icon: ArrowLeftRight },
+          { label: 'Approved', value: approvedCount, detail: 'Posted to the ledger', icon: CircleCheck },
+          {
+            label: 'Pending',
+            value: rows.length - approvedCount,
+            detail: 'Awaiting approval',
+            icon: Clock,
+          },
+          { label: 'Total moved', value: totalLabel, detail: 'Across every transfer', icon: Wallet },
+        ]}
+      />
+
+      <Card title="All transfers" bodyClassName="">
         <DataTable
           columns={[
             { label: 'TX ID' },

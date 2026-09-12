@@ -2,11 +2,14 @@
 // Form fields for server-action forms.
 //
 // The ERP forms post through `<form action={serverAction}>` with native inputs,
-// so these stay uncontrolled and keep working without client JavaScript - which
-// rules out the design system's Radix Select and Checkbox, both of which are
-// buttons that post nothing on their own. The controls here are native
-// elements wearing the same tokens, so they match the rest of the product while
-// still submitting on a plain form post.
+// so these stay uncontrolled and keep working without client JavaScript.
+//
+// Selects are the exception. A native `<select>` can be made to match `Input`
+// when closed, but its open list is drawn by the operating system and no
+// stylesheet reaches it - so every dropdown in the product left the design
+// system the moment it was clicked. `FormSelect` now renders the Radix
+// listbox (see `select-control.tsx`) with a hidden input carrying the value,
+// which is what keeps the form post identical to the native control's.
 //
 // They render the structure the Blade forms did: a label, the control and the
 // validation message the action returns.
@@ -16,11 +19,9 @@ import React, { type ReactNode } from 'react';
 import { AlertCircle, CheckCircle2, Info, TriangleAlert } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/components/ui/utils';
+import { SelectControl, type SelectOption } from './select-control';
 
-/** The native `<select>`, matching `Input`'s box. */
-const SELECT_CONTROL =
-  'border-input bg-input-background dark:bg-input/30 flex h-9 w-full min-w-0 appearance-none rounded-md border px-3 py-1 text-base transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm';
+export type { SelectOption };
 
 export function FieldLabel({
   children,
@@ -143,12 +144,6 @@ export function FormTextarea({
   );
 }
 
-export type SelectOption = {
-  value: string | number;
-  label: string;
-  disabled?: boolean;
-};
-
 export function FormSelect({
   label,
   error,
@@ -158,47 +153,63 @@ export function FormSelect({
   wrapperClassName,
   className = '',
   children,
-  ...props
-}: Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'children'> & {
+  name,
+  id,
+  value,
+  defaultValue,
+  onChange,
+  disabled,
+  required,
+  'aria-label': ariaLabel,
+}: {
   label?: string;
   error?: string;
   hint?: string;
   options?: SelectOption[];
   placeholder?: string;
   wrapperClassName?: string;
+  className?: string;
+  /** Extra rows below the options. Must be `SelectItem`s, not `<option>`s. */
   children?: ReactNode;
+  name?: string;
+  id?: string;
+  value?: string | number;
+  defaultValue?: string | number;
+  /** Receives a native-shaped event, so `e.target.value` reads the same as before. */
+  onChange?: (event: { target: { name: string; value: string } }) => void;
+  disabled?: boolean;
+  required?: boolean;
+  'aria-label'?: string;
 }) {
-  const id = props.id ?? props.name;
+  const controlId = id ?? name;
+  const describedBy = controlId && (error || hint) ? `${controlId}-${error ? 'error' : 'hint'}` : undefined;
+
   return (
     <Field
       label={label}
-      htmlFor={id}
-      required={props.required}
+      htmlFor={controlId}
+      required={required}
       error={error}
       hint={hint}
       className={wrapperClassName}
     >
-      {/* The chevron is drawn as a background image rather than an overlaid
-          element, so the control stays a single native <select>. */}
-      <select
-        id={id}
-        data-slot="native-select"
-        aria-invalid={Boolean(error)} aria-describedby={id && (error || hint) ? `${id}-${error ? 'error' : 'hint'}` : undefined}
-        className={cn(
-          SELECT_CONTROL,
-          "bg-[length:0.65rem] bg-[position:right_0.75rem_center] bg-no-repeat pr-9 bg-[image:url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%23888' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E\")]",
-          className,
-        )}
-        {...props}
+      <SelectControl
+        name={name}
+        id={controlId}
+        options={options}
+        placeholder={placeholder}
+        value={value === undefined ? undefined : String(value)}
+        defaultValue={defaultValue === undefined ? undefined : String(defaultValue)}
+        onChange={onChange}
+        disabled={disabled}
+        required={required}
+        invalid={Boolean(error)}
+        describedBy={describedBy}
+        className={className}
+        aria-label={ariaLabel}
       >
-        {placeholder ? <option value="">{placeholder}</option> : null}
-        {options.map((option) => (
-          <option key={option.value} value={option.value} disabled={option.disabled}>
-            {option.label}
-          </option>
-        ))}
         {children}
-      </select>
+      </SelectControl>
     </Field>
   );
 }

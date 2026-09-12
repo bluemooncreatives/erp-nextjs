@@ -7,12 +7,19 @@ import { logActivityListsDuty } from '@/lib/activity-log';
 import { toDateTimeString } from '@/lib/php-date';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { LogIn, Radio, Users } from 'lucide-react';
 
 export const metadata: Metadata = { title: 'User Login History' };
 
 export default async function UserLoginLogPage() {
   await authorize('activity_log.login');
   const activities = await logActivityListsDuty();
+
+  // A session with no logout time is one nobody has signed out of - either
+  // still open, or ended by the browser closing rather than by signing out.
+  const openCount = activities.filter((activity) => !activity.logoutTime).length;
+  const userCount = new Set(activities.map((activity) => activity.userName).filter(Boolean)).size;
 
   return (
     <>
@@ -21,7 +28,15 @@ export default async function UserLoginLogPage() {
         breadcrumb={[{ label: 'Settings'}, { label:'User Login History' }]}
       />
 
-      <Card title={`Sessions (${activities.length})`} bodyClassName="">
+      <ReportSummary
+        figures={[
+          { label: 'Sessions', value: activities.length, detail: 'Sign-ins recorded', icon: LogIn },
+          { label: 'Users', value: userCount, detail: 'Who have signed in', icon: Users },
+          { label: 'Never signed out', value: openCount, detail: 'No logout recorded', icon: Radio },
+        ]}
+      />
+
+      <Card title="Login history" bodyClassName="">
         <DataTable
           columns={[
             { label: 'ID' },
