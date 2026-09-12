@@ -278,6 +278,21 @@ export async function findComboProduct(id: number) {
   return { combo, details };
 }
 
+/** `count($comboProduct->combo_products)` for a page of the combo list. */
+export async function comboItemCountMap(ids: number[]): Promise<Map<number, number>> {
+  if (ids.length === 0) return new Map();
+  const rows = await db
+    .select({
+      comboProductId: comboProductDetails.comboProductId,
+      total: sql<number>`count(*)`,
+    })
+    .from(comboProductDetails)
+    .where(inArray(comboProductDetails.comboProductId, ids))
+    .groupBy(comboProductDetails.comboProductId);
+
+  return new Map(rows.map((r) => [Number(r.comboProductId), Number(r.total)]));
+}
+
 /** `comboStatus()` - the active toggle on the combo tab of the product list. */
 export async function setComboStatus(id: number, status: number): Promise<void> {
   await db.update(comboProducts).set({ status }).where(eq(comboProducts.id, id));
