@@ -962,6 +962,8 @@ export type PurchasePaymentInput = {
   accountId?: number | null;
   bankName?: string | null;
   branch?: string | null;
+  accountNo?: string | null;
+  accountOwner?: string | null;
 };
 
 /** `PurchaseOrderRepository::payments($payments, $id)` */
@@ -1026,6 +1028,8 @@ export async function recordPurchasePayments(
         accountId: payment.accountId ?? null,
         bankName: payment.bankName ?? null,
         branch: payment.branch ?? null,
+        accountNo: payment.accountNo ?? null,
+        accountOwner: payment.accountOwner ?? null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });

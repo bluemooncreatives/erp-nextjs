@@ -440,6 +440,8 @@ export function PurchaseForm({
                 />
                 <FormInput label="Bank Name" name="bank_name" />
                 <FormInput label="Branch" name="branch" />
+                <FormInput label="Account No" name="account_no" />
+                <FormInput label="Account Owner" name="account_owner" />
               </>
             ) : null}
           </div>

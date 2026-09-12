@@ -103,6 +103,10 @@ export function QuotationForm({
       discount: l.discount,
     })) ?? [],
   );
+  // Which button submitted - the Blade's "save", "save and mail" and
+  // "save and preview" set these hidden fields.
+  const [sendMail, setSendMail] = useState(false);
+  const [preview, setPreview] = useState(false);
   const [discountType, setDiscountType] = useState(defaults?.discountType ?? '1');
   const [discountValue, setDiscountValue] = useState(defaults?.discountValue ?? 0);
   const [taxId, setTaxId] = useState(defaults?.taxId ?? '0');
@@ -390,6 +394,9 @@ export function QuotationForm({
         </Card>
       </div>
 
+      <input type="hidden" name="send_mail" value={sendMail ? '1' : ''} />
+      <input type="hidden" name="preview_status" value={preview ? '1' : ''} />
+
       <div className="flex items-center justify-end gap-3">
         <Link
           href={ROUTES['quotation.index']}
@@ -397,7 +404,35 @@ export function QuotationForm({
         >
           Cancel
         </Link>
-        <SubmitButton disabled={lines.length === 0}>
+        <button
+          type="submit"
+          disabled={lines.length === 0}
+          onClick={() => {
+            setSendMail(false);
+            setPreview(true);
+          }}
+          className="rounded-lg px-5 py-3 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 dark:text-gray-400 dark:ring-gray-700"
+        >
+          Save &amp; Preview
+        </button>
+        <button
+          type="submit"
+          disabled={lines.length === 0}
+          onClick={() => {
+            setPreview(false);
+            setSendMail(true);
+          }}
+          className="rounded-lg px-5 py-3 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 dark:text-gray-400 dark:ring-gray-700"
+        >
+          Save &amp; Send Mail
+        </button>
+        <SubmitButton
+          disabled={lines.length === 0}
+          onClick={() => {
+            setSendMail(false);
+            setPreview(false);
+          }}
+        >
           {submitLabel ?? 'Save Quotation'}
         </SubmitButton>
       </div>

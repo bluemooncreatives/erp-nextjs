@@ -224,3 +224,34 @@ export async function sendSaleMail(options: {
     `,
   });
 }
+
+/**
+ * `QuotationController@send_mail_quotation($id)` - the quotation equivalent of
+ * `sendSaleMail`, from the `quotation_template` row.
+ */
+export async function sendQuotationMail(options: {
+  to: string;
+  customerName: string;
+  invoiceNo: string;
+  quotationUrl: string;
+}): Promise<boolean> {
+  const setting = await generalSetting();
+
+  return sendTemplateMail({
+    type: EmailTemplateType.Quotation,
+    to: options.to,
+    variables: {
+      USER_FIRST_NAME: options.customerName,
+      USER_LOGIN_EMAIL: options.to,
+      EMAIL_SIGNATURE: setting.mailSignature ?? '',
+      EMAIL_FOOTER: setting.mailFooter ?? '',
+      INVOICE_NO: options.invoiceNo,
+      QUOTATION_URL: options.quotationUrl,
+    },
+    fallbackHtml: `
+      <p>Dear ${options.customerName},</p>
+      <p>Your quotation ${options.invoiceNo} is ready.</p>
+      <p><a href="${options.quotationUrl}">View the quotation</a></p>
+    `,
+  });
+}

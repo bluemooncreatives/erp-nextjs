@@ -365,3 +365,11 @@ export async function deleteQuotation(id: number): Promise<void> {
     await tx.delete(quotations).where(eq(quotations.id, id));
   });
 }
+
+/** `$data->status = 1; $data->save();` after the quotation mail is sent. */
+export async function markQuotationMailed(id: number): Promise<void> {
+  await db
+    .update(quotations)
+    .set({ status: 1, updatedAt: new Date() })
+    .where(eq(quotations.id, id));
+}

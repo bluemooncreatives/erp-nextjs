@@ -71,6 +71,8 @@ function readPayments(formData: FormData): PurchasePaymentInput[] {
   const accountIds = formData.getAll('account_id').map((v) => Number(v));
   const bankNames = formData.getAll('bank_name').map(String);
   const branches = formData.getAll('branch').map(String);
+  const accountNos = formData.getAll('account_no').map(String);
+  const accountOwners = formData.getAll('account_owner').map(String);
 
   const out: PurchasePaymentInput[] = [];
   for (let i = 0; i < methods.length; i++) {
@@ -82,6 +84,8 @@ function readPayments(formData: FormData): PurchasePaymentInput[] {
       accountId: Number.isFinite(accountIds[i]) ? accountIds[i] : null,
       bankName: bankNames[i] || null,
       branch: branches[i] || null,
+      accountNo: accountNos[i] || null,
+      accountOwner: accountOwners[i] || null,
     });
   }
   return out;

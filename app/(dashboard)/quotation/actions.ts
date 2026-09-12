@@ -14,8 +14,12 @@ import {
   updateQuotation,
   type QuotationInput,
   type QuotationLineInput,
+  findQuotation,
+  markQuotationMailed,
 } from '@/lib/quotation/repository';
 import { quotationToSale } from '@/lib/sale/repository';
+import { sendQuotationMail } from '@/lib/mail';
+import { config } from '@/lib/config';
 
 export type QuotationFormState = {
   error?: string;
@@ -130,6 +134,12 @@ export async function storeQuotation(
   let quotationId: number;
   try {
     quotationId = await createQuotation(input, user.id);
+
+    // `if ($request->send_mail == 1) $this->send_mail_quotation(...)`
+    if (formData.get('send_mail')) {
+      await mailQuotation(quotationId, user.id);
+    }
+
     await successLog(`Quotation created: ${quotationId}`, user.id);
   } catch (error) {
     await errorLog(String(error), user.id);
@@ -137,7 +147,35 @@ export async function storeQuotation(
   }
 
   revalidatePath(ROUTES['quotation.index']);
+
+  // `if ($request->preview_status == 1) return redirect()->route('quotation.edit', ...)`
+  if (formData.get('preview_status')) {
+    redirect(route('quotation.edit', { id: quotationId }));
+  }
+
   redirect(route('quotation.show', { id: quotationId }));
+}
+
+/** `send_mail_quotation($id)` - mail the quotation and stamp its status. */
+async function mailQuotation(quotationId: number, userId: number): Promise<void> {
+  const record = await findQuotation(quotationId);
+  const email = record?.customer?.email;
+  if (!record || !email) {
+    await errorLog(`Customer email doesn't exist for quotation ${quotationId}`, userId);
+    return;
+  }
+
+  const sent = await sendQuotationMail({
+    to: email,
+    customerName: record.customer?.name ?? '',
+    invoiceNo: record.quotation.invoiceNo ?? String(quotationId),
+    quotationUrl: `${config.app.url}${route('quotation.order.print_view', { id: quotationId })}`,
+  });
+
+  if (sent) {
+    await markQuotationMailed(quotationId);
+    await successLog(`Mail sent to ${email} for quotation ${quotationId}`, userId);
+  }
 }
 
 export async function updateQuotationAction(
