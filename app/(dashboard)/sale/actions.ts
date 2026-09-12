@@ -15,6 +15,7 @@ import {
   approveSale,
   approveSaleReturn,
   createSale,
+  updateSale,
   deleteSale,
   quotationToSale,
   recordSalePayments,
@@ -182,6 +183,35 @@ export async function storeSale(
     }
 
     await successLog(`Sale created: ${saleId}`, user.id);
+  } catch (error) {
+    await errorLog(String(error), user.id);
+    return { error: 'Something Went Wrong' };
+  }
+
+  revalidatePath(ROUTES['sale.index']);
+  redirect(route('sale.show', { id: saleId }));
+}
+
+/** `SaleController@update` */
+export async function saveSale(
+  _prev: SaleFormState,
+  formData: FormData,
+): Promise<SaleFormState> {
+  const saleId = Number(formData.get('id'));
+  if (!Number.isFinite(saleId)) return { error: 'Missing sale id.' };
+
+  const input = readSaleInput(formData);
+  const fieldErrors = validate(input);
+  if (fieldErrors) return { fieldErrors };
+
+  const user = await authorize('sale.update');
+
+  try {
+    const result = await updateSale(saleId, input, user.id);
+    if (result === INSUFFICIENT_STOCK) {
+      return { error: 'Your stock is out' };
+    }
+    await successLog('Sale Updated Successfully without Payment', user.id);
   } catch (error) {
     await errorLog(String(error), user.id);
     return { error: 'Something Went Wrong' };

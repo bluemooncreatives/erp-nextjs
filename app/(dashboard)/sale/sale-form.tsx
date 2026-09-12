@@ -61,28 +61,69 @@ type CartLine = {
   stock: number;
 };
 
+/** The sale being edited, as `sale::sale.edit` pre-filled its form. */
+export type SaleFormDefaults = {
+  id: number;
+  customerRef: string;
+  locationRef: string;
+  date: string;
+  refNo: string;
+  notes: string;
+  discountType: string;
+  discountValue: number;
+  taxId: string;
+  shippingCharge: number;
+  otherCharge: number;
+  lines: Array<{
+    productId: number;
+    isCombo: boolean;
+    label: string;
+    price: number;
+    quantity: number;
+    tax: number;
+    discount: number;
+    stock: number;
+  }>;
+};
+
 export function SaleForm({
   options,
   action,
   currencySymbol,
   defaultLocation,
   heading = 'New Sale',
+  defaults,
+  submitLabel,
 }: {
   options: SaleFormOptions;
   action: (prev: SaleFormState, formData: FormData) => Promise<SaleFormState>;
   currencySymbol: string;
   defaultLocation?: string;
   heading?: string;
+  defaults?: SaleFormDefaults;
+  submitLabel?: string;
 }) {
   const [state, formAction] = useActionState(action, INITIAL);
 
-  const [lines, setLines] = useState<CartLine[]>([]);
+  const [lines, setLines] = useState<CartLine[]>(
+    defaults?.lines.map((l) => ({
+      key: `${l.isCombo ? 'c' : 'p'}-${l.productId}`,
+      productId: l.productId,
+      isCombo: l.isCombo,
+      label: l.label,
+      price: l.price,
+      quantity: l.quantity,
+      tax: l.tax,
+      discount: l.discount,
+      stock: l.stock,
+    })) ?? [],
+  );
   const [picked, setPicked] = useState('');
-  const [discountType, setDiscountType] = useState('1');
-  const [discountValue, setDiscountValue] = useState(0);
-  const [taxId, setTaxId] = useState('0');
-  const [shipping, setShipping] = useState(0);
-  const [other, setOther] = useState(0);
+  const [discountType, setDiscountType] = useState(defaults?.discountType ?? '1');
+  const [discountValue, setDiscountValue] = useState(defaults?.discountValue ?? 0);
+  const [taxId, setTaxId] = useState(defaults?.taxId ?? '0');
+  const [shipping, setShipping] = useState(defaults?.shippingCharge ?? 0);
+  const [other, setOther] = useState(defaults?.otherCharge ?? 0);
   const [paymentMethod, setPaymentMethod] = useState('');
   const [paymentAmount, setPaymentAmount] = useState(0);
   const [accountId, setAccountId] = useState('');
@@ -164,6 +205,8 @@ export function SaleForm({
     <form action={formAction} className="space-y-6">
       <FormAlert variant="error" message={state.error} />
 
+      {defaults ? <input type="hidden" name="id" value={defaults.id} /> : null}
+
       {/* Values the server action reads back. */}
       <input type="hidden" name="item_amount" value={totals.itemAmount.toFixed(2)} />
       <input type="hidden" name="total_quantity" value={totals.totalQuantity} />
@@ -187,6 +230,7 @@ export function SaleForm({
             name="customer_id"
             required
             placeholder="Select customer"
+            defaultValue={defaults?.customerRef ?? ''}
             options={options.customers}
             error={state.fieldErrors?.customer_id}
           />
@@ -195,7 +239,7 @@ export function SaleForm({
             name="warehouse_id"
             required
             placeholder="Select location"
-            defaultValue={defaultLocation ?? ''}
+            defaultValue={defaults?.locationRef ?? defaultLocation ?? ''}
             options={options.locations}
             error={state.fieldErrors?.warehouse_id}
           />
@@ -204,10 +248,10 @@ export function SaleForm({
             name="date"
             type="date"
             required
-            defaultValue={new Date().toISOString().slice(0, 10)}
+            defaultValue={defaults?.date ?? new Date().toISOString().slice(0, 10)}
             error={state.fieldErrors?.date}
           />
-          <FormInput label="Reference No" name="ref_no" />
+          <FormInput label="Reference No" name="ref_no" defaultValue={defaults?.refNo ?? ''} />
         </div>
       </Card>
 
@@ -394,7 +438,12 @@ export function SaleForm({
             <FormInput label="Shipping Name" name="shipping_name" />
           </div>
 
-          <FormTextarea label="Notes" name="notes" wrapperClassName="mt-5" />
+          <FormTextarea
+            label="Notes"
+            name="notes"
+            wrapperClassName="mt-5"
+            defaultValue={defaults?.notes ?? ''}
+          />
         </Card>
 
         <Card title="Summary">
@@ -470,7 +519,7 @@ export function SaleForm({
         >
           Cancel
         </Link>
-        <SubmitButton disabled={lines.length === 0}>Save Sale</SubmitButton>
+        <SubmitButton disabled={lines.length === 0}>{submitLabel ?? 'Save Sale'}</SubmitButton>
       </div>
     </form>
   );
