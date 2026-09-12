@@ -7,6 +7,8 @@ import { generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { ReceiptText, Truck, Users } from 'lucide-react';
 import { ReportFilter } from '../report/report-filter';
 
 export const metadata: Metadata = { title: 'Expense By Supplier' };
@@ -23,6 +25,7 @@ export default async function ExpenseBySupplierPage({
 
   const rows = await expenseBySupplier({ from: sp.from, to: sp.to });
   const grandTotal = rows.reduce((sum, r) => sum + r.total, 0);
+  const orderCount = rows.reduce((sum, r) => sum + r.orders, 0);
 
   return (
     <>
@@ -38,10 +41,20 @@ export default async function ExpenseBySupplierPage({
         }
       />
 
-      <Card
-        title={`Suppliers (${rows.length}) - ${symbol} ${numberFormat(grandTotal)}`}
-        bodyClassName=""
-      >
+      <ReportSummary
+        figures={[
+          { label: 'Suppliers', value: rows.length, detail: 'With spend in this period', icon: Users },
+          { label: 'Purchase orders', value: orderCount, detail: 'Across every supplier', icon: Truck },
+          {
+            label: 'Total expense',
+            value: `${symbol} ${numberFormat(grandTotal)}`,
+            detail: 'In this period',
+            icon: ReceiptText,
+          },
+        ]}
+      />
+
+      <Card title="Expense by supplier" bodyClassName="">
         <DataTable
           columns={[{ label: 'Supplier' }, { label: 'Orders' }, { label: 'Total' }]}
           isEmpty={rows.length === 0}

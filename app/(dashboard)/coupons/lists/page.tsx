@@ -11,6 +11,8 @@ import { listCoupons } from '@/lib/product/coupons';
 import { dateConvert } from '@/lib/settings';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, StatusBadge, Td, Tr } from '@/components/erp/table';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { CircleCheck, CircleSlash, TicketPercent } from 'lucide-react';
 import { CouponForm } from './coupon-form';
 
 export const metadata: Metadata = { title: 'Coupon' };
@@ -29,12 +31,27 @@ export default async function CouponsPage() {
     })),
   );
 
+  const activeCount = decorated.filter((row) => row.status === 1).length;
+
   return (
     <>
       <PageHeader title="Coupon" breadcrumb={[{ label: 'Products' }, { label: 'Coupon' }]} />
 
+      <ReportSummary
+        figures={[
+          { label: 'Coupons', value: decorated.length, detail: 'Defined in total', icon: TicketPercent },
+          { label: 'Active', value: activeCount, detail: 'Redeemable now', icon: CircleCheck },
+          {
+            label: 'Inactive',
+            value: decorated.length - activeCount,
+            detail: 'Switched off or expired',
+            icon: CircleSlash,
+          },
+        ]}
+      />
+
       <div className="grid gap-5 lg:grid-cols-[1fr_360px]">
-        <Card title={`Coupons (${rows.length})`} bodyClassName="">
+        <Card title="All coupons" bodyClassName="">
           <DataTable
             columns={[
               { label: 'Code' },

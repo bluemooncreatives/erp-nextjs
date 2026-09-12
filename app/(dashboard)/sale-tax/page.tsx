@@ -8,6 +8,8 @@ import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Coins, FileText, Landmark, Receipt } from 'lucide-react';
 import { ReportFilter } from '../report/report-filter';
 
 export const metadata: Metadata = { title: 'Sales Tax' };
@@ -28,6 +30,9 @@ export default async function SalesTaxPage({
     rows.map(async (r) => ({ ...r, dateLabel: await dateConvert(r.sale.date) })),
   );
 
+  const netTotal = rows.reduce((sum, r) => sum + Number(r.sale.amount ?? 0), 0);
+  const grossTotal = rows.reduce((sum, r) => sum + Number(r.sale.payableAmount ?? 0), 0);
+
   return (
     <>
       <PageHeader
@@ -38,10 +43,31 @@ export default async function SalesTaxPage({
         }
       />
 
-      <Card
-        title={`Invoices with tax (${rows.length}) - ${symbol} ${numberFormat(total)} collected`}
-        bodyClassName=""
-      >
+      <ReportSummary
+        figures={[
+          { label: 'Taxed invoices', value: rows.length, detail: 'In this period', icon: FileText },
+          {
+            label: 'Net amount',
+            value: `${symbol} ${numberFormat(netTotal)}`,
+            detail: 'Before tax',
+            icon: Landmark,
+          },
+          {
+            label: 'Tax collected',
+            value: `${symbol} ${numberFormat(total)}`,
+            detail: 'Owed to the revenue',
+            icon: Coins,
+          },
+          {
+            label: 'Gross total',
+            value: `${symbol} ${numberFormat(grossTotal)}`,
+            detail: 'Invoiced including tax',
+            icon: Receipt,
+          },
+        ]}
+      />
+
+      <Card title="Sales tax" bodyClassName="">
         <DataTable
           columns={[
             { label: 'Invoice' },

@@ -11,6 +11,8 @@ import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { CheckCircle2, FolderKanban, ListTodo, Users } from 'lucide-react';
 
 export const metadata: Metadata = { title: 'Projects' };
 
@@ -24,6 +26,10 @@ export default async function ProjectListPage() {
       dueLabel: row.project.dueDate ? await dateConvert(row.project.dueDate) : '-',
     })),
   );
+
+  const taskTotal = rows.reduce((sum, row) => sum + Number(row.taskCount ?? 0), 0);
+  const doneTotal = rows.reduce((sum, row) => sum + Number(row.doneCount ?? 0), 0);
+  const teamCount = new Set(rows.map((row) => row.teamName).filter(Boolean)).size;
 
   return (
     <>
@@ -48,7 +54,21 @@ export default async function ProjectListPage() {
         }
       />
 
-      <Card title={`Projects (${rows.length})`} bodyClassName="">
+      <ReportSummary
+        figures={[
+          { label: 'Projects', value: rows.length, detail: 'You have access to', icon: FolderKanban },
+          { label: 'Teams', value: teamCount, detail: 'Owning these projects', icon: Users },
+          { label: 'Tasks', value: taskTotal, detail: 'Across every project', icon: ListTodo },
+          {
+            label: 'Completed',
+            value: doneTotal,
+            detail: taskTotal > 0 ? `${Math.round((doneTotal / taskTotal) * 100)}% of all tasks` : 'No tasks yet',
+            icon: CheckCircle2,
+          },
+        ]}
+      />
+
+      <Card title="All projects" bodyClassName="">
         <DataTable
           columns={[
             { label: 'Project' },

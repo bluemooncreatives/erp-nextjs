@@ -7,6 +7,8 @@ import { generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { FileText, Users, Wallet } from 'lucide-react';
 import { ReportFilter } from '../report/report-filter';
 
 export const metadata: Metadata = { title: 'Income By Customer' };
@@ -23,6 +25,7 @@ export default async function IncomeByCustomerPage({
 
   const rows = await incomeByCustomer({ from: sp.from, to: sp.to });
   const grandTotal = rows.reduce((sum, r) => sum + r.total, 0);
+  const invoiceCount = rows.reduce((sum, r) => sum + r.invoices, 0);
 
   return (
     <>
@@ -38,10 +41,20 @@ export default async function IncomeByCustomerPage({
         }
       />
 
-      <Card
-        title={`Customers (${rows.length}) - ${symbol} ${numberFormat(grandTotal)}`}
-        bodyClassName=""
-      >
+      <ReportSummary
+        figures={[
+          { label: 'Customers', value: rows.length, detail: 'Billed in this period', icon: Users },
+          { label: 'Invoices', value: invoiceCount, detail: 'Across every customer', icon: FileText },
+          {
+            label: 'Total income',
+            value: `${symbol} ${numberFormat(grandTotal)}`,
+            detail: 'In this period',
+            icon: Wallet,
+          },
+        ]}
+      />
+
+      <Card title="Income by customer" bodyClassName="">
         <DataTable
           columns={[{ label: 'Customer' }, { label: 'Invoices'}, { label:'Total' }]}
           isEmpty={rows.length === 0}

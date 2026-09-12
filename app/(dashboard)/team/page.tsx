@@ -9,6 +9,8 @@ import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Globe, Lock, Users } from 'lucide-react';
 import { TeamForm } from '../project/forms';
 
 export const metadata: Metadata = { title: 'Teams' };
@@ -19,6 +21,8 @@ export default async function TeamListPage() {
   const teams = user.currentWorkspaceId
     ? await teamsInWorkspace(user.currentWorkspaceId, user.id)
     : [];
+
+  const privateCount = teams.filter((team) => team.privacyType === 1).length;
 
   return (
     <>
@@ -35,8 +39,16 @@ export default async function TeamListPage() {
         }
       />
 
+      <ReportSummary
+        figures={[
+          { label: 'Teams', value: teams.length, detail: 'In this workspace', icon: Users },
+          { label: 'Public', value: teams.length - privateCount, detail: 'Open to the workspace', icon: Globe },
+          { label: 'Private', value: privateCount, detail: 'Invite only', icon: Lock },
+        ]}
+      />
+
       <div className="grid gap-5 lg:grid-cols-[1fr_360px]">
-        <Card title={`Teams (${teams.length})`} bodyClassName="">
+        <Card title="All teams" bodyClassName="">
           <DataTable
             columns={[
               { label: 'Team' },
