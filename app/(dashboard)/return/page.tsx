@@ -12,6 +12,8 @@ import {
 } from '@/lib/contact/queries';
 import { dateConvert, singlePrice } from '@/lib/settings';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Undo2, Wallet, Divide } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 
 export const metadata: Metadata = { title: 'My Returns' };
@@ -41,6 +43,7 @@ export default async function ContactReturnPage() {
   // The Blade summed `$sale->amount` across the returned invoices.
   const total = history.reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
   const totalLabel = await singlePrice(total);
+  const averageLabel = await singlePrice(history.length ? total / history.length : 0);
 
   return (
     <>
@@ -49,7 +52,15 @@ export default async function ContactReturnPage() {
         breadcrumb={[{ label: 'My Details'}, { label:'Returns' }]}
       />
 
-      <Card title={`Returns (${rows.length}) - ${totalLabel}`} bodyClassName="">
+      <ReportSummary
+        figures={[
+          { label: 'Returned value', value: totalLabel, detail: 'Across every return', icon: Wallet },
+          { label: 'Returns', value: rows.length.toLocaleString('en-US'), detail: 'On this contact', icon: Undo2 },
+          { label: 'Average return', value: averageLabel, detail: 'Per return', icon: Divide },
+        ]}
+      />
+
+      <Card title={`Returns (${rows.length})`} bodyClassName="">
         <DataTable
           columns={[
             { label: 'Date' },

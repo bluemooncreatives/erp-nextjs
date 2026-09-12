@@ -7,6 +7,8 @@ import { requireUser } from '@/lib/auth/permissions';
 import { ContactType, contactStatement, findContact } from '@/lib/contact/queries';
 import { dateConvert, singlePrice } from '@/lib/settings';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { PlayCircle, ArrowDownLeft, ArrowUpRight, Scale } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 
 export const metadata: Metadata = { title: 'My Transactions' };
@@ -21,8 +23,12 @@ export default async function ContactTransactionPage() {
   const isCustomer = contact.contactType === ContactType.Customer;
   const statement = await contactStatement(contact);
 
-  const openingLabel = await singlePrice(statement.opening);
-  const closingLabel = await singlePrice(statement.closing);
+  const [openingLabel, closingLabel, debitLabel, creditLabel] = await Promise.all([
+    singlePrice(statement.opening),
+    singlePrice(statement.closing),
+    singlePrice(statement.rows.filter((r) => r.type === 'Dr').reduce((sum, r) => sum + Number(r.amount), 0)),
+    singlePrice(statement.rows.filter((r) => r.type === 'Cr').reduce((sum, r) => sum + Number(r.amount), 0)),
+  ]);
 
   const rows = await Promise.all(
     statement.rows.map(async (row) => ({
@@ -41,7 +47,16 @@ export default async function ContactTransactionPage() {
         breadcrumb={[{ label: 'My Details'}, { label:'Transactions' }]}
       />
 
-      <Card title={`Transactions (${rows.length}) - balance ${closingLabel}`} bodyClassName="">
+      <ReportSummary
+        figures={[
+          { label: 'Opening balance', value: openingLabel, detail: 'Brought forward', icon: PlayCircle },
+          { label: 'Debits', value: debitLabel, detail: 'Dr on this contact', icon: ArrowDownLeft },
+          { label: 'Credits', value: creditLabel, detail: 'Cr on this contact', icon: ArrowUpRight },
+          { label: 'Current balance', value: closingLabel, detail: `After ${rows.length} transactions`, icon: Scale },
+        ]}
+      />
+
+      <Card title={`Transactions (${rows.length})`} bodyClassName="">
         <DataTable
           columns={[
             { label: 'Date' },

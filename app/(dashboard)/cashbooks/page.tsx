@@ -14,6 +14,8 @@ import { singlePrice } from '@/lib/settings';
 import { today, toDateString, phpDate } from '@/lib/php-date';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card, EmptyState } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { PlayCircle, ArrowDownLeft, ArrowUpRight, Wallet } from 'lucide-react';
 import { DataTable, Td, Tr, SearchBar } from '@/components/erp/table';
 
 export const metadata: Metadata = { title: 'Cashbook' };
@@ -103,6 +105,17 @@ export default async function CashbookPage({
             placeholder="yyyy-mm-dd"
           />
         }
+      />
+
+      {/* The same five figures the summary table at the foot of the page
+          carries, put where they are read first. */}
+      <ReportSummary
+        figures={[
+          { label: 'Opening', value: openingLabel, detail: 'Cash in hand before today', icon: PlayCircle },
+          { label: 'Received today', value: creditLabel, detail: `${credits.length} receipts`, icon: ArrowDownLeft },
+          { label: 'Paid today', value: debitLabel, detail: `${debits.length} payments`, icon: ArrowUpRight },
+          { label: 'Closing', value: closingLabel, detail: `${inHandLabel} movement today`, icon: Wallet },
+        ]}
       />
 
       <div className="grid gap-5 lg:grid-cols-2">

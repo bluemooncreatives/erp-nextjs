@@ -90,8 +90,11 @@ export default function AppSidebar({
     override && override.pathname === pathname ? override.index : activeGroup;
 
   return (
-    <Sidebar collapsible="icon" className="border-r">
-      <SidebarHeader className="h-[49px] justify-center border-b px-3">
+    // `inset`: the sidebar floats in a padded gutter and the content beside it
+    // becomes a rounded panel, so there is no shared edge for a border to sit
+    // on - the separation comes from the `bg-sidebar` page behind both.
+    <Sidebar collapsible="icon" variant="inset">
+      <SidebarHeader className="h-[49px] justify-center px-3">
         <Link href="/home" className="flex items-center gap-2 overflow-hidden">
           <BrandLogo
             src={logo}

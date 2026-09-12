@@ -8,6 +8,8 @@ import { ContactType, findContact } from '@/lib/contact/queries';
 import { customerSaleHistory, supplierPurchaseHistory } from '@/lib/contact/repository';
 import { dateConvert, singlePrice } from '@/lib/settings';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Receipt, CircleCheck, CircleAlert, Wallet } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
 
@@ -36,11 +38,32 @@ export default async function ContactInvoicePage() {
     })),
   );
 
+  // Paid against unpaid is the reason to open a contact's invoice list, so it
+  // leads - the raw count alone never answered it.
+  const paidCount = history.filter((row) => row.status === 1 || row.status === 2).length;
+  const totalLabel = await singlePrice(
+    history.reduce((sum, row) => sum + Number('payableAmount' in row ? row.payableAmount : 0), 0),
+  );
+  const unpaidLabel = await singlePrice(
+    history
+      .filter((row) => row.status !== 1 && row.status !== 2)
+      .reduce((sum, row) => sum + Number('payableAmount' in row ? row.payableAmount : 0), 0),
+  );
+
   return (
     <>
       <PageHeader
         title={isCustomer ? 'Customer Invoice':'Supplier Invoice'}
         breadcrumb={[{ label: 'My Details'}, { label:'Invoices' }]}
+      />
+
+      <ReportSummary
+        figures={[
+          { label: 'Unpaid value', value: unpaidLabel, detail: `${history.length - paidCount} invoices`, icon: CircleAlert },
+          { label: 'Paid', value: paidCount, detail: 'Settled invoices', icon: CircleCheck },
+          { label: 'Invoiced total', value: totalLabel, detail: 'Across every invoice', icon: Wallet },
+          { label: 'Invoices', value: rows.length.toLocaleString('en-US'), detail: 'On this contact', icon: Receipt },
+        ]}
       />
 
       <Card title={`Invoices (${rows.length})`} bodyClassName="">

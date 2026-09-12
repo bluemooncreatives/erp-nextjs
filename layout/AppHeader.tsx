@@ -73,7 +73,7 @@ export default function AppHeader({
     // `h-[49px]` rather than `h-12`: with border-box sizing the border is part
     // of the height, so 48 + 1 keeps this content row level with the sidebar
     // header's own 48px row and puts both borders on the same line.
-    <header className="bg-card sticky top-0 z-40 h-[49px] border-b">
+    <header className="bg-background sticky top-0 z-40 h-[49px] border-b md:rounded-t-xl">
       <div className="flex h-full items-center justify-between gap-3 px-3 sm:px-4">
         <div className="flex min-w-0 items-center gap-3">
           <SidebarTrigger className="[&_svg]:size-5!" />

@@ -50,7 +50,16 @@ export function AdminShell({
     // `erp-theme` is where the saved Appearance palette lands; globals.css
     // feeds those `--erp-*` values into the design tokens.
     <TooltipProvider delayDuration={300}>
-      <SidebarProvider className="erp-theme" style={appearance}>
+      <SidebarProvider
+        className="erp-theme"
+        style={{
+          ...appearance,
+          // The inset frame shares the sidebar surface. Legacy page-background
+          // settings otherwise paint a black gutter around the light panels.
+          backgroundColor: 'var(--sidebar)',
+          backgroundImage: 'none',
+        }}
+      >
         <a
           href="#main"
           className="bg-primary text-primary-foreground sr-only z-50 rounded-md px-4 py-2 text-sm font-medium focus:not-sr-only focus:fixed focus:top-4 focus:left-4"
@@ -65,7 +74,10 @@ export function AdminShell({
           siteTitle={siteTitle}
         />
 
-        <SidebarInset className="flex min-w-0 flex-1 flex-col">
+        {/* No `overflow-hidden` to clip the panel's rounded corners: it would
+            make this the scroll container and the sticky header would stop
+            sticking. The header carries `rounded-t-xl` itself instead. */}
+        <SidebarInset className="@container/content flex min-w-0 flex-1 flex-col">
           <AppHeader
             user={user}
             branches={branches}
@@ -77,7 +89,7 @@ export function AdminShell({
             unreadCount={unreadCount}
             showNotifications={showNotifications}
           />
-          <div id="main" className="mx-auto w-full max-w-360 flex-1 p-4 sm:p-6">
+          <div id="main" className="@7xl/content:mx-auto @7xl/content:max-w-7xl w-full flex-1 px-4 py-6">
             {children}
           </div>
         </SidebarInset>

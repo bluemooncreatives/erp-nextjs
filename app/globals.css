@@ -438,7 +438,12 @@
   /* Added for admin-frontend's MRR "Churned" bar series (dual-bar-metric-card.tsx),
      which has no other color slot to reach for — same value admin-frontend used directly. */
   --chart-6: oklch(0.6300 0.2100 300.0000);
-  --sidebar: oklch(0.9848 0 0);
+  /* The `inset` sidebar variant paints this behind the whole page and floats
+     the content on top as a rounded `--background` panel. At 0.9848 it was
+     within 1.5% of white, so the gutter, the sidebar and the panel all read as
+     one flat sheet and the inset had no visible edge. A cooler, deeper tray
+     gives the panel something to sit on. */
+  --sidebar: oklch(0.9550 0.0045 258);
   --sidebar-foreground: oklch(0.3705 0 0);
   --sidebar-primary: oklch(0.5296 0.1863 258.1459);
   --theme-default-sidebar-primary: oklch(0.5296 0.1863 258.1459);
@@ -548,7 +553,9 @@
   --chart-4: oklch(0.6863 0.1603 305.6668);
   --chart-5: oklch(0.6856 0.1898 352.1927);
   --chart-6: oklch(0.7000 0.1850 300.0000);
-  --sidebar: oklch(0.1700 0.0060 258);
+  /* Same reasoning as light mode, in the other direction: the tray goes
+     darker than the `0.19` content panel so the panel reads as raised. */
+  --sidebar: oklch(0.1380 0.0060 258);
   --sidebar-foreground: oklch(0.9000 0 0);
   --sidebar-primary: oklch(0.7000 0.1750 258.0000);
   --theme-default-sidebar-primary: oklch(0.7000 0.1750 258.0000);

@@ -7,6 +7,8 @@ import { accountTypeName } from '@/lib/accounting/accounts';
 import { generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { ArrowDownLeft, ArrowUpRight, Scale, Landmark } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { DateRangeFilter } from '../account/date-range-filter';
 
@@ -43,8 +45,17 @@ export default async function AccountBalancePage({
         }
       />
 
+      <ReportSummary
+        figures={[
+          { label: 'Total debit', value: `${symbol} ${numberFormat(debitTotal)}`, detail: 'Dr side', icon: ArrowDownLeft },
+          { label: 'Total credit', value: `${symbol} ${numberFormat(creditTotal)}`, detail: 'Cr side', icon: ArrowUpRight },
+          { label: 'Difference', value: `${symbol} ${numberFormat(Math.abs(debitTotal - creditTotal))}`, detail: debitTotal === creditTotal ? 'The ledger balances' : 'The ledger is out of balance', icon: Scale },
+          { label: 'Accounts', value: rows.length.toLocaleString('en-US'), detail: 'With a balance', icon: Landmark },
+        ]}
+      />
+
       <Card
-        title={`Balances (${rows.length}) - Dr ${symbol} ${numberFormat(debitTotal)} / Cr ${symbol} ${numberFormat(creditTotal)}`}
+        title={`Balances (${rows.length})`}
         desc={
           Math.abs(debitTotal - creditTotal) < 0.01
             ? 'The ledger balances.'

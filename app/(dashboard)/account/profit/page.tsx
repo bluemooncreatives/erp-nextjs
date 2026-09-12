@@ -6,6 +6,8 @@ import { profitAndLoss } from '@/lib/accounting/reports';
 import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { ArrowDownLeft, ArrowUpRight, TrendingUp, TrendingDown } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { DateRangeFilter } from '../date-range-filter';
 
@@ -39,20 +41,22 @@ export default async function ProfitPage({
         }
       />
 
+      {/* These three were a local `Figure` tile that existed only on this page.
+          They are the same shape as every other summary, so they use it. */}
+      <ReportSummary
+        figures={[
+          { label: 'Total income', value: money(pnl.totalIncome), detail: periodLabel, icon: ArrowDownLeft },
+          { label: 'Total expense', value: money(pnl.totalExpense), detail: periodLabel, icon: ArrowUpRight },
+          {
+            label: pnl.netProfit >= 0 ? 'Net profit' : 'Net loss',
+            value: money(Math.abs(pnl.netProfit)),
+            detail: 'Income less expense',
+            icon: pnl.netProfit >= 0 ? TrendingUp : TrendingDown,
+          },
+        ]}
+      />
+
       <div className="grid grid-cols-12 gap-4 md:gap-6">
-        <div className="col-span-12">
-          <Card title="Result" desc={periodLabel}>
-            <dl className="grid gap-4 sm:grid-cols-3">
-              <Figure label="Total Income" value={money(pnl.totalIncome)} />
-              <Figure label="Total Expense" value={money(pnl.totalExpense)} />
-              <Figure
-                label={pnl.netProfit >= 0 ? 'Net Profit' : 'Net Loss'}
-                value={money(Math.abs(pnl.netProfit))}
-                tone={pnl.netProfit >= 0 ? 'success' : 'error'}
-              />
-            </dl>
-          </Card>
-        </div>
 
         <div className="col-span-12 lg:col-span-6">
           <Card title="Income" bodyClassName="">
@@ -98,26 +102,3 @@ export default async function ProfitPage({
   );
 }
 
-function Figure({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone?: 'success' | 'error';
-}) {
-  const colour =
-    tone === 'success'
-      ? 'text-success'
-      : tone === 'error'
-        ? 'text-destructive'
-        : 'text-foreground ';
-
-  return (
-    <div className="rounded-xl border border-border p-4">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className={`mt-1 text-2xl font-bold ${colour}`}>{value}</dd>
-    </div>
-  );
-}
