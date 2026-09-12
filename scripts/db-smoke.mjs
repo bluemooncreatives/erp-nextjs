@@ -69,7 +69,6 @@ const cashbook = require('@/lib/accounting/cashbook');
 const openingBalance = require('@/lib/accounting/opening-balance');
 const periods = require('@/lib/accounting/periods');
 const transfers = require('@/lib/inventory/transfers');
-const stock = require('@/lib/inventory/stock');
 const hrStaff = require('@/lib/hr/staff');
 const hrLeave = require('@/lib/hr/leave');
 const hrLoans = require('@/lib/hr/loans');

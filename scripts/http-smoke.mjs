@@ -8,12 +8,10 @@
 // automatically; dynamic segments are filled from the database.
 
 import { readdirSync, statSync } from 'node:fs';
-import { createRequire } from 'node:module';
 import path from 'node:path';
 import { SignJWT } from 'jose';
 import mysql from 'mysql2/promise';
 
-const require = createRequire(import.meta.url);
 const base = process.env.BASE_URL ?? 'http://127.0.0.1:3000';
 const root = process.cwd();
 

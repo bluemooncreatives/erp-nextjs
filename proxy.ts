@@ -59,7 +59,18 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Everything except Next internals, static assets and uploaded files.
-    '/((?!_next/static|_next/image|favicon.ico|uploads|backEnd|robots.txt|sitemap.xml).*)',
+    // Everything except Next's own routes, static assets and uploaded files.
+    //
+    // `_next` must be excluded whole, not just `_next/static` and
+    // `_next/image`: development serves hot reloading over a WebSocket at
+    // `/_next/hmr`, and running this middleware on the upgrade request answers
+    // it with an ordinary HTTP response. The handshake then fails, the dev
+    // client never finishes booting, and the page renders but never hydrates -
+    // every button and dropdown in `next dev` is inert.
+    //
+    // The file-extension branch keeps the public folders (images, fonts, the
+    // TailAdmin assets) reachable while signed out, instead of redirecting
+    // them to the login page.
+    '/((?!_next|uploads|backEnd|.*\\.(?:ico|png|jpe?g|gif|svg|webp|avif|css|js|map|txt|xml|json|woff2?|ttf|eot)$).*)',
   ],
 };

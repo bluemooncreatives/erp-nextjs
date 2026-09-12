@@ -51,7 +51,6 @@ for (const extension of ['.ts', '.tsx']) {
 const { db, pool } = require('@/lib/db/client');
 const schema = require('@/lib/db/schema');
 const { eq, and } = require('drizzle-orm');
-const { MorphType } = require('@/lib/db/morph');
 const products = require('@/lib/product/products');
 const contacts = require('@/lib/contact/repository');
 const purchases = require('@/lib/purchase/repository');
