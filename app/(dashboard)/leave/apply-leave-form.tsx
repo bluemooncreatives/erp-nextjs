@@ -1,0 +1,118 @@
+'use client';
+
+// Apply-leave form - port of `leave::apply_leaves.create`.
+//
+// The `day` selector decides whether an end date and half-day markers apply,
+// which is what the repository uses to work out `total_days`.
+
+import { useActionState, useState } from 'react';
+import { Card } from '@/components/erp/page';
+import {
+  FormAlert,
+  FormCheckbox,
+  FormInput,
+  FormSelect,
+  FormTextarea,
+  type SelectOption,
+} from '@/components/erp/fields';
+import { SubmitButton } from '@/components/erp/submit-button';
+import { storeLeaveApplication, type LeaveFormState } from './actions';
+
+const INITIAL: LeaveFormState = {};
+
+export function ApplyLeaveForm({
+  leaveTypes,
+  balance,
+}: {
+  leaveTypes: SelectOption[];
+  balance: { entitlement: number; taken: number; remaining: number };
+}) {
+  const [state, formAction] = useActionState(storeLeaveApplication, INITIAL);
+  const [day, setDay] = useState('1');
+  const [makeup, setMakeup] = useState(false);
+
+  const isRange = day === '2';
+
+  return (
+    <Card
+      title="Apply for Leave"
+      desc={`Entitlement ${balance.entitlement} / taken ${balance.taken} / remaining ${balance.remaining}`}
+    >
+      <form action={formAction} className="space-y-4">
+        <FormAlert variant="error" message={state.error} />
+
+        <FormSelect
+          label="Leave Type"
+          name="leave_type_id"
+          required
+          placeholder="Select type"
+          options={leaveTypes}
+          error={state.fieldErrors?.leave_type_id}
+        />
+
+        <FormSelect
+          label="Duration"
+          name="day"
+          value={day}
+          onChange={(e) => setDay(e.target.value)}
+          options={[
+            { value: '1', label: 'Single day' },
+            { value: '2', label: 'Date range' },
+            { value: '0', label: 'Half day' },
+          ]}
+        />
+
+        <FormInput
+          label="Apply Date"
+          name="apply_date"
+          type="date"
+          required
+          defaultValue={new Date().toISOString().slice(0, 10)}
+        />
+
+        <FormInput
+          label={isRange ? 'Start Date' : 'Date'}
+          name="start_date"
+          type="date"
+          required
+          error={state.fieldErrors?.start_date}
+        />
+
+        {isRange ? (
+          <>
+            <FormInput
+              label="End Date"
+              name="end_date"
+              type="date"
+              required
+              error={state.fieldErrors?.end_date}
+            />
+            <FormCheckbox label="First day is a half day" name="half" value="1" />
+            <FormCheckbox label="Last day is a half day" name="half_to" value="1" />
+          </>
+        ) : null}
+
+        <FormTextarea
+          label="Reason"
+          name="reason"
+          required
+          error={state.fieldErrors?.reason}
+        />
+
+        <FormCheckbox
+          label="Offer a makeup day"
+          name="makeup_leave"
+          value="1"
+          checked={makeup}
+          onChange={(e) => setMakeup(e.target.checked)}
+        />
+
+        {makeup ? <FormInput label="Makeup Date" name="makeup_date" type="date" /> : null}
+
+        <FormInput label="Attachment" name="file" type="file" />
+
+        <SubmitButton>Submit Application</SubmitButton>
+      </form>
+    </Card>
+  );
+}

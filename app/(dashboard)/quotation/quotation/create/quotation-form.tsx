@@ -1,0 +1,396 @@
+'use client';
+
+// Quotation form - port of `quotation::quotation.create`.
+//
+// Same cart maths as the sale form; quotations move no stock, so any product
+// can be quoted whether or not it is currently in stock.
+
+import { useActionState, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { Card } from '@/components/erp/page';
+import {
+  FormAlert,
+  FormInput,
+  FormSelect,
+  FormTextarea,
+  type SelectOption,
+} from '@/components/erp/fields';
+import { SubmitButton } from '@/components/erp/submit-button';
+import { DataTable, Td, Tr } from '@/components/erp/table';
+import { ROUTES } from '@/lib/routes';
+import { storeQuotation, type QuotationFormState } from '../../actions';
+
+const INITIAL: QuotationFormState = {};
+
+export type QuotableProduct = {
+  id: number;
+  label: string;
+  sellingPrice: number;
+  tax: number;
+};
+
+type CartLine = {
+  key: string;
+  productId: number;
+  label: string;
+  price: number;
+  quantity: number;
+  tax: number;
+  discount: number;
+};
+
+export function QuotationForm({
+  customers,
+  locations,
+  taxes,
+  products,
+  currencySymbol,
+  defaultLocation,
+}: {
+  customers: SelectOption[];
+  locations: SelectOption[];
+  taxes: Array<{ id: number; name: string; rate: number }>;
+  products: QuotableProduct[];
+  currencySymbol: string;
+  defaultLocation?: string;
+}) {
+  const [state, formAction] = useActionState(storeQuotation, INITIAL);
+
+  const [lines, setLines] = useState<CartLine[]>([]);
+  const [discountType, setDiscountType] = useState('1');
+  const [discountValue, setDiscountValue] = useState(0);
+  const [taxId, setTaxId] = useState('0');
+  const [shipping, setShipping] = useState(0);
+  const [other, setOther] = useState(0);
+
+  const addLine = (value: string) => {
+    const product = products.find((p) => String(p.id) === value);
+    if (!product) return;
+    setLines((prev) => {
+      const existing = prev.find((l) => l.productId === product.id);
+      if (existing) {
+        return prev.map((l) => (l === existing ? { ...l, quantity: l.quantity + 1 } : l));
+      }
+      return [
+        ...prev,
+        {
+          key: `p-${product.id}`,
+          productId: product.id,
+          label: product.label,
+          price: product.sellingPrice,
+          quantity: 1,
+          tax: product.tax,
+          discount: 0,
+        },
+      ];
+    });
+  };
+
+  const patch = (key: string, value: Partial<CartLine>) =>
+    setLines((prev) => prev.map((l) => (l.key === key ? { ...l, ...value } : l)));
+
+  const totals = useMemo(() => {
+    let itemAmount = 0;
+    let totalQuantity = 0;
+    for (const line of lines) {
+      const lineTotal = line.price * line.quantity;
+      itemAmount +=
+        lineTotal + (lineTotal * line.tax) / 100 - (lineTotal * line.discount) / 100;
+      totalQuantity += line.quantity;
+    }
+
+    const invoiceDiscount =
+      discountType === '2' ? (itemAmount * discountValue) / 100 : discountValue;
+    const selectedTax = taxes.find((t) => String(t.id) === taxId);
+    const invoiceTax = selectedTax
+      ? ((itemAmount - invoiceDiscount) * selectedTax.rate) / 100
+      : 0;
+
+    return {
+      itemAmount,
+      totalQuantity,
+      invoiceDiscount,
+      invoiceTax,
+      taxRate: selectedTax?.rate ?? 0,
+      payable: itemAmount - invoiceDiscount + invoiceTax + shipping + other,
+    };
+  }, [lines, discountType, discountValue, taxId, shipping, other, taxes]);
+
+  const money = (v: number) => `${currencySymbol} ${v.toFixed(2)}`;
+
+  return (
+    <form action={formAction} className="space-y-6">
+      <FormAlert variant="error" message={state.error} />
+
+      <input type="hidden" name="item_amount" value={totals.itemAmount.toFixed(2)} />
+      <input type="hidden" name="total_quantity" value={totals.totalQuantity} />
+      <input
+        type="hidden"
+        name="total_tax"
+        value={`${totals.invoiceTax.toFixed(2)}-${taxId}`}
+      />
+      <input
+        type="hidden"
+        name="total_discount_amount"
+        value={totals.invoiceDiscount.toFixed(2)}
+      />
+      <input type="hidden" name="total_discount" value={discountValue} />
+      <input type="hidden" name="total_amount" value={totals.payable.toFixed(2)} />
+
+      <Card title="Quotation">
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+          <FormSelect
+            label="Customer"
+            name="customer_id"
+            required
+            placeholder="Select customer"
+            options={customers}
+            error={state.fieldErrors?.customer_id}
+          />
+          <FormSelect
+            label="Branch / Warehouse"
+            name="showroom"
+            placeholder="Select location"
+            defaultValue={defaultLocation ?? ''}
+            options={locations}
+          />
+          <FormInput
+            label="Date"
+            name="date"
+            type="date"
+            required
+            defaultValue={new Date().toISOString().slice(0, 10)}
+            error={state.fieldErrors?.date}
+          />
+          <FormInput
+            label="Valid Until"
+            name="valid_till_date"
+            type="date"
+            required
+            error={state.fieldErrors?.valid_till_date}
+          />
+          <FormInput label="Reference No" name="ref_no" />
+          <FormInput label="Shipping Address" name="shipping_address" />
+          <FormInput label="Documents" name="documents" type="file" multiple />
+        </div>
+      </Card>
+
+      <Card title="Products">
+        <div className="mb-4 max-w-md">
+          <FormSelect
+            label="Add product"
+            name="_picker"
+            value=""
+            onChange={(e) => addLine(e.target.value)}
+            placeholder="Search and select a product"
+            options={products.map((p) => ({
+              value: p.id,
+              label: `${p.label} - ${money(p.sellingPrice)}`,
+            }))}
+          />
+        </div>
+
+        {state.fieldErrors?.items ? (
+          <p className="mb-3 text-xs text-error-500">{state.fieldErrors.items}</p>
+        ) : null}
+
+        <DataTable
+          columns={[
+            { label: 'Product' },
+            { label: 'Price' },
+            { label: 'Qty' },
+            { label: 'Tax %' },
+            { label: 'Disc %' },
+            { label: 'Subtotal' },
+            { label: '' },
+          ]}
+          isEmpty={lines.length === 0}
+          empty="No products added yet."
+        >
+          {lines.map((line) => {
+            const lineTotal = line.price * line.quantity;
+            const subTotal =
+              lineTotal + (lineTotal * line.tax) / 100 - (lineTotal * line.discount) / 100;
+            return (
+              <Tr key={line.key}>
+                <Td className="font-medium text-gray-700 dark:text-gray-300">
+                  {line.label}
+                  <input type="hidden" name="items" value={line.productId} />
+                </Td>
+                <Td>
+                  <NumberCell
+                    name="item_price"
+                    value={line.price}
+                    onChange={(v) => patch(line.key, { price: v })}
+                  />
+                </Td>
+                <Td>
+                  <NumberCell
+                    name="item_quantity"
+                    value={line.quantity}
+                    min={1}
+                    step="1"
+                    onChange={(v) => patch(line.key, { quantity: v })}
+                  />
+                </Td>
+                <Td>
+                  <NumberCell
+                    name="product_tax"
+                    value={line.tax}
+                    onChange={(v) => patch(line.key, { tax: v })}
+                  />
+                </Td>
+                <Td>
+                  <NumberCell
+                    name="item_discount"
+                    value={line.discount}
+                    onChange={(v) => patch(line.key, { discount: v })}
+                  />
+                </Td>
+                <Td className="font-medium">{money(subTotal)}</Td>
+                <Td>
+                  <button
+                    type="button"
+                    onClick={() => setLines((prev) => prev.filter((l) => l.key !== line.key))}
+                    className="rounded-lg px-2 py-1 text-theme-xs font-medium text-error-500 hover:bg-error-50 dark:hover:bg-error-500/10"
+                  >
+                    Remove
+                  </button>
+                </Td>
+              </Tr>
+            );
+          })}
+        </DataTable>
+      </Card>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card title="Charges & Discount">
+          <div className="grid gap-5 sm:grid-cols-2">
+            <FormSelect
+              label="Discount Type"
+              name="discount_type"
+              value={discountType}
+              onChange={(e) => setDiscountType(e.target.value)}
+              options={[
+                { value: '1', label: 'Fixed' },
+                { value: '2', label: 'Percentage' },
+              ]}
+            />
+            <FormInput
+              label={discountType === '2' ? 'Discount (%)' : 'Discount amount'}
+              name="_discount_value"
+              type="number"
+              step="0.01"
+              min="0"
+              value={discountValue}
+              onChange={(e) => setDiscountValue(Number(e.target.value))}
+            />
+            <FormSelect
+              label="Tax"
+              name="_tax_id"
+              value={taxId}
+              onChange={(e) => setTaxId(e.target.value)}
+              options={[
+                { value: '0', label: 'No tax' },
+                ...taxes.map((t) => ({ value: t.id, label: `${t.name} (${t.rate}%)` })),
+              ]}
+            />
+            <FormInput
+              label="Shipping Charge"
+              name="shipping_charge"
+              type="number"
+              step="0.01"
+              min="0"
+              value={shipping}
+              onChange={(e) => setShipping(Number(e.target.value))}
+            />
+            <FormInput
+              label="Other Charge"
+              name="other_charge"
+              type="number"
+              step="0.01"
+              min="0"
+              value={other}
+              onChange={(e) => setOther(Number(e.target.value))}
+            />
+          </div>
+          <FormTextarea label="Notes" name="notes" wrapperClassName="mt-5" />
+        </Card>
+
+        <Card title="Summary">
+          <dl className="space-y-3 text-sm">
+            <Row label="Items total" value={money(totals.itemAmount)} />
+            <Row label="Discount" value={`- ${money(totals.invoiceDiscount)}`} />
+            <Row label={`Tax (${totals.taxRate}%)`} value={money(totals.invoiceTax)} />
+            <Row label="Shipping" value={money(shipping)} />
+            <Row label="Other charges" value={money(other)} />
+            <div className="border-t border-gray-200 pt-3 dark:border-gray-700">
+              <Row label="Payable" value={money(totals.payable)} strong />
+            </div>
+          </dl>
+        </Card>
+      </div>
+
+      <div className="flex items-center justify-end gap-3">
+        <Link
+          href={ROUTES['quotation.index']}
+          className="rounded-lg px-5 py-3 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:text-gray-400 dark:ring-gray-700"
+        >
+          Cancel
+        </Link>
+        <SubmitButton disabled={lines.length === 0}>Save Quotation</SubmitButton>
+      </div>
+    </form>
+  );
+}
+
+function NumberCell({
+  name,
+  value,
+  onChange,
+  min = 0,
+  step = '0.01',
+}: {
+  name: string;
+  value: number;
+  onChange: (value: number) => void;
+  min?: number;
+  step?: string;
+}) {
+  return (
+    <input
+      type="number"
+      name={name}
+      value={value}
+      min={min}
+      step={step}
+      onChange={(e) => onChange(Number(e.target.value))}
+      className="h-9 w-24 rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+    />
+  );
+}
+
+function Row({
+  label,
+  value,
+  strong,
+}: {
+  label: string;
+  value: string;
+  strong?: boolean;
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <dt className="text-gray-500 dark:text-gray-400">{label}</dt>
+      <dd
+        className={
+          strong
+            ? 'text-base font-semibold text-gray-800 dark:text-white/90'
+            : 'text-gray-700 dark:text-gray-300'
+        }
+      >
+        {value}
+      </dd>
+    </div>
+  );
+}

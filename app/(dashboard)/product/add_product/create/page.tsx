@@ -1,0 +1,200 @@
+// Product list.
+//
+// Port of ProductController@create (which rendered `product::product.list_products`
+// - in this codebase `create()` is the LIST and `index()` is the add form).
+
+import type { Metadata } from 'next';
+import Image from 'next/image';
+import Link from 'next/link';
+import { authorize, can } from '@/lib/auth/permissions';
+import { listProductSkus, skuStockAt } from '@/lib/product/products';
+import { productFormOptions } from '@/lib/product/repositories';
+import { getSession } from '@/lib/auth/session';
+import { generalSetting, numberFormat } from '@/lib/settings';
+import { assetUrl } from '@/lib/paths';
+import { ROUTES, route } from '@/lib/routes';
+import { PageHeader, Card } from '@/components/erp/page';
+import { DataTable, Pagination, SearchBar, Td, Tr } from '@/components/erp/table';
+import { deleteProductAction } from '../../product-actions';
+import { ActionButton } from '@/components/erp/submit-button';
+
+export const metadata: Metadata = { title: 'Product List' };
+
+export default async function ProductListPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    search?: string;
+    page?: string;
+    brand_id?: string;
+    category_id?: string;
+  }>;
+}) {
+  await authorize('add_product.create');
+  const sp = await searchParams;
+  const session = await getSession();
+  const setting = await generalSetting();
+  const symbol = setting.currencySymbol ?? '$';
+
+  const { rows, total, page, perPage } = await listProductSkus({
+    search: sp.search,
+    brandId: sp.brand_id ? Number(sp.brand_id) : undefined,
+    categoryId: sp.category_id ? Number(sp.category_id) : undefined,
+    page: Number(sp.page ?? 1),
+  });
+
+  const options = await productFormOptions();
+
+  const stock = session?.showroomId
+    ? await skuStockAt(
+        rows.map((r) => r.id),
+        session.showroomId,
+      )
+    : new Map<number, number>();
+
+  const [canEdit, canDelete, canShow] = await Promise.all([
+    can('add_product.edit'),
+    can('add_product.delete'),
+    can('add_product.show'),
+  ]);
+
+  return (
+    <>
+      <PageHeader
+        title="Product List"
+        breadcrumb={[{ label: 'Products' }, { label: 'Product List' }]}
+        actions={
+          <Link
+            href={ROUTES['add_product.index']}
+            className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+          >
+            Add Product
+          </Link>
+        }
+      />
+
+      <Card
+        title={`Products (${total})`}
+        bodyClassName=""
+        actions={
+          <SearchBar
+            action={ROUTES['add_product.create']}
+            defaultValue={sp.search}
+            placeholder="Search name or SKU..."
+          >
+            <select
+              name="brand_id"
+              defaultValue={sp.brand_id ?? ''}
+              className="h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+            >
+              <option value="">All brands</option>
+              {options.brands.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
+            <select
+              name="category_id"
+              defaultValue={sp.category_id ?? ''}
+              className="h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+            >
+              <option value="">All categories</option>
+              {options.categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </SearchBar>
+        }
+      >
+        <DataTable
+          columns={[
+            { label: 'Product' },
+            { label: 'SKU' },
+            { label: 'Category' },
+            { label: 'Brand' },
+            { label: 'Purchase' },
+            { label: 'Selling' },
+            { label: 'Stock' },
+            { label: 'Action' },
+          ]}
+          isEmpty={rows.length === 0}
+          empty="No products found."
+        >
+          {rows.map((row) => (
+            <Tr key={row.id}>
+              <Td>
+                <div className="flex items-center gap-3">
+                  {row.imageSource ? (
+                    <Image
+                      src={assetUrl(row.imageSource)!}
+                      alt={row.productName ?? ''}
+                      width={36}
+                      height={36}
+                      className="rounded-md object-cover"
+                      unoptimized
+                    />
+                  ) : (
+                    <span className="flex h-9 w-9 items-center justify-center rounded-md bg-gray-100 text-theme-xs text-gray-400 dark:bg-gray-800">
+                      -
+                    </span>
+                  )}
+                  <div>
+                    <p className="font-medium text-gray-700 dark:text-gray-300">
+                      {row.productName}
+                    </p>
+                    <p className="text-theme-xs text-gray-400">{row.productType}</p>
+                  </div>
+                </div>
+              </Td>
+              <Td>{row.sku}</Td>
+              <Td>{row.categoryName ?? '-'}</Td>
+              <Td>{row.brandName ?? '-'}</Td>
+              <Td>{`${symbol} ${numberFormat(row.purchasePrice)}`}</Td>
+              <Td>{`${symbol} ${numberFormat(row.sellingPrice)}`}</Td>
+              <Td>{stock.get(row.id) ?? 0}</Td>
+              <Td>
+                <div className="flex items-center gap-2">
+                  {canShow && row.productId ? (
+                    <Link
+                      href={route('add_product.product_Detail', { id: row.productId })}
+                      className="rounded-lg px-2 py-1 text-theme-xs font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5"
+                    >
+                      View
+                    </Link>
+                  ) : null}
+                  {canEdit && row.productId ? (
+                    <Link
+                      href={route('add_product.edit', { id: row.productId })}
+                      className="rounded-lg px-2 py-1 text-theme-xs font-medium text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+                    >
+                      Edit
+                    </Link>
+                  ) : null}
+                  {canDelete && row.productId ? (
+                    <form action={deleteProductAction}>
+                      <input type="hidden" name="id" value={row.productId} />
+                      <ActionButton confirm={`Delete "${row.productName}"?`}>
+                        Delete
+                      </ActionButton>
+                    </form>
+                  ) : null}
+                </div>
+              </Td>
+            </Tr>
+          ))}
+        </DataTable>
+
+        <Pagination
+          page={page}
+          perPage={perPage}
+          total={total}
+          baseUrl={ROUTES['add_product.create']}
+          params={sp}
+        />
+      </Card>
+    </>
+  );
+}

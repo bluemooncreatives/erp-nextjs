@@ -1,0 +1,100 @@
+// Stock alert list - port of PurchaseOrderController@suggestList
+// (`purchase::suggest_list`): SKUs at or below their alert quantity.
+
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { authorize } from '@/lib/auth/permissions';
+import { getSession } from '@/lib/auth/session';
+import { stockAlertList } from '@/lib/purchase/repository';
+import { supplierOptions } from '@/lib/contact/queries';
+import { generalSetting, numberFormat } from '@/lib/settings';
+import { ROUTES } from '@/lib/routes';
+import { PageHeader, Card } from '@/components/erp/page';
+import { DataTable, SearchBar, Td, Tr } from '@/components/erp/table';
+
+export const metadata: Metadata = { title: 'Stock Alert List' };
+
+export default async function StockAlertPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ supplier_id?: string }>;
+}) {
+  const user = await authorize('purchase.suggest');
+  const sp = await searchParams;
+  const session = await getSession();
+  const setting = await generalSetting();
+  const symbol = setting.currencySymbol ?? '$';
+
+  const showroomId =
+    user.role.type === 'system_user' ? null : (session?.showroomId ?? user.showroomId);
+
+  const [rows, suppliers] = await Promise.all([
+    stockAlertList(showroomId, sp.supplier_id ? Number(sp.supplier_id) : undefined),
+    supplierOptions(),
+  ]);
+
+  return (
+    <>
+      <PageHeader
+        title="Stock Alert List"
+        breadcrumb={[{ label: 'Purchase' }, { label: 'Stock Alert List' }]}
+        actions={
+          <Link
+            href={ROUTES['purchase_order.create']}
+            className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+          >
+            Create Purchase Order
+          </Link>
+        }
+      />
+
+      <Card
+        title={`Products below alert level (${rows.length})`}
+        bodyClassName=""
+        actions={
+          <SearchBar
+            action={ROUTES['purchase.suggest']}
+            placeholder="Filter by supplier"
+          >
+            <select
+              name="supplier_id"
+              defaultValue={sp.supplier_id ?? ''}
+              className="h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+            >
+              <option value="">All suppliers</option>
+              {suppliers.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </SearchBar>
+        }
+      >
+        <DataTable
+          columns={[
+            { label: 'Product' },
+            { label: 'SKU' },
+            { label: 'In stock' },
+            { label: 'Alert at' },
+            { label: 'Purchase price' },
+          ]}
+          isEmpty={rows.length === 0}
+          empty="Nothing is below its alert level."
+        >
+          {rows.map((row) => (
+            <Tr key={row.productSkuId}>
+              <Td className="font-medium text-gray-700 dark:text-gray-300">
+                {row.productName}
+              </Td>
+              <Td>{row.sku ?? '-'}</Td>
+              <Td>{row.stock}</Td>
+              <Td>{row.alertQuantity ?? '-'}</Td>
+              <Td>{`${symbol} ${numberFormat(row.purchasePrice)}`}</Td>
+            </Tr>
+          ))}
+        </DataTable>
+      </Card>
+    </>
+  );
+}
