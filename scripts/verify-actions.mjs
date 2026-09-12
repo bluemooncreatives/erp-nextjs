@@ -788,6 +788,32 @@ await scenario('sale edit: the update replaces lines instead of adding them', as
   assert.equal(Number(updated.payable_amount), 300, 'the total was updated');
 });
 
+await scenario('notifications: a sale and a contact raise in-app notices', async () => {
+  const [[toggle]] = [
+    await rows("select status from business_settings where type = 'system_notification'"),
+  ];
+  if (!toggle?.[0] || toggle[0].status !== 1) return; // channel is off in this install
+
+  const before = (await rows('select count(*) as n from notifications'))[0].n;
+
+  const storeContact = action('storeContact');
+  await submit(storeContact, {
+    contact_type: 'Customer',
+    name: `Notify Customer ${stamp}`,
+    email: `notify.${stamp}@example.com`,
+    mobile: '0190000000',
+    address: 'Notify Road',
+    opening_balance: '0',
+  });
+
+  const after = (await rows('select count(*) as n from notifications'))[0].n;
+  assert.ok(after > before, 'the contact notification was recorded');
+
+  const notice = await one('select * from notifications order by id desc limit 1');
+  assert.equal(notice.notifiable_type, MORPH.contact, 'it points at the contact');
+  assert.ok(String(notice.type).includes('Added'), `unexpected subject ${notice.type}`);
+});
+
 const failed = results.filter((r) => !r.ok);
 console.log(
   `ran ${results.length} action scenarios: ${results.length - failed.length} ok, ${failed.length} failed`,

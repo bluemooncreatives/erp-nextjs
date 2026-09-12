@@ -39,6 +39,7 @@ function fixture({ approved = false, existing = { paymentType: 'voucher_recieve'
     '@/lib/activity-log': { successLog: async () => {}, errorLog: async () => {} },
     '@/lib/routes': { ROUTES: { 'voucher_recieve.index': '/account/voucher/recieve' } },
     '@/lib/forms': { actionFormData: (previous, formData) => (formData instanceof FormData ? formData : previous) },
+    '@/lib/notifications/documents': { notifyVoucher: async () => {}, notifySale: async () => {}, notifyPurchase: async () => {}, notifyContact: async () => {}, notifyStaff: async () => {}, notifyPayroll: async () => {} },
   };
   const exports = {};
   vm.runInNewContext(compiled, { exports, require: (name) => {
