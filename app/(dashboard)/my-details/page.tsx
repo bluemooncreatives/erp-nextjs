@@ -16,7 +16,7 @@ import {
 } from '@/lib/contact/queries';
 import { customerSaleHistory, supplierPurchaseHistory } from '@/lib/contact/repository';
 import { dateConvert, singlePrice } from '@/lib/settings';
-import { ROUTES } from '@/lib/routes';
+import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card, DetailList } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import Badge from '@/components/ui/badge/Badge';
@@ -124,6 +124,7 @@ export default async function MyDetailsPage() {
               { label: 'Invoice' },
               { label: 'Amount' },
               { label: 'Status' },
+              ...(isCustomer ? [{ label: 'Action' }] : []),
             ]}
             isEmpty={rows.length === 0}
             empty="Nothing here yet."
@@ -140,6 +141,20 @@ export default async function MyDetailsPage() {
                     {row.status === 1 ? 'Paid' : 'Unpaid'}
                   </Badge>
                 </Td>
+                {isCustomer ? (
+                  <Td>
+                    {row.status === 1 ? (
+                      '-'
+                    ) : (
+                      <Link
+                        href={route('contact.my_payment', { id: row.id })}
+                        className="rounded-lg px-2 py-1 text-theme-xs font-medium text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+                      >
+                        Pay
+                      </Link>
+                    )}
+                  </Td>
+                ) : null}
               </Tr>
             ))}
           </DataTable>
