@@ -68,7 +68,8 @@ export function Td({
   className = '',
   colSpan,
 }: {
-  children: ReactNode;
+  /** Optional, so an intentionally blank cell can be written `<Td />`. */
+  children?: ReactNode;
   className?: string;
   colSpan?: number;
 }) {
