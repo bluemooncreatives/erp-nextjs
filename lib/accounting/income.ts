@@ -14,13 +14,16 @@ export async function incomeAccounts() {
   return db.select().from(chartAccounts).where(or(eq(chartAccounts.type, '4'), eq(chartAccounts.parentId, 3))).orderBy(chartAccounts.code);
 }
 export async function createIncome(data: IncomeInput) { return saveIncome(null, data); }
-export async function updateIncome(id: number, data: IncomeInput) { return saveIncome(id, data); }
+export async function updateIncome(id: number, data: IncomeInput) {
+  if (!Number.isSafeInteger(id) || id <= 0) throw new Error('Income not found');
+  return saveIncome(id, data);
+}
 
 async function saveIncome(id: number | null, data: IncomeInput) {
   return transaction(async (tx) => {
     let voucherId: number;
     const values = { amount: data.amount, date: data.date, narration: data.narration ?? null, voucherType: 'INC', paymentType: 'cash_voucher', accountId: data.accountId, updatedAt: new Date() };
-    if (id) {
+    if (id !== null) {
       const [income] = await tx.select().from(incomes).where(eq(incomes.id, id)).limit(1);
       if (!income?.voucherId) throw new Error('Income not found');
       voucherId = income.voucherId;

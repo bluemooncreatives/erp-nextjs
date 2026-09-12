@@ -196,6 +196,7 @@ export async function updateIncomeAction(
 
 async function saveIncomeForm(formData: FormData, editing: boolean): Promise<AccountFormState> {
   const user = await authorize(editing ? 'income.edit' : 'income.store');
+  if (editing && (!Number.isSafeInteger(Number(formData.get('id'))) || Number(formData.get('id')) <= 0)) return { error: 'Income not found.' };
   const account = (await incomeAccounts()).find((row) => row.id === Number(formData.get('account_id')));
   if (!account) return { fieldErrors: { account_id: 'Select an income or bank account.' } };
   const amount = Number(formData.get('amount'));

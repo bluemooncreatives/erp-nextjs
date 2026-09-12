@@ -224,7 +224,7 @@ export async function updateExpense(
     .from(expenses)
     .where(eq(expenses.id, expenseId))
     .limit(1);
-  if (!expense?.voucherId) return;
+  if (!expense?.voucherId) throw new Error('Expense not found');
 
   await runInTransaction(async (tx) => {
     await tx

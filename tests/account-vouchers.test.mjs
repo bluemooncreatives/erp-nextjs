@@ -25,8 +25,11 @@ const journal = load('lib/accounting/journal.ts', {
   'server-only': {}, 'drizzle-orm': {}, '@/lib/db/client': {}, '@/lib/db/schema': {},
   '@/lib/db/morph': {}, './vouchers': { VoucherType },
 });
+const income = load('lib/accounting/income.ts', {
+  'server-only': {}, 'drizzle-orm': {}, '@/lib/db/client': {}, '@/lib/db/schema': {}, '@/lib/db/morph': {},
+});
 
-function fixture({ approved = false, existingType = 'voucher_payment', denied = false } = {}) {
+function fixture({ approved = false, existingType = 'voucher_payment', denied = false, incomeType = '4' } = {}) {
   const calls = { permissions: [], writes: [] };
   const f = load('app/(dashboard)/account/actions.ts', {
     'next/cache': { revalidatePath: () => {} },
@@ -36,9 +39,16 @@ function fixture({ approved = false, existingType = 'voucher_payment', denied = 
       if (denied) throw new Error('forbidden');
       return { id: 7 };
     } },
-    '@/lib/auth/session': {}, '@/lib/db/client': {}, '@/lib/db/schema': {}, 'drizzle-orm': {},
-    '@/lib/accounting/expenses': {},
-    '@/lib/accounting/income': {},
+    '@/lib/auth/session': { getSession: async () => ({ showroomId: 1 }) }, '@/lib/db/client': {}, '@/lib/db/schema': {}, 'drizzle-orm': {},
+    '@/lib/accounting/expenses': {
+      createExpense: async (data) => calls.writes.push({ operation: 'create', data }),
+      updateExpense: async (id, data) => calls.writes.push({ operation: 'update', id, data }),
+    },
+    '@/lib/accounting/income': {
+      incomeAccounts: async () => [{ id: 10, type: incomeType }],
+      createIncome: async (data) => calls.writes.push({ operation: 'create', data, posting: income.incomePosting(data) }),
+      updateIncome: async (id, data) => calls.writes.push({ operation: 'update', id, data, posting: income.incomePosting(data) }),
+    },
     '@/lib/activity-log': { successLog: async () => {}, errorLog: async () => {} },
     '@/lib/routes': { ROUTES: { 'vouchers.index': '/payment', 'journal.index': '/journal', 'contra.index': '/contra' } },
     '@/lib/accounting/vouchers': {
@@ -52,7 +62,7 @@ function fixture({ approved = false, existingType = 'voucher_payment', denied = 
       createJournalVoucher: async (data) => calls.writes.push({ operation: 'create', data, legs: journal.buildJournalLegs(data) }),
       updateJournalVoucher: async (id, data) => calls.writes.push({ operation: 'update', id, data, legs: journal.buildJournalLegs(data) }),
     },
-    '@/lib/business-settings': { isEnabled: async (key) => { assert.match(key, /^(voucher_payment|journal_voucher|contra_voucher)_approval$/); return approved; } },
+    '@/lib/business-settings': { isEnabled: async (key) => { assert.match(key, /^(voucher_payment|journal_voucher|contra_voucher|expense_voucher)_approval$/); return approved; } },
     '@/lib/accounting/periods': { openAccountingPeriod: async () => ({ startDate: '2026-04-01' }) },
   });
   return { ...f, calls };
@@ -148,4 +158,38 @@ test('unauthorized voucher mutations never reach persistence', async () => {
     await assert.rejects(action({}, form({ ...compound, id: 42 })), /forbidden/);
   }
   assert.equal(f.calls.writes.length, 0);
+});
+
+test('income creates one credit posting for revenue and one debit posting for asset accounts', async () => {
+  for (const [incomeType, expected] of [['4', 'Cr'], ['1', 'Dr']]) {
+    const f = fixture({ incomeType });
+    await assert.rejects(f.storeIncome({}, form({ account_id: 10, amount: 125, date: '2026-09-12', note: 'Bank interest', is_approve: 1 })), /redirect/);
+    assert.equal(f.calls.writes.length, 1);
+    assert.equal(f.calls.writes[0].posting.accountId, 10);
+    assert.equal(f.calls.writes[0].posting.type, expected);
+    assert.equal(f.calls.writes[0].posting.narration, 'Bank interest');
+    assert.equal(f.calls.writes[0].data.isApprove, 0);
+  }
+});
+
+test('income edits require a valid record ID and the income edit permission', async () => {
+  const f = fixture();
+  const fields = { account_id: 10, amount: 125, date: '2026-09-12' };
+  for (const id of ['0', 'NaN', '-1', '']) assert.ok((await f.updateIncomeAction({}, form({ ...fields, id }))).error);
+  assert.equal(f.calls.writes.length, 0);
+  await assert.rejects(f.updateIncomeAction({}, form({ ...fields, id: 42 })), /redirect/);
+  assert.equal(f.calls.writes[0].operation, 'update');
+  assert.equal(f.calls.permissions.at(-1), 'income.edit');
+});
+
+test('expense create and update retain the distinct Laravel controller voucher shapes', async () => {
+  const f = fixture();
+  await assert.rejects(f.storeExpense({}, form({ ...compound, payment_method: 'bank' })), /redirect/);
+  assert.equal(f.calls.writes[0].data.voucherType, 'BV');
+  assert.equal(f.calls.writes[0].data.paymentType, 'contra_voucher');
+  assert.equal(f.calls.writes[0].data.accountType, 'credit');
+  assert.equal(f.calls.writes[0].data.isApprove, 0);
+  await assert.rejects(f.updateExpenseAction({}, form({ ...compound, id: 42 })), /redirect/);
+  assert.equal(f.calls.writes[1].data.voucherType, 'CRV');
+  assert.equal(f.calls.writes[1].data.accountType, 'debit');
 });
