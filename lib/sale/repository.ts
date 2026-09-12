@@ -385,6 +385,203 @@ async function attachPartNumbers(
 }
 
 // ---------------------------------------------------------------------------
+// update
+// ---------------------------------------------------------------------------
+
+/**
+ * `SaleRepository::update($data, $id)`.
+ *
+ * The PHP deleted every product history for the sale up front, then updated the
+ * lines that were already on it and appended the newly added ones, re-recording
+ * a movement for each. Its stock check compared the *delta* for an existing line
+ * and the full quantity for a new one; both are kept here.
+ *
+ * The edit form posts one uniform line list, so a line that is no longer present
+ * is removed - the end state is the same set of rows the PHP arrived at.
+ */
+export async function updateSale(
+  id: number,
+  data: SaleInput,
+  userId: number,
+): Promise<number | typeof INSUFFICIENT_STOCK> {
+  const location = parseLocation(data.locationRef);
+  if (!location) return INSUFFICIENT_STOCK;
+
+  const { customerId, agentUserId } = parseCustomerRef(data.customerRef);
+  const tax = parseTotalTax(data.totalTax);
+
+  return runInTransaction(async (tx) => {
+    const [sale] = await tx.select().from(sales).where(eq(sales.id, id)).limit(1);
+    if (!sale) throw new InsufficientStockError();
+
+    await tx
+      .update(sales)
+      .set({
+        customerId,
+        agentUserId,
+        userId,
+        saleableId: location.id,
+        saleableType: location.type,
+        refNo: data.refNo ?? null,
+        date: toDateString(data.date) ?? today(),
+        notes: data.notes ?? null,
+        amount: data.itemAmount,
+        totalQuantity: data.totalQuantity,
+        totalDiscount: data.totalDiscountAmount,
+        discountType: data.discountType,
+        discountAmount: data.totalDiscount,
+        payableAmount: data.totalAmount,
+        shippingCharge: data.shippingCharge,
+        otherCharge: data.otherCharge,
+        totalTax: tax.amount,
+        taxId: tax.taxId,
+        updatedBy: userId,
+        updatedAt: new Date(),
+      })
+      .where(eq(sales.id, id));
+
+    // `foreach ($sale->houses as $productHistory) { $productHistory->delete(); }`
+    await deleteMovementsFor(MorphType.Sale, id, tx);
+
+    const existing = await tx
+      .select()
+      .from(productItemDetails)
+      .where(
+        and(
+          eq(productItemDetails.itemableId, id),
+          eq(productItemDetails.itemableType, MorphType.Sale),
+        ),
+      );
+
+    const keyOf = (productableId: number, isCombo: boolean) =>
+      `${isCombo ? 'combo' : 'sku'}-${productableId}`;
+
+    const existingByKey = new Map(
+      existing.map((item) => [
+        keyOf(
+          item.productableId ?? item.productSkuId,
+          item.productableType === MorphType.ComboProduct,
+        ),
+        item,
+      ]),
+    );
+
+    const seen = new Set<string>();
+
+    for (const line of data.lines) {
+      const key = keyOf(line.productableId, Boolean(line.isCombo));
+      seen.add(key);
+      const current = existingByKey.get(key);
+
+      if (!current) {
+        // A line added during the edit - checked against the full quantity.
+        const ok = await addSaleLine(tx, id, location, line, userId);
+        if (!ok) throw new InsufficientStockError();
+        continue;
+      }
+
+      // Serial numbers are re-attached from scratch, as the PHP did.
+      await tx
+        .delete(productItemDetailsPartNumbers)
+        .where(eq(productItemDetailsPartNumbers.productItemDetailId, current.id));
+      await attachPartNumbers(tx, id, current.id, line);
+
+      const lineTotal = line.price * line.quantity;
+      const calculatedTax = (lineTotal * line.tax) / 100;
+      const subTotal = line.isCombo
+        ? lineTotal
+        : lineTotal + calculatedTax - line.discount;
+
+      await tx
+        .update(productItemDetails)
+        .set({
+          price: line.price,
+          quantity: line.quantity,
+          tax: line.isCombo ? current.tax : line.tax,
+          discount: line.isCombo ? current.discount : line.discount,
+          subTotal,
+          productableId: line.productableId,
+          productableType: line.isCombo ? MorphType.ComboProduct : MorphType.ProductSku,
+          updatedAt: new Date(),
+        })
+        .where(eq(productItemDetails.id, current.id));
+
+      // `$decreaseQuantity = $new - $old` - only the extra has to be in stock.
+      const delta = line.quantity - current.quantity;
+
+      if (line.isCombo) {
+        const components = await comboComponents(line.productableId, tx);
+        for (const component of components) {
+          if (component.productSkuId == null || component.productQty == null) continue;
+          if (delta > 0) {
+            const onHand = await currentStock(location, component.productSkuId, tx);
+            if (onHand < delta * component.productQty) throw new InsufficientStockError();
+          }
+        }
+
+        await recordMovement(
+          {
+            type: MovementType.Sales,
+            documentType: MorphType.Sale,
+            documentId: id,
+            location,
+            productSkuId: line.productSkuId,
+            quantity: line.quantity,
+            userId,
+          },
+          tx,
+        );
+        continue;
+      }
+
+      const service = await isServiceSku(line.productSkuId, tx);
+      if (!service) {
+        if (delta > 0) {
+          const onHand = await currentStock(location, line.productSkuId, tx);
+          if (onHand < delta) throw new InsufficientStockError();
+        }
+
+        await recordMovement(
+          {
+            type: MovementType.Sales,
+            documentType: MorphType.Sale,
+            documentId: id,
+            location,
+            productSkuId: line.productSkuId,
+            quantity: line.quantity,
+            userId,
+          },
+          tx,
+        );
+      }
+    }
+
+    // Lines dropped on the edit screen go away with their serial numbers.
+    for (const [key, item] of existingByKey) {
+      if (seen.has(key)) continue;
+      await tx
+        .delete(productItemDetailsPartNumbers)
+        .where(eq(productItemDetailsPartNumbers.productItemDetailId, item.id));
+      await tx.delete(productItemDetails).where(eq(productItemDetails.id, item.id));
+    }
+
+    // Serial numbers selected anywhere on the form are marked sold.
+    const allPartNumbers = data.lines.flatMap((l) => l.partNumberIds ?? []);
+    if (allPartNumbers.length) {
+      await tx
+        .update(partNumbers)
+        .set({ isSold: 1, updatedAt: new Date() })
+        .where(inArray(partNumbers.id, allPartNumbers));
+    }
+
+    return id;
+  }).catch((error) => {
+    if (error instanceof InsufficientStockError) return INSUFFICIENT_STOCK;
+    throw error;
+  });
+}
+
+// ---------------------------------------------------------------------------
 // delete
 // ---------------------------------------------------------------------------
 
