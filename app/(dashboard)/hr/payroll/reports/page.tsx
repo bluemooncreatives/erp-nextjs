@@ -8,6 +8,8 @@ import { roleOptions } from '@/lib/hr/staff';
 import { singlePrice } from '@/lib/settings';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Wallet, Users, Divide, FileText } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
 import { ReportFilter } from '../../../report/report-filter';
@@ -59,6 +61,13 @@ export default async function PayrollReportPage({
   const total = await singlePrice(
     filtered.reduce((sum, r) => sum + Number(r.payroll.netSalary ?? 0), 0),
   );
+  const averageLabel = await singlePrice(
+    filtered.length
+      ? filtered.reduce((sum, r) => sum + Number(r.payroll.netSalary ?? 0), 0) / filtered.length
+      : 0,
+  );
+  // `payrolls` identifies its subject by `staff_id`; there is no `user_id`.
+  const staffCount = new Set(filtered.map((r) => r.payroll.staffId)).size;
 
   const currentYear = new Date().getUTCFullYear();
 
@@ -97,7 +106,16 @@ export default async function PayrollReportPage({
         }
       />
 
-      <Card title={`Payslips (${decorated.length}) - ${total}`} bodyClassName="">
+      <ReportSummary
+        figures={[
+          { label: 'Net payroll', value: total, detail: 'Over the selected filters', icon: Wallet },
+          { label: 'Payslips', value: decorated.length.toLocaleString('en-US'), detail: 'Matching the filters', icon: FileText },
+          { label: 'Staff', value: staffCount, detail: 'Distinct, in this run', icon: Users },
+          { label: 'Average net', value: averageLabel, detail: 'Per payslip', icon: Divide },
+        ]}
+      />
+
+      <Card title={`Payslips (${decorated.length})`} bodyClassName="">
         <DataTable
           columns={[
             { label: 'Staff' },

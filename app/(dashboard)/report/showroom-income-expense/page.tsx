@@ -9,6 +9,8 @@ import { dateConvert, singlePrice } from '@/lib/settings';
 import { toDateString, today } from '@/lib/php-date';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { ArrowDownLeft, ArrowUpRight, Scale, Landmark } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { FormAlert } from '@/components/erp/fields';
 import { DateRangeFilter } from '../period-filter';
@@ -87,8 +89,17 @@ export default async function ShowroomIncomeExpensePage({
         </div>
       ) : null}
 
+      <ReportSummary
+        figures={[
+          { label: 'Debit', value: debitLabel, detail: 'Dr over the range', icon: ArrowDownLeft },
+          { label: 'Credit', value: creditLabel, detail: 'Cr over the range', icon: ArrowUpRight },
+          { label: 'Net', value: netLabel, detail: 'Debit less credit', icon: Scale },
+          { label: 'Branch accounts', value: accountCount, detail: `${rows.length} postings`, icon: Landmark },
+        ]}
+      />
+
       <Card
-        title={`Transactions (${rows.length}) across ${accountCount} branch accounts`}
+        title={`Transactions (${rows.length})`}
         desc={`Debit ${debitLabel} · Credit ${creditLabel} · Net ${netLabel}`}
         bodyClassName=""
       >

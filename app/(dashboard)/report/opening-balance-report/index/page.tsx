@@ -9,6 +9,8 @@ import { chartAccounts, typeOpeningBalances } from '@/lib/db/schema';
 import { dateConvert, singlePrice } from '@/lib/settings';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { PlayCircle, Landmark, ListOrdered } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ReportFilter } from '../../report-filter';
 
@@ -44,6 +46,7 @@ export default async function OpeningBalanceReportPage({
   );
 
   const total = await singlePrice(rows.reduce((sum, r) => sum + Number(r.row.amount), 0));
+  const accountCount = new Set(rows.map((r) => r.row.accountId)).size;
 
   return (
     <>
@@ -70,7 +73,15 @@ export default async function OpeningBalanceReportPage({
         }
       />
 
-      <Card title={`Opening balances (${rows.length}) - ${total}`} bodyClassName="">
+      <ReportSummary
+        figures={[
+          { label: 'Opening total', value: total, detail: 'Across the balances shown', icon: PlayCircle },
+          { label: 'Accounts', value: accountCount, detail: 'With an opening balance', icon: Landmark },
+          { label: 'Entries', value: rows.length.toLocaleString('en-US'), detail: 'Matching the filters', icon: ListOrdered },
+        ]}
+      />
+
+      <Card title={`Opening balances (${rows.length})`} bodyClassName="">
         <DataTable
           columns={[
             { label: 'Date' },

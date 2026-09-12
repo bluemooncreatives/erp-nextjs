@@ -8,6 +8,8 @@ import { dateConvert, singlePrice } from '@/lib/settings';
 import { toDateString, today } from '@/lib/php-date';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { ArrowDownLeft, ArrowUpRight, Scale } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { SingleDateFilter } from '../../period-filter';
 
@@ -57,8 +59,16 @@ export default async function DailyIncomeExpensePage({
         }
       />
 
+      <ReportSummary
+        figures={[
+          { label: 'Income', value: incomeTotal, detail: dateLabel, icon: ArrowDownLeft },
+          { label: 'Expense', value: expenseTotal, detail: dateLabel, icon: ArrowUpRight },
+          { label: 'Net for the day', value: netLabel, detail: 'Income less expense', icon: Scale },
+        ]}
+      />
+
       <div className="grid gap-5 lg:grid-cols-2">
-        <Card title={`Income on ${dateLabel} - ${incomeTotal}`} bodyClassName="">
+        <Card title={`Income on ${dateLabel}`} bodyClassName="">
           <DataTable
             columns={[{ label: 'Account'}, { label:'Amount' }]}
             isEmpty={incomeRows.length === 0}
@@ -73,7 +83,7 @@ export default async function DailyIncomeExpensePage({
           </DataTable>
         </Card>
 
-        <Card title={`Expense on ${dateLabel} - ${expenseTotal}`} bodyClassName="">
+        <Card title={`Expense on ${dateLabel}`} bodyClassName="">
           <DataTable
             columns={[{ label: 'Account'}, { label:'Amount' }]}
             isEmpty={expenseRows.length === 0}
@@ -89,11 +99,6 @@ export default async function DailyIncomeExpensePage({
         </Card>
       </div>
 
-      <div className="mt-5">
-        <Card title="Net for the day">
-          <p className="text-2xl font-semibold text-foreground">{netLabel}</p>
-        </Card>
-      </div>
     </>
   );
 }

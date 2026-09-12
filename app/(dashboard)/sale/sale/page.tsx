@@ -35,12 +35,13 @@ export default async function SaleListPage({
     allBranches: user.role.type === 'system_user',
   });
 
-  const [canCreate, canEdit, canDelete, canApprove, canShow] = await Promise.all([
+  const [canCreate, canEdit, canDelete, canApprove, canShow, canQuote] = await Promise.all([
     can('sale.store'),
     can('sale.edit'),
     can('sale.delete'),
     can('conditional.sale.approve'),
     can('sale.show'),
+    can('quotation.store'),
   ]);
 
   // Dates go through the configured format; resolve them before rendering.
@@ -160,11 +161,28 @@ export default async function SaleListPage({
               <Td>
                 <div className="flex items-center gap-2">
                   {canEdit && sale.isApproved !== 1 ? (
-                    <LinkButton
-                      href={route('sale.edit', { id: sale.id })}
-                      
-                    >
+                    <LinkButton href={route('sale.edit', { id: sale.id })}>
                       Edit
+                    </LinkButton>
+                  ) : null}
+                  {/* The Blade's "Clone to Sale" and "Clone to Quotation" -
+                      each opens a new document's form seeded from this one. */}
+                  {canCreate ? (
+                    <LinkButton
+                      href={route('sale.clone', { id: sale.id })}
+                      variant="ghost"
+                      size="xs"
+                    >
+                      Clone
+                    </LinkButton>
+                  ) : null}
+                  {canQuote ? (
+                    <LinkButton
+                      href={route('sale.convertTosale', { id: sale.id })}
+                      variant="ghost"
+                      size="xs"
+                    >
+                      To quotation
                     </LinkButton>
                   ) : null}
                   {canDelete ? (

@@ -10,6 +10,8 @@ import { MorphType } from '@/lib/db/morph';
 import { dateConvert, singlePrice } from '@/lib/settings';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { PlayCircle, ArrowDownLeft, ArrowUpRight, Scale } from 'lucide-react';
 import { LedgerTable } from '@/components/erp/ledger-table';
 
 export const metadata: Metadata = { title: 'Staff History' };
@@ -48,9 +50,13 @@ export default async function StaffHistoryPage({
     })),
   );
 
-  const [openingLabel, closingLabel] = await Promise.all([
+  // The running balance only tells you where the account ended up; the period's
+  // own debit and credit totals say how much moved to get it there.
+  const [openingLabel, closingLabel, debitLabel, creditLabel] = await Promise.all([
     singlePrice(ledger.opening),
     singlePrice(ledger.closing),
+    singlePrice(ledger.rows.filter((r) => r.type === 'Dr').reduce((sum, r) => sum + Number(r.amount), 0)),
+    singlePrice(ledger.rows.filter((r) => r.type === 'Cr').reduce((sum, r) => sum + Number(r.amount), 0)),
   ]);
 
   return (
@@ -59,9 +65,17 @@ export default async function StaffHistoryPage({
         title={`Staff History - ${staff.user.name}`}
         breadcrumb={[{ label: 'Reports' }, { label: 'Staff History' }]}
       />
+      <ReportSummary
+        figures={[
+          { label: 'Opening balance', value: openingLabel, detail: 'Brought forward', icon: PlayCircle },
+          { label: 'Debits', value: debitLabel, detail: 'Dr on this account', icon: ArrowDownLeft },
+          { label: 'Credits', value: creditLabel, detail: 'Cr on this account', icon: ArrowUpRight },
+          { label: 'Current balance', value: closingLabel, detail: `After ${ledger.rows.length} postings`, icon: Scale },
+        ]}
+      />
+
       <LedgerTable
         title={staff.user.name}
-        desc={`Current balance ${closingLabel}`}
         openingLabel={openingLabel}
         rows={rows}
       />

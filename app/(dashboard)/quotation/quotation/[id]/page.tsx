@@ -9,7 +9,6 @@ import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card, DetailList } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
-import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
 
 export const metadata: Metadata = { title: 'Quotation' };

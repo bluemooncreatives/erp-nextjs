@@ -6,6 +6,8 @@ import { serialNumberReport } from '@/lib/reports/queries';
 import { productsForPurchase } from '@/lib/product/products';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { PackageCheck, ShoppingCart, Undo2, Barcode } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
 
@@ -30,11 +32,23 @@ export default async function SerialReportPage({
   const control =
     'h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground   ';
 
+  const soldCount = rows.filter((r) => r.serial.isSold === 1).length;
+  const returnedCount = rows.filter((r) => r.serial.isReturned === 1).length;
+
   return (
     <>
       <PageHeader
         title="Product Serial Report"
         breadcrumb={[{ label: 'Reports' }, { label: 'Product Serial Report' }]}
+      />
+
+      <ReportSummary
+        figures={[
+          { label: 'In stock', value: rows.length - soldCount, detail: 'Not yet sold', icon: PackageCheck },
+          { label: 'Sold', value: soldCount, detail: 'Matching the filters', icon: ShoppingCart },
+          { label: 'Returned', value: returnedCount, detail: 'Came back after sale', icon: Undo2 },
+          { label: 'Serial numbers', value: rows.length.toLocaleString('en-US'), detail: 'Matching the filters', icon: Barcode },
+        ]}
       />
 
       <Card

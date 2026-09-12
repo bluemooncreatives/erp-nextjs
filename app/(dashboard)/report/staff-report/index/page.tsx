@@ -10,6 +10,8 @@ import { locationOptions } from '@/lib/setup/repositories';
 import { dateConvert, singlePrice } from '@/lib/settings';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { UserCheck, UserX, Wallet, Building2 } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
 import { ReportFilter } from '../../report-filter';
@@ -42,6 +44,12 @@ export default async function StaffReportPage({
     })),
   );
 
+  const activeCount = decorated.filter((row) => row.user.isActive === 1).length;
+  const departmentCount = new Set(decorated.map((row) => row.departmentName).filter(Boolean)).size;
+  const salaryLabel = await singlePrice(
+    decorated.reduce((sum, row) => sum + Number(row.staff.basicSalary ?? 0), 0),
+  );
+
   return (
     <>
       <PageHeader
@@ -71,6 +79,15 @@ export default async function StaffReportPage({
             ]}
           />
         }
+      />
+
+      <ReportSummary
+        figures={[
+          { label: 'Active', value: activeCount, detail: 'Matching the filters', icon: UserCheck },
+          { label: 'Inactive', value: decorated.length - activeCount, detail: 'Matching the filters', icon: UserX },
+          { label: 'Basic salary', value: salaryLabel, detail: 'Combined, for the staff shown', icon: Wallet },
+          { label: 'Departments', value: departmentCount, detail: 'Represented in this report', icon: Building2 },
+        ]}
       />
 
       <Card title={`Staff (${decorated.length})`} bodyClassName="">
