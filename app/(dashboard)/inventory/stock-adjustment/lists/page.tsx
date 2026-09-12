@@ -32,11 +32,12 @@ export default async function StockAdjustmentListPage({
     allBranches: user.role.type === 'system_user',
   });
 
-  const [canCreate, canApprove, canDelete, canShow] = await Promise.all([
+  const [canCreate, canApprove, canDelete, canShow, canEdit] = await Promise.all([
     can('stock_adjustment.store'),
     can('stock_adjustment.approve'),
     can('stock_adjustment.destroy'),
     can('stock_adjustment.show'),
+    can('stock_adjustment.edit'),
   ]);
 
   const adjustmentRows = await Promise.all(
@@ -90,6 +91,7 @@ export default async function StockAdjustmentListPage({
               </Td>
               <Td>
                 <div className="flex items-center gap-2">
+                  {canEdit && adjustment.status !== 1 && <Link className="text-brand-500 hover:underline" href={`/inventory/stock-adjustment/edit/${adjustment.id}`}>Edit</Link>}
                   {canShow && <Link className="text-brand-500 hover:underline" href={`/inventory/stock-adjustment/show/${adjustment.id}`}>Details</Link>}
                   {adjustment.status !== 1 && canApprove ? (
                     <form action={approveAdjustmentAction}>

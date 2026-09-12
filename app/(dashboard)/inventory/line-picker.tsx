@@ -32,6 +32,7 @@ export function LinePicker({
   currencySymbol,
   showPrice = true,
   error,
+  initialLines = [],
 }: {
   products: PickableProduct[];
   /** Form field names, matching what the server action reads. */
@@ -41,8 +42,9 @@ export function LinePicker({
   currencySymbol: string;
   showPrice?: boolean;
   error?: string;
+  initialLines?: PickedLine[];
 }) {
-  const [lines, setLines] = useState<PickedLine[]>([]);
+  const [lines, setLines] = useState<PickedLine[]>(initialLines);
 
   const addLine = (value: string) => {
     const product = products.find((p) => String(p.id) === value);

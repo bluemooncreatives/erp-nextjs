@@ -14,8 +14,8 @@ import {
 } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import { ROUTES } from '@/lib/routes';
-import { LinePicker, type PickableProduct } from '../../line-picker';
-import { storeStockAdjustment, type InventoryFormState } from '../../actions';
+import { LinePicker, type PickableProduct, type PickedLine } from '../../line-picker';
+import { storeStockAdjustment, updateAdjustmentAction, type InventoryFormState } from '../../actions';
 
 const INITIAL: InventoryFormState = {};
 
@@ -24,16 +24,19 @@ export function AdjustmentForm({
   products,
   currencySymbol,
   defaultLocation,
+  defaults,
 }: {
   locations: SelectOption[];
   products: PickableProduct[];
   currencySymbol: string;
   defaultLocation?: string;
+  defaults?: { id: number; refNo: string; date: string; recoveryAmount: number; reason: string; lines: PickedLine[] };
 }) {
-  const [state, formAction] = useActionState(storeStockAdjustment, INITIAL);
+  const [state, formAction] = useActionState(defaults ? updateAdjustmentAction : storeStockAdjustment, INITIAL);
 
   return (
     <form action={formAction} className="space-y-6">
+      {defaults && <input type="hidden" name="id" value={defaults.id} />}
       <FormAlert variant="error" message={state.error} />
 
       <Card title="Adjustment Details">
@@ -47,13 +50,13 @@ export function AdjustmentForm({
             options={locations}
             error={state.fieldErrors?.warehouse_id}
           />
-          <FormInput label="Reference No" name="ref_no" />
+          <FormInput label="Reference No" name="ref_no" required defaultValue={defaults?.refNo} error={state.fieldErrors?.ref_no} />
           <FormInput
             label="Date"
             name="date"
             type="date"
             required
-            defaultValue={new Date().toISOString().slice(0, 10)}
+            defaultValue={defaults?.date ?? new Date().toISOString().slice(0, 10)}
             error={state.fieldErrors?.date}
           />
           <FormInput
@@ -62,7 +65,9 @@ export function AdjustmentForm({
             type="number"
             step="0.01"
             min="0"
-            defaultValue="0"
+            defaultValue={defaults?.recoveryAmount ?? 0}
+            required
+            error={state.fieldErrors?.recovery_amount}
           />
         </div>
       </Card>
@@ -73,6 +78,7 @@ export function AdjustmentForm({
       >
         <LinePicker
           products={products}
+          initialLines={defaults?.lines}
           idFieldName="product_id"
           quantityFieldName="product_quantity"
           currencySymbol={currencySymbol}
@@ -82,7 +88,7 @@ export function AdjustmentForm({
       </Card>
 
       <Card title="Reason">
-        <FormTextarea label="Reason" name="notes" />
+        <FormTextarea label="Reason" name="notes" defaultValue={defaults?.reason} />
       </Card>
 
       <div className="flex items-center justify-end gap-3">

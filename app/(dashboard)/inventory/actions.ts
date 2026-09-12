@@ -9,10 +9,12 @@ import { authorize } from '@/lib/auth/permissions';
 import { errorLog, successLog } from '@/lib/activity-log';
 import { ROUTES } from '@/lib/routes';
 import { filesFrom, saveUpload } from '@/lib/uploads';
+import { adjustmentInput } from '@/lib/inventory/adjustment-input';
 import {
   INSUFFICIENT_STOCK,
   applyStockAdjustment,
   createStockAdjustment,
+  updateStockAdjustment,
   createStockTransfer,
   deleteStockAdjustment,
   deleteStockTransfer,
@@ -139,36 +141,24 @@ export async function storeStockAdjustment(
   _prev: InventoryFormState,
   formData: FormData,
 ): Promise<InventoryFormState> {
-  const user = await authorize('stock_adjustment.store');
+  return saveAdjustmentForm(null, formData);
+}
 
-  const productIds = numList(formData, 'product_id');
-  const quantities = numList(formData, 'product_quantity');
+export async function updateAdjustmentAction(_prev: InventoryFormState, formData: FormData): Promise<InventoryFormState> {
+  const id = Number(formData.get('id'));
+  await authorize('stock_adjustment.edit');
+  if (!Number.isSafeInteger(id) || id < 1) return { error: 'Invalid adjustment.' };
+  return saveAdjustmentForm(id, formData);
+}
 
-  const fieldErrors: Record<string, string> = {};
-  if (!formData.get('warehouse_id')) {
-    fieldErrors.warehouse_id = 'Select Warehouse or Showroom';
-  }
-  if (!formData.get('date')) fieldErrors.date = 'The date field is required.';
-  if (productIds.length === 0) fieldErrors.product_id = 'Add at least one product.';
+async function saveAdjustmentForm(editId: number | null, formData: FormData): Promise<InventoryFormState> {
+  const user = await authorize(editId == null ? 'stock_adjustment.store' : 'stock_adjustment.edit');
+  const { data, fieldErrors } = adjustmentInput(formData);
   if (Object.keys(fieldErrors).length) return { fieldErrors };
-
   try {
-    const id = await createStockAdjustment(
-      {
-        locationRef: String(formData.get('warehouse_id') ?? ''),
-        refNo: str(formData, 'ref_no'),
-        recoveryAmount: Number(formData.get('recovery_amount') ?? 0),
-        date: String(formData.get('date') ?? ''),
-        reason: str(formData, 'notes'),
-        lines: productIds.map((productSkuId, i) => ({
-          productSkuId,
-          quantity: quantities[i] ?? 0,
-        })),
-      },
-      user.id,
-    );
+    const id = editId == null ? await createStockAdjustment(data, user.id) : await updateStockAdjustment(editId, data, user.id);
     if (!id) return { error: 'Select Warehouse or Showroom' };
-    await successLog(`Stock adjustment created: ${id}`, user.id);
+    await successLog(`Stock adjustment ${editId == null ? "created" : "updated"}: ${id}`, user.id);
   } catch (error) {
     await errorLog(String(error), user.id);
     return { error: 'Something Went Wrong' };

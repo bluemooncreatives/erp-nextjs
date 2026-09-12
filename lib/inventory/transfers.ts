@@ -17,6 +17,7 @@ import { and, desc, eq, sql } from 'drizzle-orm';
 import { db, transaction as runInTransaction } from '@/lib/db/client';
 import {
   productItemDetails,
+  productHistories,
   productSku,
   products,
   showRooms,
@@ -30,7 +31,6 @@ import { MorphType } from '@/lib/db/morph';
 import {
   MovementType,
   adjustStock,
-  currentStock,
   deleteMovementsFor,
   parseLocation,
   recordMovement,
@@ -163,12 +163,26 @@ export async function createStockTransfer(
   data: TransferInput,
   userId: number,
 ): Promise<number | null> {
+  return saveStockTransfer(null, data, userId);
+}
+
+export async function updateStockTransfer(id: number, data: TransferInput, userId: number) {
+  if (!Number.isSafeInteger(id) || id < 1) throw new Error('Invalid transfer.');
+  return saveStockTransfer(id, data, userId);
+}
+
+async function saveStockTransfer(id: number | null, data: TransferInput, userId: number) {
   const from = parseLocation(data.fromRef);
   const to = parseLocation(data.toRef);
   if (!from || !to) return null;
 
   return runInTransaction(async (tx) => {
-    const [inserted] = await tx.insert(stockTransfers).values({
+    for (const location of [from, to]) {
+      const table = location.type === MorphType.WareHouse ? wareHouses : showRooms;
+      const [house] = await tx.select({ id: table.id }).from(table).where(eq(table.id, location.id)).limit(1);
+      if (!house) throw new Error('Location not found.');
+    }
+    const values = {
       date: toDateString(data.date) ?? today(),
       notes: data.notes ?? null,
       documents: JSON.stringify(data.documents ?? []),
@@ -176,14 +190,35 @@ export async function createStockTransfer(
       sendableType: from.type,
       receivableId: to.id,
       receivableType: to.type,
-      status: 0,
-      createdAt: new Date(),
       updatedAt: new Date(),
-    });
-
-    const transferId = Number(inserted.insertId);
+    };
+    let transferId: number;
+    let existingItems: (typeof productItemDetails.$inferSelect)[] = [];
+    if (id == null) {
+      const [inserted] = await tx.insert(stockTransfers).values({ ...values, status: 0, createdAt: new Date() });
+      transferId = Number(inserted.insertId);
+    } else {
+      const [existing] = await tx.select().from(stockTransfers).where(eq(stockTransfers.id, id)).limit(1).for('update');
+      if (!existing) throw new Error('Transfer not found.');
+      if (existing.status === 1 || existing.receivedAt) throw new Error('Approved transfers cannot be edited.');
+      transferId = id;
+      // Correct the PHP sender-type typo: use the selected sender's type.
+      await tx.update(stockTransfers).set(values).where(eq(stockTransfers.id, id));
+      existingItems = await tx.select().from(productItemDetails).where(and(eq(productItemDetails.itemableId, id), eq(productItemDetails.itemableType, MorphType.StockTransfer)));
+      for (const item of existingItems) {
+        if (!data.lines.some((line) => line.productSkuId === item.productSkuId)) await tx.delete(productItemDetails).where(eq(productItemDetails.id, item.id));
+      }
+    }
 
     for (const line of data.lines) {
+      const [sku] = await tx.select({ id: productSku.id }).from(productSku).where(eq(productSku.id, line.productSkuId)).limit(1);
+      if (!sku) throw new Error('Product not found.');
+      const existing = existingItems.find((item) => item.productSkuId === line.productSkuId);
+      if (existing) {
+        if (line.quantity < existing.returnQuantity) throw new Error('Quantity cannot be less than the returned quantity.');
+        await tx.update(productItemDetails).set({ price: line.price, quantity: line.quantity, subTotal: line.price * line.quantity, updatedAt: new Date() }).where(eq(productItemDetails.id, existing.id));
+        continue;
+      }
       await tx.insert(productItemDetails).values({
         itemableId: transferId,
         itemableType: MorphType.StockTransfer,
@@ -219,59 +254,34 @@ export async function receiveStockTransfer(
   id: number,
   userId: number,
 ): Promise<typeof INSUFFICIENT_STOCK | void> {
-  const found = await findStockTransfer(id);
-  if (!found) return;
-
-  const { transfer, items } = found;
-
-  const sender: StockLocation = {
-    id: transfer.sendableId,
-    type:
-      transfer.sendableType === MorphType.WareHouse
-        ? MorphType.WareHouse
-        : MorphType.ShowRoom,
-  };
-  const receiver: StockLocation = {
-    id: transfer.receivableId,
-    type:
-      transfer.receivableType === MorphType.WareHouse
-        ? MorphType.WareHouse
-        : MorphType.ShowRoom,
-  };
-
-  // Check every line before moving anything.
-  for (const item of items) {
-    const onHand = await currentStock(sender, item.productSkuId);
-    const moving = item.quantity - item.returnQuantity;
-    if (onHand < moving) return INSUFFICIENT_STOCK;
-  }
-
-  await runInTransaction(async (tx) => {
+  return runInTransaction(async (tx) => {
+    const [transfer] = await tx.select().from(stockTransfers).where(eq(stockTransfers.id, id)).limit(1).for('update');
+    if (!transfer) throw new Error('Transfer not found.');
+    if (transfer.receivedAt) return;
+    if (transfer.status !== 1) throw new Error('Approve the transfer before receiving it.');
+    const items = await tx.select().from(productItemDetails).where(and(eq(productItemDetails.itemableId, id), eq(productItemDetails.itemableType, MorphType.StockTransfer)));
+    const sender: StockLocation = { id: transfer.sendableId, type: transfer.sendableType === MorphType.WareHouse ? MorphType.WareHouse : MorphType.ShowRoom };
+    const receiver: StockLocation = { id: transfer.receivableId, type: transfer.receivableType === MorphType.WareHouse ? MorphType.WareHouse : MorphType.ShowRoom };
+    // Lock existing stock rows in a stable order. Check gross quantity as PHP
+    // does; move only quantity minus returns. Preflight all lines atomically.
+    const stock = await tx.select().from(stockReports).where(sql`(${stockReports.houseableId} = ${sender.id} and ${stockReports.houseableType} = ${sender.type}) or (${stockReports.houseableId} = ${receiver.id} and ${stockReports.houseableType} = ${receiver.type})`).orderBy(stockReports.id).for('update');
+    const available = new Map(stock.filter((row) => row.houseableId === sender.id && row.houseableType === sender.type).map((row) => [row.productSkuId, stockValue(row.stock)]));
+    for (const item of items) {
+      const onHand = available.get(item.productSkuId) ?? 0;
+      if (onHand < item.quantity) return INSUFFICIENT_STOCK;
+      available.set(item.productSkuId, onHand - (item.quantity - item.returnQuantity));
+    }
     for (const item of items) {
       const moving = item.quantity - item.returnQuantity;
-
       await adjustStock(receiver, item.productSkuId, moving, tx);
       await adjustStock(sender, item.productSkuId, -moving, tx);
-
-      await recordMovement(
-        {
-          type: MovementType.StockTransfer,
-          documentType: MorphType.StockTransfer,
-          documentId: id,
-          location: receiver,
-          productSkuId: item.productSkuId,
-          quantity: moving,
-          status: 1,
-          userId,
-        },
-        tx,
-      );
+      // Match the existing purchase history, rather than inventing a transfer
+      // movement that the Laravel repository never creates.
+      const [history] = await tx.select().from(productHistories).where(and(eq(productHistories.type, 'purchase'), eq(productHistories.houseableId, id), eq(productHistories.houseableType, MorphType.StockTransfer), eq(productHistories.productSkuId, item.productSkuId))).limit(1);
+      if (history) await tx.update(productHistories).set({ status: 1, updatedAt: new Date() }).where(eq(productHistories.id, history.id));
     }
-
-    await tx
-      .update(stockTransfers)
-      .set({ receivedAt: today(), status: 1, updatedAt: new Date() })
-      .where(eq(stockTransfers.id, id));
+    await tx.update(stockTransfers).set({ receivedAt: today(), updatedAt: new Date() }).where(eq(stockTransfers.id, id));
+    void userId;
   });
 }
 
@@ -394,24 +404,45 @@ export async function createStockAdjustment(
   data: AdjustmentInput,
   userId: number,
 ): Promise<number | null> {
+  return saveStockAdjustment(null, data, userId);
+}
+
+/** PHP replaces the pending adjustment's lines and histories, repricing SKUs. */
+export async function updateStockAdjustment(id: number, data: AdjustmentInput, userId: number) {
+  if (!Number.isSafeInteger(id) || id < 1) throw new Error('Invalid adjustment.');
+  return saveStockAdjustment(id, data, userId);
+}
+
+async function saveStockAdjustment(id: number | null, data: AdjustmentInput, userId: number) {
   const location = parseLocation(data.locationRef);
   if (!location) return null;
 
   return runInTransaction(async (tx) => {
-    const [inserted] = await tx.insert(stockAdjustments).values({
+    const locationTable = location.type === MorphType.WareHouse ? wareHouses : showRooms;
+    const [house] = await tx.select({ id: locationTable.id }).from(locationTable).where(eq(locationTable.id, location.id)).limit(1);
+    if (!house) throw new Error('Location not found.');
+    const values = {
       refNo: data.refNo ?? null,
       recoveryAmount: data.recoveryAmount,
       date: toDateString(data.date) ?? today(),
       reason: data.reason ?? null,
       adjustableId: location.id,
       adjustableType: location.type,
-      status: 0,
-      createdBy: userId,
-      createdAt: new Date(),
       updatedAt: new Date(),
-    });
-
-    const adjustmentId = Number(inserted.insertId);
+    };
+    let adjustmentId: number;
+    if (id == null) {
+      const [inserted] = await tx.insert(stockAdjustments).values({ ...values, status: 0, createdBy: userId, createdAt: new Date() });
+      adjustmentId = Number(inserted.insertId);
+    } else {
+      const [existing] = await tx.select().from(stockAdjustments).where(eq(stockAdjustments.id, id)).limit(1).for('update');
+      if (!existing) throw new Error('Adjustment not found.');
+      if (existing.status === 1) throw new Error('Approved adjustments cannot be edited.');
+      adjustmentId = id;
+      await tx.update(stockAdjustments).set({ ...values, updatedBy: userId }).where(eq(stockAdjustments.id, id));
+      await deleteMovementsFor(MorphType.StockAdjustment, id, tx);
+      await tx.delete(stockAdjustmentProducts).where(eq(stockAdjustmentProducts.stockAdjustmentId, id));
+    }
 
     for (const line of data.lines) {
       // The unit price is the SKU's purchase price, as the PHP read it.
@@ -421,7 +452,8 @@ export async function createStockAdjustment(
         .where(eq(productSku.id, line.productSkuId))
         .limit(1);
 
-      const price = Number(sku?.purchasePrice ?? 0);
+      if (!sku) throw new Error('Product not found.');
+      const price = Number(sku.purchasePrice ?? 0);
 
       await tx.insert(stockAdjustmentProducts).values({
         stockAdjustmentId: adjustmentId,
@@ -464,6 +496,9 @@ export async function applyStockAdjustment(
   const { productHistories } = await import('@/lib/db/schema');
 
   await runInTransaction(async (tx) => {
+    const [adjustment] = await tx.select().from(stockAdjustments).where(eq(stockAdjustments.id, id)).limit(1).for('update');
+    if (!adjustment) throw new Error('Adjustment not found.');
+    if (adjustment.status === 1) return;
     const movements = await tx
       .select()
       .from(productHistories)
@@ -500,6 +535,9 @@ export async function applyStockAdjustment(
 
 export async function deleteStockAdjustment(id: number): Promise<void> {
   await runInTransaction(async (tx) => {
+    const [adjustment] = await tx.select().from(stockAdjustments).where(eq(stockAdjustments.id, id)).limit(1).for('update');
+    if (!adjustment) throw new Error('Adjustment not found.');
+    if (adjustment.status === 1) throw new Error('Approved adjustments cannot be deleted.');
     await deleteMovementsFor(MorphType.StockAdjustment, id, tx);
     await tx
       .delete(stockAdjustmentProducts)
