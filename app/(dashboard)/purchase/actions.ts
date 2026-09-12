@@ -14,6 +14,7 @@ import {
   approvePurchaseOrder,
   approvePurchaseReturn,
   createPurchaseOrder,
+  updatePurchaseOrder,
   deletePurchaseOrder,
   recordPurchasePayments,
   recordPurchaseReturn,
@@ -143,6 +144,66 @@ export async function storePurchaseOrder(
     }
 
     await successLog(`Purchase order created: ${orderId}`, user.id);
+  } catch (error) {
+    await errorLog(String(error), user.id);
+    return { error: 'Something Went Wrong' };
+  }
+
+  revalidatePath(ROUTES['purchase_order.index']);
+  redirect(route('purchase_order.show', { id: orderId }));
+}
+
+/** `PurchaseController@update` */
+export async function savePurchaseOrder(
+  _prev: PurchaseFormState,
+  formData: FormData,
+): Promise<PurchaseFormState> {
+  const orderId = Number(formData.get('id'));
+  if (!Number.isFinite(orderId)) return { error: 'Missing purchase order id.' };
+
+  const user = await authorize('purchase_order.update');
+
+  const lines = readLines(formData);
+  const fieldErrors: Record<string, string> = {};
+  if (!formData.get('supplier_id')) fieldErrors.supplier_id = 'Please select a supplier.';
+  if (!formData.get('showroom')) fieldErrors.showroom = 'Select Warehouse or Showroom';
+  if (!formData.get('date')) fieldErrors.date = 'The date field is required.';
+  if (lines.length === 0) fieldErrors.product_id = 'Add at least one product.';
+  if (Object.keys(fieldErrors).length) return { fieldErrors };
+
+  // Newly attached documents replace the stored list, as the PHP did.
+  const documents: string[] = [];
+  for (const file of filesFrom(formData, 'documents')) {
+    const stored = await saveUpload(file, 'purchase_order');
+    if (stored) documents.push(stored);
+  }
+
+  const input: PurchaseInput = {
+    supplierId: num(formData, 'supplier_id'),
+    locationRef: String(formData.get('showroom') ?? ''),
+    shippingAddress: str(formData, 'shipping_address'),
+    notes: str(formData, 'notes'),
+    documents,
+    itemAmount: num(formData, 'item_amount'),
+    date: String(formData.get('date') ?? ''),
+    totalQuantity: num(formData, 'total_quantity'),
+    totalDiscountAmount: num(formData, 'total_discount_amount'),
+    totalDiscount: num(formData, 'total_discount'),
+    discountType: num(formData, 'discount_type', 2),
+    totalAmount: num(formData, 'total_amount'),
+    totalTax: String(formData.get('total_tax') ?? '0-0'),
+    shippingCharge: num(formData, 'shipping_charge'),
+    otherCharge: num(formData, 'other_charge'),
+    refNo: str(formData, 'ref_no'),
+    lcNo: str(formData, 'lc_no'),
+    cnfId: formData.get('cnf_agent') ? num(formData, 'cnf_agent') : null,
+    lines,
+  };
+
+  try {
+    const result = await updatePurchaseOrder(orderId, input, user.id);
+    if (!result) return { error: 'Select Warehouse or Showroom' };
+    await successLog(`Purchase order updated: ${orderId}`, user.id);
   } catch (error) {
     await errorLog(String(error), user.id);
     return { error: 'Something Went Wrong' };

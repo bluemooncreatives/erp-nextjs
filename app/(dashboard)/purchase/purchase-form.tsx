@@ -50,11 +50,40 @@ type CartLine = {
   discount: number;
 };
 
+/** The order being edited, as `purchase::purchase.edit` pre-filled its form. */
+export type PurchaseFormDefaults = {
+  id: number;
+  supplierId: string;
+  locationRef: string;
+  date: string;
+  refNo: string;
+  lcNo: string;
+  cnfId: string;
+  shippingAddress: string;
+  notes: string;
+  discountType: string;
+  discountValue: number;
+  taxId: string;
+  shippingCharge: number;
+  otherCharge: number;
+  lines: Array<{
+    productId: number;
+    label: string;
+    price: number;
+    sellingPrice: number;
+    quantity: number;
+    tax: number;
+    discount: number;
+  }>;
+};
+
 export function PurchaseForm({
   options,
   action,
   currencySymbol,
   defaultLocation,
+  defaults,
+  submitLabel,
 }: {
   options: PurchaseFormOptions;
   action: (
@@ -63,15 +92,28 @@ export function PurchaseForm({
   ) => Promise<PurchaseFormState>;
   currencySymbol: string;
   defaultLocation?: string;
+  defaults?: PurchaseFormDefaults;
+  submitLabel?: string;
 }) {
   const [state, formAction] = useActionState(action, INITIAL);
 
-  const [lines, setLines] = useState<CartLine[]>([]);
-  const [discountType, setDiscountType] = useState('2');
-  const [discountValue, setDiscountValue] = useState(0);
-  const [taxId, setTaxId] = useState('0');
-  const [shipping, setShipping] = useState(0);
-  const [other, setOther] = useState(0);
+  const [lines, setLines] = useState<CartLine[]>(
+    defaults?.lines.map((l) => ({
+      key: `p-${l.productId}`,
+      productId: l.productId,
+      label: l.label,
+      price: l.price,
+      sellingPrice: l.sellingPrice,
+      quantity: l.quantity,
+      tax: l.tax,
+      discount: l.discount,
+    })) ?? [],
+  );
+  const [discountType, setDiscountType] = useState(defaults?.discountType ?? '2');
+  const [discountValue, setDiscountValue] = useState(defaults?.discountValue ?? 0);
+  const [taxId, setTaxId] = useState(defaults?.taxId ?? '0');
+  const [shipping, setShipping] = useState(defaults?.shippingCharge ?? 0);
+  const [other, setOther] = useState(defaults?.otherCharge ?? 0);
   const [paymentMethod, setPaymentMethod] = useState('');
   const [paymentAmount, setPaymentAmount] = useState(0);
 
@@ -145,6 +187,8 @@ export function PurchaseForm({
       <input type="hidden" name="total_discount" value={discountValue} />
       <input type="hidden" name="total_amount" value={totals.payable.toFixed(2)} />
 
+      {defaults ? <input type="hidden" name="id" value={defaults.id} /> : null}
+
       <Card title="Purchase Order">
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
           <FormSelect
@@ -152,6 +196,7 @@ export function PurchaseForm({
             name="supplier_id"
             required
             placeholder="Select supplier"
+            defaultValue={defaults?.supplierId ?? ''}
             options={options.suppliers}
             error={state.fieldErrors?.supplier_id}
           />
@@ -160,7 +205,7 @@ export function PurchaseForm({
             name="showroom"
             required
             placeholder="Select location"
-            defaultValue={defaultLocation ?? ''}
+            defaultValue={defaults?.locationRef ?? defaultLocation ?? ''}
             options={options.locations}
             error={state.fieldErrors?.showroom}
           />
@@ -169,18 +214,23 @@ export function PurchaseForm({
             name="date"
             type="date"
             required
-            defaultValue={new Date().toISOString().slice(0, 10)}
+            defaultValue={defaults?.date ?? new Date().toISOString().slice(0, 10)}
             error={state.fieldErrors?.date}
           />
-          <FormInput label="Reference No" name="ref_no" />
-          <FormInput label="LC No" name="lc_no" />
+          <FormInput label="Reference No" name="ref_no" defaultValue={defaults?.refNo ?? ''} />
+          <FormInput label="LC No" name="lc_no" defaultValue={defaults?.lcNo ?? ''} />
           <FormSelect
             label="CNF Agent"
             name="cnf_agent"
             placeholder="Select agent"
+            defaultValue={defaults?.cnfId ?? ''}
             options={options.cnfAgents}
           />
-          <FormInput label="Shipping Address" name="shipping_address" />
+          <FormInput
+            label="Shipping Address"
+            name="shipping_address"
+            defaultValue={defaults?.shippingAddress ?? ''}
+          />
           <FormInput
             label="Documents"
             name="documents"
@@ -337,7 +387,12 @@ export function PurchaseForm({
               onChange={(e) => setOther(Number(e.target.value))}
             />
           </div>
-          <FormTextarea label="Notes" name="notes" wrapperClassName="mt-5" />
+          <FormTextarea
+            label="Notes"
+            name="notes"
+            wrapperClassName="mt-5"
+            defaultValue={defaults?.notes ?? ''}
+          />
         </Card>
 
         <Card title="Summary">
@@ -397,7 +452,9 @@ export function PurchaseForm({
         >
           Cancel
         </Link>
-        <SubmitButton disabled={lines.length === 0}>Save Purchase Order</SubmitButton>
+        <SubmitButton disabled={lines.length === 0}>
+          {submitLabel ?? 'Save Purchase Order'}
+        </SubmitButton>
       </div>
     </form>
   );

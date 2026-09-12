@@ -372,6 +372,138 @@ export async function createPurchaseOrder(
   });
 }
 
+/**
+ * `PurchaseOrderRepository::update($data, $id)`.
+ *
+ * The PHP updated the lines already on the order in place (also updating their
+ * stock movement's `in_out`) and appended newly added ones. Posting one uniform
+ * line list here reaches the same end state, with dropped lines removed.
+ *
+ * Editing is only offered before the order is received into stock, so no stock
+ * levels move - only the pending `product_histories` rows are kept in step.
+ */
+export async function updatePurchaseOrder(
+  orderId: number,
+  data: PurchaseInput,
+  userId: number,
+): Promise<number | null> {
+  const location = parseLocation(data.locationRef);
+  if (!location) return null;
+
+  const tax = parseTotalTax(data.totalTax);
+
+  return runInTransaction(async (tx) => {
+    await tx
+      .update(purchaseOrders)
+      .set({
+        supplierId: data.supplierId,
+        shippingAddress: data.shippingAddress ?? null,
+        notes: data.notes ?? null,
+        date: toDateString(data.date) ?? today(),
+        purchasableType: location.type,
+        purchasableId: location.id,
+        amount: data.itemAmount,
+        totalQuantity: data.totalQuantity,
+        totalDiscount: data.totalDiscountAmount,
+        discountAmount: data.totalDiscount,
+        discountType: data.discountType,
+        totalVat: tax.amount,
+        taxId: tax.taxId,
+        shippingCharge: data.shippingCharge,
+        otherCharge: data.otherCharge,
+        payableAmount: data.totalAmount,
+        refNo: data.refNo ?? null,
+        lcNo: data.lcNo ?? null,
+        cnfId: data.cnfId ?? null,
+        updatedBy: userId,
+        updatedAt: new Date(),
+      })
+      .where(eq(purchaseOrders.id, orderId));
+
+    if (data.documents?.length) {
+      await tx
+        .update(purchaseOrders)
+        .set({ documents: JSON.stringify(data.documents) })
+        .where(eq(purchaseOrders.id, orderId));
+    }
+
+    const existing = await tx
+      .select()
+      .from(productItemDetails)
+      .where(
+        and(
+          eq(productItemDetails.itemableId, orderId),
+          eq(productItemDetails.itemableType, MorphType.PurchaseOrder),
+        ),
+      );
+    const existingBySku = new Map(existing.map((item) => [item.productSkuId, item]));
+    const seen = new Set<number>();
+
+    for (const line of data.lines) {
+      seen.add(line.productSkuId);
+      const current = existingBySku.get(line.productSkuId);
+      const subTotal = line.price * line.quantity;
+
+      if (current) {
+        await tx
+          .update(productItemDetails)
+          .set({
+            price: line.price,
+            sellingPrice: line.sellingPrice,
+            quantity: line.quantity,
+            tax: line.tax,
+            discount: line.discount,
+            subTotal,
+            productableId: line.productSkuId,
+            productableType: MorphType.ProductSku,
+            updatedAt: new Date(),
+          })
+          .where(eq(productItemDetails.id, current.id));
+      } else {
+        await tx.insert(productItemDetails).values({
+          itemableId: orderId,
+          itemableType: MorphType.PurchaseOrder,
+          productSkuId: line.productSkuId,
+          sellingPrice: line.sellingPrice,
+          price: line.price,
+          quantity: line.quantity,
+          tax: line.tax,
+          discount: line.discount,
+          subTotal,
+          productableId: line.productSkuId,
+          productableType: MorphType.ProductSku,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+      }
+    }
+
+    for (const [skuId, item] of existingBySku) {
+      if (seen.has(skuId)) continue;
+      await tx.delete(productItemDetails).where(eq(productItemDetails.id, item.id));
+    }
+
+    // `$order->houses()->...->update(['in_out' => ...])` - rewritten wholesale.
+    await deleteMovementsFor(MorphType.PurchaseOrder, orderId, tx);
+    for (const line of data.lines) {
+      await recordMovement(
+        {
+          type: MovementType.Purchase,
+          documentType: MorphType.PurchaseOrder,
+          documentId: orderId,
+          location,
+          productSkuId: line.productSkuId,
+          quantity: line.quantity,
+          userId,
+        },
+        tx,
+      );
+    }
+
+    return orderId;
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Approve
 // ---------------------------------------------------------------------------
