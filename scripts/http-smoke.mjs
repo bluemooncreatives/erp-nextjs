@@ -30,11 +30,19 @@ const connection = await mysql.createConnection({
   database: process.env.DB_DATABASE ?? 'software_erp',
 });
 
+// ROLE_ID lets the sweep run as a less privileged user, to check that missing
+// permissions redirect rather than crash.
+const roleFilter = process.env.ROLE_ID ? `where u.role_id = ${Number(process.env.ROLE_ID)}` : '';
 const [[admin]] = await connection.query(
   `select u.id, u.role_id, r.type from users u
      left join roles r on r.id = u.role_id
+   ${roleFilter}
     order by u.role_id asc limit 1`,
 );
+if (!admin) {
+  console.error(`no user found${roleFilter ? ` for ROLE_ID=${process.env.ROLE_ID}` : ''}`);
+  process.exit(2);
+}
 const [[showroom]] = await connection.query('select id from show_rooms limit 1');
 
 const token = await new SignJWT({
