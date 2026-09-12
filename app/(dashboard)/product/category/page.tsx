@@ -11,7 +11,6 @@ import { PageHeader } from '@/components/erp/page';
 import { ReferenceCrud } from '@/components/erp/reference-crud';
 import { ROUTES } from '@/lib/routes';
 import { deleteCategory, saveCategory } from '../actions';
-import { CategoryExtraFields } from './extra-fields';
 
 export const metadata: Metadata = { title: 'Category' };
 
@@ -69,17 +68,23 @@ export default async function CategoryPage({
         canDelete={canDelete}
         saveAction={saveCategory}
         deleteAction={deleteCategory}
-        extraFields={(row) => (
-          <CategoryExtraFields
-            parents={parents}
-            defaultParentId={
-              row ? (withParent.find((c) => c.id === row.id)?.parentId ?? null) : null
-            }
-            defaultCode={
-              row ? (withParent.find((c) => c.id === row.id)?.code ?? '') : ''
-            }
-          />
-        )}
+        extraFields={[
+          {
+            name: 'parent_id',
+            label: 'Parent Category',
+            kind: 'select',
+            placeholder: 'None (top level)',
+            options: parents,
+            values: Object.fromEntries(
+              withParent.map((c) => [String(c.id), c.parentId ? String(c.parentId) : '']),
+            ),
+          },
+          {
+            name: 'code',
+            label: 'Code',
+            values: Object.fromEntries(withParent.map((c) => [String(c.id), c.code ?? ''])),
+          },
+        ]}
       />
     </>
   );

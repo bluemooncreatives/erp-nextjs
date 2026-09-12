@@ -7,7 +7,6 @@ import { ROUTES } from '@/lib/routes';
 import { PageHeader } from '@/components/erp/page';
 import { ReferenceCrud } from '@/components/erp/reference-crud';
 import { saveCurrency, deleteCurrency } from '../../setup/actions';
-import { CurrencyFields } from './fields';
 
 export const metadata: Metadata = { title: 'Currency' };
 
@@ -59,12 +58,19 @@ export default async function CurrencyPage({
         hasStatus={false}
         saveAction={saveCurrency}
         deleteAction={deleteCurrency}
-      extraFields={(row) => (
-          <CurrencyFields
-            defaultCode={row ? codeById.get(row.id) ?? '' : ''}
-            defaultSymbol={row ? symbolById.get(row.id) ?? '' : ''}
-          />
-        )}
+        extraFields={[
+          {
+            name: 'code',
+            label: 'Code',
+            required: true,
+            values: Object.fromEntries(rows.map((r) => [String(r.id), r.code ?? ''])),
+          },
+          {
+            name: 'symbol',
+            label: 'Symbol',
+            values: Object.fromEntries(rows.map((r) => [String(r.id), r.symbol ?? ''])),
+          },
+        ]}
       />
     </>
   );

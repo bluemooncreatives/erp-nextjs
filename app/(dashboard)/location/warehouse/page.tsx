@@ -7,7 +7,6 @@ import { ROUTES } from '@/lib/routes';
 import { PageHeader } from '@/components/erp/page';
 import { ReferenceCrud } from '@/components/erp/reference-crud';
 import { saveWareHouse, deleteWareHouse } from '../../setup/actions';
-import { ContactFields } from './fields';
 
 export const metadata: Metadata = { title: 'Warehouse' };
 
@@ -56,7 +55,24 @@ export default async function WarehousePage({
         hasStatus={true}
         saveAction={saveWareHouse}
         deleteAction={deleteWareHouse}
-      extraFields={() => <ContactFields />}
+        extraFields={[
+          {
+            name: 'email',
+            label: 'Email',
+            kind: 'email',
+            values: Object.fromEntries(rows.map((r) => [String(r.id), r.email ?? ''])),
+          },
+          {
+            name: 'phone',
+            label: 'Phone',
+            values: Object.fromEntries(rows.map((r) => [String(r.id), r.phone ?? ''])),
+          },
+          {
+            name: 'address',
+            label: 'Address',
+            values: Object.fromEntries(rows.map((r) => [String(r.id), r.address ?? ''])),
+          },
+        ]}
       />
     </>
   );

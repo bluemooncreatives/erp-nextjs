@@ -11,7 +11,6 @@ import { PageHeader } from '@/components/erp/page';
 import { ReferenceCrud } from '@/components/erp/reference-crud';
 import { ROUTES } from '@/lib/routes';
 import { deleteVariant, saveVariant } from '../actions';
-import { VariantValuesField } from './values-field';
 
 export const metadata: Metadata = { title: 'Variant' };
 
@@ -66,11 +65,17 @@ export default async function VariantPage({
         canDelete={canDelete}
         saveAction={saveVariant}
         deleteAction={deleteVariant}
-        extraFields={(row) => (
-          <VariantValuesField
-            defaultValues={row ? (valuesById.get(row.id) ?? []).join(', ') : ''}
-          />
-        )}
+        extraFields={[
+          {
+            name: 'values',
+            label: 'Values',
+            placeholder: 'Red, Blue, Green',
+            hint: 'Separate each value with a comma. Values already used by a product are kept.',
+            values: Object.fromEntries(
+              rows.map((r) => [String(r.id), (valuesById.get(r.id) ?? []).join(', ')]),
+            ),
+          },
+        ]}
       />
     </>
   );

@@ -7,7 +7,6 @@ import { ROUTES } from '@/lib/routes';
 import { PageHeader } from '@/components/erp/page';
 import { ReferenceCrud } from '@/components/erp/reference-crud';
 import { saveCountry, deleteCountry } from '../actions';
-import { CountryFields } from './fields';
 
 export const metadata: Metadata = { title: 'Country' };
 
@@ -56,7 +55,35 @@ export default async function CountryPage({
         hasStatus={true}
         saveAction={saveCountry}
         deleteAction={deleteCountry}
-      extraFields={() => <CountryFields />}
+        extraFields={[
+          {
+            name: 'iso2',
+            label: 'ISO2',
+            maxLength: 10,
+            values: Object.fromEntries(rows.map((r) => [String(r.id), r.iso2 ?? ''])),
+          },
+          {
+            name: 'iso3',
+            label: 'ISO3',
+            maxLength: 10,
+            values: Object.fromEntries(rows.map((r) => [String(r.id), r.iso3 ?? ''])),
+          },
+          {
+            name: 'phonecode',
+            label: 'Phone Code',
+            values: Object.fromEntries(rows.map((r) => [String(r.id), r.phonecode ?? ''])),
+          },
+          {
+            name: 'currency',
+            label: 'Currency',
+            values: Object.fromEntries(rows.map((r) => [String(r.id), r.currency ?? ''])),
+          },
+          {
+            name: 'capital',
+            label: 'Capital',
+            values: Object.fromEntries(rows.map((r) => [String(r.id), r.capital ?? ''])),
+          },
+        ]}
       />
     </>
   );

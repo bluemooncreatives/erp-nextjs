@@ -7,7 +7,6 @@ import { listPrinters } from '@/lib/setup/printers';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader } from '@/components/erp/page';
 import { ReferenceCrud } from '@/components/erp/reference-crud';
-import { PrinterFields } from './fields';
 import { deletePrinterAction, savePrinter } from './actions';
 
 export const metadata: Metadata = { title: 'Printer' };
@@ -46,17 +45,21 @@ export default async function PrinterPage() {
         canDelete={canDelete}
         saveAction={savePrinter}
         deleteAction={deletePrinterAction}
-        extraFields={(row) => (
-          <PrinterFields
-            defaults={{
-              connectionType: String(row?.extra?.[0] ?? ''),
-              charPerLine: String(row?.extra?.[1] ?? ''),
-              ip: String(row?.extra?.[2] ?? ''),
-              port: String(row?.extra?.[3] ?? ''),
-              path: String(row?.extra?.[4] ?? ''),
-            }}
-          />
-        )}
+        extraFields={[
+          { name: 'connection_type', label: 'Connection Type', required: true },
+          { name: 'char_per_line', label: 'Character Per Line', required: true },
+          { name: 'ip', label: 'IP Address', required: true },
+          { name: 'port', label: 'Port', required: true },
+          { name: 'path', label: 'Path', required: true },
+        ].map((field, index) => ({
+          ...field,
+          values: Object.fromEntries(
+            rows.map((r) => [
+              String(r.id),
+              String([r.connectionType, r.charPerLine, r.ip, r.port, r.path][index] ?? ''),
+            ]),
+          ),
+        }))}
       />
     </>
   );

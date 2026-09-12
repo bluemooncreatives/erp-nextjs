@@ -26,6 +26,30 @@ export type ReferenceRow = {
   extra?: Array<string | number | null>;
 };
 
+/**
+ * Extra inputs for entities with more than name/description/status.
+ *
+ * These are declared as data, not as a render function: a server component
+ * cannot hand a function to this client component, and doing so failed the
+ * whole page at request time.
+ */
+export type ExtraField = {
+  name: string;
+  label: string;
+  kind?: 'text' | 'number' | 'email' | 'textarea' | 'select';
+  required?: boolean;
+  placeholder?: string;
+  hint?: string;
+  step?: string;
+  min?: string;
+  maxLength?: number;
+  options?: Array<{ value: string | number; label: string }>;
+  /** Value used when adding a new row. */
+  defaultValue?: string;
+  /** Value per existing row id, used when that row is being edited. */
+  values?: Record<string, string>;
+};
+
 export type ReferenceFormState = {
   error?: string;
   success?: string;
@@ -54,7 +78,7 @@ export function ReferenceCrud({
   extraFields,
   breadcrumbLabel,
   /** Optional "View" link per row - the Branch list had one. */
-  detailHref,
+  detailRoute,
 }: {
   title: string;
   singular: string;
@@ -76,9 +100,10 @@ export function ReferenceCrud({
   hasDescription?: boolean;
   hasStatus?: boolean;
   /** Extra inputs for entities with more than name/description/status. */
-  extraFields?: (row: ReferenceRow | null) => React.ReactNode;
+  extraFields?: ExtraField[];
   breadcrumbLabel?: string;
-  detailHref?: (row: ReferenceRow) => string;
+  /** URL template for the per-row "View" link, with `{id}` standing in. */
+  detailRoute?: string;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -133,7 +158,60 @@ export function ReferenceCrud({
                 />
               ) : null}
 
-              {extraFields?.(editing)}
+              {extraFields?.map((field) => {
+                const value = editing
+                  ? (field.values?.[String(editing.id)] ?? '')
+                  : (field.defaultValue ?? '');
+                const error = state.fieldErrors?.[field.name];
+
+                if (field.kind === 'select') {
+                  return (
+                    <FormSelect
+                      key={field.name}
+                      label={field.label}
+                      name={field.name}
+                      required={field.required}
+                      placeholder={field.placeholder}
+                      options={field.options ?? []}
+                      defaultValue={value}
+                      error={error}
+                      hint={field.hint}
+                    />
+                  );
+                }
+
+                if (field.kind === 'textarea') {
+                  return (
+                    <FormTextarea
+                      key={field.name}
+                      label={field.label}
+                      name={field.name}
+                      required={field.required}
+                      placeholder={field.placeholder}
+                      defaultValue={value}
+                      error={error}
+                      hint={field.hint}
+                    />
+                  );
+                }
+
+                return (
+                  <FormInput
+                    key={field.name}
+                    label={field.label}
+                    name={field.name}
+                    type={field.kind === 'number' ? 'number' : (field.kind ?? 'text')}
+                    required={field.required}
+                    placeholder={field.placeholder}
+                    step={field.step}
+                    min={field.min}
+                    maxLength={field.maxLength}
+                    defaultValue={value}
+                    error={error}
+                    hint={field.hint}
+                  />
+                );
+              })}
 
               {hasStatus ? (
                 <FormSelect
@@ -197,7 +275,7 @@ export function ReferenceCrud({
               ...extraColumns.map((label) => ({ label })),
               ...(hasDescription ? [{ label: 'Description' }] : []),
               ...(hasStatus ? [{ label: 'Status' }] : []),
-              ...(canEdit || canDelete || detailHref ? [{ label: 'Action' }] : []),
+              ...(canEdit || canDelete || detailRoute ? [{ label: 'Action' }] : []),
             ]}
             isEmpty={rows.length === 0}
             empty={`No ${title.toLowerCase()} found.`}
@@ -220,12 +298,12 @@ export function ReferenceCrud({
                   </Td>
                 ) : null}
 
-                {canEdit || canDelete || detailHref ? (
+                {canEdit || canDelete || detailRoute ? (
                   <Td>
                     <div className="flex items-center gap-2">
-                      {detailHref ? (
+                      {detailRoute ? (
                         <Link
-                          href={detailHref(row)}
+                          href={detailRoute.replace('{id}', String(row.id))}
                           className="rounded-lg px-2 py-1 text-theme-xs font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5"
                         >
                           View

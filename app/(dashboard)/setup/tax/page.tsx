@@ -7,7 +7,6 @@ import { ROUTES } from '@/lib/routes';
 import { PageHeader } from '@/components/erp/page';
 import { ReferenceCrud } from '@/components/erp/reference-crud';
 import { saveTax, deleteTax } from '../actions';
-import { RateField } from './fields';
 
 export const metadata: Metadata = { title: 'Tax' };
 
@@ -58,7 +57,19 @@ export default async function TaxPage({
         hasStatus={true}
         saveAction={saveTax}
         deleteAction={deleteTax}
-      extraFields={(row) => <RateField defaultRate={row ? rateById.get(row.id) ?? 0 : 0} />}
+        extraFields={[
+          {
+            name: 'rate',
+            label: 'Rate (%)',
+            kind: 'number',
+            step: '0.01',
+            min: '0',
+            defaultValue: '0',
+            values: Object.fromEntries(
+              rows.map((r) => [String(r.id), String(rateById.get(r.id) ?? 0)]),
+            ),
+          },
+        ]}
       />
     </>
   );

@@ -3,11 +3,10 @@
 import type { Metadata } from 'next';
 import { authorize, can } from '@/lib/auth/permissions';
 import { showRoomRepository } from '@/lib/setup/repositories';
-import { ROUTES, route } from '@/lib/routes';
+import { ROUTES } from '@/lib/routes';
 import { PageHeader } from '@/components/erp/page';
 import { ReferenceCrud } from '@/components/erp/reference-crud';
 import { saveShowRoom, deleteShowRoom } from '../../setup/actions';
-import { ContactFields } from './fields';
 
 export const metadata: Metadata = { title: 'Branch' };
 
@@ -54,10 +53,27 @@ export default async function BranchPage({
         canDelete={canDelete}
         hasDescription={false}
         hasStatus={true}
-        detailHref={(row) => route('showroom.show', { id: row.id })}
+        detailRoute={ROUTES['showroom.show']}
         saveAction={saveShowRoom}
         deleteAction={deleteShowRoom}
-      extraFields={() => <ContactFields />}
+        extraFields={[
+          {
+            name: 'email',
+            label: 'Email',
+            kind: 'email',
+            values: Object.fromEntries(rows.map((r) => [String(r.id), r.email ?? ''])),
+          },
+          {
+            name: 'phone',
+            label: 'Phone',
+            values: Object.fromEntries(rows.map((r) => [String(r.id), r.phone ?? ''])),
+          },
+          {
+            name: 'address',
+            label: 'Address',
+            values: Object.fromEntries(rows.map((r) => [String(r.id), r.address ?? ''])),
+          },
+        ]}
       />
     </>
   );
