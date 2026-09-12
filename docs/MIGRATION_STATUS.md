@@ -78,6 +78,18 @@ passes is in the git history; this document covers the state of the whole port.
 - Stock alert list can now convert the chosen SKUs into a prefilled purchase order, which is
   what `convertSuggest()` did.
 
+### Parity gaps closed by diffing the Blade forms against the ported forms
+
+- Sale: the invoice number field, "Save & Preview" and "Save & Send Mail", and the
+  auto-approval the controller applied when the `sale_approval` setting is on.
+- Quotation: the same mail and preview buttons, stamping `status` when the mail goes out.
+- Purchase: the bank `account_no` / `account_owner` on a payment, which the PHP stored.
+- Product: the per-combination `variation_file` image and `price_of_other_currency`.
+- Payroll: the role filter on the staff list that `staff_search_for_payroll` applied.
+- Sale and purchase history: the branch / warehouse (`house_id`) filter.
+
+Both mail flows carry a link to the print view instead of the dompdf attachment the PHP sent.
+
 ### Fixes found by running the app
 
 - **Reference screens returned 500.** `ReferenceCrud` took `extraFields` as a render function
@@ -117,6 +129,7 @@ from `software_erp.sql`, plus the usual static checks.
 | Seeded end-to-end | `node scripts/seed-demo.mjs` | products, contacts, purchase (approved + received), sale (approved + paid), conditional sale, 4 vouchers, transfer, adjustment |
 | Pages, as super admin | `npm run verify:http` | 202 routes, 0 server errors (177 rendered, 18 not-found for absent rows, 7 expected redirects) |
 | Pages, as staff with no permissions | `ROLE_ID=3 npm run verify:http` | 202 routes, 0 server errors (135 permission denials handled, 51 rendered) |
+| Pages, as staff holding every seeded permission | `ROLE_ID=3 npm run verify:http` | 202 routes, 0 server errors (120 rendered, 62 denied for permissions this dump does not seed) |
 
 The write scenarios assert the behaviour the PHP relied on: a receipt posts one Dr and one Cr
 leg; editing a voucher **replaces** its transactions and its cheque document instead of
