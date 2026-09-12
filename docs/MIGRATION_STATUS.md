@@ -149,7 +149,7 @@ from `SESSION_SECRET`.
 - Reference screens that the PHP served as modals (brand, category, model, unit type, variant,
   tax, country, currency, language, holiday, event, role, permission, CNF, printer) are inline
   forms here. That is a deliberate interface change, not a missing screen.
-- Audit note: `node scripts/audit-pages.mjs` reports 203 page files and 92 sidebar links, with
+- Audit note: `node scripts/audit-pages.mjs` reports 204 page files and 92 sidebar links, with
   every sidebar link resolving. Its "missing screen candidates" list is structural only; each
   remaining entry is one of the dead or inline cases above.
 
