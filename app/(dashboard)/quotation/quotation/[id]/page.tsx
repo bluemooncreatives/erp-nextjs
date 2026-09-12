@@ -53,6 +53,12 @@ export default async function QuotationDetailPage({
             >
               Print
             </Link>
+            <Link
+              href={route('quotation.order.pdf', { id: quotation.id })}
+              className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:text-gray-400 dark:ring-gray-700"
+            >
+              Export
+            </Link>
             {canConvert &&
             quotation.convertStatus !== QuotationConvertStatus.Converted ? (
               <form action={convertQuotation}>
