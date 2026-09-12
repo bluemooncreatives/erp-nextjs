@@ -15,6 +15,7 @@ import { createJournalVoucher } from '@/lib/accounting/journal';
 import { findContactAccount, receiveByAccounts } from '@/lib/accounting/accounts';
 import { MorphType } from '@/lib/db/morph';
 import { route } from '@/lib/routes';
+import { actionFormData } from '@/lib/forms';
 
 export type BalanceFormState = {
   error?: string;
@@ -40,6 +41,7 @@ export async function addCustomerBalance(
   _previous: BalanceFormState,
   formData: FormData,
 ): Promise<BalanceFormState> {
+  formData = actionFormData(_previous, formData);
   const contactId = Number(formData.get('contact_id'));
   const user = await authorize('voucher_recieve.store');
 
@@ -101,6 +103,7 @@ export async function addSupplierBalance(
   _previous: BalanceFormState,
   formData: FormData,
 ): Promise<BalanceFormState> {
+  formData = actionFormData(_previous, formData);
   const contactId = Number(formData.get('contact_id'));
   const user = await authorize('vouchers.store');
 
@@ -164,6 +167,7 @@ export async function subtractContactBalance(
   _previous: BalanceFormState,
   formData: FormData,
 ): Promise<BalanceFormState> {
+  formData = actionFormData(_previous, formData);
   const contactId = Number(formData.get('contact_id'));
   const user = await authorize('journal.store');
 

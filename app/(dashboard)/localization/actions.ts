@@ -12,6 +12,7 @@ import { generalSettings, languages } from '@/lib/db/schema';
 import { patchSession } from '@/lib/auth/session';
 import { ROUTES, route } from '@/lib/routes';
 import { saveTranslations } from '@/lib/i18n';
+import { actionFormData } from '@/lib/forms';
 
 export type LanguageFormState = {
   error?: string;
@@ -28,6 +29,7 @@ export async function saveLanguage(
   _prev: LanguageFormState,
   formData: FormData,
 ): Promise<LanguageFormState> {
+  formData = actionFormData(_prev, formData);
   const id = formData.get('id') ? Number(formData.get('id')) : null;
   const user = await authorize(id ? 'languages.edit' : 'languages.store');
 

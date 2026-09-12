@@ -23,6 +23,7 @@ import {
   wareHouseRepository,
 } from '@/lib/setup/repositories';
 import type { ReferenceFormState } from '@/components/erp/reference-crud';
+import { actionFormData } from '@/lib/forms';
 
 function read(formData: FormData) {
   return {
@@ -43,6 +44,7 @@ export async function saveShowRoom(
   _prev: ReferenceFormState,
   formData: FormData,
 ): Promise<ReferenceFormState> {
+  formData = actionFormData(_prev, formData);
   const data = read(formData);
   const fieldErrors = requireName(data.name);
   if (fieldErrors) return { fieldErrors };
@@ -92,6 +94,7 @@ export async function saveWareHouse(
   _prev: ReferenceFormState,
   formData: FormData,
 ): Promise<ReferenceFormState> {
+  formData = actionFormData(_prev, formData);
   const data = read(formData);
   const fieldErrors = requireName(data.name);
   if (fieldErrors) return { fieldErrors };
@@ -140,6 +143,7 @@ export async function saveTax(
   _prev: ReferenceFormState,
   formData: FormData,
 ): Promise<ReferenceFormState> {
+  formData = actionFormData(_prev, formData);
   const data = read(formData);
   const fieldErrors = requireName(data.name);
   if (fieldErrors) return { fieldErrors };
@@ -181,6 +185,7 @@ export async function saveIntroPrefix(
   _prev: ReferenceFormState,
   formData: FormData,
 ): Promise<ReferenceFormState> {
+  formData = actionFormData(_prev, formData);
   const id = formData.get('id') ? Number(formData.get('id')) : null;
   const prefix = String(formData.get('name') ?? '').trim();
   const title = String(formData.get('description') ?? '').trim();
@@ -218,6 +223,7 @@ export async function saveCurrency(
   _prev: ReferenceFormState,
   formData: FormData,
 ): Promise<ReferenceFormState> {
+  formData = actionFormData(_prev, formData);
   const id = formData.get('id') ? Number(formData.get('id')) : null;
   const name = String(formData.get('name') ?? '').trim();
   const code = String(formData.get('code') ?? '').trim();
@@ -259,6 +265,7 @@ export async function saveCountry(
   _prev: ReferenceFormState,
   formData: FormData,
 ): Promise<ReferenceFormState> {
+  formData = actionFormData(_prev, formData);
   const id = formData.get('id') ? Number(formData.get('id')) : null;
   const name = String(formData.get('name') ?? '').trim();
   if (!name) return { fieldErrors: { name: 'The name field is required.' } };
@@ -302,6 +309,7 @@ export async function saveDepartment(
   _prev: ReferenceFormState,
   formData: FormData,
 ): Promise<ReferenceFormState> {
+  formData = actionFormData(_prev, formData);
   const data = read(formData);
   const fieldErrors = requireName(data.name);
   if (fieldErrors) return { fieldErrors };

@@ -41,6 +41,7 @@ import {
   findProject,
 } from '@/lib/project/repository';
 import { ROUTES, route } from '@/lib/routes';
+import { actionFormData } from '@/lib/forms';
 
 export type ProjectFormState = {
   error?: string;
@@ -70,6 +71,7 @@ export async function storeWorkspace(
   _prev: ProjectFormState,
   formData: FormData,
 ): Promise<ProjectFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await requireUser();
   const name = str(formData, 'name');
   if (!name) return { fieldErrors: { name: 'The name field is required.' } };
@@ -100,6 +102,7 @@ export async function storeTeam(
   _prev: ProjectFormState,
   formData: FormData,
 ): Promise<ProjectFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await requireUser();
   const name = str(formData, 'name');
   if (!name) return { fieldErrors: { name: 'The name field is required.' } };
@@ -130,6 +133,7 @@ export async function saveTeam(
   _prev: ProjectFormState,
   formData: FormData,
 ): Promise<ProjectFormState> {
+  formData = actionFormData(_prev, formData);
   await requireUser();
   const id = Number(formData.get('id'));
 
@@ -147,6 +151,7 @@ export async function inviteToTeam(
   _prev: ProjectFormState,
   formData: FormData,
 ): Promise<ProjectFormState> {
+  formData = actionFormData(_prev, formData);
   await requireUser();
   const teamId = Number(formData.get('team_id'));
 
@@ -175,6 +180,7 @@ export async function storeProject(
   _prev: ProjectFormState,
   formData: FormData,
 ): Promise<ProjectFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await requireUser();
   const name = str(formData, 'name');
   if (!name) return { fieldErrors: { name: 'The name field is required.' } };
@@ -206,6 +212,7 @@ export async function saveProject(
   _prev: ProjectFormState,
   formData: FormData,
 ): Promise<ProjectFormState> {
+  formData = actionFormData(_prev, formData);
   await requireUser();
   const id = Number(formData.get('project_id'));
 
@@ -226,6 +233,7 @@ export async function shareProjectAction(
   _prev: ProjectFormState,
   formData: FormData,
 ): Promise<ProjectFormState> {
+  formData = actionFormData(_prev, formData);
   await requireUser();
   const projectId = Number(formData.get('project_id'));
 

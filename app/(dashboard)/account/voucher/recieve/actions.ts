@@ -11,6 +11,7 @@ import { MorphType } from '@/lib/db/morph';
 import { successLog, errorLog } from '@/lib/activity-log';
 import { ROUTES } from '@/lib/routes';
 import type { AccountFormState } from '../../actions';
+import { actionFormData } from '@/lib/forms';
 
 export async function loadReceiptInvoices(accountId: number) {
   await authorize('voucher_recieve.store');
@@ -24,6 +25,7 @@ export async function saveReceiptVoucher(
   _previous: AccountFormState,
   formData: FormData,
 ): Promise<AccountFormState> {
+  formData = actionFormData(_previous, formData);
   const id = Number(formData.get('id') || 0);
   const user = await authorize(id ? 'voucher_recieve.edit' : 'voucher_recieve.store');
   const text = (key: string) => String(formData.get(key) ?? '').trim();

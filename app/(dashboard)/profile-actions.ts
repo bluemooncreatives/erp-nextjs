@@ -13,6 +13,7 @@ import { staffs, users } from '@/lib/db/schema';
 import { hashPassword, verifyPassword } from '@/lib/auth/password';
 import { saveAvatar, fileFrom } from '@/lib/uploads';
 import { ROUTES } from '@/lib/routes';
+import { actionFormData } from '@/lib/forms';
 
 export type ProfileFormState = {
   error?: string;
@@ -29,6 +30,7 @@ export async function updateProfile(
   _prev: ProfileFormState,
   formData: FormData,
 ): Promise<ProfileFormState> {
+  formData = actionFormData(_prev, formData);
   const actor = await requireUser();
 
   const name = str(formData, 'name');
@@ -130,6 +132,7 @@ export async function changePassword(
   _prev: ProfileFormState,
   formData: FormData,
 ): Promise<ProfileFormState> {
+  formData = actionFormData(_prev, formData);
   const actor = await requireUser();
 
   const currentPassword = str(formData, 'current_password');

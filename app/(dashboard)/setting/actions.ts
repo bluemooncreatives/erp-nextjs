@@ -21,6 +21,7 @@ import { fileFrom, saveSettingsImage, deleteStoredFile } from '@/lib/uploads';
 import { overwriteEnvFile } from '@/lib/env-file';
 import { sendMail } from '@/lib/mail';
 import { sendSms } from '@/lib/sms';
+import { actionFormData } from '@/lib/forms';
 
 export type SettingFormState = {
   error?: string;
@@ -58,6 +59,7 @@ export async function updateGeneralSettings(
   _prev: SettingFormState,
   formData: FormData,
 ): Promise<SettingFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('company_information_update');
   const isCompanyForm = formData.get('company') != null;
 
@@ -147,6 +149,7 @@ export async function updateInvoiceSettings(
   _prev: SettingFormState,
   formData: FormData,
 ): Promise<SettingFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('invoice_settings_update');
   const setting = await settingRow();
   if (!setting) return { error: 'Something Went Wrong' };
@@ -179,6 +182,7 @@ export async function updateSmtpCredentials(
   _prev: SettingFormState,
   formData: FormData,
 ): Promise<SettingFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('smtp_gateway_credentials_update');
 
   const protocol = str(formData, 'mail_protocol');
@@ -222,6 +226,7 @@ export async function updateSmsCredentials(
   _prev: SettingFormState,
   formData: FormData,
 ): Promise<SettingFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('sms_gateway_credentials_update');
 
   const gatewayId = num(formData, 'sms_gateway_id');
@@ -257,6 +262,7 @@ export async function sendTestMailAction(
   _prev: SettingFormState,
   formData: FormData,
 ): Promise<SettingFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('test_mail.send');
   const to = str(formData, 'email');
   const content = str(formData, 'content');
@@ -279,6 +285,7 @@ export async function sendTestSmsAction(
   _prev: SettingFormState,
   formData: FormData,
 ): Promise<SettingFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('sms_send_demo');
   const to = str(formData, 'number');
   const message = str(formData, 'message');
@@ -303,6 +310,7 @@ export async function updateEmailTemplate(
   _prev: SettingFormState,
   formData: FormData,
 ): Promise<SettingFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('template_update');
   const type = str(formData, 'name');
   if (!type) return { error: 'Something Went Wrong' };
@@ -336,6 +344,7 @@ export async function updateMailFooter(
   _prev: SettingFormState,
   formData: FormData,
 ): Promise<SettingFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('general_setting_footer_update');
   const setting = await settingRow();
   if (!setting) return { error: 'Something Went Wrong' };
@@ -404,6 +413,7 @@ export async function updatePaymentGateway(
   _prev: SettingFormState,
   formData: FormData,
 ): Promise<SettingFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('update-payment-method-settings');
   const id = Number(formData.get('id'));
 
@@ -434,6 +444,7 @@ export async function updateGuestBackground(
   _prev: SettingFormState,
   formData: FormData,
 ): Promise<SettingFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('guest-background');
   const setting = await settingRow();
   if (!setting) return { error: 'Something Went Wrong' };
@@ -462,6 +473,7 @@ export async function changeDefaultView(
   _prev: SettingFormState,
   formData: FormData,
 ): Promise<SettingFormState> {
+  formData = actionFormData(_prev, formData);
   await authorize('themes.change_view');
   const view = String(formData.get('view') ?? '');
   if (view !== 'normal' && view !== 'compact') {

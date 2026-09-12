@@ -26,6 +26,7 @@ import {
   sendStockTransfer,
   setTransferStatus,
 } from '@/lib/inventory/transfers';
+import { actionFormData } from '@/lib/forms';
 
 export type InventoryFormState = {
   error?: string;
@@ -46,6 +47,7 @@ export async function storeStockTransfer(
   _prev: InventoryFormState,
   formData: FormData,
 ): Promise<InventoryFormState> {
+  formData = actionFormData(_prev, formData);
   return saveTransferForm(null, formData);
 }
 
@@ -126,6 +128,7 @@ export async function storeStockAdjustment(
   _prev: InventoryFormState,
   formData: FormData,
 ): Promise<InventoryFormState> {
+  formData = actionFormData(_prev, formData);
   return saveAdjustmentForm(null, formData);
 }
 

@@ -20,6 +20,7 @@ import { transaction as runInTransaction } from '@/lib/db/client';
 import { MorphType } from '@/lib/db/morph';
 import { today } from '@/lib/php-date';
 import { route } from '@/lib/routes';
+import { actionFormData } from '@/lib/forms';
 
 export type OpeningBalanceState = {
   error?: string;
@@ -31,6 +32,7 @@ export async function storeShowroomOpeningBalance(
   _previous: OpeningBalanceState,
   formData: FormData,
 ): Promise<OpeningBalanceState> {
+  formData = actionFormData(_previous, formData);
   const showroomId = Number(formData.get('showroom_id'));
   const amount = Number(formData.get('opening_balance'));
   const type = String(formData.get('type') ?? 'showroom').trim() || 'showroom';

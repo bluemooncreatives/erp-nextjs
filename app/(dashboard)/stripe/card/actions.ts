@@ -9,6 +9,7 @@ import { errorLog, successLog } from '@/lib/activity-log';
 import { createStripeCharge, recordGatewayPayment } from '@/lib/payment/gateways';
 import { findSale } from '@/lib/sale/queries';
 import { ROUTES } from '@/lib/routes';
+import { actionFormData } from '@/lib/forms';
 
 export type StripeFormState = { error?: string };
 
@@ -16,6 +17,7 @@ export async function payWithStripe(
   _previous: StripeFormState,
   formData: FormData,
 ): Promise<StripeFormState> {
+  formData = actionFormData(_previous, formData);
   const user = await requireUser();
 
   const token = String(formData.get('stripeToken') ?? '');

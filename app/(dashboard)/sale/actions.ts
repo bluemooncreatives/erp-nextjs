@@ -31,6 +31,7 @@ import { findSale } from '@/lib/sale/queries';
 import { sendSaleMail } from '@/lib/mail';
 import { isEnabled } from '@/lib/business-settings';
 import { config } from '@/lib/config';
+import { actionFormData } from '@/lib/forms';
 
 export type SaleFormState = {
   error?: string;
@@ -168,6 +169,7 @@ export async function storeSale(
   _prev: SaleFormState,
   formData: FormData,
 ): Promise<SaleFormState> {
+  formData = actionFormData(_prev, formData);
   const input = readSaleInput(formData);
   const fieldErrors = validate(input);
   if (fieldErrors) return { fieldErrors };
@@ -250,6 +252,7 @@ export async function saveSale(
   _prev: SaleFormState,
   formData: FormData,
 ): Promise<SaleFormState> {
+  formData = actionFormData(_prev, formData);
   const saleId = Number(formData.get('id'));
   if (!Number.isFinite(saleId)) return { error: 'Missing sale id.' };
 
@@ -280,6 +283,7 @@ export async function addSalePayment(
   _prev: SaleFormState,
   formData: FormData,
 ): Promise<SaleFormState> {
+  formData = actionFormData(_prev, formData);
   const saleId = Number(formData.get('sale_id'));
   if (!Number.isFinite(saleId)) return { error: 'Missing sale id.' };
 
@@ -323,6 +327,7 @@ export async function storeSaleReturn(
   _prev: SaleFormState,
   formData: FormData,
 ): Promise<SaleFormState> {
+  formData = actionFormData(_prev, formData);
   const saleId = Number(formData.get('sale_id'));
   if (!Number.isFinite(saleId)) return { error: 'Missing sale id.' };
 
@@ -386,6 +391,7 @@ export async function storeShipping(
   _prev: SaleFormState,
   formData: FormData,
 ): Promise<SaleFormState> {
+  formData = actionFormData(_prev, formData);
   const saleId = Number(formData.get('sale_id'));
   const user = await authorize('store.shipping');
 

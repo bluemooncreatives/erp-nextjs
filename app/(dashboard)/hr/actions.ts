@@ -21,6 +21,7 @@ import {
   updateStaff,
   type StaffInput,
 } from '@/lib/hr/staff';
+import { actionFormData } from '@/lib/forms';
 
 export type HrFormState = {
   error?: string;
@@ -95,6 +96,7 @@ export async function storeStaff(
   _prev: HrFormState,
   formData: FormData,
 ): Promise<HrFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('staffs.store');
   const input = await readStaffInput(formData);
 
@@ -117,6 +119,7 @@ export async function updateStaffAction(
   _prev: HrFormState,
   formData: FormData,
 ): Promise<HrFormState> {
+  formData = actionFormData(_prev, formData);
   const id = Number(formData.get('id'));
   const user = await authorize('staffs.edit');
   const input = await readStaffInput(formData);
@@ -160,6 +163,7 @@ export async function uploadStaffDocument(
   _prev: HrFormState,
   formData: FormData,
 ): Promise<HrFormState> {
+  formData = actionFormData(_prev, formData);
   const staffId = Number(formData.get('staff_id'));
   const user = await authorize('staffs.edit');
 
@@ -190,6 +194,7 @@ export async function saveRole(
   _prev: HrFormState,
   formData: FormData,
 ): Promise<HrFormState> {
+  formData = actionFormData(_prev, formData);
   const id = formData.get('id') ? Number(formData.get('id')) : null;
   const name = String(formData.get('name') ?? '').trim();
   const type = String(formData.get('type') ?? 'regular_user');

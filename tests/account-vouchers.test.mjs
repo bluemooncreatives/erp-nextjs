@@ -51,6 +51,7 @@ function fixture({ approved = false, existingType = 'voucher_payment', denied = 
     },
     '@/lib/activity-log': { successLog: async () => {}, errorLog: async () => {} },
     '@/lib/routes': { ROUTES: { 'vouchers.index': '/payment', 'journal.index': '/journal', 'contra.index': '/contra' } },
+    '@/lib/forms': { actionFormData: (previous, formData) => (formData instanceof FormData ? formData : previous) },
     '@/lib/accounting/vouchers': {
       VoucherType,
       createVoucher: async (data) => calls.writes.push({ operation: 'create', data }),

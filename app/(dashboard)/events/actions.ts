@@ -19,6 +19,7 @@ import { sendNotification } from '@/lib/notifications';
 import { MorphType } from '@/lib/db/morph';
 import { saveImage, fileFrom } from '@/lib/uploads';
 import { ROUTES } from '@/lib/routes';
+import { actionFormData } from '@/lib/forms';
 
 export type EventFormState = {
   error?: string;
@@ -42,6 +43,7 @@ export async function storeEvent(
   _prev: EventFormState,
   formData: FormData,
 ): Promise<EventFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await requireUser();
 
   const fieldErrors = validate(formData);
@@ -88,6 +90,7 @@ export async function saveEvent(
   _prev: EventFormState,
   formData: FormData,
 ): Promise<EventFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await requireUser();
   const id = Number(formData.get('id'));
 
@@ -132,6 +135,7 @@ export async function storeToDo(
   _prev: EventFormState,
   formData: FormData,
 ): Promise<EventFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await requireUser();
 
   const fieldErrors: Record<string, string> = {};

@@ -14,6 +14,7 @@ import {
 import { isEnabled } from '@/lib/business-settings';
 import { toDateString, today } from '@/lib/php-date';
 import { ROUTES } from '@/lib/routes';
+import { actionFormData } from '@/lib/forms';
 
 export type TransferFormState = {
   error?: string;
@@ -80,6 +81,7 @@ export async function storeTransfer(
   _prev: TransferFormState,
   formData: FormData,
 ): Promise<TransferFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('transfer_showroom.store');
 
   const input = await inputFrom(formData, 'credit', user.id);
@@ -102,6 +104,7 @@ export async function saveTransfer(
   _prev: TransferFormState,
   formData: FormData,
 ): Promise<TransferFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('transfer_showroom.update');
   const id = Number(formData.get('id'));
 

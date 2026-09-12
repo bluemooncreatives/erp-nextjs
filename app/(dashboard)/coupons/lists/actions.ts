@@ -8,6 +8,7 @@ import { authorize } from '@/lib/auth/permissions';
 import { errorLog, successLog } from '@/lib/activity-log';
 import { ROUTES } from '@/lib/routes';
 import { couponCodeTaken, createCoupon } from '@/lib/product/coupons';
+import { actionFormData } from '@/lib/forms';
 
 export type CouponFormState = {
   error?: string;
@@ -19,6 +20,7 @@ export async function storeCoupon(
   _previous: CouponFormState,
   formData: FormData,
 ): Promise<CouponFormState> {
+  formData = actionFormData(_previous, formData);
   const text = (key: string) => String(formData.get(key) ?? '').trim();
 
   const code = text('code');

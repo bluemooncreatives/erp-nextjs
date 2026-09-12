@@ -28,6 +28,7 @@ import {
   type PayrollLine,
 } from '@/lib/hr/leave';
 import type { ReferenceFormState } from '@/components/erp/reference-crud';
+import { actionFormData } from '@/lib/forms';
 
 export type LeaveFormState = {
   error?: string;
@@ -54,6 +55,7 @@ export async function saveLeaveType(
   _prev: ReferenceFormState,
   formData: FormData,
 ): Promise<ReferenceFormState> {
+  formData = actionFormData(_prev, formData);
   const id = formData.get('id') ? Number(formData.get('id')) : null;
   const name = String(formData.get('name') ?? '').trim();
   if (!name) return { fieldErrors: { name: 'The name field is required.' } };
@@ -89,6 +91,7 @@ export async function storeLeaveDefine(
   _prev: LeaveFormState,
   formData: FormData,
 ): Promise<LeaveFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('leave_define.store');
 
   const roleId = num(formData, 'role_id');
@@ -153,6 +156,7 @@ export async function storeLeaveApplication(
   _prev: LeaveFormState,
   formData: FormData,
 ): Promise<LeaveFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await requireUser();
   const input = await readLeaveInput(formData, user.id);
 
@@ -181,6 +185,7 @@ export async function updateLeaveApplicationAction(
   _prev: LeaveFormState,
   formData: FormData,
 ): Promise<LeaveFormState> {
+  formData = actionFormData(_prev, formData);
   const id = Number(formData.get('id'));
   const user = await requireUser();
   const input = await readLeaveInput(formData, user.id);
@@ -226,6 +231,7 @@ export async function storeAttendance(
   _prev: LeaveFormState,
   formData: FormData,
 ): Promise<LeaveFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('attendances.store');
 
   const date = String(formData.get('date') ?? '');
@@ -261,6 +267,7 @@ export async function storeHoliday(
   _prev: LeaveFormState,
   formData: FormData,
 ): Promise<LeaveFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('holidays.store');
 
   const name = String(formData.get('name') ?? '').trim();
@@ -303,6 +310,7 @@ export async function storePayroll(
   _prev: LeaveFormState,
   formData: FormData,
 ): Promise<LeaveFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('save_payroll');
 
   const staffId = num(formData, 'staff_id');

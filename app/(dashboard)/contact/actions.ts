@@ -16,6 +16,7 @@ import {
   type ContactInput,
 } from '@/lib/contact/repository';
 import { generalSetting } from '@/lib/settings';
+import { actionFormData } from '@/lib/forms';
 
 export type ContactFormState = {
   error?: string;
@@ -93,6 +94,7 @@ export async function storeContact(
   _prev: ContactFormState,
   formData: FormData,
 ): Promise<ContactFormState> {
+  formData = actionFormData(_prev, formData);
   const fieldErrors = await validate(formData, false);
   if (fieldErrors) return { fieldErrors };
 
@@ -115,6 +117,7 @@ export async function updateContactAction(
   _prev: ContactFormState,
   formData: FormData,
 ): Promise<ContactFormState> {
+  formData = actionFormData(_prev, formData);
   const id = Number(formData.get('id'));
   if (!Number.isFinite(id)) return { error: 'Missing contact id.' };
 

@@ -20,6 +20,7 @@ import {
   importStaff,
   importUnitTypes,
 } from '@/lib/import/imports';
+import { actionFormData } from '@/lib/forms';
 
 export type ImportFormState = { error?: string; success?: string };
 
@@ -72,6 +73,7 @@ export async function uploadBrandCsv(
   _previous: ImportFormState,
   formData: FormData,
 ): Promise<ImportFormState> {
+  formData = actionFormData(_previous, formData);
   return run('brand.csv_upload_store', formData, ROUTES['brand.index'], importBrands);
 }
 
@@ -79,6 +81,7 @@ export async function uploadModelCsv(
   _previous: ImportFormState,
   formData: FormData,
 ): Promise<ImportFormState> {
+  formData = actionFormData(_previous, formData);
   return run('model.csv_upload_store', formData, ROUTES['model.index'], importModels);
 }
 
@@ -86,6 +89,7 @@ export async function uploadUnitTypeCsv(
   _previous: ImportFormState,
   formData: FormData,
 ): Promise<ImportFormState> {
+  formData = actionFormData(_previous, formData);
   return run(
     'unit_type.csv_upload_store',
     formData,
@@ -98,6 +102,7 @@ export async function uploadContactCsv(
   _previous: ImportFormState,
   formData: FormData,
 ): Promise<ImportFormState> {
+  formData = actionFormData(_previous, formData);
   return run(
     'contact_csv_upload_store',
     formData,
@@ -110,6 +115,7 @@ export async function uploadBankAccountCsv(
   _previous: ImportFormState,
   formData: FormData,
 ): Promise<ImportFormState> {
+  formData = actionFormData(_previous, formData);
   return run(
     'bank.account.csv_upload_store',
     formData,
@@ -122,6 +128,7 @@ export async function uploadStaffCsv(
   _previous: ImportFormState,
   formData: FormData,
 ): Promise<ImportFormState> {
+  formData = actionFormData(_previous, formData);
   return run('staffs.csv_upload_store', formData, ROUTES['staffs.index'], importStaff);
 }
 
@@ -129,6 +136,7 @@ export async function uploadProductCsv(
   _previous: ImportFormState,
   formData: FormData,
 ): Promise<ImportFormState> {
+  formData = actionFormData(_previous, formData);
   const session = await getSession();
   const showroomId = session?.showroomId ?? 1;
 

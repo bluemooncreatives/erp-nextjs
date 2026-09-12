@@ -8,6 +8,7 @@ import { errorLog, successLog } from '@/lib/activity-log';
 import { createBackup, deleteBackup, importDump } from '@/lib/backup';
 import { fileFrom } from '@/lib/uploads';
 import { ROUTES } from '@/lib/routes';
+import { actionFormData } from '@/lib/forms';
 
 export type BackupFormState = { error?: string; success?: string };
 
@@ -47,6 +48,7 @@ export async function importBackup(
   _prev: BackupFormState,
   formData: FormData,
 ): Promise<BackupFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('backup.import');
 
   const file = fileFrom(formData, 'db_file');

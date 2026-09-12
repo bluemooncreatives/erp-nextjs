@@ -14,6 +14,7 @@ import {
   type LoanInput,
 } from '@/lib/hr/loans';
 import { ROUTES } from '@/lib/routes';
+import { actionFormData } from '@/lib/forms';
 
 export type LoanFormState = {
   error?: string;
@@ -60,6 +61,7 @@ export async function storeLoan(
   _prev: LoanFormState,
   formData: FormData,
 ): Promise<LoanFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await requireUser();
 
   const fieldErrors = validate(formData);
@@ -81,6 +83,7 @@ export async function saveLoan(
   _prev: LoanFormState,
   formData: FormData,
 ): Promise<LoanFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await requireUser();
   const id = Number(formData.get('id'));
 

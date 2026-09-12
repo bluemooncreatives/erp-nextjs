@@ -23,6 +23,7 @@ import {
   type PurchaseLineInput,
   type PurchasePaymentInput,
 } from '@/lib/purchase/repository';
+import { actionFormData } from '@/lib/forms';
 
 export type PurchaseFormState = {
   error?: string;
@@ -97,6 +98,7 @@ export async function storePurchaseOrder(
   _prev: PurchaseFormState,
   formData: FormData,
 ): Promise<PurchaseFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('purchase_order.store');
 
   const lines = readLines(formData);
@@ -162,6 +164,7 @@ export async function savePurchaseOrder(
   _prev: PurchaseFormState,
   formData: FormData,
 ): Promise<PurchaseFormState> {
+  formData = actionFormData(_prev, formData);
   const orderId = Number(formData.get('id'));
   if (!Number.isFinite(orderId)) return { error: 'Missing purchase order id.' };
 
@@ -240,6 +243,7 @@ export async function receiveStockAction(
   _prev: PurchaseFormState,
   formData: FormData,
 ): Promise<PurchaseFormState> {
+  formData = actionFormData(_prev, formData);
   const orderId = Number(formData.get('purchase_id'));
   const user = await authorize('purchase.add.stock');
 
@@ -271,6 +275,7 @@ export async function storeOpeningStock(
   _prev: PurchaseFormState,
   formData: FormData,
 ): Promise<PurchaseFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('add_opening_stock_create');
 
   const fieldErrors: Record<string, string> = {};
@@ -307,6 +312,7 @@ export async function addPurchasePayment(
   _prev: PurchaseFormState,
   formData: FormData,
 ): Promise<PurchaseFormState> {
+  formData = actionFormData(_prev, formData);
   const orderId = Number(formData.get('purchase_id'));
   const user = await authorize('purchase.payment');
 
@@ -331,6 +337,7 @@ export async function storePurchaseReturn(
   _prev: PurchaseFormState,
   formData: FormData,
 ): Promise<PurchaseFormState> {
+  formData = actionFormData(_prev, formData);
   const orderId = Number(formData.get('purchase_id'));
   const user = await authorize('purchase.return.index');
 

@@ -20,6 +20,7 @@ import {
 import { quotationToSale } from '@/lib/sale/repository';
 import { sendQuotationMail } from '@/lib/mail';
 import { config } from '@/lib/config';
+import { actionFormData } from '@/lib/forms';
 
 export type QuotationFormState = {
   error?: string;
@@ -125,6 +126,7 @@ export async function storeQuotation(
   _prev: QuotationFormState,
   formData: FormData,
 ): Promise<QuotationFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('quotation.store');
   const input = await readInput(formData);
 
@@ -182,6 +184,7 @@ export async function updateQuotationAction(
   _prev: QuotationFormState,
   formData: FormData,
 ): Promise<QuotationFormState> {
+  formData = actionFormData(_prev, formData);
   const id = Number(formData.get('id'));
   const user = await authorize('quotation.edit');
   const input = await readInput(formData);

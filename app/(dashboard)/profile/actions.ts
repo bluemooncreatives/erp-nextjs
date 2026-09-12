@@ -12,6 +12,7 @@ import { contacts, users } from '@/lib/db/schema';
 import { hashPassword } from '@/lib/auth/password';
 import { saveAvatar, fileFrom, deleteStoredFile } from '@/lib/uploads';
 import { ROUTES } from '@/lib/routes';
+import { actionFormData } from '@/lib/forms';
 
 export type ContactProfileState = {
   error?: string;
@@ -27,6 +28,7 @@ export async function updateContactProfile(
   _prev: ContactProfileState,
   formData: FormData,
 ): Promise<ContactProfileState> {
+  formData = actionFormData(_prev, formData);
   const user = await requireUser();
   const contactId = Number(user.contactId);
   if (!contactId) return { error: 'Something Went Wrong' };

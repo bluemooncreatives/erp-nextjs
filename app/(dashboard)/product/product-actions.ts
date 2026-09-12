@@ -23,6 +23,7 @@ import {
   type ProductInput,
   type ProductTypeValue,
 } from '@/lib/product/products';
+import { actionFormData } from '@/lib/forms';
 
 export type ProductFormState = {
   error?: string;
@@ -153,6 +154,7 @@ export async function storeProduct(
   _prev: ProductFormState,
   formData: FormData,
 ): Promise<ProductFormState> {
+  formData = actionFormData(_prev, formData);
   const fieldErrors = validate(formData);
   if (fieldErrors) return { fieldErrors };
 
@@ -203,6 +205,7 @@ export async function updateProductAction(
   _prev: ProductFormState,
   formData: FormData,
 ): Promise<ProductFormState> {
+  formData = actionFormData(_prev, formData);
   const id = Number(formData.get('id'));
   if (!Number.isFinite(id)) return { error: 'Missing product id.' };
 

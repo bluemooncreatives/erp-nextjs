@@ -22,6 +22,7 @@ import { accountBalances } from '@/lib/accounting/reports';
 import { AccountCode, accountIdByCode } from '@/lib/accounting/accounts';
 import { toDateString, today } from '@/lib/php-date';
 import { ROUTES } from '@/lib/routes';
+import { actionFormData } from '@/lib/forms';
 
 export type OpeningBalanceFormState = {
   error?: string;
@@ -43,6 +44,7 @@ export async function storeOpeningBalance(
   _prev: OpeningBalanceFormState,
   formData: FormData,
 ): Promise<OpeningBalanceFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('openning_balance.store');
 
   const fieldErrors = validate(formData);
@@ -77,6 +79,7 @@ export async function updateOpeningBalances(
   _prev: OpeningBalanceFormState,
   formData: FormData,
 ): Promise<OpeningBalanceFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('openning_balance.update');
   const id = Number(formData.get('id'));
 

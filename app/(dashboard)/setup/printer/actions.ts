@@ -9,6 +9,7 @@ import { errorLog, successLog } from '@/lib/activity-log';
 import { ROUTES } from '@/lib/routes';
 import { createPrinter, deletePrinter, updatePrinter } from '@/lib/setup/printers';
 import type { ReferenceFormState } from '@/components/erp/reference-crud';
+import { actionFormData } from '@/lib/forms';
 
 function read(formData: FormData) {
   const text = (key: string) => String(formData.get(key) ?? '').trim();
@@ -27,6 +28,7 @@ export async function savePrinter(
   _previous: ReferenceFormState,
   formData: FormData,
 ): Promise<ReferenceFormState> {
+  formData = actionFormData(_previous, formData);
   const data = read(formData);
 
   const fieldErrors: Record<string, string> = {};

@@ -11,6 +11,7 @@ import { authorize } from '@/lib/auth/permissions';
 import { errorLog, successLog } from '@/lib/activity-log';
 import { ROUTES } from '@/lib/routes';
 import { latestShippingBySale } from '@/lib/sale/queries';
+import { actionFormData } from '@/lib/forms';
 
 export type ReceiveOrderState = {
   error?: string;
@@ -22,6 +23,7 @@ export async function receiveSaleOrder(
   _previous: ReceiveOrderState,
   formData: FormData,
 ): Promise<ReceiveOrderState> {
+  formData = actionFormData(_previous, formData);
   const saleId = Number(formData.get('id'));
   const name = String(formData.get('name') ?? '').trim();
   const date = String(formData.get('delivery_date') ?? '').trim();

@@ -39,6 +39,7 @@ import { activeAccounts, createJournalVoucher, updateJournalVoucher as updateJou
 import { isEnabled } from '@/lib/business-settings';
 import { openAccountingPeriod } from '@/lib/accounting/periods';
 import { createIncome, updateIncome, incomeAccounts, type IncomeInput } from '@/lib/accounting/income';
+import { actionFormData } from '@/lib/forms';
 
 export type AccountFormState = {
   error?: string;
@@ -119,6 +120,7 @@ export async function storeExpense(
   _prev: AccountFormState,
   formData: FormData,
 ): Promise<AccountFormState> {
+  formData = actionFormData(_prev, formData);
   const user = await authorize('expenses.store');
   const input = await readExpenseInput(formData);
   input.paymentType = 'contra_voucher';
@@ -145,6 +147,7 @@ export async function updateExpenseAction(
   _prev: AccountFormState,
   formData: FormData,
 ): Promise<AccountFormState> {
+  formData = actionFormData(_prev, formData);
   const id = Number(formData.get('id'));
   const user = await authorize('expenses.edit');
 
@@ -184,6 +187,7 @@ export async function storeIncome(
   _prev: AccountFormState,
   formData: FormData,
 ): Promise<AccountFormState> {
+  formData = actionFormData(_prev, formData);
   return saveIncomeForm(formData, false);
 }
 
@@ -191,6 +195,7 @@ export async function updateIncomeAction(
   _prev: AccountFormState,
   formData: FormData,
 ): Promise<AccountFormState> {
+  formData = actionFormData(_prev, formData);
   return saveIncomeForm(formData, true);
 }
 
@@ -233,6 +238,7 @@ export async function saveBankAccount(
   _prev: AccountFormState,
   formData: FormData,
 ): Promise<AccountFormState> {
+  formData = actionFormData(_prev, formData);
   const id = formData.get('id') ? Number(formData.get('id')) : null;
   const bankName = String(formData.get('bank_name') ?? '').trim();
   if (!bankName) return { fieldErrors: { bank_name: 'The bank name is required.' } };
@@ -277,6 +283,7 @@ export async function storeVoucher(
   _prev: AccountFormState,
   formData: FormData,
 ): Promise<AccountFormState> {
+  formData = actionFormData(_prev, formData);
   return savePaymentVoucher(formData, false);
 }
 
@@ -284,6 +291,7 @@ export async function updatePaymentVoucher(
   _prev: AccountFormState,
   formData: FormData,
 ): Promise<AccountFormState> {
+  formData = actionFormData(_prev, formData);
   return savePaymentVoucher(formData, true);
 }
 
@@ -354,6 +362,7 @@ export async function storeJournalVoucher(
   _prev: AccountFormState,
   formData: FormData,
 ): Promise<AccountFormState> {
+  formData = actionFormData(_prev, formData);
   return saveCompoundVoucher(formData, 'journal', false);
 }
 
@@ -462,6 +471,7 @@ export async function saveChartAccount(
   _prev: AccountFormState,
   formData: FormData,
 ): Promise<AccountFormState> {
+  formData = actionFormData(_prev, formData);
   const id = formData.get('id') ? Number(formData.get('id')) : null;
   const name = String(formData.get('name') ?? '').trim();
   const type = str(formData, 'type');

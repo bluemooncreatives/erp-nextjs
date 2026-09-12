@@ -28,6 +28,7 @@ import {
   variantRepository,
 } from '@/lib/product/repositories';
 import type { ReferenceFormState } from '@/components/erp/reference-crud';
+import { actionFormData } from '@/lib/forms';
 
 function readCommon(formData: FormData) {
   return {
@@ -51,6 +52,7 @@ export async function saveBrand(
   _prev: ReferenceFormState,
   formData: FormData,
 ): Promise<ReferenceFormState> {
+  formData = actionFormData(_prev, formData);
   const data = readCommon(formData);
   const fieldErrors = validateName(data.name);
   if (fieldErrors) return { fieldErrors };
@@ -101,6 +103,7 @@ export async function saveModel(
   _prev: ReferenceFormState,
   formData: FormData,
 ): Promise<ReferenceFormState> {
+  formData = actionFormData(_prev, formData);
   const data = readCommon(formData);
   const fieldErrors = validateName(data.name);
   if (fieldErrors) return { fieldErrors };
@@ -144,6 +147,7 @@ export async function saveUnitType(
   _prev: ReferenceFormState,
   formData: FormData,
 ): Promise<ReferenceFormState> {
+  formData = actionFormData(_prev, formData);
   const data = readCommon(formData);
   const fieldErrors = validateName(data.name);
   if (fieldErrors) return { fieldErrors };
@@ -187,6 +191,7 @@ export async function saveCategory(
   _prev: ReferenceFormState,
   formData: FormData,
 ): Promise<ReferenceFormState> {
+  formData = actionFormData(_prev, formData);
   const data = readCommon(formData);
   const fieldErrors = validateName(data.name);
   if (fieldErrors) return { fieldErrors };
@@ -239,6 +244,7 @@ export async function saveVariant(
   _prev: ReferenceFormState,
   formData: FormData,
 ): Promise<ReferenceFormState> {
+  formData = actionFormData(_prev, formData);
   const data = readCommon(formData);
   const fieldErrors = validateName(data.name);
   if (fieldErrors) return { fieldErrors };

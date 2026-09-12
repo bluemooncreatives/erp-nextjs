@@ -25,6 +25,7 @@ import { generalSetting } from '@/lib/settings';
 import { loginLog, logoutLog } from '@/lib/activity-log';
 import { ROUTES } from '@/lib/routes';
 import { config } from '@/lib/config';
+import { actionFormData } from '@/lib/forms';
 
 export type AuthFormState = {
   error?: string;
@@ -76,6 +77,7 @@ export async function login(
   _prev: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
+  formData = actionFormData(_prev, formData);
   const login = String(formData.get('email') ?? '').trim();
   const password = String(formData.get('password') ?? '');
 
@@ -179,6 +181,7 @@ export async function register(
   _prev: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
+  formData = actionFormData(_prev, formData);
   const name = String(formData.get('name') ?? '').trim();
   const email = String(formData.get('email') ?? '').trim();
   const password = String(formData.get('password') ?? '');
@@ -231,6 +234,7 @@ export async function sendPasswordResetLink(
   _prev: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
+  formData = actionFormData(_prev, formData);
   const email = String(formData.get('email') ?? '').trim();
   if (!email) return { fieldErrors: { email: 'The email field is required.' } };
 
@@ -261,6 +265,7 @@ export async function resetPassword(
   _prev: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
+  formData = actionFormData(_prev, formData);
   const email = String(formData.get('email') ?? '').trim();
   const token = String(formData.get('token') ?? '');
   const password = String(formData.get('password') ?? '');
@@ -307,6 +312,7 @@ export async function changePassword(
   _prev: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
+  formData = actionFormData(_prev, formData);
   const session = await getSession();
   if (!session) redirect('/login');
 
@@ -381,6 +387,7 @@ export async function resendVerificationEmail(
   _prev: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
+  formData = actionFormData(_prev, formData);
   const email = String(formData.get('email') ?? '').trim();
   if (!email) return { fieldErrors: { email: 'The email field is required.' } };
 
