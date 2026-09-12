@@ -21,10 +21,12 @@ import {
   productSku,
   productVariations,
   products,
+  showRooms,
   stockReports,
   unitTypes,
   variantValues,
   variants,
+  wareHouses,
   type ProductSkuRow,
   type ProductsRow,
 } from '@/lib/db/schema';
@@ -259,14 +261,99 @@ export async function findComboProduct(id: number) {
     .select({
       detail: comboProductDetails,
       sku: productSku.sku,
+      sellingPrice: productSku.sellingPrice,
+      tax: productSku.tax,
       productName: products.productName,
+      imageSource: products.imageSource,
+      categoryName: categories.name,
+      brandName: brands.name,
     })
     .from(comboProductDetails)
     .leftJoin(productSku, eq(productSku.id, comboProductDetails.productSkuId))
     .leftJoin(products, eq(products.id, productSku.productId))
+    .leftJoin(categories, eq(categories.id, products.categoryId))
+    .leftJoin(brands, eq(brands.id, products.brandId))
     .where(eq(comboProductDetails.comboProductId, id));
 
   return { combo, details };
+}
+
+/** `comboStatus()` - the active toggle on the combo tab of the product list. */
+export async function setComboStatus(id: number, status: number): Promise<void> {
+  await db.update(comboProducts).set({ status }).where(eq(comboProducts.id, id));
+}
+
+/**
+ * `product_Detail()` for a non-combo product: the product with its SKUs, the
+ * variant rows, and the stock held at each branch or warehouse. The Blade also
+ * printed the category, brand and unit names, which are joined here.
+ */
+export async function productDetail(id: number) {
+  const [row] = await db
+    .select({
+      product: products,
+      categoryName: categories.name,
+      brandName: brands.name,
+      unitTypeName: unitTypes.name,
+      modelName: models.name,
+    })
+    .from(products)
+    .leftJoin(categories, eq(categories.id, products.categoryId))
+    .leftJoin(brands, eq(brands.id, products.brandId))
+    .leftJoin(unitTypes, eq(unitTypes.id, products.unitTypeId))
+    .leftJoin(models, eq(models.id, products.modelId))
+    .where(eq(products.id, id))
+    .limit(1);
+  if (!row) return null;
+
+  const skus = await db
+    .select()
+    .from(productSku)
+    .where(eq(productSku.productId, id))
+    .orderBy(productSku.id);
+
+  const skuIds = skus.map((s) => s.id);
+
+  const variationRows = skuIds.length
+    ? await db
+        .select({
+          variation: productVariations,
+          sku: productSku,
+        })
+        .from(productVariations)
+        .leftJoin(productSku, eq(productSku.id, productVariations.productSkuId))
+        .where(eq(productVariations.productId, id))
+    : [];
+
+  const stocks = skuIds.length
+    ? await db
+        .select({
+          productSkuId: stockReports.productSkuId,
+          stock: stockReports.stock,
+          houseableId: stockReports.houseableId,
+          houseableType: stockReports.houseableType,
+          showroomName: showRooms.name,
+          warehouseName: wareHouses.name,
+        })
+        .from(stockReports)
+        .leftJoin(
+          showRooms,
+          and(
+            eq(showRooms.id, stockReports.houseableId),
+            eq(stockReports.houseableType, MorphType.ShowRoom),
+          ),
+        )
+        .leftJoin(
+          wareHouses,
+          and(
+            eq(wareHouses.id, stockReports.houseableId),
+            eq(stockReports.houseableType, MorphType.WareHouse),
+          ),
+        )
+        .where(inArray(stockReports.productSkuId, skuIds))
+    : [];
+
+  return { ...row, skus, variations: variationRows, stocks };
 }
 
 // ---------------------------------------------------------------------------

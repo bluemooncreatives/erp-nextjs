@@ -17,6 +17,7 @@ import {
   createProduct,
   deleteComboProduct,
   deleteProduct,
+  setComboStatus,
   updateComboProduct,
   updateProduct,
   type ProductInput,
@@ -262,6 +263,22 @@ export async function deleteComboAction(formData: FormData): Promise<void> {
   try {
     await deleteComboProduct(id);
     await successLog(`Combo product deleted: ${id}`, user.id);
+  } catch (error) {
+    await errorLog(String(error), user.id);
+  }
+
+  revalidatePath(ROUTES['add_product.create']);
+}
+
+/** `ProductController@comboStatus` - the active toggle on the combo list. */
+export async function comboStatusAction(formData: FormData): Promise<void> {
+  const id = Number(formData.get('id'));
+  const status = Number(formData.get('status')) === 1 ? 1 : 0;
+  const user = await authorize('combo_product.update_active_status');
+
+  try {
+    await setComboStatus(id, status);
+    await successLog(`Combo product status updated: ${id}`, user.id);
   } catch (error) {
     await errorLog(String(error), user.id);
   }
