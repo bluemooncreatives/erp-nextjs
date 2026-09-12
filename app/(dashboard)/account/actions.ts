@@ -484,6 +484,17 @@ export async function saveChartAccount(
 
   const parentId = formData.get('parent_id') ? num(formData, 'parent_id') : null;
   const isGroup = formData.get('is_group') ? 1 : 0;
+  const allAccounts = await db.select().from(chartAccounts);
+  const parent = allAccounts.find((account) => account.id === parentId);
+  if (parentId && !parent) return { fieldErrors: { parent_id: 'Parent account not found.' } };
+  if (id && !allAccounts.some((account) => account.id === id)) return { error: 'Account not found.' };
+  const ancestors = new Set<number>();
+  let cursor = parent;
+  while (cursor) {
+    if (cursor.id === id || ancestors.has(cursor.id)) return { fieldErrors: { parent_id: 'An account cannot be placed under itself or its descendants.' } };
+    ancestors.add(cursor.id);
+    cursor = allAccounts.find((account) => account.id === cursor!.parentId);
+  }
 
   try {
     if (id) {
@@ -510,11 +521,11 @@ export async function saveChartAccount(
 
     const [inserted] = await db.insert(chartAccounts).values({
       name,
-      type: type!,
+      type: parent?.type ?? type!,
       description: str(formData, 'description'),
       parentId,
       isGroup,
-      level: parentId ? 2 : 1,
+      level: parent ? Number(parent.level ?? 0) + 1 : 1,
       status: num(formData, 'status', 1),
       configurationGroupId: formData.get('configuration_group_id')
         ? num(formData, 'configuration_group_id')
@@ -524,14 +535,14 @@ export async function saveChartAccount(
       updatedAt: new Date(),
     });
 
-    // The code follows the seeded convention: 0<type>-<parent>-<id>.
+    // ChartAccountRepository extends the complete parent code, including all ancestors.
     const newId = Number(inserted.insertId);
     await db
       .update(chartAccounts)
       .set({
-        code: parentId
-          ? `0${type}-${String(parentId).padStart(2, '0')}-${newId}`
-          : `0${type}-${newId}`,
+        code: parent
+          ? `${parent.code}-${String(newId).padStart(2, '0')}`
+          : `0${type}-${String(newId).padStart(2, '0')}`,
       })
       .where(eq(chartAccounts.id, newId));
 

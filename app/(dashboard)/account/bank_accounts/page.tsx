@@ -1,6 +1,7 @@
 // Bank accounts - port of BankAccountController.
 
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { authorize, can } from '@/lib/auth/permissions';
 import { listBankAccounts } from '@/lib/accounting/expenses';
 import { accountBalances } from '@/lib/accounting/reports';
@@ -21,9 +22,11 @@ export default async function BankAccountsPage() {
   const [rows, balances] = await Promise.all([listBankAccounts(), accountBalances()]);
   const balanceById = new Map(balances.map((b) => [b.id, b.balance]));
 
-  const [canCreate, canDelete] = await Promise.all([
+  const [canCreate, canDelete, canEdit, canHistory] = await Promise.all([
     can('bank_accounts.store'),
     can('bank_accounts.delete'),
+    can('bank_accounts.edit'),
+    can('bank.account.history'),
   ]);
 
   return (
@@ -68,6 +71,8 @@ export default async function BankAccountsPage() {
                     )}`}
                   </Td>
                   <Td>
+                    {canEdit ? <Link className="mr-3 text-brand-500" href={`/account/bank_accounts/${row.account.id}/edit`}>Edit</Link> : null}
+                    {canHistory ? <Link className="mr-3 text-brand-500" href={`/account/bank_accounts/history/${row.account.id}`}>History</Link> : null}
                     {canDelete ? (
                       <form action={deleteBankAccountAction}>
                         <input type="hidden" name="id" value={row.account.id} />

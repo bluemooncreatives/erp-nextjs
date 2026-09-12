@@ -2,6 +2,7 @@
 // which the PHP served at `/account/`).
 
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { authorize, can } from '@/lib/auth/permissions';
 import { accountTree, accountTypeName, type AccountTreeNode } from '@/lib/accounting/accounts';
 import { accountBalances } from '@/lib/accounting/reports';
@@ -94,6 +95,7 @@ export default async function ChartOfAccountsPage() {
                     </Badge>
                   </Td>
                   <Td>
+                    {canEdit ? <Link className="mr-3 text-brand-500" href={`/account/chart-account/${node.id}/edit`}>Edit</Link> : null}
                     {canDelete && node.isGroup === 0 ? (
                       <form action={deleteChartAccountAction}>
                         <input type="hidden" name="id" value={node.id} />

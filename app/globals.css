@@ -4,14 +4,14 @@
 
 /* Laravel color-theme values mapped onto the TailAdmin components. */
 .erp-theme .bg-brand-500 { background: var(--erp-primary-background, var(--color-brand-500)); }
-.erp-theme .text-white { color: var(--erp-text-white, #fff); }
-.erp-theme .text-black { color: var(--erp-text-black, #000); }
-.erp-theme .text-gray-500 { color: var(--erp-text-color, var(--color-gray-500)); }
-.erp-theme .bg-white { background-color: var(--erp-bg-white, #fff); }
-.erp-theme .bg-black { background-color: var(--erp-bg-black, #000); }
-.erp-theme .border-gray-200 { border-color: var(--erp-border-color, var(--color-gray-200)); }
-.erp-theme input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
-.erp-theme select, .erp-theme textarea { background-color: var(--erp-input--bg); }
+html:not(.dark) .erp-theme .text-white { color: var(--erp-text-white, #fff); }
+html:not(.dark) .erp-theme .text-black { color: var(--erp-text-black, #000); }
+html:not(.dark) .erp-theme .text-gray-500 { color: var(--erp-text-color, var(--color-gray-500)); }
+html:not(.dark) .erp-theme .bg-white { background-color: var(--erp-bg-white, #fff); }
+html:not(.dark) .erp-theme .bg-black { background-color: var(--erp-bg-black, #000); }
+html:not(.dark) .erp-theme .border-gray-200 { border-color: var(--erp-border-color, var(--color-gray-200)); }
+html:not(.dark) .erp-theme input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+html:not(.dark) .erp-theme select, html:not(.dark) .erp-theme textarea { background-color: var(--erp-input--bg); }
 .erp-theme { scrollbar-color: var(--erp-scroll-color, auto) transparent; }
 .erp-theme .text-success-500 { color: var(--erp-success, var(--color-success-500)); }
 .erp-theme .text-warning-500 { color: var(--erp-warning, var(--color-warning-500)); }
