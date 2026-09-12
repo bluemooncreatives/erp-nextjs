@@ -96,6 +96,7 @@ export async function listLeaveApplications(filters: {
     .select({
       leave: applyLeaves,
       userName: users.name,
+      userEmail: users.email,
       leaveTypeName: leaveTypes.name,
       approvedByName: sql<string | null>`(
         select u.name from users u where u.id = ${applyLeaves.approvedBy}
