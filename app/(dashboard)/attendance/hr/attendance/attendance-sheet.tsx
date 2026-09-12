@@ -8,6 +8,7 @@ import { FormAlert } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { storeAttendance, type LeaveFormState } from '../../../leave/actions';
+import { SelectControl } from '@/components/erp/select-control';
 
 const INITIAL: LeaveFormState = {};
 
@@ -73,18 +74,14 @@ export function AttendanceSheet({
                 <input type="hidden" name="user_id" value={row.id} />
               </Td>
               <Td>
-                <select
+                <SelectControl
                   name="attendance"
                   value={row.mark}
                   onChange={(e) => patch(row.id, { mark: e.target.value })}
-                  className="h-9 w-36 rounded-lg border border-border bg-transparent px-2 text-sm"
-                >
-                  {MARKS.map((m) => (
-                    <option key={m.value} value={m.value}>
-                      {m.label}
-                    </option>
-                  ))}
-                </select>
+                  options={MARKS}
+                  aria-label="Attendance mark"
+                  className="w-36"
+                />
               </Td>
               <Td>
                 <input

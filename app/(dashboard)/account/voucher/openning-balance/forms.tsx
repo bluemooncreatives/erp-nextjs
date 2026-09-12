@@ -13,6 +13,7 @@ import {
 import { SubmitButton } from '@/components/erp/submit-button';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import {
+import { SelectControl } from '@/components/erp/select-control';
   storeOpeningBalance,
   updateOpeningBalances,
   type OpeningBalanceFormState,
@@ -103,19 +104,15 @@ function LineTable({
         {lines.map((line) => (
           <Tr key={line.key}>
             <Td>
-              <select
+              <SelectControl
                 name={accountField}
                 value={line.accountId}
                 onChange={(e) => patch(line.key, { accountId: e.target.value })}
-                className="h-9 w-64 rounded-lg border border-border bg-transparent px-2 text-sm"
-              >
-                <option value="">Select account</option>
-                {accounts.map((a) => (
-                  <option key={a.value} value={a.value}>
-                    {a.label}
-                  </option>
-                ))}
-              </select>
+                options={accounts}
+                placeholder="Select account"
+                aria-label="Account"
+                className="w-64"
+              />
             </Td>
             <Td>
               <input

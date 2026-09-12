@@ -21,6 +21,7 @@ import {
 import { SubmitButton } from '@/components/erp/submit-button';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import type { AccountFormState } from './actions';
+import { SelectControl } from '@/components/erp/select-control';
 
 const INITIAL: AccountFormState = {};
 
@@ -165,20 +166,16 @@ export function VoucherForm({
           {lines.map((line) => (
             <Tr key={line.key}>
               <Td>
-                <select
+                <SelectControl
                   name="sub_account_id"
                   required
                   value={line.accountId}
                   onChange={(e) => patch(line.key, { accountId: e.target.value })}
-                  className="h-9 w-64 rounded-lg border border-border bg-transparent px-2 text-sm"
-                >
-                  <option value="">Select account</option>
-                  {lineAccounts.map((a) => (
-                    <option key={a.value} value={a.value}>
-                      {a.label}
-                    </option>
-                  ))}
-                </select>
+                  options={lineAccounts}
+                  placeholder="Select account"
+                  aria-label="Account"
+                  className="w-64"
+                />
               </Td>
               <Td>
                 <input
