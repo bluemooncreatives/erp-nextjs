@@ -45,7 +45,12 @@ type CartLine = {
 
 /** The quotation being edited, as `quotation::quotation.edit` pre-filled it. */
 export type QuotationFormDefaults = {
-  id: number;
+  /**
+   * The quotation being edited. Omitted when the form is seeded from another
+   * document - a sale being turned into a quotation - because that posts a new
+   * record rather than editing the source.
+   */
+  id?: number;
   customerId: string;
   locationRef: string;
   date: string;
@@ -87,8 +92,10 @@ export function QuotationForm({
   defaults?: QuotationFormDefaults;
   submitLabel?: string;
 }) {
+  // Seeded-but-new forms (a sale converted to a quotation) carry defaults with
+  // no id, and must store rather than update.
   const [state, formAction] = useActionState(
-    defaults ? updateQuotationAction : storeQuotation,
+    defaults?.id ? updateQuotationAction : storeQuotation,
     INITIAL,
   );
 
@@ -187,7 +194,7 @@ export function QuotationForm({
       <input type="hidden" name="total_discount" value={discountValue} />
       <input type="hidden" name="total_amount" value={totals.payable.toFixed(2)} />
 
-      {defaults ? <input type="hidden" name="id" value={defaults.id} /> : null}
+      {defaults?.id ? <input type="hidden" name="id" value={defaults.id} /> : null}
 
       <Card title="Quotation">
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">

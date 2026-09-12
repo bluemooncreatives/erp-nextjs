@@ -9,6 +9,8 @@ import { customerOptions } from '@/lib/contact/queries';
 import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Undo2, Wallet, Users, Divide } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ReportFilter } from '../../report-filter';
 
@@ -40,6 +42,9 @@ export default async function SalesReturnReportPage({
     rows.map(async (r) => ({ ...r, dateLabel: await dateConvert(r.sale.date) })),
   );
 
+  const customerCount = new Set(rows.map((r) => r.customerName).filter(Boolean)).size;
+  const averageReturn = rows.length ? total / rows.length : 0;
+
   return (
     <>
       <PageHeader
@@ -47,8 +52,17 @@ export default async function SalesReturnReportPage({
         breadcrumb={[{ label: 'Reports' }, { label: 'Sales Return' }]}
       />
 
+      <ReportSummary
+        figures={[
+          { label: 'Returned value', value: `${symbol} ${numberFormat(total)}`, detail: 'Over the selected range', icon: Wallet },
+          { label: 'Returns', value: rows.length.toLocaleString('en-US'), detail: 'Matching the filters', icon: Undo2 },
+          { label: 'Average return', value: `${symbol} ${numberFormat(averageReturn)}`, detail: 'Per record in range', icon: Divide },
+          { label: 'Customers', value: customerCount, detail: 'Distinct, in range', icon: Users },
+        ]}
+      />
+
       <Card
-        title={`Returns (${rows.length}) - ${symbol} ${numberFormat(total)}`}
+        title={`Returns (${rows.length})`}
         bodyClassName=""
         actions={
           <ReportFilter

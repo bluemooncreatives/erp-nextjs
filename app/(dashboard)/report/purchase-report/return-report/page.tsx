@@ -10,6 +10,8 @@ import { supplierOptions } from '@/lib/contact/queries';
 import { dateConvert, singlePrice } from '@/lib/settings';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Undo2, Wallet, Users, Divide } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ReportFilter } from '../../report-filter';
 
@@ -45,6 +47,8 @@ export default async function PurchaseReturnReportPage({
   );
 
   const totalLabel = await singlePrice(total);
+  const averageLabel = await singlePrice(rows.length ? total / rows.length : 0);
+  const supplierCount = new Set(rows.map((r) => r.supplierName).filter(Boolean)).size;
 
   return (
     <>
@@ -68,7 +72,16 @@ export default async function PurchaseReturnReportPage({
         }
       />
 
-      <Card title={`Returns (${rows.length}) - ${totalLabel}`} bodyClassName="">
+      <ReportSummary
+        figures={[
+          { label: 'Returned value', value: totalLabel, detail: 'Over the selected range', icon: Wallet },
+          { label: 'Returns', value: rows.length.toLocaleString('en-US'), detail: 'Matching the filters', icon: Undo2 },
+          { label: 'Average return', value: averageLabel, detail: 'Per record in range', icon: Divide },
+          { label: 'Suppliers', value: supplierCount, detail: 'Distinct, in range', icon: Users },
+        ]}
+      />
+
+      <Card title={`Returns (${rows.length})`} bodyClassName="">
         <DataTable
           columns={[
             { label: 'Date' },

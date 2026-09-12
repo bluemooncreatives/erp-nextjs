@@ -8,6 +8,8 @@ import { db } from '@/lib/db/client';
 import { roles, staffs, users } from '@/lib/db/schema';
 import { singlePrice } from '@/lib/settings';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Store, Wallet, Receipt, Divide } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
 
@@ -45,6 +47,10 @@ export default async function RetailerReportPage() {
   const grandTotal = await singlePrice(
     rows.reduce((sum, r) => sum + Number(r.total), 0),
   );
+  const invoiceCount = rows.reduce((sum, r) => sum + Number(r.invoices ?? 0), 0);
+  const averagePerRetailer = await singlePrice(
+    rows.length ? rows.reduce((sum, r) => sum + Number(r.total), 0) / rows.length : 0,
+  );
 
   return (
     <>
@@ -53,7 +59,16 @@ export default async function RetailerReportPage() {
         breadcrumb={[{ label: 'Reports' }, { label: 'Retailer Report' }]}
       />
 
-      <Card title={`Retailers (${rows.length}) - ${grandTotal}`} bodyClassName="">
+      <ReportSummary
+        figures={[
+          { label: 'Value in range', value: grandTotal, detail: 'Across all retailers shown', icon: Wallet },
+          { label: 'Retailers', value: rows.length.toLocaleString('en-US'), detail: 'Matching the filters', icon: Store },
+          { label: 'Invoices', value: invoiceCount.toLocaleString('en-US'), detail: 'Across those retailers', icon: Receipt },
+          { label: 'Average per retailer', value: averagePerRetailer, detail: 'Over the selected range', icon: Divide },
+        ]}
+      />
+
+      <Card title={`Retailers (${rows.length})`} bodyClassName="">
         <DataTable
           columns={[
             { label: 'Name' },

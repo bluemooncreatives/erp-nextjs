@@ -11,6 +11,8 @@ import { customerOptions } from '@/lib/contact/queries';
 import { dateConvert, singlePrice } from '@/lib/settings';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { FileText, Wallet, CircleAlert, HandCoins } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
 import { ReportFilter } from '../../report-filter';
@@ -49,7 +51,7 @@ export default async function CustomerBillPage({
     })),
   );
 
-  const [totalLabel, dueTotalLabel] = await Promise.all([
+  const [totalLabel, dueTotalLabel, paidTotalLabel] = await Promise.all([
     singlePrice(rows.reduce((sum, r) => sum + Number(r.sale.payableAmount), 0)),
     singlePrice(
       rows.reduce(
@@ -57,6 +59,7 @@ export default async function CustomerBillPage({
         0,
       ),
     ),
+    singlePrice(rows.reduce((sum, r) => sum + Number(r.paid), 0)),
   ]);
 
   return (
@@ -81,9 +84,17 @@ export default async function CustomerBillPage({
         }
       />
 
+      <ReportSummary
+        figures={[
+          { label: 'Outstanding', value: dueTotalLabel, detail: 'Still to be settled', icon: CircleAlert },
+          { label: 'Billed total', value: totalLabel, detail: 'Over the selected range', icon: Wallet },
+          { label: 'Received', value: paidTotalLabel, detail: 'Settled so far', icon: HandCoins },
+          { label: 'Invoices', value: rows.length.toLocaleString('en-US'), detail: 'Matching the filters', icon: FileText },
+        ]}
+      />
+
       <Card
-        title={`Invoices (${rows.length}) - ${totalLabel}`}
-        desc={`Outstanding ${dueTotalLabel}`}
+        title={`Invoices (${rows.length})`}
         bodyClassName=""
       >
         <DataTable

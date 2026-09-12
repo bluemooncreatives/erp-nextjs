@@ -11,6 +11,8 @@ import { locationOptions } from '@/lib/setup/repositories';
 import { dateConvert, singlePrice } from '@/lib/settings';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Wallet, Receipt, Users, Divide } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
 import { ReportFilter } from '../../report-filter';
@@ -56,6 +58,13 @@ export default async function PurchaseHistoryPage({
     rows.reduce((sum, r) => sum + Number(r.order.payableAmount), 0),
   );
 
+  // An average alongside the total tells you whether a period's value came from
+  // volume or from a few large purchase orders, which the total alone hides.
+  const averageLabel = await singlePrice(
+    rows.length ? rows.reduce((sum, r) => sum + Number(r.order.payableAmount), 0) / rows.length : 0,
+  );
+  const partyCount = new Set(rows.map((r) => r.supplierName).filter(Boolean)).size;
+
   return (
     <>
       <PageHeader
@@ -84,7 +93,16 @@ export default async function PurchaseHistoryPage({
         }
       />
 
-      <Card title={`Purchase orders (${rows.length}) - ${total}`} bodyClassName="">
+      <ReportSummary
+        figures={[
+          { label: 'Value in range', value: total, detail: 'Total over the selected filters', icon: Wallet },
+          { label: 'Purchase orders', value: rows.length.toLocaleString('en-US'), detail: 'Matching the filters', icon: Receipt },
+          { label: 'Average', value: averageLabel, detail: 'Per record in range', icon: Divide },
+          { label: 'Suppliers', value: partyCount, detail: 'Distinct, in range', icon: Users },
+        ]}
+      />
+
+      <Card title={`Purchase orders (${rows.length})`} bodyClassName="">
         <DataTable
           columns={[
             { label: 'Date' },
