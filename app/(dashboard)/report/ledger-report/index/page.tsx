@@ -13,6 +13,7 @@ import { ReportSummary } from '@/components/erp/report-summary';
 import { ArrowDownLeft, ArrowUpRight, PlayCircle, Scale } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { FormAlert } from '@/components/erp/fields';
+import { SelectControl } from '@/components/erp/select-control';
 
 export const metadata: Metadata = { title: 'Ledger Report' };
 
@@ -62,18 +63,17 @@ export default async function LedgerReportPage({
             method="get"
             className="flex flex-wrap items-center gap-2"
           >
-            <select
+            <SelectControl
               name="account_id"
               defaultValue={accountId ? String(accountId) : ''}
-              className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
-            >
-              <option value="">Select account</option>
-              {accounts.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {`${a.name}${a.code ? ` (${a.code})` : ''}`}
-                </option>
-              ))}
-            </select>
+              placeholder="Select account"
+              aria-label="Account"
+              options={accounts.map((a) => ({
+                value: String(a.id),
+                label: a.name + (a.code ? ' (' + a.code + ')' : ''),
+              }))}
+              className="sm:w-72"
+            />
             <input
               type="date"
               name="dateFrom"
