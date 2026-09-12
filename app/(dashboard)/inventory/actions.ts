@@ -9,6 +9,7 @@ import { authorize } from '@/lib/auth/permissions';
 import { errorLog, successLog } from '@/lib/activity-log';
 import { ROUTES } from '@/lib/routes';
 import { filesFrom, saveUpload } from '@/lib/uploads';
+import { transferInput } from '@/lib/inventory/transfer-input';
 import { adjustmentInput } from '@/lib/inventory/adjustment-input';
 import {
   INSUFFICIENT_STOCK,
@@ -16,6 +17,7 @@ import {
   createStockAdjustment,
   updateStockAdjustment,
   createStockTransfer,
+  updateStockTransfer,
   deleteStockAdjustment,
   deleteStockTransfer,
   receiveStockTransfer,
@@ -29,62 +31,36 @@ export type InventoryFormState = {
   fieldErrors?: Record<string, string>;
 };
 
-function numList(formData: FormData, key: string): number[] {
-  return formData.getAll(key).map((v) => Number(v)).filter(Number.isFinite);
-}
-
-function str(formData: FormData, key: string): string | null {
-  const raw = formData.get(key);
-  const value = raw == null ? '' : String(raw).trim();
-  return value === '' ? null : value;
-}
-
 // --- Transfers -------------------------------------------------------------
 
 export async function storeStockTransfer(
   _prev: InventoryFormState,
   formData: FormData,
 ): Promise<InventoryFormState> {
-  const user = await authorize('stock-transfer.store');
+  return saveTransferForm(null, formData);
+}
 
-  const productIds = numList(formData, 'product_id');
-  const prices = numList(formData, 'product_price');
-  const quantities = numList(formData, 'quantity');
+export async function updateTransferAction(_prev: InventoryFormState, formData: FormData): Promise<InventoryFormState> {
+  await authorize('stock-transfer.edit');
+  const id = Number(formData.get('id'));
+  if (!Number.isSafeInteger(id) || id < 1) return { error: 'Invalid transfer.' };
+  return saveTransferForm(id, formData);
+}
 
-  const fieldErrors: Record<string, string> = {};
-  if (!formData.get('from')) fieldErrors.from = 'Select the sending location.';
-  if (!formData.get('to')) fieldErrors.to = 'Select the receiving location.';
-  if (formData.get('from') === formData.get('to')) {
-    fieldErrors.to = 'The sending and receiving locations must differ.';
-  }
-  if (!formData.get('date')) fieldErrors.date = 'The date field is required.';
-  if (productIds.length === 0) fieldErrors.product_id = 'Add at least one product.';
+async function saveTransferForm(editId: number | null, formData: FormData): Promise<InventoryFormState> {
+  const user = await authorize(editId == null ? 'stock-transfer.store' : 'stock-transfer.edit');
+  const { data, fieldErrors } = transferInput(formData);
   if (Object.keys(fieldErrors).length) return { fieldErrors };
-
-  const documents: string[] = [];
-  for (const file of filesFrom(formData, 'documents')) {
-    const stored = await saveUpload(file, 'stock_transfer');
-    if (stored) documents.push(stored);
-  }
-
   try {
-    const id = await createStockTransfer(
-      {
-        fromRef: String(formData.get('from') ?? ''),
-        toRef: String(formData.get('to') ?? ''),
-        date: String(formData.get('date') ?? ''),
-        notes: str(formData, 'notes'),
-        documents,
-        lines: productIds.map((productSkuId, i) => ({
-          productSkuId,
-          price: prices[i] ?? 0,
-          quantity: quantities[i] ?? 0,
-        })),
-      },
-      user.id,
-    );
+    const documents: string[] = [];
+    for (const file of filesFrom(formData, 'documents')) {
+      const stored = await saveUpload(file, 'stock_transfer');
+      if (stored) documents.push(stored);
+    }
+    data.documents = documents;
+    const id = editId == null ? await createStockTransfer(data, user.id) : await updateStockTransfer(editId, data, user.id);
     if (!id) return { error: 'Select Warehouse or Showroom' };
-    await successLog(`Stock transfer created: ${id}`, user.id);
+    await successLog(`Stock transfer ${editId == null ? "created" : "updated"}: ${id}`, user.id);
   } catch (error) {
     await errorLog(String(error), user.id);
     return { error: 'Something Went Wrong' };

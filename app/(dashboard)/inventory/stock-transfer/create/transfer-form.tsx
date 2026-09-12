@@ -14,8 +14,8 @@ import {
 } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import { ROUTES } from '@/lib/routes';
-import { LinePicker, type PickableProduct } from '../../line-picker';
-import { storeStockTransfer, type InventoryFormState } from '../../actions';
+import { LinePicker, type PickableProduct, type PickedLine } from '../../line-picker';
+import { storeStockTransfer, updateTransferAction, type InventoryFormState } from '../../actions';
 
 const INITIAL: InventoryFormState = {};
 
@@ -24,16 +24,19 @@ export function TransferForm({
   products,
   currencySymbol,
   defaultFrom,
+  defaults,
 }: {
   locations: SelectOption[];
   products: PickableProduct[];
   currencySymbol: string;
   defaultFrom?: string;
+  defaults?: { id: number; to: string; date: string; notes: string; lines: PickedLine[] };
 }) {
-  const [state, formAction] = useActionState(storeStockTransfer, INITIAL);
+  const [state, formAction] = useActionState(defaults ? updateTransferAction : storeStockTransfer, INITIAL);
 
   return (
     <form action={formAction} className="space-y-6">
+      {defaults && <input type="hidden" name="id" value={defaults.id} />}
       <FormAlert variant="error" message={state.error} />
 
       <Card title="Transfer Details">
@@ -52,6 +55,7 @@ export function TransferForm({
             name="to"
             required
             placeholder="Receiving location"
+            defaultValue={defaults?.to}
             options={locations}
             error={state.fieldErrors?.to}
           />
@@ -60,7 +64,7 @@ export function TransferForm({
             name="date"
             type="date"
             required
-            defaultValue={new Date().toISOString().slice(0, 10)}
+            defaultValue={defaults?.date ?? new Date().toISOString().slice(0, 10)}
             error={state.fieldErrors?.date}
           />
           <FormInput label="Documents" name="documents" type="file" multiple />
@@ -70,6 +74,7 @@ export function TransferForm({
       <Card title="Products">
         <LinePicker
           products={products}
+          initialLines={defaults?.lines}
           idFieldName="product_id"
           quantityFieldName="quantity"
           priceFieldName="product_price"
@@ -79,7 +84,7 @@ export function TransferForm({
       </Card>
 
       <Card title="Notes">
-        <FormTextarea label="Notes" name="notes" />
+        <FormTextarea label="Notes" name="notes" defaultValue={defaults?.notes} />
       </Card>
 
       <div className="flex items-center justify-end gap-3">

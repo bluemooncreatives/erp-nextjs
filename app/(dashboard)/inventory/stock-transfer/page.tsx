@@ -15,6 +15,7 @@ import {
   deleteTransferAction,
   receiveTransferAction,
   sendTransferAction,
+  changeTransferStatusAction,
 } from '../actions';
 
 export const metadata: Metadata = { title: 'Stock Transfer' };
@@ -34,12 +35,14 @@ export default async function StockTransferListPage({
     allBranches: user.role.type === 'system_user',
   });
 
-  const [canCreate, canSend, canReceive, canDelete, canShow] = await Promise.all([
+  const [canCreate, canSend, canReceive, canDelete, canShow, canEdit, canApprove] = await Promise.all([
     can('stock-transfer.store'),
     can('stock-transfer.sent'),
     can('stock-transfer.receive'),
     can('stock-transfer.delete'),
     can('stock-transfer.show'),
+    can('stock-transfer.edit'),
+    can('stock-transfer.status'),
   ]);
 
   const transferRows = await Promise.all(
@@ -91,11 +94,13 @@ export default async function StockTransferListPage({
               <Td>{transfer.receivedLabel ?? '-'}</Td>
               <Td>
                 <Badge size="sm" color={transfer.status === 1 ? 'success' : 'warning'}>
-                  {transfer.status === 1 ? 'Completed' : 'In progress'}
+                  {transfer.status === 1 ? 'Approved' : 'Pending'}
                 </Badge>
               </Td>
               <Td>
                 <div className="flex items-center gap-2">
+                  {canEdit && transfer.status === 0 && !transfer.receivedAt && <Link className="text-brand-500 hover:underline" href={`/inventory/stock-transfer/${transfer.id}/edit`}>Edit</Link>}
+                  {canApprove && transfer.status === 0 && <form action={changeTransferStatusAction}><input type="hidden" name="id" value={transfer.id} /><ActionButton variant="primary">Approve</ActionButton></form>}
                   {canShow && <Link className="text-brand-500 hover:underline" href={`/inventory/stock-transfer/${transfer.id}`}>Details</Link>}
                   {!transfer.sentAt && canSend ? (
                     <form action={sendTransferAction}>
@@ -103,7 +108,7 @@ export default async function StockTransferListPage({
                       <ActionButton variant="primary">Dispatch</ActionButton>
                     </form>
                   ) : null}
-                  {transfer.sentAt && !transfer.receivedAt && canReceive ? (
+                  {transfer.status === 1 && !transfer.receivedAt && canReceive ? (
                     <form action={receiveTransferAction}>
                       <input type="hidden" name="id" value={transfer.id} />
                       <ActionButton
