@@ -470,3 +470,98 @@ export async function salesTaxReport(filters: ReportFilters = {}) {
   const total = rows.reduce((sum, r) => sum + Number(r.sale.totalTax), 0);
   return { rows, total };
 }
+
+/**
+ * `AccountsController@customerBill` - a customer's invoices with what has been
+ * paid on each, so the outstanding column can be shown.
+ */
+export async function customerBillReport(filters: ReportFilters = {}) {
+  const where = saleScope(filters);
+
+  return db
+    .select({
+      sale: sales,
+      customerName: contacts.name,
+      showroomName: showRooms.name,
+      paid: sql<number>`(
+        select coalesce(sum(p.amount + p.advance_amount - p.return_amount), 0)
+        from payments p
+        where p.payable_id = ${sales.id} and p.payable_type = ${MorphType.Sale}
+      )`,
+    })
+    .from(sales)
+    .leftJoin(contacts, eq(contacts.id, sales.customerId))
+    .leftJoin(
+      showRooms,
+      and(eq(showRooms.id, sales.saleableId), eq(sales.saleableType, MorphType.ShowRoom)),
+    )
+    .where(where.length ? and(...where) : undefined)
+    .orderBy(desc(sales.id))
+    .limit(500);
+}
+
+/** `AccountsController@supplierBill` - the same for purchase orders. */
+export async function supplierBillReport(filters: ReportFilters = {}) {
+  const where = purchaseScope(filters);
+
+  return db
+    .select({
+      order: purchaseOrders,
+      supplierName: contacts.name,
+      showroomName: showRooms.name,
+      paid: sql<number>`(
+        select coalesce(sum(p.amount + p.advance_amount - p.return_amount), 0)
+        from payments p
+        where p.payable_id = ${purchaseOrders.id} and p.payable_type = ${MorphType.PurchaseOrder}
+      )`,
+    })
+    .from(purchaseOrders)
+    .leftJoin(contacts, eq(contacts.id, purchaseOrders.supplierId))
+    .leftJoin(
+      showRooms,
+      and(
+        eq(showRooms.id, purchaseOrders.purchasableId),
+        eq(purchaseOrders.purchasableType, MorphType.ShowRoom),
+      ),
+    )
+    .where(where.length ? and(...where) : undefined)
+    .orderBy(desc(purchaseOrders.id))
+    .limit(500);
+}
+
+/**
+ * `PurchaseReportController@purchase_return_report` - the purchase orders that
+ * have been returned against, with the returned value per order.
+ */
+export async function purchaseReturnReport(filters: ReportFilters = {}) {
+  const where = purchaseScope(filters);
+  where.push(ne(purchaseOrders.returnStatus, 2));
+
+  const rows = await db
+    .select({
+      order: purchaseOrders,
+      supplierName: contacts.name,
+      showroomName: showRooms.name,
+      returned: sql<number>`(
+        select coalesce(sum(d.return_amount), 0)
+        from product_item_details d
+        where d.itemable_id = ${purchaseOrders.id}
+          and d.itemable_type = ${MorphType.PurchaseOrder}
+      )`,
+    })
+    .from(purchaseOrders)
+    .leftJoin(contacts, eq(contacts.id, purchaseOrders.supplierId))
+    .leftJoin(
+      showRooms,
+      and(
+        eq(showRooms.id, purchaseOrders.purchasableId),
+        eq(purchaseOrders.purchasableType, MorphType.ShowRoom),
+      ),
+    )
+    .where(and(...where))
+    .orderBy(desc(purchaseOrders.id))
+    .limit(500);
+
+  const total = rows.reduce((sum, r) => sum + Number(r.returned ?? 0), 0);
+  return { rows, total };
+}

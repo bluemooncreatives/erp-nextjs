@@ -349,3 +349,125 @@ export async function ledgerAccounts() {
     .where(eq(chartAccounts.isGroup, 0))
     .orderBy(asc(chartAccounts.code));
 }
+
+/**
+ * `LedgerReportRepository::balanceBeforeDate()` - the opening balance the
+ * ledger starts from. Asset (1) and Income (4) accounts read Dr - Cr; the rest
+ * read Cr - Dr, which is the PHP's own (unusual) split.
+ */
+export async function ledgerOpeningBalance(
+  accountId: number,
+  accountType: number,
+  before: string,
+): Promise<number> {
+  const [row] = await db
+    .select({
+      debit: sql<number>`coalesce(sum(case when ${transactions.type} = 'Dr' then ${transactions.amount} else 0 end), 0)`,
+      credit: sql<number>`coalesce(sum(case when ${transactions.type} = 'Cr' then ${transactions.amount} else 0 end), 0)`,
+    })
+    .from(transactions)
+    .where(
+      and(
+        eq(transactions.accountId, accountId),
+        sql`${transactions.createdAt} < ${`${before} 23:59:59`}`,
+      ),
+    );
+
+  const debit = Number(row?.debit ?? 0);
+  const credit = Number(row?.credit ?? 0);
+  return accountType === 1 || accountType === 4 ? debit - credit : credit - debit;
+}
+
+/** `LedgerReportRepository::search($dateFrom, $dateTo, $account_id)` */
+export async function ledgerRows(
+  accountId: number,
+  from: string | null,
+  to: string | null,
+) {
+  const where: SQL[] = [eq(transactions.accountId, accountId)];
+  if (from && to) {
+    where.push(sql`${transactions.createdAt} >= ${`${from} 00:00:00`}`);
+    where.push(sql`${transactions.createdAt} <= ${`${to} 23:59:59`}`);
+  }
+
+  return db
+    .select({
+      id: transactions.id,
+      type: transactions.type,
+      amount: transactions.amount,
+      narration: transactions.narration,
+      createdAt: transactions.createdAt,
+      date: vouchers.date,
+      txId: vouchers.txId,
+      voucherNarration: vouchers.narration,
+      isApprove: vouchers.isApprove,
+    })
+    .from(transactions)
+    .leftJoin(
+      vouchers,
+      and(
+        eq(vouchers.id, transactions.voucherableId),
+        eq(transactions.voucherableType, MorphType.Voucher),
+      ),
+    )
+    .where(and(...where))
+    .orderBy(asc(transactions.id));
+}
+
+/**
+ * The "history" screens (staff, customer, supplier) all render one contact's
+ * chart-account ledger with a running balance that starts at their opening
+ * balance and moves Dr up / Cr down, regardless of account type.
+ */
+export async function contactableLedger(
+  contactableType: string,
+  contactableId: number,
+  openingBalance: number,
+) {
+  const [account] = await db
+    .select({ id: chartAccounts.id, name: chartAccounts.name, code: chartAccounts.code })
+    .from(chartAccounts)
+    .where(
+      and(
+        eq(chartAccounts.contactableType, contactableType),
+        eq(chartAccounts.contactableId, contactableId),
+      ),
+    )
+    .limit(1);
+
+  if (!account) {
+    return { account: null, rows: [], opening: openingBalance, closing: openingBalance };
+  }
+
+  const rows = await db
+    .select({
+      id: transactions.id,
+      type: transactions.type,
+      amount: transactions.amount,
+      narration: transactions.narration,
+      createdAt: transactions.createdAt,
+      date: vouchers.date,
+      txId: vouchers.txId,
+      voucherNarration: vouchers.narration,
+      isApprove: vouchers.isApprove,
+    })
+    .from(transactions)
+    .leftJoin(
+      vouchers,
+      and(
+        eq(vouchers.id, transactions.voucherableId),
+        eq(transactions.voucherableType, MorphType.Voucher),
+      ),
+    )
+    .where(eq(transactions.accountId, account.id))
+    .orderBy(asc(transactions.id));
+
+  let balance = openingBalance;
+  const withBalance = rows.map((row) => {
+    const amount = Number(row.amount);
+    balance += row.type === 'Dr' ? amount : -amount;
+    return { ...row, amount, balance };
+  });
+
+  return { account, rows: withBalance, opening: openingBalance, closing: balance };
+}

@@ -12,7 +12,7 @@
 // ---------------------------------------------------------------------------
 
 import 'server-only';
-import { and, eq, inArray, sql, type SQL } from 'drizzle-orm';
+import { and, eq, inArray, notInArray, or, sql, type SQL } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { chartAccounts, transactions, vouchers } from '@/lib/db/schema';
 import { endOfWeek, endOfYear, startOfMonth, endOfMonth, startOfWeek, today } from '@/lib/php-date';
@@ -321,4 +321,32 @@ export async function accountTree(): Promise<AccountTreeNode[]> {
     }
   }
   return roots;
+}
+
+/**
+ * `VoucherRepository::recieveCategoryAccounts()` - who money can be received
+ * from: every customer account (children of account 5, or receivable group) and
+ * every posting income account bar `04-16-17` and `04-24`.
+ */
+export async function receiveFromAccounts(): Promise<ChartAccountRow[]> {
+  return db
+    .select()
+    .from(chartAccounts)
+    .where(
+      or(
+        and(eq(chartAccounts.parentId, 5), eq(chartAccounts.isGroup, 0)),
+        eq(chartAccounts.configurationGroupId, ConfigurationGroup.Receivable),
+        and(
+          eq(chartAccounts.type, String(AccountType.Income)),
+          eq(chartAccounts.isGroup, 0),
+          notInArray(chartAccounts.code, ['04-16-17', '04-24']),
+        ),
+      ),
+    )
+    .orderBy(chartAccounts.code);
+}
+
+/** `VoucherRepository::get_recieveByAccount_account()` - cash and bank accounts. */
+export async function receiveByAccounts(): Promise<ChartAccountRow[]> {
+  return accountsInGroups([ConfigurationGroup.Cash, ConfigurationGroup.Bank]);
 }

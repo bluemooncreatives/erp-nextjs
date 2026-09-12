@@ -1,0 +1,73 @@
+// The ledger table the staff / customer / supplier history screens shared -
+// an opening-balance row followed by every posting with a running balance.
+
+import { Card } from '@/components/erp/page';
+import { DataTable, Td, Tr } from '@/components/erp/table';
+
+export type LedgerRow = {
+  id: number;
+  dateLabel: string;
+  reference: string;
+  narration: string;
+  debitLabel: string;
+  creditLabel: string;
+  balanceLabel: string;
+};
+
+export function LedgerTable({
+  title,
+  desc,
+  openingLabel,
+  rows,
+  empty = 'No transactions.',
+}: {
+  title: string;
+  desc?: string;
+  openingLabel: string;
+  rows: LedgerRow[];
+  empty?: string;
+}) {
+  return (
+    <Card title={title} desc={desc} bodyClassName="">
+      <DataTable
+        columns={[
+          { label: 'Date' },
+          { label: 'Reference' },
+          { label: 'Description' },
+          { label: 'Debit' },
+          { label: 'Credit' },
+          { label: 'Balance' },
+        ]}
+        isEmpty={false}
+      >
+        <Tr>
+          <Td className="font-medium text-gray-700 dark:text-gray-300">Openning Balance</Td>
+          <Td>{''}</Td>
+          <Td>{''}</Td>
+          <Td>{''}</Td>
+          <Td>{''}</Td>
+          <Td className="text-right">{openingLabel}</Td>
+        </Tr>
+
+        {rows.map((row) => (
+          <Tr key={row.id}>
+            <Td>{row.dateLabel}</Td>
+            <Td>{row.reference}</Td>
+            <Td>{row.narration}</Td>
+            <Td>{row.debitLabel}</Td>
+            <Td>{row.creditLabel}</Td>
+            <Td className="text-right">{row.balanceLabel}</Td>
+          </Tr>
+        ))}
+
+        {rows.length === 0 ? (
+          <Tr>
+            <Td colSpan={6} className="text-center text-gray-500 dark:text-gray-400">
+              {empty}
+            </Td>
+          </Tr>
+        ) : null}
+      </DataTable>
+    </Card>
+  );
+}
