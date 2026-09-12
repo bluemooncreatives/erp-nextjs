@@ -10,8 +10,10 @@ import { activeShowRooms } from '@/lib/setup/repositories';
 import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ReportFilter } from '../../report-filter';
+import { Banknote, FileText, Receipt, Wallet } from 'lucide-react';
 
 export const metadata: Metadata = { title: 'Sale Reports' };
 
@@ -56,8 +58,37 @@ export default async function SalesReportPage({
         breadcrumb={[{ label: 'Reports' }, { label: 'Sale Reports' }]}
       />
 
+      <ReportSummary
+        figures={[
+          {
+            label: 'Invoices',
+            value: numberFormat(rows.length, 0),
+            detail: 'Matching this filter',
+            icon: FileText,
+          },
+          {
+            label: 'Billed',
+            value: `${symbol} ${numberFormat(totals.payable)}`,
+            detail: 'Total payable',
+            icon: Receipt,
+          },
+          {
+            label: 'Collected',
+            value: `${symbol} ${numberFormat(totals.paid)}`,
+            detail: 'Received against these invoices',
+            icon: Wallet,
+          },
+          {
+            label: 'Outstanding',
+            value: `${symbol} ${numberFormat(totals.payable - totals.paid)}`,
+            detail: 'Still owed',
+            icon: Banknote,
+          },
+        ]}
+      />
+
       <Card
-        title={`Sales (${rows.length}) - ${symbol} ${numberFormat(totals.payable)} billed, ${symbol} ${numberFormat(totals.paid)} collected`}
+        title="Sales"
         bodyClassName=""
         actions={
           <ReportFilter

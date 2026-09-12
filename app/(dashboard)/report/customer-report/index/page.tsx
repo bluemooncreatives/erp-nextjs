@@ -1,6 +1,7 @@
 // Customer report - port of CustomerReportController@index.
 
 import type { Metadata } from 'next';
+import { Banknote, FileText, Receipt, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import { authorize } from '@/lib/auth/permissions';
 import { customerReport } from '@/lib/reports/queries';
@@ -8,6 +9,7 @@ import { customerOptions } from '@/lib/contact/queries';
 import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ReportFilter } from '../../report-filter';
 
@@ -43,8 +45,19 @@ export default async function CustomerReportPage({
         breadcrumb={[{ label: 'Reports' }, { label: 'Customer Reports' }]}
       />
 
+      <ReportSummary
+        figures={[
+          { label: 'Invoices', value: numberFormat(rows.length, 0), detail: 'Matching this filter', icon: FileText },
+          { label: 'Billed', value: `${symbol} ${numberFormat(totals.payable)}`, detail: 'Total payable', icon: Receipt },
+          { label: 'Paid', value: `${symbol} ${numberFormat(totals.paid)}`, detail: 'Received', icon: Wallet },
+          { label: 'Due', value: `${symbol} ${numberFormat(due)}`, detail: 'Still owed', icon: Banknote },
+        ]}
+
+      />
+
+
       <Card
-        title={`Invoices (${rows.length}) - ${symbol} ${numberFormat(totals.payable)} billed, ${symbol} ${numberFormat(totals.paid)} paid, ${symbol} ${numberFormat(due)} due`}
+        title="Invoices"
         bodyClassName=""
         actions={
           <ReportFilter

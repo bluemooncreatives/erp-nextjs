@@ -1,6 +1,7 @@
 // Purchase report - port of PurchaseReportController@index / search.
 
 import type { Metadata } from 'next';
+import { Banknote, Receipt, ShoppingCart, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import { authorize } from '@/lib/auth/permissions';
 import { getSession } from '@/lib/auth/session';
@@ -10,6 +11,7 @@ import { activeShowRooms } from '@/lib/setup/repositories';
 import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ReportFilter } from '../../report-filter';
 
@@ -56,8 +58,19 @@ export default async function PurchaseReportPage({
         breadcrumb={[{ label: 'Reports' }, { label: 'Purchase Reports' }]}
       />
 
+      <ReportSummary
+        figures={[
+          { label: 'Orders', value: numberFormat(rows.length, 0), detail: 'Matching this filter', icon: ShoppingCart },
+          { label: 'Billed', value: `${symbol} ${numberFormat(totals.payable)}`, detail: 'Total payable', icon: Receipt },
+          { label: 'Paid', value: `${symbol} ${numberFormat(totals.paid)}`, detail: 'Settled with suppliers', icon: Wallet },
+          { label: 'Outstanding', value: `${symbol} ${numberFormat(totals.payable - totals.paid)}`, detail: 'Still owed', icon: Banknote },
+        ]}
+
+      />
+
+
       <Card
-        title={`Purchases (${rows.length}) - ${symbol} ${numberFormat(totals.payable)} billed, ${symbol} ${numberFormat(totals.paid)} paid`}
+        title="Purchases"
         bodyClassName=""
         actions={
           <ReportFilter

@@ -1,6 +1,7 @@
 // Product-wise sale report - port of SalesReportController@productSales.
 
 import type { Metadata } from 'next';
+import { Boxes, Layers, Receipt } from 'lucide-react';
 import { authorize } from '@/lib/auth/permissions';
 import { getSession } from '@/lib/auth/session';
 import { productSalesReport } from '@/lib/reports/queries';
@@ -8,6 +9,7 @@ import { productsForPurchase } from '@/lib/product/products';
 import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ReportFilter } from '../../report-filter';
 
@@ -46,8 +48,18 @@ export default async function ProductSalesReportPage({
         breadcrumb={[{ label: 'Reports' }, { label: 'Product Wise Sale' }]}
       />
 
+      <ReportSummary
+        figures={[
+          { label: 'Lines', value: numberFormat(rows.length, 0), detail: 'Matching this filter', icon: Layers },
+          { label: 'Units sold', value: numberFormat(totals.quantity, 0), detail: 'Across every line', icon: Boxes },
+          { label: 'Value', value: `${symbol} ${numberFormat(totals.amount)}`, detail: 'Line totals', icon: Receipt },
+        ]}
+
+      />
+
+
       <Card
-        title={`Lines (${rows.length}) - ${numberFormat(totals.quantity, 0)} units, ${symbol} ${numberFormat(totals.amount)}`}
+        title="Product sales"
         bodyClassName=""
         actions={
           <ReportFilter
