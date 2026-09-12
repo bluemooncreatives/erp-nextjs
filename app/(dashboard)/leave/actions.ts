@@ -303,7 +303,7 @@ export async function storePayroll(
   _prev: LeaveFormState,
   formData: FormData,
 ): Promise<LeaveFormState> {
-  const user = await authorize('payroll.store');
+  const user = await authorize('save_payroll');
 
   const staffId = num(formData, 'staff_id');
   if (!staffId) return { fieldErrors: { staff_id: 'Select a staff member.' } };
@@ -353,7 +353,7 @@ export async function storePayroll(
 export async function setPayrollStatusAction(formData: FormData): Promise<void> {
   const id = Number(formData.get('id'));
   const status = String(formData.get('status') ?? 'Paid');
-  const user = await authorize('payroll.edit');
+  const user = await authorize('save_payroll');
 
   await setPayrollStatus(id, status, user.id);
   await successLog(`Payroll ${id} marked ${status}`, user.id);
@@ -362,7 +362,7 @@ export async function setPayrollStatusAction(formData: FormData): Promise<void> 
 
 export async function deletePayrollAction(formData: FormData): Promise<void> {
   const id = Number(formData.get('id'));
-  await authorize('payroll.delete');
+  await authorize('payroll_payment_store');
   await deletePayroll(id);
   revalidatePath(ROUTES['payroll.index']);
 }

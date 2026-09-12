@@ -31,9 +31,9 @@ export default async function PayrollPage({
   });
 
   const [canCreate, canEdit, canDelete] = await Promise.all([
-    can('payroll.store'),
-    can('payroll.edit'),
-    can('payroll.delete'),
+    can('save_payroll'),
+    can('save_payroll'),
+    can('payroll_payment_store'),
   ]);
 
   const staffOptions = canCreate ? await payableStaff() : [];

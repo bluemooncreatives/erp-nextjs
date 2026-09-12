@@ -334,7 +334,7 @@ export async function storeShipping(
   formData: FormData,
 ): Promise<SaleFormState> {
   const saleId = Number(formData.get('sale_id'));
-  const user = await authorize('sale.shipping.store');
+  const user = await authorize('store.shipping');
 
   try {
     await saveShipping({

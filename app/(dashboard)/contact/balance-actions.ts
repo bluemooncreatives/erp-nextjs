@@ -102,7 +102,7 @@ export async function addSupplierBalance(
   formData: FormData,
 ): Promise<BalanceFormState> {
   const contactId = Number(formData.get('contact_id'));
-  const user = await authorize('voucher_payment.store');
+  const user = await authorize('vouchers.store');
 
   const date = text(formData, 'date');
   const amount = Number(formData.get('debit_account_amount'));
@@ -165,7 +165,7 @@ export async function subtractContactBalance(
   formData: FormData,
 ): Promise<BalanceFormState> {
   const contactId = Number(formData.get('contact_id'));
-  const user = await authorize('journal_voucher.store');
+  const user = await authorize('journal.store');
 
   const date = text(formData, 'date');
   const amount = Number(formData.get('sub_amount'));
