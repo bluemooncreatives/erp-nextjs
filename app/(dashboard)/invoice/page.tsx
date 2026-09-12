@@ -39,8 +39,8 @@ export default async function ContactInvoicePage() {
   return (
     <>
       <PageHeader
-        title={isCustomer ? 'Customer Invoice' : 'Supplier Invoice'}
-        breadcrumb={[{ label: 'My Details' }, { label: 'Invoices' }]}
+        title={isCustomer ? 'Customer Invoice':'Supplier Invoice'}
+        breadcrumb={[{ label: 'My Details'}, { label:'Invoices' }]}
       />
 
       <Card title={`Invoices (${rows.length})`} bodyClassName="">
@@ -58,7 +58,7 @@ export default async function ContactInvoicePage() {
           {rows.map((row) => (
             <Tr key={row.id}>
               <Td>{row.dateLabel}</Td>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {row.invoiceNo ?? row.id}
               </Td>
               <Td>{row.refNo ?? '-'}</Td>
@@ -67,7 +67,7 @@ export default async function ContactInvoicePage() {
                   color={row.status === 1 || row.status === 2 ? 'success' : 'warning'}
                   size="sm"
                 >
-                  {row.status === 1 || row.status === 2 ? 'Paid' : 'Unpaid'}
+                  {row.status === 1 || row.status === 2 ? 'Paid':'Unpaid'}
                 </Badge>
               </Td>
               <Td>{row.amountLabel}</Td>

@@ -15,7 +15,7 @@ export function DateRangeFilter({
   accountId?: string;
 }) {
   const control =
-    'h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90';
+    'h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground   ';
 
   return (
     <form action={action} method="get" className="flex flex-wrap items-center gap-2">
@@ -35,7 +35,7 @@ export function DateRangeFilter({
 
       <button
         type="submit"
-        className="h-10 rounded-lg bg-brand-500 px-4 text-sm font-medium text-white hover:bg-brand-600"
+        className="h-10 rounded-lg bg-primary px-4 text-sm font-medium text-white hover:bg-primary"
       >
         Filter
       </button>

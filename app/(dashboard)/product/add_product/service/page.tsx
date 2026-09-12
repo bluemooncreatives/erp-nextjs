@@ -42,7 +42,7 @@ export default async function ServiceListPage({
         actions={
           <Link
             href={ROUTES['add_product.index']}
-            className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
           >
             Add Service
           </Link>
@@ -74,7 +74,7 @@ export default async function ServiceListPage({
         >
           {rows.map((row) => (
             <Tr key={row.id}>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {row.productName}
               </Td>
               <Td>{row.sku}</Td>
@@ -86,7 +86,7 @@ export default async function ServiceListPage({
                   {canEdit && row.productId ? (
                     <Link
                       href={route('add_product.edit', { id: row.productId })}
-                      className="rounded-lg px-2 py-1 text-theme-xs font-medium text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+                      className="rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
                     >
                       Edit
                     </Link>

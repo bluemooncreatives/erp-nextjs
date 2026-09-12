@@ -61,7 +61,7 @@ export function ReceivePanel({
         >
           {items.map((item) => (
             <Tr key={item.productSkuId}>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {item.name}
                 <input type="hidden" name="product_sku_id" value={item.productSkuId} />
               </Td>
@@ -80,7 +80,7 @@ export function ReceivePanel({
                       [item.productSkuId]: Number(e.target.value),
                     }))
                   }
-                  className="h-9 w-24 rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                  className="h-9 w-24 rounded-lg border border-border bg-transparent px-2 text-sm"
                 />
               </Td>
               <Td>
@@ -88,7 +88,7 @@ export function ReceivePanel({
                   type="text"
                   name="serial_no"
                   placeholder="SN1, SN2, ..."
-                  className="h-9 w-48 rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                  className="h-9 w-48 rounded-lg border border-border bg-transparent px-2 text-sm"
                 />
               </Td>
             </Tr>

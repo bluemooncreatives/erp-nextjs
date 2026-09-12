@@ -14,12 +14,12 @@ export const metadata: Metadata = { title: 'User Activity Log' };
 /** The Blade's badge classes, keyed by `log_activity.type`. */
 const TYPE_LABELS: Record<
   number,
-  { label: string; color: 'error' | 'success' | 'warning' | 'info' }
+  { label: string; color: 'error' | 'success' | 'warning'|'info' }
 > = {
-  0: { label: 'Error', color: 'error' },
-  1: { label: 'Success', color: 'success' },
-  2: { label: 'Warning', color: 'warning' },
-  3: { label: 'Info', color: 'info' },
+  0: { label: 'Error', color:'error' },
+  1: { label: 'Success', color:'success' },
+  2: { label: 'Warning', color:'warning' },
+  3: { label: 'Info', color:'info' },
 };
 
 export default async function UserActivityLogPage() {
@@ -30,7 +30,7 @@ export default async function UserActivityLogPage() {
     <>
       <PageHeader
         title="User Activity Log"
-        breadcrumb={[{ label: 'Settings' }, { label: 'User Activity Log' }]}
+        breadcrumb={[{ label: 'Settings'}, { label:'User Activity Log' }]}
       />
 
       <Card title={`Activities (${activities.length})`} bodyClassName="">
@@ -53,7 +53,7 @@ export default async function UserActivityLogPage() {
             return (
               <Tr key={activity.id}>
                 <Td>{index + 1}</Td>
-                <Td className="font-medium text-gray-700 dark:text-gray-300">
+                <Td className="font-medium text-foreground">
                   {activity.subject}
                 </Td>
                 <Td>

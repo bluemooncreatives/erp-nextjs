@@ -48,12 +48,12 @@ export default async function StockAdjustmentListPage({
     <>
       <PageHeader
         title="Stock Adjustment"
-        breadcrumb={[{ label: 'Inventory' }, { label: 'Stock Adjustment' }]}
+        breadcrumb={[{ label: 'Inventory'}, { label:'Stock Adjustment' }]}
         actions={
           canCreate ? (
             <Link
               href={ROUTES['stock_adjustment.create']}
-              className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
             >
               Add Adjustment
             </Link>
@@ -77,7 +77,7 @@ export default async function StockAdjustmentListPage({
         >
           {adjustmentRows.map((adjustment) => (
             <Tr key={adjustment.id}>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {adjustment.refNo ?? adjustment.id}
               </Td>
               <Td>{adjustment.dateLabel}</Td>
@@ -91,8 +91,8 @@ export default async function StockAdjustmentListPage({
               </Td>
               <Td>
                 <div className="flex items-center gap-2">
-                  {canEdit && adjustment.status !== 1 && <Link className="text-brand-500 hover:underline" href={`/inventory/stock-adjustment/edit/${adjustment.id}`}>Edit</Link>}
-                  {canShow && <Link className="text-brand-500 hover:underline" href={`/inventory/stock-adjustment/show/${adjustment.id}`}>Details</Link>}
+                  {canEdit && adjustment.status !== 1 && <Link className="text-primary hover:underline" href={`/inventory/stock-adjustment/edit/${adjustment.id}`}>Edit</Link>}
+                  {canShow && <Link className="text-primary hover:underline" href={`/inventory/stock-adjustment/show/${adjustment.id}`}>Details</Link>}
                   {adjustment.status !== 1 && canApprove ? (
                     <form action={approveAdjustmentAction}>
                       <input type="hidden" name="id" value={adjustment.id} />

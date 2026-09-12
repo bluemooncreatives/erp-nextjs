@@ -58,7 +58,7 @@ export default async function LoanApprovalPage() {
             return (
               <Tr key={row.loan.id}>
                 <Td>{index + 1}</Td>
-                <Td className="font-medium text-gray-700 dark:text-gray-300">
+                <Td className="font-medium text-foreground">
                   {row.userName ?? 'Removed'}
                 </Td>
                 <Td>{row.departmentName ?? '-'}</Td>

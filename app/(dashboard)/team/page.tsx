@@ -27,7 +27,7 @@ export default async function TeamListPage() {
         actions={
           <Link
             href={ROUTES['workspaces.index']}
-            className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-300 transition hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700"
+            className="inline-flex items-center gap-2 rounded-lg bg-card px-4 py-2.5 text-sm font-medium text-foreground ring-1 ring-inset ring-border transition hover:bg-muted"
           >
             Workspaces
           </Link>
@@ -52,24 +52,24 @@ export default async function TeamListPage() {
           >
             {teams.map((team) => (
               <Tr key={team.id}>
-                <Td className="font-medium text-gray-700 dark:text-gray-300">
+                <Td className="font-medium text-foreground">
                   <Link
                     href={route('team.show', { id: team.id })}
-                    className="text-brand-500 hover:text-brand-600"
+                    className="text-primary hover:text-primary"
                   >
                     {team.name}
                   </Link>
                 </Td>
                 <Td>{team.description ?? '-'}</Td>
                 <Td>
-                  <Badge color={team.privacyType === 1 ? 'warning' : 'success'} size="sm">
-                    {team.privacyType === 1 ? 'Private' : 'Public'}
+                  <Badge color={team.privacyType === 1 ? 'warning':'success'} size="sm">
+                    {team.privacyType === 1 ? 'Private':'Public'}
                   </Badge>
                 </Td>
                 <Td>
                   <Link
                     href={`${ROUTES['project.create']}?team_id=${team.id}`}
-                    className="text-theme-xs font-medium text-brand-500 hover:text-brand-600"
+                    className="text-xs font-medium text-primary hover:text-primary"
                   >
                     New project
                   </Link>

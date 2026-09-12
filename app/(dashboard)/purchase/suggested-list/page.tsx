@@ -41,7 +41,7 @@ export default async function StockAlertPage({
         actions={
           <Link
             href={ROUTES['purchase_order.create']}
-            className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
           >
             Create Purchase Order
           </Link>
@@ -59,7 +59,7 @@ export default async function StockAlertPage({
             <select
               name="supplier_id"
               defaultValue={sp.supplier_id ?? ''}
-              className="h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+              className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
             >
               <option value="">All suppliers</option>
               {suppliers.map((s) => (
@@ -96,10 +96,10 @@ export default async function StockAlertPage({
                   type="checkbox"
                   name="sku"
                   value={row.productSkuId}
-                  className="h-4 w-4 rounded border-gray-300 text-brand-500 dark:border-gray-700 dark:bg-gray-900"
+                  className="h-4 w-4 rounded border-border text-primary"
                 />
               </Td>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {row.productName}
               </Td>
               <Td>{row.sku ?? '-'}</Td>
@@ -111,10 +111,10 @@ export default async function StockAlertPage({
         </DataTable>
 
           {rows.length ? (
-            <div className="flex justify-end border-t border-gray-100 px-5 py-3 dark:border-gray-800">
+            <div className="flex justify-end border-t border-border px-5 py-3">
               <button
                 type="submit"
-                className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+                className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
               >
                 Convert to Purchase Order
               </button>

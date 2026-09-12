@@ -14,10 +14,10 @@ const INITIAL: LeaveFormState = {};
 /** The marks `attendances.attendance` accepts. */
 const MARKS = [
   { value: 'P', label: 'Present' },
-  { value: 'A', label: 'Absent' },
-  { value: 'L', label: 'Late' },
-  { value: 'H', label: 'Half day' },
-  { value: 'F', label: 'Holiday' },
+  { value: 'A', label:'Absent' },
+  { value: 'L', label:'Late' },
+  { value: 'H', label:'Half day' },
+  { value: 'F', label:'Holiday' },
 ];
 
 export function AttendanceSheet({
@@ -61,15 +61,15 @@ export function AttendanceSheet({
         </div>
 
         <DataTable
-          columns={[{ label: 'Staff' }, { label: 'Attendance' }, { label: 'Note' }]}
+          columns={[{ label: 'Staff' }, { label: 'Attendance'}, { label:'Note' }]}
           isEmpty={rows.length === 0}
           empty="No active users in this role."
         >
           {rows.map((row) => (
             <Tr key={row.id}>
               <Td>
-                <p className="font-medium text-gray-700 dark:text-gray-300">{row.name}</p>
-                <p className="text-theme-xs text-gray-400">{row.email}</p>
+                <p className="font-medium text-foreground">{row.name}</p>
+                <p className="text-xs text-muted-foreground">{row.email}</p>
                 <input type="hidden" name="user_id" value={row.id} />
               </Td>
               <Td>
@@ -77,7 +77,7 @@ export function AttendanceSheet({
                   name="attendance"
                   value={row.mark}
                   onChange={(e) => patch(row.id, { mark: e.target.value })}
-                  className="h-9 w-36 rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                  className="h-9 w-36 rounded-lg border border-border bg-transparent px-2 text-sm"
                 >
                   {MARKS.map((m) => (
                     <option key={m.value} value={m.value}>
@@ -92,7 +92,7 @@ export function AttendanceSheet({
                   name="note"
                   value={row.note ?? ''}
                   onChange={(e) => patch(row.id, { note: e.target.value })}
-                  className="h-9 w-64 rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                  className="h-9 w-64 rounded-lg border border-border bg-transparent px-2 text-sm"
                 />
               </Td>
             </Tr>

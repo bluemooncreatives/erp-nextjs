@@ -40,7 +40,7 @@ export default async function StockReportPage({
     <>
       <PageHeader
         title="Stock List"
-        breadcrumb={[{ label: 'Inventory' }, { label: 'Stock List' }]}
+        breadcrumb={[{ label: 'Inventory'}, { label:'Stock List' }]}
       />
 
       <Card
@@ -69,7 +69,7 @@ export default async function StockReportPage({
         >
           {rows.map((row) => (
             <Tr key={row.id}>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {row.productName}
               </Td>
               <Td>{row.sku ?? '-'}</Td>

@@ -66,10 +66,10 @@ export default async function ProfileViewPage() {
                 className="h-24 w-24 rounded-full object-cover"
               />
               <div>
-                <p className="text-base font-medium text-gray-800 dark:text-white/90">
+                <p className="text-base font-medium text-foreground">
                   {user.name}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{user.role.name}</p>
+                <p className="text-sm text-muted-foreground">{user.role.name}</p>
               </div>
             </div>
 
@@ -116,7 +116,7 @@ export default async function ProfileViewPage() {
                         href={assetUrl(document.documents) ?? '#'}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-theme-xs font-medium text-brand-500 hover:text-brand-600"
+                        className="text-xs font-medium text-primary hover:text-primary"
                       >
                         Download
                       </a>

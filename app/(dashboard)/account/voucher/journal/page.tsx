@@ -38,12 +38,12 @@ export default async function JournalVouchersPage({
     <>
       <PageHeader
         title="Journal Vouchers"
-        breadcrumb={[{ label: 'Accounts' }, { label: 'Journal' }]}
+        breadcrumb={[{ label: 'Accounts'}, { label:'Journal' }]}
         actions={
           canCreate ? (
             <Link
               href={ROUTES['journal.create']}
-              className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
             >
               Add Journal
             </Link>
@@ -66,13 +66,13 @@ export default async function JournalVouchersPage({
         >
           {voucherRows.map((voucher) => (
             <Tr key={voucher.id}>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {voucher.txId ?? voucher.id}
               </Td>
               <Td>{voucher.dateLabel}</Td>
               <Td className="max-w-sm">
                 {voucher.legs.map((leg, i) => (
-                  <span key={i} className="block text-theme-xs">
+                  <span key={i} className="block text-xs">
                     {leg.type}: {leg.accountName} {symbol} {numberFormat(leg.amount)}
                   </span>
                 ))}
@@ -80,10 +80,10 @@ export default async function JournalVouchersPage({
               <Td>{`${symbol} ${numberFormat(voucher.amount)}`}</Td>
               <Td>
                 <Badge size="sm" color={voucher.isApprove === 1 ? 'success' : 'warning'}>
-                  {voucher.isApprove === 1 ? 'Approved' : 'Pending'}
+                  {voucher.isApprove === 1 ? 'Approved':'Pending'}
                 </Badge>
               </Td>
-              <Td>{canEdit ? <Link className="text-brand-500" href={route('journal.edit', { id: voucher.id })}>Edit</Link> : '-'}</Td>
+              <Td>{canEdit ? <Link className="text-primary" href={route('journal.edit', { id: voucher.id })}>Edit</Link> : '-'}</Td>
             </Tr>
           ))}
         </DataTable>

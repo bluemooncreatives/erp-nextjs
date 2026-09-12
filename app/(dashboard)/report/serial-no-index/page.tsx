@@ -28,7 +28,7 @@ export default async function SerialReportPage({
   ]);
 
   const control =
-    'h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90';
+    'h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground   ';
 
   return (
     <>
@@ -65,7 +65,7 @@ export default async function SerialReportPage({
             </select>
             <button
               type="submit"
-              className="h-10 rounded-lg bg-brand-500 px-4 text-sm font-medium text-white hover:bg-brand-600"
+              className="h-10 rounded-lg bg-primary px-4 text-sm font-medium text-white hover:bg-primary"
             >
               Search
             </button>
@@ -85,7 +85,7 @@ export default async function SerialReportPage({
         >
           {rows.map((r) => (
             <Tr key={r.serial.id}>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {r.serial.seiralNo ?? '-'}
               </Td>
               <Td>{r.productName ?? '-'}</Td>

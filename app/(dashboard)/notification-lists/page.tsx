@@ -58,11 +58,11 @@ export default async function NotificationListPage() {
                     />
                   )}
                 </Td>
-                <Td className="font-medium text-gray-700 dark:text-gray-300">
+                <Td className="font-medium text-foreground">
                   {notification.url ? (
                     <Link
                       href={notification.url}
-                      className="text-brand-500 hover:text-brand-600"
+                      className="text-primary hover:text-primary"
                     >
                       {notification.type}
                     </Link>
@@ -73,7 +73,7 @@ export default async function NotificationListPage() {
                 <Td>{notification.data}</Td>
                 <Td>
                   <Badge color={notification.readAt ? 'light' : 'info'} size="sm">
-                    {notification.readAt ? 'Seen' : 'Unseen'}
+                    {notification.readAt ? 'Seen':'Unseen'}
                   </Badge>
                 </Td>
                 <Td>{toDateTimeString(notification.createdAt) ?? '-'}</Td>

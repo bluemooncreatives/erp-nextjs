@@ -107,7 +107,7 @@ export default async function ShowroomDetailsPage({
         actions={
           <Link
             href={route('product_movement.index', {}, { showroom_id: showroom.id })}
-            className="rounded-lg px-4 py-2.5 text-sm font-medium text-brand-500 ring-1 ring-inset ring-brand-300 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+            className="rounded-lg px-4 py-2.5 text-sm font-medium text-primary ring-1 ring-inset ring-ring/50 hover:bg-primary/10"
           >
             Products
           </Link>
@@ -174,7 +174,7 @@ export default async function ShowroomDetailsPage({
               { label: 'Balance' },
             ]}
             isEmpty={statementRows.length === 0}
-            empty={account ? 'No transactions.' : 'This branch has no ledger account.'}
+            empty={account ? 'No transactions.':'This branch has no ledger account.'}
           >
             {statementRows.map((row) => (
               <Tr key={row.id}>

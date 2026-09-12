@@ -161,10 +161,10 @@ export function StaffForm({
                 name="employment_type"
                 defaultValue={defaults.employmentType ?? 'Permanent'}
                 options={[
-                  { value: 'Permanent', label: 'Permanent' },
-                  { value: 'Contractual', label: 'Contractual' },
-                  { value: 'Part Time', label: 'Part Time' },
-                  { value: 'Intern', label: 'Intern' },
+                  { value: 'Permanent', label:'Permanent' },
+                  { value: 'Contractual', label:'Contractual' },
+                  { value: 'Part Time', label:'Part Time' },
+                  { value: 'Intern', label:'Intern' },
                 ]}
               />
               <FormInput
@@ -255,7 +255,7 @@ export function StaffForm({
       <div className="flex items-center justify-end gap-3">
         <Link
           href={ROUTES['staffs.index']}
-          className="rounded-lg px-5 py-3 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:text-gray-400 dark:ring-gray-700"
+          className="rounded-lg px-5 py-3 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
         >
           Cancel
         </Link>

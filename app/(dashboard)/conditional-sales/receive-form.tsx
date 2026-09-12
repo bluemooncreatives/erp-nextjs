@@ -19,7 +19,7 @@ export function ReceiveOrderForm({ saleId }: { saleId: number }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-lg px-2 py-1 text-theme-xs font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5"
+        className="rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted"
       >
         Receive
       </button>
@@ -48,7 +48,7 @@ export function ReceiveOrderForm({ saleId }: { saleId: number }) {
       <button
         type="button"
         onClick={() => setOpen(false)}
-        className="mb-0.5 rounded-lg px-2 py-1 text-theme-xs font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5"
+        className="mb-0.5 rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted"
       >
         Cancel
       </button>

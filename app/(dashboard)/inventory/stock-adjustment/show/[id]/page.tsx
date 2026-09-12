@@ -35,7 +35,7 @@ export default async function AdjustmentDetails({ params }: { params: Promise<{ 
     ['Location', locationName ?? '-'],
   ];
   return <>
-    <PageHeader title="Stock Adjustment Details" breadcrumb={[{ label: 'Stock Adjustment', href: '/inventory/stock-adjustment/lists' }, { label: String(id) }]} />
+    <PageHeader title="Stock Adjustment Details" breadcrumb={[{ label: 'Stock Adjustment', href:'/inventory/stock-adjustment/lists' }, { label: String(id) }]} />
     <PrintButton />
     <style>{`@media print {
       body * { visibility: hidden; }
@@ -44,19 +44,19 @@ export default async function AdjustmentDetails({ params }: { params: Promise<{ 
     }`}</style>
     <div id="adjustment-print" className="space-y-6">
       <Card title={`Adjustment ${adjustment.refNo ?? id}`}>
-        <dl className="grid gap-4 text-sm text-gray-700 dark:text-gray-300 sm:grid-cols-2">{fields.map(([label, value]) => <div key={label}><dt className="font-semibold">{label}</dt><dd>{value}</dd></div>)}</dl>
+        <dl className="grid gap-4 text-sm text-foreground sm:grid-cols-2">{fields.map(([label, value]) => <div key={label}><dt className="font-semibold">{label}</dt><dd>{value}</dd></div>)}</dl>
       </Card>
       <Card title="Products" bodyClassName="">
-        <DataTable columns={['Product', 'SKU', 'Unit price', 'Quantity', 'Subtotal'].map((label) => ({ label }))} isEmpty={!rows.length}>
+        <DataTable columns={['Product', 'SKU', 'Unit price','Quantity','Subtotal'].map((label) => ({ label }))} isEmpty={!rows.length}>
           {rows.map((item) => <Tr key={item.id}><Td>{item.productName ?? '-'}{item.variant && <div className="text-xs">{item.variant}</div>}</Td><Td>{item.sku ?? '-'}</Td><Td>{item.priceLabel}</Td><Td>{item.qty}</Td><Td>{item.subtotalLabel}</Td></Tr>)}
         </DataTable>
-        <div className="space-y-2 p-6 text-right text-sm text-gray-700 dark:text-gray-300">
+        <div className="space-y-2 p-6 text-right text-sm text-foreground">
           <p>Total products: {items.reduce((sum, item) => sum + item.qty, 0)}</p>
           <p>Total: {await singlePrice(items.reduce((sum, item) => sum + item.subtotal, 0))}</p>
           <p>Total recovery: {await singlePrice(adjustment.recoveryAmount)}</p>
         </div>
       </Card>
-      <Card title="Reason"><p className="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">{adjustment.reason ?? '-'}</p></Card>
+      <Card title="Reason"><p className="whitespace-pre-wrap text-sm text-foreground">{adjustment.reason ?? '-'}</p></Card>
     </div>
   </>;
 }

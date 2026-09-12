@@ -257,7 +257,7 @@ export function PurchaseForm({
         </div>
 
         {state.fieldErrors?.product_id ? (
-          <p className="mb-3 text-xs text-error-500">{state.fieldErrors.product_id}</p>
+          <p className="mb-3 text-xs text-destructive">{state.fieldErrors.product_id}</p>
         ) : null}
 
         <DataTable
@@ -276,7 +276,7 @@ export function PurchaseForm({
         >
           {lines.map((line) => (
             <Tr key={line.key}>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {line.label}
                 <input type="hidden" name="product_id" value={line.productId} />
               </Td>
@@ -324,7 +324,7 @@ export function PurchaseForm({
                   onClick={() =>
                     setLines((prev) => prev.filter((l) => l.key !== line.key))
                   }
-                  className="rounded-lg px-2 py-1 text-theme-xs font-medium text-error-500 hover:bg-error-50 dark:hover:bg-error-500/10"
+                  className="rounded-lg px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10"
                 >
                   Remove
                 </button>
@@ -344,11 +344,11 @@ export function PurchaseForm({
               onChange={(e) => setDiscountType(e.target.value)}
               options={[
                 { value: '2', label: 'Percentage' },
-                { value: '1', label: 'Amount' },
+                { value: '1', label:'Amount' },
               ]}
             />
             <FormInput
-              label={discountType === '2' ? 'Discount (%)' : 'Discount amount'}
+              label={discountType === '2' ? 'Discount (%)':'Discount amount'}
               name="_discount_value"
               type="number"
               step="0.01"
@@ -403,7 +403,7 @@ export function PurchaseForm({
             <Row label={`Tax (${totals.taxRate}%)`} value={money(totals.invoiceTax)} />
             <Row label="Shipping" value={money(shipping)} />
             <Row label="Other charges" value={money(other)} />
-            <div className="border-t border-gray-200 pt-3 dark:border-gray-700">
+            <div className="border-t border-border pt-3">
               <Row label="Payable" value={money(totals.payable)} strong />
             </div>
           </dl>
@@ -417,8 +417,8 @@ export function PurchaseForm({
               onChange={(e) => setPaymentMethod(e.target.value)}
               options={[
                 { value: 'cash', label: 'Cash' },
-                { value: 'bank', label: 'Bank' },
-                { value: 'cheque', label: 'Cheque' },
+                { value: 'bank', label:'Bank' },
+                { value: 'cheque', label:'Cheque' },
               ]}
             />
             <FormInput
@@ -451,7 +451,7 @@ export function PurchaseForm({
       <div className="flex items-center justify-end gap-3">
         <Link
           href={ROUTES['purchase_order.index']}
-          className="rounded-lg px-5 py-3 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:text-gray-400 dark:ring-gray-700"
+          className="rounded-lg px-5 py-3 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
         >
           Cancel
         </Link>
@@ -484,7 +484,7 @@ function NumberCell({
       min={min}
       step={step}
       onChange={(e) => onChange(Number(e.target.value))}
-      className="h-9 w-24 rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+      className="h-9 w-24 rounded-lg border border-border bg-transparent px-2 text-sm"
     />
   );
 }
@@ -500,12 +500,12 @@ function Row({
 }) {
   return (
     <div className="flex items-center justify-between">
-      <dt className="text-gray-500 dark:text-gray-400">{label}</dt>
+      <dt className="text-muted-foreground">{label}</dt>
       <dd
         className={
           strong
-            ? 'text-base font-semibold text-gray-800 dark:text-white/90'
-            : 'text-gray-700 dark:text-gray-300'
+            ? 'text-base font-semibold text-foreground '
+            : 'text-foreground '
         }
       >
         {value}

@@ -42,7 +42,7 @@ export default async function RolesPage() {
     <>
       <PageHeader
         title="Role"
-        breadcrumb={[{ label: 'Human Resource' }, { label: 'Role' }]}
+        breadcrumb={[{ label: 'Human Resource'}, { label:'Role' }]}
       />
 
       <div className="grid grid-cols-12 gap-4 md:gap-6">
@@ -52,7 +52,7 @@ export default async function RolesPage() {
           </div>
         ) : null}
 
-        <div className={canCreate ? 'col-span-12 xl:col-span-8' : 'col-span-12'}>
+        <div className={canCreate ? 'col-span-12 xl:col-span-8':'col-span-12'}>
           <Card title={`Roles (${rows.length})`} bodyClassName="">
             <DataTable
               columns={[
@@ -66,7 +66,7 @@ export default async function RolesPage() {
             >
               {rows.map((row) => (
                 <Tr key={row.role.id}>
-                  <Td className="font-medium text-gray-700 dark:text-gray-300">
+                  <Td className="font-medium text-foreground">
                     {row.role.name}
                   </Td>
                   <Td>
@@ -88,7 +88,7 @@ export default async function RolesPage() {
                       {canEditPermissions && row.role.type !== 'system_user' ? (
                         <Link
                           href={`${ROUTES['permission.permissions.index']}?role_id=${row.role.id}`}
-                          className="rounded-lg px-2 py-1 text-theme-xs font-medium text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+                          className="rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
                         >
                           Permissions
                         </Link>

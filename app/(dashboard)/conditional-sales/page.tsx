@@ -93,14 +93,14 @@ export default async function ConditionalSalePage({
           {saleRows.map((sale) => (
             <Tr key={sale.id}>
               <Td>{sale.dateLabel || '-'}</Td>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {sale.invoiceNo ?? sale.id}
               </Td>
               <Td>{sale.customerName ?? sale.agentName ?? '-'}</Td>
               <Td>{`${symbol} ${numberFormat(sale.payableAmount)}`}</Td>
               <Td>
                 <Badge color={sale.isApproved === 1 ? 'success' : 'warning'} size="sm">
-                  {sale.isApproved === 1 ? 'Approved' : 'Pending'}
+                  {sale.isApproved === 1 ? 'Approved':'Pending'}
                 </Badge>
               </Td>
               <Td>
@@ -113,7 +113,7 @@ export default async function ConditionalSalePage({
                   {canShow ? (
                     <Link
                       href={route('sale.show', { id: sale.id })}
-                      className="rounded-lg px-2 py-1 text-theme-xs font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5"
+                      className="rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted"
                     >
                       Order Details
                     </Link>
@@ -121,7 +121,7 @@ export default async function ConditionalSalePage({
                   {canEdit ? (
                     <Link
                       href={route('sale.edit', { id: sale.id })}
-                      className="rounded-lg px-2 py-1 text-theme-xs font-medium text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+                      className="rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
                     >
                       Edit
                     </Link>

@@ -99,7 +99,7 @@ export default async function LedgerReportPage({
             <select
               name="account_id"
               defaultValue={accountId ? String(accountId) : ''}
-              className="h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+              className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
             >
               <option value="">Select account</option>
               {accounts.map((a) => (
@@ -112,17 +112,17 @@ export default async function LedgerReportPage({
               type="date"
               name="dateFrom"
               defaultValue={from ?? ''}
-              className="h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+              className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
             />
             <input
               type="date"
               name="dateTo"
               defaultValue={to ?? ''}
-              className="h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+              className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
             />
             <button
               type="submit"
-              className="h-10 rounded-lg bg-brand-500 px-4 text-sm font-medium text-white transition hover:bg-brand-600"
+              className="h-10 rounded-lg bg-primary px-4 text-sm font-medium text-white transition hover:bg-primary"
             >
               Search
             </button>
@@ -147,7 +147,7 @@ export default async function LedgerReportPage({
           actions={
             <Link
               href={route('leadger_report.print_view', { slug: account.id })}
-              className="text-theme-xs font-medium text-brand-500 hover:text-brand-600"
+              className="text-xs font-medium text-primary hover:text-primary"
             >
               Print view
             </Link>
@@ -165,7 +165,7 @@ export default async function LedgerReportPage({
             isEmpty={false}
           >
             <Tr>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 Opening Balance
               </Td>
               <Td>{''}</Td>

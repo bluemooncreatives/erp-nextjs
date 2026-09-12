@@ -50,7 +50,7 @@ export default async function PermissionsPage({
     <>
       <PageHeader
         title="Permission"
-        breadcrumb={[{ label: 'Human Resource' }, { label: 'Permission' }]}
+        breadcrumb={[{ label: 'Human Resource'}, { label:'Permission' }]}
         actions={
           <form
             action={ROUTES['permission.permissions.index']}
@@ -60,7 +60,7 @@ export default async function PermissionsPage({
             <select
               name="role_id"
               defaultValue={roleId ?? ''}
-              className="h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+              className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
             >
               <option value="">Select a role</option>
               {roleRows.map((r) => (
@@ -71,7 +71,7 @@ export default async function PermissionsPage({
             </select>
             <button
               type="submit"
-              className="h-10 rounded-lg bg-brand-500 px-4 text-sm font-medium text-white hover:bg-brand-600"
+              className="h-10 rounded-lg bg-primary px-4 text-sm font-medium text-white hover:bg-primary"
             >
               Load
             </button>

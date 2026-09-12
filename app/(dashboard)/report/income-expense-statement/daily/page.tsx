@@ -60,7 +60,7 @@ export default async function DailyIncomeExpensePage({
       <div className="grid gap-5 lg:grid-cols-2">
         <Card title={`Income on ${dateLabel} - ${incomeTotal}`} bodyClassName="">
           <DataTable
-            columns={[{ label: 'Account' }, { label: 'Amount' }]}
+            columns={[{ label: 'Account'}, { label:'Amount' }]}
             isEmpty={incomeRows.length === 0}
             empty="No income on this date."
           >
@@ -75,7 +75,7 @@ export default async function DailyIncomeExpensePage({
 
         <Card title={`Expense on ${dateLabel} - ${expenseTotal}`} bodyClassName="">
           <DataTable
-            columns={[{ label: 'Account' }, { label: 'Amount' }]}
+            columns={[{ label: 'Account'}, { label:'Amount' }]}
             isEmpty={expenseRows.length === 0}
             empty="No expense on this date."
           >
@@ -91,7 +91,7 @@ export default async function DailyIncomeExpensePage({
 
       <div className="mt-5">
         <Card title="Net for the day">
-          <p className="text-2xl font-semibold text-gray-800 dark:text-white/90">{netLabel}</p>
+          <p className="text-2xl font-semibold text-foreground">{netLabel}</p>
         </Card>
       </div>
     </>

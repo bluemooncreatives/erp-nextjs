@@ -32,7 +32,7 @@ export default async function SalesTaxPage({
     <>
       <PageHeader
         title="Sales Tax"
-        breadcrumb={[{ label: 'Accounts' }, { label: 'Sales Tax' }]}
+        breadcrumb={[{ label: 'Accounts'}, { label:'Sales Tax' }]}
         actions={
           <ReportFilter action={ROUTES['sale_tax']} from={sp.from} to={sp.to} />
         }
@@ -59,7 +59,7 @@ export default async function SalesTaxPage({
               <Td>
                 <Link
                   href={route('sale.show', { id: r.sale.id })}
-                  className="font-medium text-brand-500 hover:text-brand-600"
+                  className="font-medium text-primary hover:text-primary"
                 >
                   {r.sale.invoiceNo ?? r.sale.id}
                 </Link>

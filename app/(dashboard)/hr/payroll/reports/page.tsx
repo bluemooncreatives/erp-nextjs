@@ -115,7 +115,7 @@ export default async function PayrollReportPage({
         >
           {decorated.map((row) => (
             <Tr key={row.payroll.id}>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
 {row.staffName ?? '-'}
               </Td>
               <Td>{row.employeeId ?? '-'}</Td>

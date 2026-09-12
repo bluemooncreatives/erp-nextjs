@@ -12,7 +12,7 @@ import { Badge } from '@/components/erp/badge';
 
 export const metadata: Metadata = { title: 'Attendance Report' };
 
-const MARK_COLOUR: Record<string, 'success' | 'error' | 'warning' | 'light'> = {
+const MARK_COLOUR: Record<string, 'success' | 'error' | 'warning'|'light'> = {
   P: 'success',
   A: 'error',
   L: 'warning',
@@ -41,13 +41,13 @@ export default async function AttendanceReportPage({
   const pad = (n: number) => String(n).padStart(2, '0');
 
   const control =
-    'h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90';
+    'h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground   ';
 
   return (
     <>
       <PageHeader
         title="Attendance Report"
-        breadcrumb={[{ label: 'Human Resource' }, { label: 'Attendance Report' }]}
+        breadcrumb={[{ label: 'Human Resource'}, { label:'Attendance Report' }]}
         actions={
           <form
             action={ROUTES['attendance_report.index']}
@@ -82,7 +82,7 @@ export default async function AttendanceReportPage({
             />
             <button
               type="submit"
-              className="h-10 rounded-lg bg-brand-500 px-4 text-sm font-medium text-white hover:bg-brand-600"
+              className="h-10 rounded-lg bg-primary px-4 text-sm font-medium text-white hover:bg-primary"
             >
               Show
             </button>
@@ -96,25 +96,25 @@ export default async function AttendanceReportPage({
         ) : (
           <div className="max-w-full overflow-x-auto custom-scrollbar">
             <table className="min-w-full">
-              <thead className="border-b border-gray-100 dark:border-white/[0.05]">
+              <thead className="border-b border-border ]">
                 <tr>
-                  <th className="px-4 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">
+                  <th className="px-4 py-3 text-start text-xs font-medium text-muted-foreground">
                     Staff
                   </th>
                   {days.map((d) => (
                     <th
                       key={d}
-                      className="px-1 py-3 text-center text-theme-xs font-medium text-gray-500 dark:text-gray-400"
+                      className="px-1 py-3 text-center text-xs font-medium text-muted-foreground"
                     >
                       {d}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+              <tbody className="divide-y divide-border ]">
                 {report.map((row) => (
                   <tr key={row.userId}>
-                    <td className="whitespace-nowrap px-4 py-3 text-theme-sm font-medium text-gray-700 dark:text-gray-300">
+                    <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-foreground">
                       {row.userName}
                     </td>
                     {days.map((d) => {
@@ -127,7 +127,7 @@ export default async function AttendanceReportPage({
                               {mark}
                             </Badge>
                           ) : (
-                            <span className="text-gray-300 dark:text-gray-700">-</span>
+                            <span className="text-muted-foreground dark:text-foreground">-</span>
                           )}
                         </td>
                       );

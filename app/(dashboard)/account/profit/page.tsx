@@ -33,7 +33,7 @@ export default async function ProfitPage({
     <>
       <PageHeader
         title="Profit & Loss"
-        breadcrumb={[{ label: 'Accounts' }, { label: 'Profit & Loss' }]}
+        breadcrumb={[{ label: 'Accounts'}, { label:'Profit & Loss' }]}
         actions={
           <DateRangeFilter action={ROUTES['profit.index']} from={sp.from} to={sp.to} />
         }
@@ -57,13 +57,13 @@ export default async function ProfitPage({
         <div className="col-span-12 lg:col-span-6">
           <Card title="Income" bodyClassName="">
             <DataTable
-              columns={[{ label: 'Account' }, { label: 'Code' }, { label: 'Amount' }]}
+              columns={[{ label: 'Account'}, { label:'Code'}, { label:'Amount' }]}
               isEmpty={pnl.income.length === 0}
               empty="No income in this period."
             >
               {pnl.income.map((row) => (
                 <Tr key={row.id}>
-                  <Td className="font-medium text-gray-700 dark:text-gray-300">
+                  <Td className="font-medium text-foreground">
                     {row.name}
                   </Td>
                   <Td>{row.code ?? '-'}</Td>
@@ -77,13 +77,13 @@ export default async function ProfitPage({
         <div className="col-span-12 lg:col-span-6">
           <Card title="Expense" bodyClassName="">
             <DataTable
-              columns={[{ label: 'Account' }, { label: 'Code' }, { label: 'Amount' }]}
+              columns={[{ label: 'Account'}, { label:'Code'}, { label:'Amount' }]}
               isEmpty={pnl.expense.length === 0}
               empty="No expenses in this period."
             >
               {pnl.expense.map((row) => (
                 <Tr key={row.id}>
-                  <Td className="font-medium text-gray-700 dark:text-gray-300">
+                  <Td className="font-medium text-foreground">
                     {row.name}
                   </Td>
                   <Td>{row.code ?? '-'}</Td>
@@ -109,15 +109,15 @@ function Figure({
 }) {
   const colour =
     tone === 'success'
-      ? 'text-success-600 dark:text-success-400'
+      ? 'text-success'
       : tone === 'error'
-        ? 'text-error-500'
-        : 'text-gray-800 dark:text-white/90';
+        ? 'text-destructive'
+        : 'text-foreground ';
 
   return (
-    <div className="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
-      <dt className="text-sm text-gray-500 dark:text-gray-400">{label}</dt>
-      <dd className={`mt-1 text-title-sm font-bold ${colour}`}>{value}</dd>
+    <div className="rounded-xl border border-border p-4">
+      <dt className="text-sm text-muted-foreground">{label}</dt>
+      <dd className={`mt-1 text-2xl font-bold ${colour}`}>{value}</dd>
     </div>
   );
 }

@@ -37,7 +37,7 @@ export default async function PaymentMethodSettingsPage() {
       </Card>
     ) : (
       <Card title={gateway.gatewayName ?? ''}>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-muted-foreground">
           You do not have permission to edit these credentials.
         </p>
       </Card>
@@ -48,7 +48,7 @@ export default async function PaymentMethodSettingsPage() {
     <>
       <PageHeader
         title="Payment Method Settings"
-        breadcrumb={[{ label: 'Settings' }, { label: 'Payment Method Settings' }]}
+        breadcrumb={[{ label: 'Settings'}, { label:'Payment Method Settings' }]}
       />
 
       <div className="grid gap-5 lg:grid-cols-[300px_1fr]">
@@ -75,7 +75,7 @@ export default async function PaymentMethodSettingsPage() {
             <Tabs tabs={tabs} orientation="horizontal" />
           ) : (
             <Card title="Gateways">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 No payment gateways configured.
               </p>
             </Card>

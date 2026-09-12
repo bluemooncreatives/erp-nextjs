@@ -33,7 +33,7 @@ export default async function AccountBalancePage({
     <>
       <PageHeader
         title="Account Balance"
-        breadcrumb={[{ label: 'Accounts' }, { label: 'Account Balance' }]}
+        breadcrumb={[{ label: 'Accounts'}, { label:'Account Balance' }]}
         actions={
           <DateRangeFilter
             action={ROUTES['account.balance.index']}
@@ -67,7 +67,7 @@ export default async function AccountBalancePage({
           {rows.map((row) => (
             <Tr key={row.id}>
               <Td>{row.code ?? '-'}</Td>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">{row.name}</Td>
+              <Td className="font-medium text-foreground">{row.name}</Td>
               <Td>{accountTypeName(row.type)}</Td>
               <Td>{`${symbol} ${numberFormat(row.debit)}`}</Td>
               <Td>{`${symbol} ${numberFormat(row.credit)}`}</Td>

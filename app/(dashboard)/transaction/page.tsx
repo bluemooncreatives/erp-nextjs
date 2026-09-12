@@ -37,8 +37,8 @@ export default async function ContactTransactionPage() {
   return (
     <>
       <PageHeader
-        title={isCustomer ? 'Customer Transaction' : 'Supplier Transaction'}
-        breadcrumb={[{ label: 'My Details' }, { label: 'Transactions' }]}
+        title={isCustomer ? 'Customer Transaction':'Supplier Transaction'}
+        breadcrumb={[{ label: 'My Details'}, { label:'Transactions' }]}
       />
 
       <Card title={`Transactions (${rows.length}) - balance ${closingLabel}`} bodyClassName="">
@@ -54,7 +54,7 @@ export default async function ContactTransactionPage() {
           isEmpty={false}
         >
           <Tr>
-            <Td className="font-medium text-gray-700 dark:text-gray-300">Openning Balance</Td>
+            <Td className="font-medium text-foreground">Openning Balance</Td>
             <Td>{''}</Td>
             <Td>{''}</Td>
             <Td>{''}</Td>

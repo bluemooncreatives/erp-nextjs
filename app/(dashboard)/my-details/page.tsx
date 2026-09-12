@@ -66,15 +66,15 @@ export default async function MyDetailsPage() {
         actions={
           <div className="flex flex-wrap items-center gap-2">
             {[
-              { href: ROUTES['contact.invoice'], label: 'Invoices' },
-              { href: ROUTES['contact.return'], label: 'Returns' },
-              { href: ROUTES['contact.transaction'], label: 'Transactions' },
-              { href: ROUTES['contact.profile'], label: 'Profile' },
+              { href: ROUTES['contact.invoice'], label:'Invoices' },
+              { href: ROUTES['contact.return'], label:'Returns' },
+              { href: ROUTES['contact.transaction'], label:'Transactions' },
+              { href: ROUTES['contact.profile'], label:'Profile' },
             ].map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="rounded-lg px-3 py-2 text-theme-xs font-medium text-gray-600 transition hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5"
+                className="rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground transition hover:bg-muted"
               >
                 {link.label}
               </Link>
@@ -112,7 +112,7 @@ export default async function MyDetailsPage() {
         </div>
 
         <Card
-          title={isCustomer ? 'Recent invoices' : 'Recent purchase orders'}
+          title={isCustomer ? 'Recent invoices':'Recent purchase orders'}
           desc={
             lastInvoice?.invoiceNo ? `Last invoice ${lastInvoice.invoiceNo}` : undefined
           }
@@ -132,13 +132,13 @@ export default async function MyDetailsPage() {
             {rows.map((row) => (
               <Tr key={row.id}>
                 <Td>{row.dateLabel}</Td>
-                <Td className="font-medium text-gray-700 dark:text-gray-300">
+                <Td className="font-medium text-foreground">
                   {row.invoiceNo ?? row.id}
                 </Td>
                 <Td>{row.amount}</Td>
                 <Td>
                   <Badge color={row.status === 1 ? 'success' : 'warning'} size="sm">
-                    {row.status === 1 ? 'Paid' : 'Unpaid'}
+                    {row.status === 1 ? 'Paid':'Unpaid'}
                   </Badge>
                 </Td>
                 {isCustomer ? (
@@ -148,7 +148,7 @@ export default async function MyDetailsPage() {
                     ) : (
                       <Link
                         href={route('contact.my_payment', { id: row.id })}
-                        className="rounded-lg px-2 py-1 text-theme-xs font-medium text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+                        className="rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
                       >
                         Pay
                       </Link>

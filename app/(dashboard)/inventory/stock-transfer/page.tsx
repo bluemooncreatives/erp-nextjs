@@ -58,12 +58,12 @@ export default async function StockTransferListPage({
     <>
       <PageHeader
         title="Stock Transfer"
-        breadcrumb={[{ label: 'Inventory' }, { label: 'Stock Transfer' }]}
+        breadcrumb={[{ label: 'Inventory'}, { label:'Stock Transfer' }]}
         actions={
           canCreate ? (
             <Link
               href={ROUTES['stock-transfer.create']}
-              className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
             >
               Add Transfer
             </Link>
@@ -99,9 +99,9 @@ export default async function StockTransferListPage({
               </Td>
               <Td>
                 <div className="flex items-center gap-2">
-                  {canEdit && transfer.status === 0 && !transfer.receivedAt && <Link className="text-brand-500 hover:underline" href={`/inventory/stock-transfer/${transfer.id}/edit`}>Edit</Link>}
+                  {canEdit && transfer.status === 0 && !transfer.receivedAt && <Link className="text-primary hover:underline" href={`/inventory/stock-transfer/${transfer.id}/edit`}>Edit</Link>}
                   {canApprove && transfer.status === 0 && <form action={changeTransferStatusAction}><input type="hidden" name="id" value={transfer.id} /><ActionButton variant="primary">Approve</ActionButton></form>}
-                  {canShow && <Link className="text-brand-500 hover:underline" href={`/inventory/stock-transfer/${transfer.id}`}>Details</Link>}
+                  {canShow && <Link className="text-primary hover:underline" href={`/inventory/stock-transfer/${transfer.id}`}>Details</Link>}
                   {!transfer.sentAt && canSend ? (
                     <form action={sendTransferAction}>
                       <input type="hidden" name="id" value={transfer.id} />

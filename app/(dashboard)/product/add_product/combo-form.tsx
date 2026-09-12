@@ -149,7 +149,7 @@ export function ComboForm({
             </div>
           ))}
           {items.length === 0 ? (
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-muted-foreground">
               This combo has no items.
             </p>
           ) : null}
@@ -160,7 +160,7 @@ export function ComboForm({
         <SubmitButton>Update</SubmitButton>
         <Link
           href={ROUTES['add_product.create']}
-          className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5"
+          className="rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted"
         >
           Cancel
         </Link>

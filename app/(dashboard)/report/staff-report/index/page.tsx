@@ -91,7 +91,7 @@ export default async function StaffReportPage({
           {decorated.map((row) => (
             <Tr key={row.staff.id}>
               <Td>{row.staff.employeeId ?? '-'}</Td>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {row.user.name}
               </Td>
               <Td>{row.roleName ?? '-'}</Td>
@@ -106,7 +106,7 @@ export default async function StaffReportPage({
               <Td>
                 <Link
                   href={route('staff_report.history', { id: row.staff.id })}
-                  className="text-theme-xs font-medium text-brand-500 hover:text-brand-600"
+                  className="text-xs font-medium text-primary hover:text-primary"
                 >
                   History
                 </Link>

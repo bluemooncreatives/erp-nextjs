@@ -61,7 +61,7 @@ export default async function PurchaseOrderListPage({
           canCreate ? (
             <Link
               href={ROUTES['purchase_order.create']}
-              className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
             >
               Add Purchase Order
             </Link>
@@ -101,7 +101,7 @@ export default async function PurchaseOrderListPage({
               <Td>
                 <Link
                   href={route('purchase_order.show', { id: order.id })}
-                  className="font-medium text-brand-500 hover:text-brand-600"
+                  className="font-medium text-primary hover:text-primary"
                 >
                   {order.invoiceNo || order.id}
                 </Link>

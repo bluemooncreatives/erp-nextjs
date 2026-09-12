@@ -49,13 +49,13 @@ export default async function QuotationDetailPage({
           <div className="flex items-center gap-2">
             <Link
               href={route('quotation.order.print_view', { id: quotation.id })}
-              className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:text-gray-400 dark:ring-gray-700"
+              className="rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
             >
               Print
             </Link>
             <Link
               href={route('quotation.order.pdf', { id: quotation.id })}
-              className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:text-gray-400 dark:ring-gray-700"
+              className="rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
             >
               Export
             </Link>
@@ -103,7 +103,7 @@ export default async function QuotationDetailPage({
               ]}
             />
             {quotation.notes ? (
-              <p className="mt-5 whitespace-pre-line text-sm text-gray-600 dark:text-gray-400">
+              <p className="mt-5 whitespace-pre-line text-sm text-muted-foreground">
                 {quotation.notes}
               </p>
             ) : null}
@@ -123,7 +123,7 @@ export default async function QuotationDetailPage({
             >
               {items.map((item) => (
                 <Tr key={item.id}>
-                  <Td className="font-medium text-gray-700 dark:text-gray-300">
+                  <Td className="font-medium text-foreground">
                     {item.name ?? item.sku ?? item.productSkuId}
                   </Td>
                   <Td>{money(item.price)}</Td>
@@ -145,7 +145,7 @@ export default async function QuotationDetailPage({
               <Row label="Tax" value={money(quotation.totalVat)} />
               <Row label="Shipping" value={money(quotation.shippingCharge)} />
               <Row label="Other charges" value={money(quotation.otherCharge)} />
-              <div className="border-t border-gray-200 pt-3 dark:border-gray-700">
+              <div className="border-t border-border pt-3">
                 <Row label="Payable" value={money(quotation.payableAmount)} strong />
               </div>
             </dl>
@@ -167,12 +167,12 @@ function Row({
 }) {
   return (
     <div className="flex items-center justify-between">
-      <dt className="text-gray-500 dark:text-gray-400">{label}</dt>
+      <dt className="text-muted-foreground">{label}</dt>
       <dd
         className={
           strong
-            ? 'text-base font-semibold text-gray-800 dark:text-white/90'
-            : 'text-gray-700 dark:text-gray-300'
+            ? 'text-base font-semibold text-foreground '
+            : 'text-foreground '
         }
       >
         {value}

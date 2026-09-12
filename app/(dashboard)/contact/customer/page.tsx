@@ -22,11 +22,11 @@ export default async function CustomerPage({
     <>
       <PageHeader
         title="Customer"
-        breadcrumb={[{ label: 'Contacts' }, { label: 'Customer' }]}
+        breadcrumb={[{ label: 'Contacts'}, { label:'Customer' }]}
         actions={
           <Link
             href={`${ROUTES['add_contact.create']}?type=Customer`}
-            className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
           >
             Add Customer
           </Link>

@@ -27,7 +27,7 @@ export default async function BackupPage() {
     <>
       <PageHeader
         title="Database Backup"
-        breadcrumb={[{ label: 'Settings' }, { label: 'Database Backup' }]}
+        breadcrumb={[{ label: 'Settings'}, { label:'Database Backup' }]}
       />
 
       <div className="grid gap-5 lg:grid-cols-[320px_1fr]">
@@ -58,7 +58,7 @@ export default async function BackupPage() {
             {backups.map((backup, index) => (
               <Tr key={backup.folder}>
                 <Td>{index + 1}</Td>
-                <Td className="font-medium text-gray-700 dark:text-gray-300">
+                <Td className="font-medium text-foreground">
                   {backup.folder}
                 </Td>
                 <Td>{backup.fileName}</Td>
@@ -66,7 +66,7 @@ export default async function BackupPage() {
                   {/* The Blade hid the link in demo mode (`APP_SYNC`). */}
                   {config.app.sync ? (
                     <span
-                      className="text-theme-xs text-gray-400"
+                      className="text-xs text-muted-foreground"
                       title="Restricted in demo mode"
                     >
                       Download
@@ -75,7 +75,7 @@ export default async function BackupPage() {
                     <a
                       href={backup.downloadUrl}
                       download={backup.fileName}
-                      className="text-theme-xs font-medium text-brand-500 hover:text-brand-600"
+                      className="text-xs font-medium text-primary hover:text-primary"
                     >
                       Download
                     </a>

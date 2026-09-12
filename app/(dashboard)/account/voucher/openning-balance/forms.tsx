@@ -95,9 +95,9 @@ function LineTable({
 
   return (
     <div>
-      <p className="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">{title}</p>
+      <p className="mb-3 text-sm font-medium text-foreground">{title}</p>
       <DataTable
-        columns={[{ label: 'Account' }, { label: 'Amount' }, { label: '' }]}
+        columns={[{ label: 'Account'}, { label:'Amount'}, { label:'' }]}
         isEmpty={false}
       >
         {lines.map((line) => (
@@ -107,7 +107,7 @@ function LineTable({
                 name={accountField}
                 value={line.accountId}
                 onChange={(e) => patch(line.key, { accountId: e.target.value })}
-                className="h-9 w-64 rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                className="h-9 w-64 rounded-lg border border-border bg-transparent px-2 text-sm"
               >
                 <option value="">Select account</option>
                 {accounts.map((a) => (
@@ -125,7 +125,7 @@ function LineTable({
                 name={amountField}
                 value={line.amount}
                 onChange={(e) => patch(line.key, { amount: Number(e.target.value) })}
-                className="h-9 w-32 rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                className="h-9 w-32 rounded-lg border border-border bg-transparent px-2 text-sm"
               />
             </Td>
             <Td>
@@ -133,7 +133,7 @@ function LineTable({
                 <button
                   type="button"
                   onClick={() => setLines((prev) => prev.filter((l) => l.key !== line.key))}
-                  className="rounded-lg px-2 py-1 text-theme-xs font-medium text-error-500 hover:bg-error-50 dark:hover:bg-error-500/10"
+                  className="rounded-lg px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10"
                 >
                   Remove
                 </button>
@@ -148,7 +148,7 @@ function LineTable({
         onClick={() =>
           setLines((prev) => [...prev, { key: Date.now(), accountId: '', amount: 0 }])
         }
-        className="mt-3 rounded-lg px-4 py-2.5 text-sm font-medium text-brand-500 ring-1 ring-inset ring-brand-300 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+        className="mt-3 rounded-lg px-4 py-2.5 text-sm font-medium text-primary ring-1 ring-inset ring-ring/50 hover:bg-primary/10"
       >
         Add line
       </button>

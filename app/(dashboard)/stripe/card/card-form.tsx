@@ -99,33 +99,33 @@ export function StripeCardForm({
         <div>
           <label
             htmlFor="card-holder-name"
-            className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
+            className="mb-1.5 block text-sm font-medium text-foreground"
           >
             Card Holder Name
           </label>
           <input
             id="card-holder-name"
             name="card-holder-name"
-            className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+            className="h-11 w-full rounded-lg border border-border bg-transparent px-4 text-sm text-foreground shadow-xs focus:border-ring focus:outline-none"
           />
         </div>
 
         <div>
-          <span className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+          <span className="mb-1.5 block text-sm font-medium text-foreground">
             Card
           </span>
           <div
             id="card-element"
-            className="rounded-lg border border-gray-300 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-900"
+            className="rounded-lg border border-border bg-card px-4 py-3"
           />
         </div>
 
         <button
           type="submit"
           disabled={!publishableKey || submitting}
-          className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {submitting ? 'Verifying...' : 'Pay'}
+          {submitting ? 'Verifying...':'Pay'}
         </button>
       </form>
     </Card>

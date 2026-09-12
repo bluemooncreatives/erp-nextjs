@@ -92,8 +92,8 @@ export default async function IncomeStatementPage({
                 <Td className="text-right">{cogsLabel}</Td>
               </Tr>
               <Tr>
-                <Td className="font-medium text-gray-700 dark:text-gray-300">Gross Profit</Td>
-                <Td className="text-right font-medium text-gray-700 dark:text-gray-300">
+                <Td className="font-medium text-foreground">Gross Profit</Td>
+                <Td className="text-right font-medium text-foreground">
                   {grossLabel}
                 </Td>
               </Tr>
@@ -103,7 +103,7 @@ export default async function IncomeStatementPage({
           <div className="grid gap-5 lg:grid-cols-2">
             <Card title={`Other Income - ${incomeTotal}`} bodyClassName="">
               <DataTable
-                columns={[{ label: 'Account' }, { label: 'Amount' }]}
+                columns={[{ label: 'Account'}, { label:'Amount' }]}
                 isEmpty={incomeRows.length === 0}
                 empty="No income accounts moved in this period."
               >
@@ -118,7 +118,7 @@ export default async function IncomeStatementPage({
 
             <Card title={`Expenses - ${expenseTotal}`} bodyClassName="">
               <DataTable
-                columns={[{ label: 'Account' }, { label: 'Amount' }]}
+                columns={[{ label: 'Account'}, { label:'Amount' }]}
                 isEmpty={expenseRows.length === 0}
                 empty="No expense accounts moved in this period."
               >
@@ -133,10 +133,10 @@ export default async function IncomeStatementPage({
           </div>
 
           <Card title="Net Profit">
-            <p className="text-2xl font-semibold text-gray-800 dark:text-white/90">
+            <p className="text-2xl font-semibold text-foreground">
               {netLabel}
             </p>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            <p className="mt-1 text-sm text-muted-foreground">
               Gross profit less expenses plus other income.
             </p>
           </Card>

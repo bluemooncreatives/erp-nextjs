@@ -78,7 +78,7 @@ export default async function PurchaseReturnListPage({
               <Td>
                 <Link
                   href={route('purchase_order.show', { id: order.id })}
-                  className="font-medium text-brand-500 hover:text-brand-600"
+                  className="font-medium text-primary hover:text-primary"
                 >
                   {order.invoiceNo || order.id}
                 </Link>

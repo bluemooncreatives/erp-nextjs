@@ -37,11 +37,11 @@ export default async function OpeningBalanceIndexPage() {
     <>
       <PageHeader
         title="Opening Balance"
-        breadcrumb={[{ label: 'Accounts' }, { label: 'Opening Balance' }]}
+        breadcrumb={[{ label: 'Accounts'}, { label:'Opening Balance' }]}
         actions={
           <Link
             href={ROUTES['openning_balance.create']}
-            className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs transition hover:bg-brand-600"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-xs transition hover:bg-primary"
           >
             Add Opening Balance
           </Link>
@@ -63,7 +63,7 @@ export default async function OpeningBalanceIndexPage() {
           {rows.map((row, index) => (
             <Tr key={row.period.id}>
               <Td>{index + 1}</Td>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {row.startLabel}
               </Td>
               <Td>{row.endLabel}</Td>
@@ -77,7 +77,7 @@ export default async function OpeningBalanceIndexPage() {
                   {canEdit ? (
                     <Link
                       href={route('openning_balance.edit', { id: row.period.id })}
-                      className="text-theme-xs font-medium text-brand-500 hover:text-brand-600"
+                      className="text-xs font-medium text-primary hover:text-primary"
                     >
                       Edit
                     </Link>
@@ -89,7 +89,7 @@ export default async function OpeningBalanceIndexPage() {
                         type="date"
                         name="date"
                         defaultValue={today()}
-                        className="h-8 rounded-lg border border-gray-300 bg-transparent px-2 text-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                        className="h-8 rounded-lg border border-border bg-transparent px-2 text-xs"
                       />
                       <ActionButton
                         variant="primary"

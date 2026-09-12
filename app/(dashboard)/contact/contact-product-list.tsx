@@ -43,11 +43,11 @@ export async function ContactProductList({
         title={`${contactName} - Products`}
         breadcrumb={[
           { label: 'Contacts' },
-          { label: isCustomer ? 'Customer' : 'Supplier' },
+          { label: isCustomer ? 'Customer':'Supplier' },
           { label: 'Products' },
         ]}
       />
-      <Card title={isCustomer ? 'Sold Products' : 'Purchased Products'} bodyClassName="">
+      <Card title={isCustomer ? 'Sold Products':'Purchased Products'} bodyClassName="">
         <DataTable
           columns={[
             { label: 'Product Name' },
@@ -68,7 +68,7 @@ export async function ContactProductList({
               <Td>
                 {row.productName ?? row.comboName ?? '-'}
                 {variantNames[index] ? (
-                  <span className="block text-theme-xs text-gray-400">
+                  <span className="block text-xs text-muted-foreground">
                     ({variantNames[index]})
                   </span>
                 ) : null}

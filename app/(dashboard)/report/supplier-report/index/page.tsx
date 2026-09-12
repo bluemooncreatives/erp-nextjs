@@ -79,7 +79,7 @@ export default async function SupplierReportPage({
               <Td>
                 <Link
                   href={route('purchase_order.show', { id: r.order.id })}
-                  className="font-medium text-brand-500 hover:text-brand-600"
+                  className="font-medium text-primary hover:text-primary"
                 >
                   {r.order.invoiceNo || r.order.id}
                 </Link>

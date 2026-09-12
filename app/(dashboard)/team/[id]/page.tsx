@@ -51,7 +51,7 @@ export default async function TeamShowPage({
         actions={
           <Link
             href={`${ROUTES['project.create']}?team_id=${team.id}`}
-            className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs transition hover:bg-brand-600"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-xs transition hover:bg-primary"
           >
             New Project
           </Link>
@@ -67,10 +67,10 @@ export default async function TeamShowPage({
           >
             {projectRows.map((row) => (
               <Tr key={row.project.id}>
-                <Td className="font-medium text-gray-700 dark:text-gray-300">
+                <Td className="font-medium text-foreground">
                   <Link
                     href={route('project.show', { uuid: row.project.uuid })}
-                    className="text-brand-500 hover:text-brand-600"
+                    className="text-primary hover:text-primary"
                   >
                     {row.project.name}
                   </Link>
@@ -101,7 +101,7 @@ export default async function TeamShowPage({
             >
               {members.map((member) => (
                 <Tr key={member.id}>
-                  <Td className="font-medium text-gray-700 dark:text-gray-300">
+                  <Td className="font-medium text-foreground">
                     {member.name}
                   </Td>
                   <Td>{member.email ?? '-'}</Td>

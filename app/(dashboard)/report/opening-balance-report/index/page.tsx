@@ -84,7 +84,7 @@ export default async function OpeningBalanceReportPage({
           {decorated.map((row) => (
             <Tr key={row.row.id}>
               <Td>{row.dateLabel}</Td>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {`${row.accountName ?? '-'}${row.accountCode ? ` (${row.accountCode})` : ''}`}
               </Td>
               <Td className="capitalize">{row.row.type ?? '-'}</Td>

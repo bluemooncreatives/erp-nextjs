@@ -94,8 +94,8 @@ export async function StaffDetail({ id }: { id: number }) {
           { label: 'Phone', value: staff.phone ?? '-' },
           { label: 'Role', value: roleName ?? '-' },
           { label: 'Department', value: departmentName ?? '-' },
-          { label: 'Branch', value: showroomName ?? '-' },
-          { label: 'Warehouse', value: warehouseName ?? '-' },
+          { label: 'Branch', value: showroomName ??'-' },
+          { label: 'Warehouse', value: warehouseName ??'-' },
           { label: 'Employment Type', value: staff.employmentType ?? '-' },
           { label: 'Date of Joining', value: await dateConvert(staff.dateOfJoining) },
           { label: 'Date of Birth', value: await dateConvert(staff.dateOfBirth) },
@@ -116,7 +116,7 @@ export async function StaffDetail({ id }: { id: number }) {
     <div className="space-y-5">
       <Card title="Documents" bodyClassName="">
         <DataTable
-          columns={[{ label: 'Document Title' }, { label: 'Action' }]}
+          columns={[{ label: 'Document Title'}, { label:'Action' }]}
           isEmpty={found.documents.length === 0}
           empty="No documents uploaded."
         >
@@ -130,7 +130,7 @@ export async function StaffDetail({ id }: { id: number }) {
                       href={assetUrl(doc.documents) ?? '#'}
                       target="_blank"
                       rel="noreferrer"
-                      className="rounded-lg px-2 py-1 text-theme-xs font-medium text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+                      className="rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
                     >
                       View
                     </a>
@@ -276,7 +276,7 @@ export async function StaffDetail({ id }: { id: number }) {
           canEdit ? (
             <Link
               href={route('staffs.edit', { id: staff.id })}
-              className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
             >
               Edit
             </Link>
@@ -296,10 +296,10 @@ export async function StaffDetail({ id }: { id: number }) {
               unoptimized
             />
             <div>
-              <p className="text-lg font-medium text-gray-800 dark:text-white/90">
+              <p className="text-lg font-medium text-foreground">
                 {user.name}
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 {roleName ?? '-'} &middot; {departmentName ?? '-'}
               </p>
             </div>
@@ -310,11 +310,11 @@ export async function StaffDetail({ id }: { id: number }) {
           orientation="horizontal"
           tabs={[
             { id: 'profile', label: 'Profile', content: profilePanel },
-            { id: 'documents', label: 'Documents', content: documentsPanel },
+            { id: 'documents', label:'Documents', content: documentsPanel },
             { id: 'leave', label: 'Leave', content: leavePanel },
             { id: 'payroll', label: 'Payroll', content: payrollPanel },
-            { id: 'loans', label: 'Loans', content: loanPanel },
-            { id: 'transactions', label: 'Transactions', content: transactionPanel },
+            { id: 'loans', label:'Loans', content: loanPanel },
+            { id: 'transactions', label:'Transactions', content: transactionPanel },
           ]}
         />
       </div>

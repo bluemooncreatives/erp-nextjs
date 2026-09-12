@@ -61,7 +61,7 @@ export function ReceiptVoucherForm({ fromAccounts, byAccounts, defaults }: {
         <FormInput label="Date" name="date" type="date" required defaultValue={defaults.date} error={state.fieldErrors?.date} />
         <FormSelect label="Received from" name="credit_account_id" required options={fromAccounts} placeholder="Select account" defaultValue={defaults.creditAccountId} onChange={(event) => void selectFrom(event.target.value)} error={state.fieldErrors?.credit_account_id} />
         {!defaults.id ? <div>
-          <FormSelect key={invoiceKey} label="Invoice" name="invoice_id" options={invoices} placeholder={loading ? 'Loading invoices...' : 'Select invoice (optional)'} disabled={loading || invoices.length === 0} error={state.fieldErrors?.invoice_id} />
+          <FormSelect key={invoiceKey} label="Invoice" name="invoice_id" options={invoices} placeholder={loading ? 'Loading invoices...':'Select invoice (optional)'} disabled={loading || invoices.length === 0} error={state.fieldErrors?.invoice_id} />
           <FormAlert variant="error" message={invoiceError} />
         </div> : null}
         <FormInput label="Amount" name="debit_account_amount" type="number" step="0.01" min="0.01" required defaultValue={defaults.amount} error={state.fieldErrors?.debit_account_amount} />
@@ -76,7 +76,7 @@ export function ReceiptVoucherForm({ fromAccounts, byAccounts, defaults }: {
       <FormInput label="Cheque Date" name="cheque_date" type="date" required defaultValue={defaults.chequeDate ?? ''} />
     </div></Card> : null}
     <div className="flex items-center justify-end gap-4">
-      <Link href={ROUTES['voucher_recieve.index']} className="text-sm text-gray-500">Cancel</Link>
+      <Link href={ROUTES['voucher_recieve.index']} className="text-sm text-muted-foreground">Cancel</Link>
       <SubmitButton disabled={loading || !!invoiceError}>{defaults.id ? 'Update Receipt' : 'Save Receipt'}</SubmitButton>
     </div>
   </form>;

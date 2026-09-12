@@ -28,7 +28,7 @@ export default async function ExpenseBySupplierPage({
     <>
       <PageHeader
         title="Expense By Supplier"
-        breadcrumb={[{ label: 'Accounts' }, { label: 'Expense By Supplier' }]}
+        breadcrumb={[{ label: 'Accounts'}, { label:'Expense By Supplier' }]}
         actions={
           <ReportFilter
             action={ROUTES['expense_by_supplier']}
@@ -49,7 +49,7 @@ export default async function ExpenseBySupplierPage({
         >
           {rows.map((r) => (
             <Tr key={r.supplierId ?? 'none'}>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {r.supplierName ?? 'Unassigned'}
               </Td>
               <Td>{r.orders}</Td>

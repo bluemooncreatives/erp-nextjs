@@ -26,17 +26,17 @@ export function InvoicePaymentForm({
   return (
     <Card title="Make a Payment">
       <div className="mb-5 flex flex-wrap gap-8 text-sm">
-        <p className="text-gray-500 dark:text-gray-400">
-          Total Paid: <span className="font-medium text-gray-800 dark:text-white/90">{paidLabel}</span>
+        <p className="text-muted-foreground">
+          Total Paid: <span className="font-medium text-foreground">{paidLabel}</span>
         </p>
-        <p className="text-gray-500 dark:text-gray-400">
-          Due: <span className="font-medium text-gray-800 dark:text-white/90">{dueLabel}</span>
+        <p className="text-muted-foreground">
+          Due: <span className="font-medium text-foreground">{dueLabel}</span>
         </p>
       </div>
 
       <form
         action={isPaypal ? ROUTES['paypal.process'] : ROUTES['stripe.index']}
-        method={isPaypal ? 'POST' : 'GET'}
+        method={isPaypal ? 'POST':'GET'}
         className="space-y-5"
       >
         <input type="hidden" name="sale_id" value={saleId} />
@@ -69,7 +69,7 @@ export function InvoicePaymentForm({
         <button
           type="submit"
           disabled={!method || due <= 0}
-          className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
         >
           Continue
         </button>

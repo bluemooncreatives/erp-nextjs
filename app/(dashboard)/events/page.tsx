@@ -67,7 +67,7 @@ export default async function EventsPage({
               {rows.map((row, index) => (
                 <Tr key={row.event.id}>
                   <Td>{index + 1}</Td>
-                  <Td className="font-medium text-gray-700 dark:text-gray-300">
+                  <Td className="font-medium text-foreground">
                     <span className="flex items-center gap-2">
                       {row.event.image ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -88,7 +88,7 @@ export default async function EventsPage({
                     <div className="flex items-center gap-2">
                       <Link
                         href={`${ROUTES['events.index']}?edit=${row.event.id}`}
-                        className="text-theme-xs font-medium text-brand-500 hover:text-brand-600"
+                        className="text-xs font-medium text-primary hover:text-primary"
                       >
                         Edit
                       </Link>
@@ -116,13 +116,13 @@ export default async function EventsPage({
             >
               {todoRows.map((row) => (
                 <Tr key={row.todo.id}>
-                  <Td className="font-medium text-gray-700 dark:text-gray-300">
+                  <Td className="font-medium text-foreground">
                     {row.todo.title}
                   </Td>
                   <Td>{row.dateLabel}</Td>
                   <Td>
                     <Badge color={row.todo.status === 1 ? 'success' : 'warning'} size="sm">
-                      {row.todo.status === 1 ? 'Complete' : 'Pending'}
+                      {row.todo.status === 1 ? 'Complete':'Pending'}
                     </Badge>
                   </Td>
                   <Td>
@@ -146,7 +146,7 @@ export default async function EventsPage({
         </div>
 
         <div className="space-y-5">
-          <Card title={editing ? 'Edit Event' : 'Add Event'}>
+          <Card title={editing ? 'Edit Event':'Add Event'}>
             <EventForm
               event={
                 editing
@@ -167,7 +167,7 @@ export default async function EventsPage({
               <div className="pt-4">
                 <Link
                   href={ROUTES['events.index']}
-                  className="text-theme-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400"
+                  className="text-xs font-medium text-muted-foreground hover:text-foreground"
                 >
                   Cancel
                 </Link>

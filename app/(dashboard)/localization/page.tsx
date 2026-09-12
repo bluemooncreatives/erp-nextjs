@@ -38,7 +38,7 @@ export default async function LocalizationPage({
     <>
       <PageHeader
         title="Language List"
-        breadcrumb={[{ label: 'Settings' }, { label: 'Languages' }]}
+        breadcrumb={[{ label: 'Settings'}, { label:'Languages' }]}
       />
 
       <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
@@ -68,7 +68,7 @@ export default async function LocalizationPage({
             {rows.map((language, index) => (
               <Tr key={language.id}>
                 <Td>{index + 1}</Td>
-                <Td className="font-medium text-gray-700 dark:text-gray-300">
+                <Td className="font-medium text-foreground">
                   {language.name}
                 </Td>
                 <Td>{language.code}</Td>
@@ -92,7 +92,7 @@ export default async function LocalizationPage({
                     {canEdit ? (
                       <Link
                         href={`${ROUTES['languages.index']}?edit=${language.id}`}
-                        className="text-theme-xs font-medium text-brand-500 hover:text-brand-600"
+                        className="text-xs font-medium text-primary hover:text-primary"
                       >
                         Edit
                       </Link>
@@ -100,7 +100,7 @@ export default async function LocalizationPage({
                     {canTranslate ? (
                       <Link
                         href={route('language.translate_view', { id: language.id })}
-                        className="text-theme-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400"
+                        className="text-xs font-medium text-muted-foreground hover:text-foreground"
                       >
                         Translation
                       </Link>
@@ -120,13 +120,13 @@ export default async function LocalizationPage({
         </Card>
 
         {canCreate || (editing && canEdit) ? (
-          <Card title={editing ? 'Edit Language' : 'Add New Language'}>
+          <Card title={editing ? 'Edit Language':'Add New Language'}>
             <LanguageForm language={editing} />
             {editing ? (
               <div className="pt-4">
                 <Link
                   href={ROUTES['languages.index']}
-                  className="text-theme-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400"
+                  className="text-xs font-medium text-muted-foreground hover:text-foreground"
                 >
                   Cancel
                 </Link>

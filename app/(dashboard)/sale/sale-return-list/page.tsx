@@ -76,7 +76,7 @@ export default async function SaleReturnListPage({
               <Td>
                 <Link
                   href={route('sale.show', { id: sale.id })}
-                  className="font-medium text-brand-500 hover:text-brand-600"
+                  className="font-medium text-primary hover:text-primary"
                 >
                   {sale.invoiceNo ?? sale.id}
                 </Link>

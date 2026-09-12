@@ -62,8 +62,8 @@ export default async function TaskShowPage({
               <input type="hidden" name="task_id" value={task.id} />
               <input type="hidden" name="project_id" value={task.projectId ?? ''} />
               <input type="hidden" name="value" value={task.completed === 1 ? 0 : 1} />
-              <SubmitButton size="sm" variant={task.completed === 1 ? 'outline' : 'primary'}>
-                {task.completed === 1 ? 'Reopen' : 'Mark complete'}
+              <SubmitButton size="sm" variant={task.completed === 1 ? 'outline':'primary'}>
+                {task.completed === 1 ? 'Reopen':'Mark complete'}
               </SubmitButton>
             </form>
             <form action={toggleTaskLike}>
@@ -88,24 +88,24 @@ export default async function TaskShowPage({
                 type="text"
                 name="name"
                 defaultValue={task.name ?? ''}
-                className="h-10 flex-1 rounded-lg border border-gray-300 bg-transparent px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                className="h-10 flex-1 rounded-lg border border-border bg-transparent px-3 text-sm"
               />
               <SubmitButton size="sm">Rename</SubmitButton>
             </form>
 
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <Badge color={task.completed === 1 ? 'success' : 'warning'} size="sm">
-                {task.completed === 1 ? 'Complete' : 'Open'}
+                {task.completed === 1 ? 'Complete':'Open'}
               </Badge>
               {task.completedAt ? (
-                <span className="text-theme-xs text-gray-500 dark:text-gray-400">
+                <span className="text-xs text-muted-foreground">
                   {`Completed ${toDateTimeString(task.completedAt)}`}
                 </span>
               ) : null}
             </div>
 
             {task.description ? (
-              <p className="mt-4 whitespace-pre-wrap text-sm text-gray-600 dark:text-gray-400">
+              <p className="mt-4 whitespace-pre-wrap text-sm text-muted-foreground">
                 {task.description}
               </p>
             ) : null}
@@ -119,17 +119,17 @@ export default async function TaskShowPage({
             >
               {subTasks.map((sub) => (
                 <Tr key={sub.id}>
-                  <Td className="font-medium text-gray-700 dark:text-gray-300">
+                  <Td className="font-medium text-foreground">
                     <Link
                       href={route('task.show', { uuid: sub.uuid })}
-                      className="text-brand-500 hover:text-brand-600"
+                      className="text-primary hover:text-primary"
                     >
                       {sub.name}
                     </Link>
                   </Td>
                   <Td>
                     <Badge color={sub.completed === 1 ? 'success' : 'warning'} size="sm">
-                      {sub.completed === 1 ? 'Complete' : 'Open'}
+                      {sub.completed === 1 ? 'Complete':'Open'}
                     </Badge>
                   </Td>
                 </Tr>
@@ -145,7 +145,7 @@ export default async function TaskShowPage({
                 name="name"
                 required
                 placeholder="Add a sub-task"
-                className="h-10 flex-1 rounded-lg border border-gray-300 bg-transparent px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                className="h-10 flex-1 rounded-lg border border-border bg-transparent px-3 text-sm"
               />
               <SubmitButton size="sm">Add</SubmitButton>
             </form>
@@ -160,7 +160,7 @@ export default async function TaskShowPage({
                 rows={3}
                 required
                 placeholder="Write a comment"
-                className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                className="w-full rounded-lg border border-border bg-transparent px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
               />
               <div className="flex justify-end">
                 <SubmitButton size="sm">Comment</SubmitButton>
@@ -171,14 +171,14 @@ export default async function TaskShowPage({
               {comments.map((row) => (
                 <li
                   key={row.comment.id}
-                  className="rounded-xl border border-gray-200 p-4 dark:border-gray-800"
+                  className="rounded-xl border border-border p-4"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <p className="text-sm font-medium text-foreground">
                       {row.authorName ?? 'Unknown'}
                       {row.comment.event ? (
-                        <span className="ml-2 text-theme-xs font-normal text-gray-500 dark:text-gray-400">
-                          {row.comment.event.replace(/_/g, ' ')}
+                        <span className="ml-2 text-xs font-normal text-muted-foreground">
+                          {row.comment.event.replace(/_/g, '')}
                         </span>
                       ) : null}
                     </p>
@@ -192,7 +192,7 @@ export default async function TaskShowPage({
                           value={row.comment.pinTop === 1 ? 0 : 1}
                         />
                         <ActionButton variant="outline">
-                          {row.comment.pinTop === 1 ? 'Unpin' : 'Pin'}
+                          {row.comment.pinTop === 1 ? 'Unpin':'Pin'}
                         </ActionButton>
                       </form>
                       <form action={destroyTaskComment}>
@@ -203,22 +203,22 @@ export default async function TaskShowPage({
                     </div>
                   </div>
                   {row.comment.comment ? (
-                    <p className="mt-2 whitespace-pre-wrap text-sm text-gray-600 dark:text-gray-400">
+                    <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
                       {row.comment.comment}
                     </p>
                   ) : null}
                   {row.comment.oldValue ? (
-                    <p className="mt-1 text-theme-xs text-gray-400 line-through">
+                    <p className="mt-1 text-xs text-muted-foreground line-through">
                       {row.comment.oldValue}
                     </p>
                   ) : null}
-                  <p className="mt-2 text-theme-xs text-gray-400">
+                  <p className="mt-2 text-xs text-muted-foreground">
                     {toDateTimeString(row.comment.createdAt)}
                   </p>
                 </li>
               ))}
               {comments.length === 0 ? (
-                <li className="text-sm text-gray-500 dark:text-gray-400">No activity yet.</li>
+                <li className="text-sm text-muted-foreground">No activity yet.</li>
               ) : null}
             </ul>
           </Card>
@@ -240,7 +240,7 @@ export default async function TaskShowPage({
               </li>
             ))}
             {tags.length === 0 ? (
-              <li className="text-sm text-gray-500 dark:text-gray-400">No tags.</li>
+              <li className="text-sm text-muted-foreground">No tags.</li>
             ) : null}
           </ul>
 
@@ -252,7 +252,7 @@ export default async function TaskShowPage({
               name="name"
               required
               placeholder="Add a tag"
-              className="h-10 flex-1 rounded-lg border border-gray-300 bg-transparent px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+              className="h-10 flex-1 rounded-lg border border-border bg-transparent px-3 text-sm"
             />
             <SubmitButton size="sm">Add</SubmitButton>
           </form>

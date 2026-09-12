@@ -144,7 +144,7 @@ export default async function ProductDetailPage({
         actions={
           <Link
             href={route('add_product.edit', { id: product.id })}
-            className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
           >
             Edit
           </Link>
@@ -156,7 +156,7 @@ export default async function ProductDetailPage({
           <div className="flex flex-wrap items-start gap-6">
             <Thumb src={product.imageSource} alt={product.productName ?? ''} />
             <div className="flex-1">
-              <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mb-4 text-sm text-muted-foreground">
                 In Stock: <span className="font-medium">{totalStock}</span> {unit}
               </p>
               <DetailList

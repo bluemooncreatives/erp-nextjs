@@ -91,7 +91,7 @@ export default async function ProductListPage({
               <select
                 name="brand_id"
                 defaultValue={sp.brand_id ?? ''}
-                className="h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
               >
                 <option value="">All brands</option>
                 {options.brands.map((b) => (
@@ -103,7 +103,7 @@ export default async function ProductListPage({
               <select
                 name="category_id"
                 defaultValue={sp.category_id ?? ''}
-                className="h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
               >
                 <option value="">All categories</option>
                 {options.categories.map((c) => (
@@ -143,15 +143,15 @@ export default async function ProductListPage({
                         unoptimized
                       />
                     ) : (
-                      <span className="flex h-9 w-9 items-center justify-center rounded-md bg-gray-100 text-theme-xs text-gray-400 dark:bg-gray-800">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-md bg-muted text-xs text-muted-foreground">
                         -
                       </span>
                     )}
                     <div>
-                      <p className="font-medium text-gray-700 dark:text-gray-300">
+                      <p className="font-medium text-foreground">
                         {row.productName}
                       </p>
-                      <p className="text-theme-xs text-gray-400">{row.productType}</p>
+                      <p className="text-xs text-muted-foreground">{row.productType}</p>
                     </div>
                   </div>
                 </Td>
@@ -166,7 +166,7 @@ export default async function ProductListPage({
                     {canShow && row.productId ? (
                       <Link
                         href={route('add_product.product_Detail', { id: row.productId })}
-                        className="rounded-lg px-2 py-1 text-theme-xs font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5"
+                        className="rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted"
                       >
                         View
                       </Link>
@@ -174,7 +174,7 @@ export default async function ProductListPage({
                     {canEdit && row.productId ? (
                       <Link
                         href={route('add_product.edit', { id: row.productId })}
-                        className="rounded-lg px-2 py-1 text-theme-xs font-medium text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+                        className="rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
                       >
                         Edit
                       </Link>
@@ -242,11 +242,11 @@ export default async function ProductListPage({
                     unoptimized
                   />
                 ) : (
-                  <span className="flex h-9 w-9 items-center justify-center rounded-md bg-gray-100 text-theme-xs text-gray-400 dark:bg-gray-800">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-md bg-muted text-xs text-muted-foreground">
                     -
                   </span>
                 )}
-                <p className="font-medium text-gray-700 dark:text-gray-300">
+                <p className="font-medium text-foreground">
                   {combo.name}
                 </p>
               </div>
@@ -268,7 +268,7 @@ export default async function ProductListPage({
                       id: combo.id,
                       type: 'combo',
                     })}
-                    className="rounded-lg px-2 py-1 text-theme-xs font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5"
+                    className="rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted"
                   >
                     View
                   </Link>
@@ -276,7 +276,7 @@ export default async function ProductListPage({
                 {canComboEdit && (comboItemCounts.get(combo.id) ?? 0) > 0 ? (
                   <Link
                     href={route('add_product.editCombo', { id: combo.id })}
-                    className="rounded-lg px-2 py-1 text-theme-xs font-medium text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+                    className="rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
                   >
                     Edit
                   </Link>
@@ -304,13 +304,13 @@ export default async function ProductListPage({
           <div className="flex flex-wrap items-center gap-3">
             <Link
               href={ROUTES['add_product.csv_upload']}
-              className="rounded-lg px-4 py-2.5 text-sm font-medium text-brand-500 ring-1 ring-inset ring-brand-300 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+              className="rounded-lg px-4 py-2.5 text-sm font-medium text-primary ring-1 ring-inset ring-ring/50 hover:bg-primary/10"
             >
               Upload via CSV
             </Link>
             <Link
               href={ROUTES['add_product.index']}
-              className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
             >
               Add Product
             </Link>

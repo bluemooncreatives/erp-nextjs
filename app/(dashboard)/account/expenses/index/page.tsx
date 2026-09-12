@@ -51,12 +51,12 @@ export default async function ExpenseListPage({
     <>
       <PageHeader
         title="Expense Lists"
-        breadcrumb={[{ label: 'Accounts' }, { label: 'Expense Lists' }]}
+        breadcrumb={[{ label: 'Accounts'}, { label:'Expense Lists' }]}
         actions={
           canCreate ? (
             <Link
               href={ROUTES['expenses.create']}
-              className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
             >
               Add Expense
             </Link>
@@ -80,7 +80,7 @@ export default async function ExpenseListPage({
         >
           {expenseRows.map((row) => (
             <Tr key={row.expense.id}>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {row.voucher?.txId ?? '-'}
               </Td>
               <Td>{row.dateLabel}</Td>
@@ -92,11 +92,11 @@ export default async function ExpenseListPage({
                   size="sm"
                   color={row.voucher?.isApprove === 1 ? 'success' : 'warning'}
                 >
-                  {row.voucher?.isApprove === 1 ? 'Approved' : 'Pending'}
+                  {row.voucher?.isApprove === 1 ? 'Approved':'Pending'}
                 </Badge>
               </Td>
               <Td>
-                {canEdit ? <Link className="mr-3 text-brand-500" href={`/account/expenses/${row.expense.id}/edit`}>Edit</Link> : null}
+                {canEdit ? <Link className="mr-3 text-primary" href={`/account/expenses/${row.expense.id}/edit`}>Edit</Link> : null}
                 {canDelete ? (
                   <form action={deleteExpenseAction}>
                     <input type="hidden" name="id" value={row.expense.id} />

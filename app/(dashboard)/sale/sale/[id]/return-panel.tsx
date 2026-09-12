@@ -58,7 +58,7 @@ export function ReturnPanel({
         >
           {items.map((item) => (
             <Tr key={item.id}>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {item.name}
                 <input type="hidden" name="item_id" value={item.id} />
               </Td>
@@ -77,7 +77,7 @@ export function ReturnPanel({
                       [item.id]: Number(e.target.value),
                     }))
                   }
-                  className="h-9 w-24 rounded-lg border border-gray-300 bg-transparent px-2 text-sm disabled:opacity-50 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                  className="h-9 w-24 rounded-lg border border-border bg-transparent px-2 text-sm disabled:opacity-50"
                 />
               </Td>
             </Tr>

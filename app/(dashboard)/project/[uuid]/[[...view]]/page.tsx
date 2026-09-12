@@ -96,10 +96,10 @@ export default async function ProjectShowPage({
               <Link
                 key={name}
                 href={route('project.show', { uuid, view: name === 'list' ? null : name })}
-                className={`rounded-lg px-3 py-2 text-theme-xs font-medium capitalize transition ${
+                className={`rounded-lg px-3 py-2 text-xs font-medium capitalize transition ${
                   active === name
-                    ? 'bg-brand-500 text-white'
-                    : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5'
+                    ? 'bg-primary text-white'
+                    : 'text-muted-foreground hover:bg-muted  '
                 }`}
               >
                 {name}
@@ -120,7 +120,7 @@ export default async function ProjectShowPage({
                   rows={3}
                   required
                   placeholder="Write a comment"
-                  className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                  className="w-full rounded-lg border border-border bg-transparent px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
                 />
                 <div className="flex justify-end">
                   <SubmitButton size="sm">Comment</SubmitButton>
@@ -131,10 +131,10 @@ export default async function ProjectShowPage({
                 {comments.map((row) => (
                   <li
                     key={row.comment.id}
-                    className="rounded-xl border border-gray-200 p-4 dark:border-gray-800"
+                    className="rounded-xl border border-border p-4"
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <p className="text-sm font-medium text-foreground">
                         {row.authorName ?? 'Unknown'}
                         {row.comment.pinTop === 1 ? (
                           <span className="ml-2">
@@ -150,14 +150,14 @@ export default async function ProjectShowPage({
                         <ActionButton confirm="Delete this comment?">Delete</ActionButton>
                       </form>
                     </div>
-                    <p className="mt-2 whitespace-pre-wrap text-sm text-gray-600 dark:text-gray-400">
+                    <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
                       {row.comment.comment}
                     </p>
-                    <p className="mt-2 text-theme-xs text-gray-400">{row.when}</p>
+                    <p className="mt-2 text-xs text-muted-foreground">{row.when}</p>
                   </li>
                 ))}
                 {comments.length === 0 ? (
-                  <li className="text-sm text-gray-500 dark:text-gray-400">
+                  <li className="text-sm text-muted-foreground">
                     No comments yet.
                   </li>
                 ) : null}
@@ -167,7 +167,7 @@ export default async function ProjectShowPage({
 
           {active === 'files' ? (
             <Card title="Files">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 Files are attached to individual tasks - open a task to see and add
                 attachments.
               </p>
@@ -207,10 +207,10 @@ export default async function ProjectShowPage({
                     >
                       {rows.map((row) => (
                         <Tr key={row.task.id}>
-                          <Td className="font-medium text-gray-700 dark:text-gray-300">
+                          <Td className="font-medium text-foreground">
                             <Link
                               href={route('task.show', { uuid: row.task.uuid })}
-                              className="text-brand-500 hover:text-brand-600"
+                              className="text-primary hover:text-primary"
                             >
                               {row.task.name}
                             </Link>
@@ -221,7 +221,7 @@ export default async function ProjectShowPage({
                               color={row.task.completed === 1 ? 'success' : 'warning'}
                               size="sm"
                             >
-                              {row.task.completed === 1 ? 'Complete' : 'Open'}
+                              {row.task.completed === 1 ? 'Complete':'Open'}
                             </Badge>
                           </Td>
                           <Td>
@@ -235,7 +235,7 @@ export default async function ProjectShowPage({
                                   value={row.task.completed === 1 ? 0 : 1}
                                 />
                                 <ActionButton variant="primary">
-                                  {row.task.completed === 1 ? 'Reopen' : 'Complete'}
+                                  {row.task.completed === 1 ? 'Reopen':'Complete'}
                                 </ActionButton>
                               </form>
                               <form action={destroyTask}>
@@ -260,7 +260,7 @@ export default async function ProjectShowPage({
                         name="name"
                         required
                         placeholder="Add a task"
-                        className="h-10 flex-1 rounded-lg border border-gray-300 bg-transparent px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                        className="h-10 flex-1 rounded-lg border border-border bg-transparent px-3 text-sm"
                       />
                       <SubmitButton size="sm">Add task</SubmitButton>
                     </form>
@@ -276,7 +276,7 @@ export default async function ProjectShowPage({
                     name="name"
                     required
                     placeholder="Section name"
-                    className="h-10 flex-1 rounded-lg border border-gray-300 bg-transparent px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                    className="h-10 flex-1 rounded-lg border border-border bg-transparent px-3 text-sm"
                   />
                   <SubmitButton size="sm">Add section</SubmitButton>
                 </form>
@@ -298,13 +298,13 @@ export default async function ProjectShowPage({
               members={board.members.map((m) => ({ value: m.id, label: m.name }))}
             />
 
-            <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-gray-200 pt-5 dark:border-gray-800">
+            <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-border pt-5">
               <form action={changeProjectView} className="flex items-center gap-2">
                 <input type="hidden" name="project_id" value={project.id} />
                 <select
                   name="view"
                   defaultValue={project.defaultView}
-                  className="h-9 rounded-lg border border-gray-300 bg-transparent px-2 text-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                  className="h-9 rounded-lg border border-border bg-transparent px-2 text-xs"
                 >
                   {VIEWS.map((v) => (
                     <option key={v} value={v}>
@@ -332,7 +332,7 @@ export default async function ProjectShowPage({
             >
               {board.members.map((member) => (
                 <Tr key={member.id}>
-                  <Td className="font-medium text-gray-700 dark:text-gray-300">
+                  <Td className="font-medium text-foreground">
                     {member.name}
                   </Td>
                   <Td>{member.email ?? '-'}</Td>

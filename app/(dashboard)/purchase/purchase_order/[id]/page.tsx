@@ -73,13 +73,13 @@ export default async function PurchaseOrderDetailPage({
           <div className="flex items-center gap-2">
             <Link
               href={route('purchase.order.print_view', { id: order.id })}
-              className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:text-gray-400 dark:ring-gray-700"
+              className="rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
             >
               Print
             </Link>
             <Link
               href={route('purchase.order.pdf', { id: order.id })}
-              className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:text-gray-400 dark:ring-gray-700"
+              className="rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
             >
               Export
             </Link>
@@ -105,8 +105,8 @@ export default async function PurchaseOrderDetailPage({
             <DetailList
               items={[
                 { label: 'Invoice No', value: order.invoiceNo || '-' },
-                { label: 'Reference No', value: order.refNo ?? '-' },
-                { label: 'LC No', value: order.lcNo ?? '-' },
+                { label: 'Reference No', value: order.refNo ??'-' },
+                { label: 'LC No', value: order.lcNo ??'-' },
                 { label: 'Date', value: dateLabel },
                 { label: 'Supplier', value: supplier?.name ?? '-' },
                 { label: 'Shipping Address', value: order.shippingAddress ?? '-' },
@@ -135,7 +135,7 @@ export default async function PurchaseOrderDetailPage({
               ]}
             />
             {order.notes ? (
-              <p className="mt-5 whitespace-pre-line text-sm text-gray-600 dark:text-gray-400">
+              <p className="mt-5 whitespace-pre-line text-sm text-muted-foreground">
                 {order.notes}
               </p>
             ) : null}
@@ -155,7 +155,7 @@ export default async function PurchaseOrderDetailPage({
             >
               {items.map((item) => (
                 <Tr key={item.id}>
-                  <Td className="font-medium text-gray-700 dark:text-gray-300">
+                  <Td className="font-medium text-foreground">
                     {item.productName ?? item.sku ?? item.productSkuId}
                   </Td>
                   <Td>{money(item.price)}</Td>
@@ -189,7 +189,7 @@ export default async function PurchaseOrderDetailPage({
               <SummaryRow label="Tax" value={`${numberFormat(order.totalVat)}%`} />
               <SummaryRow label="Shipping" value={money(order.shippingCharge)} />
               <SummaryRow label="Other charges" value={money(order.otherCharge)} />
-              <div className="border-t border-gray-200 pt-3 dark:border-gray-700">
+              <div className="border-t border-border pt-3">
                 <SummaryRow label="Payable" value={money(order.payableAmount)} strong />
                 <SummaryRow label="Paid" value={money(paidAmount)} />
                 <SummaryRow label="Due" value={money(dueAmount)} strong />
@@ -199,7 +199,7 @@ export default async function PurchaseOrderDetailPage({
 
           <Card title="Payments" bodyClassName="">
             <DataTable
-              columns={[{ label: 'Method' }, { label: 'Amount' }, { label: 'Advance' }]}
+              columns={[{ label: 'Method' }, { label: 'Amount'}, { label:'Advance' }]}
               isEmpty={payments.length === 0}
               empty="No payments yet."
             >
@@ -241,12 +241,12 @@ function SummaryRow({
 }) {
   return (
     <div className="flex items-center justify-between">
-      <dt className="text-gray-500 dark:text-gray-400">{label}</dt>
+      <dt className="text-muted-foreground">{label}</dt>
       <dd
         className={
           strong
-            ? 'text-base font-semibold text-gray-800 dark:text-white/90'
-            : 'text-gray-700 dark:text-gray-300'
+            ? 'text-base font-semibold text-foreground '
+            : 'text-foreground '
         }
       >
         {value}

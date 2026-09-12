@@ -282,7 +282,7 @@ export function SaleForm({
         </div>
 
         {state.fieldErrors?.items ? (
-          <p className="mb-3 text-xs text-error-500">{state.fieldErrors.items}</p>
+          <p className="mb-3 text-xs text-destructive">{state.fieldErrors.items}</p>
         ) : null}
 
         <DataTable
@@ -305,7 +305,7 @@ export function SaleForm({
 
             return (
               <Tr key={line.key}>
-                <Td className="font-medium text-gray-700 dark:text-gray-300">
+                <Td className="font-medium text-foreground">
                   {line.label}
                   <input
                     type="hidden"
@@ -323,22 +323,22 @@ export function SaleForm({
                     onChange={(e) =>
                       patchLine(line.key, { price: Number(e.target.value) })
                     }
-                    className="h-9 w-24 rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                    className="h-9 w-24 rounded-lg border border-border bg-transparent px-2 text-sm"
                   />
                 </Td>
                 <Td>
                   <input
                     type="number"
                     min="1"
-                    name={line.isCombo ? 'combo_product_quantity' : 'item_quantity'}
+                    name={line.isCombo ? 'combo_product_quantity':'item_quantity'}
                     value={line.quantity}
                     onChange={(e) =>
                       patchLine(line.key, { quantity: Number(e.target.value) })
                     }
-                    className="h-9 w-20 rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                    className="h-9 w-20 rounded-lg border border-border bg-transparent px-2 text-sm"
                   />
                   {!line.isCombo && line.quantity > line.stock ? (
-                    <p className="mt-1 text-theme-xs text-error-500">
+                    <p className="mt-1 text-xs text-destructive">
                       Only {line.stock} in stock
                     </p>
                   ) : null}
@@ -356,7 +356,7 @@ export function SaleForm({
                       onChange={(e) =>
                         patchLine(line.key, { tax: Number(e.target.value) })
                       }
-                      className="h-9 w-20 rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                      className="h-9 w-20 rounded-lg border border-border bg-transparent px-2 text-sm"
                     />
                   )}
                 </Td>
@@ -373,7 +373,7 @@ export function SaleForm({
                       onChange={(e) =>
                         patchLine(line.key, { discount: Number(e.target.value) })
                       }
-                      className="h-9 w-20 rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                      className="h-9 w-20 rounded-lg border border-border bg-transparent px-2 text-sm"
                     />
                   )}
                 </Td>
@@ -382,7 +382,7 @@ export function SaleForm({
                   <button
                     type="button"
                     onClick={() => removeLine(line.key)}
-                    className="rounded-lg px-2 py-1 text-theme-xs font-medium text-error-500 hover:bg-error-50 dark:hover:bg-error-500/10"
+                    className="rounded-lg px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10"
                   >
                     Remove
                   </button>
@@ -407,7 +407,7 @@ export function SaleForm({
               ]}
             />
             <FormInput
-              label={discountType === '2' ? 'Discount (%)' : 'Discount amount'}
+              label={discountType === '2' ? 'Discount (%)':'Discount amount'}
               name="_discount_value"
               type="number"
               step="0.01"
@@ -464,7 +464,7 @@ export function SaleForm({
             <Row label={`Tax (${totals.taxRate}%)`} value={money(totals.invoiceTax)} />
             <Row label="Shipping" value={money(shipping)} />
             <Row label="Other charges" value={money(other)} />
-            <div className="border-t border-gray-200 pt-3 dark:border-gray-700">
+            <div className="border-t border-border pt-3">
               <Row
                 label="Payable"
                 value={money(totals.payable)}
@@ -483,9 +483,9 @@ export function SaleForm({
               options={[
                 { value: 'cash', label: 'Cash' },
                 { value: 'quick cash', label: 'Quick Cash' },
-                { value: 'bank', label: 'Bank' },
-                { value: 'cheque', label: 'Cheque' },
-                { value: 'card', label: 'Card' },
+                { value: 'bank', label:'Bank' },
+                { value: 'cheque', label:'Cheque' },
+                { value: 'card', label:'Card' },
               ]}
             />
             <FormInput
@@ -514,8 +514,8 @@ export function SaleForm({
             ) : null}
 
             {paymentAmount > 0 ? (
-              <p className="sm:col-span-2 text-sm text-gray-500 dark:text-gray-400">
-                Due after payment:{' '}
+              <p className="sm:col-span-2 text-sm text-muted-foreground">
+                Due after payment:{''}
                 <strong>{money(Math.max(0, totals.payable - paymentAmount))}</strong>
               </p>
             ) : null}
@@ -531,7 +531,7 @@ export function SaleForm({
       <div className="flex items-center justify-end gap-3">
         <Link
           href={ROUTES['sale.index']}
-          className="rounded-lg px-5 py-3 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:text-gray-400 dark:ring-gray-700"
+          className="rounded-lg px-5 py-3 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
         >
           Cancel
         </Link>
@@ -542,7 +542,7 @@ export function SaleForm({
             setSendMail(false);
             setPreview(true);
           }}
-          className="rounded-lg px-5 py-3 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 dark:text-gray-400 dark:ring-gray-700"
+          className="rounded-lg px-5 py-3 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted disabled:opacity-50"
         >
           Save &amp; Preview
         </button>
@@ -553,7 +553,7 @@ export function SaleForm({
             setPreview(false);
             setSendMail(true);
           }}
-          className="rounded-lg px-5 py-3 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 dark:text-gray-400 dark:ring-gray-700"
+          className="rounded-lg px-5 py-3 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted disabled:opacity-50"
         >
           Save &amp; Send Mail
         </button>
@@ -582,12 +582,12 @@ function Row({
 }) {
   return (
     <div className="flex items-center justify-between">
-      <dt className="text-gray-500 dark:text-gray-400">{label}</dt>
+      <dt className="text-muted-foreground">{label}</dt>
       <dd
         className={
           strong
-            ? 'text-base font-semibold text-gray-800 dark:text-white/90'
-            : 'text-gray-700 dark:text-gray-300'
+            ? 'text-base font-semibold text-foreground '
+            : 'text-foreground '
         }
       >
         {value}

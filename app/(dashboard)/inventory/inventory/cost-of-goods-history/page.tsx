@@ -33,7 +33,7 @@ export default async function CostOfGoodsPage() {
     <>
       <PageHeader
         title="Product Costing"
-        breadcrumb={[{ label: 'Inventory' }, { label: 'Product Costing' }]}
+        breadcrumb={[{ label: 'Inventory'}, { label:'Product Costing' }]}
       />
 
       <Card
@@ -56,7 +56,7 @@ export default async function CostOfGoodsPage() {
           {historyRows.map((row) => (
             <Tr key={row.history.id}>
               <Td>{row.dateLabel}</Td>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {row.productName ?? row.sku ?? row.history.productSkuId}
               </Td>
               <Td>{row.history.previousRemainingStock}</Td>

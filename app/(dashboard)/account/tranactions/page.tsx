@@ -53,7 +53,7 @@ export default async function TransactionsPage({
     <>
       <PageHeader
         title="Transactions"
-        breadcrumb={[{ label: 'Accounts' }, { label: 'Transactions' }]}
+        breadcrumb={[{ label: 'Accounts'}, { label:'Transactions' }]}
       />
 
       <Card
@@ -89,7 +89,7 @@ export default async function TransactionsPage({
             <Tr key={row.id}>
               <Td>{row.dateLabel}</Td>
               <Td>
-                <span className="font-medium text-gray-700 dark:text-gray-300">
+                <span className="font-medium text-foreground">
                   {row.txId ?? '-'}
                 </span>
                 {row.isApprove !== 1 ? (
@@ -101,7 +101,7 @@ export default async function TransactionsPage({
               <Td>
                 {row.accountName}
                 {row.accountCode ? (
-                  <span className="ml-1 text-theme-xs text-gray-400">
+                  <span className="ml-1 text-xs text-muted-foreground">
                     ({row.accountCode})
                   </span>
                 ) : null}

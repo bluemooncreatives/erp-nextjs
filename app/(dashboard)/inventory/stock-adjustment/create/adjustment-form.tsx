@@ -89,7 +89,7 @@ export function AdjustmentForm({
           refreshStock
           error={state.fieldErrors?.product_id}
         />
-        {stock.loading && <p className="text-sm text-gray-500">Loading stock...</p>}
+        {stock.loading && <p className="text-sm text-muted-foreground">Loading stock...</p>}
         <FormAlert variant="error" message={stock.error} />
       </Card>
 
@@ -100,7 +100,7 @@ export function AdjustmentForm({
       <div className="flex items-center justify-end gap-3">
         <Link
           href={ROUTES['stock_adjustment.index']}
-          className="rounded-lg px-5 py-3 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:text-gray-400 dark:ring-gray-700"
+          className="rounded-lg px-5 py-3 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
         >
           Cancel
         </Link>

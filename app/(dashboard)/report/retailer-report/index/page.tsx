@@ -68,7 +68,7 @@ export default async function RetailerReportPage() {
         >
           {decorated.map((row) => (
             <Tr key={row.id}>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">{row.name}</Td>
+              <Td className="font-medium text-foreground">{row.name}</Td>
               <Td>{row.email ?? '-'}</Td>
               <Td>{row.phone ?? '-'}</Td>
               <Td>{row.invoices}</Td>

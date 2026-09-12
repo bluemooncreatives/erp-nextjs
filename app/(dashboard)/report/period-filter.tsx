@@ -17,7 +17,7 @@ export function PeriodFilter({
       <select
         name="interval"
         defaultValue={value ?? ''}
-        className="h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+        className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
@@ -27,7 +27,7 @@ export function PeriodFilter({
       </select>
       <button
         type="submit"
-        className="h-10 rounded-lg bg-brand-500 px-4 text-sm font-medium text-white transition hover:bg-brand-600"
+        className="h-10 rounded-lg bg-primary px-4 text-sm font-medium text-white transition hover:bg-primary"
       >
         Show
       </button>
@@ -61,17 +61,17 @@ export function DateRangeFilter({
         type="date"
         name={fromName}
         defaultValue={from ?? ''}
-        className="h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+        className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
       />
       <input
         type="date"
         name={toName}
         defaultValue={to ?? ''}
-        className="h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+        className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
       />
       <button
         type="submit"
-        className="h-10 rounded-lg bg-brand-500 px-4 text-sm font-medium text-white transition hover:bg-brand-600"
+        className="h-10 rounded-lg bg-primary px-4 text-sm font-medium text-white transition hover:bg-primary"
       >
         Search
       </button>
@@ -94,11 +94,11 @@ export function SingleDateFilter({
         type="date"
         name={name}
         defaultValue={date ?? ''}
-        className="h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+        className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
       />
       <button
         type="submit"
-        className="h-10 rounded-lg bg-brand-500 px-4 text-sm font-medium text-white transition hover:bg-brand-600"
+        className="h-10 rounded-lg bg-primary px-4 text-sm font-medium text-white transition hover:bg-primary"
       >
         Search
       </button>

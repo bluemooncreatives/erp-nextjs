@@ -229,8 +229,8 @@ export function ProductForm({
             name="tax_type"
             defaultValue={defaults.taxType ?? 'percent'}
             options={[
-              { value: 'percent', label: 'Percent' },
-              { value: 'fixed', label: 'Fixed' },
+              { value: 'percent', label:'Percent' },
+              { value: 'fixed', label:'Fixed' },
             ]}
           />
           {!isService && !isCombo ? (
@@ -249,7 +249,7 @@ export function ProductForm({
       <div className="flex items-center justify-end gap-3">
         <Link
           href={ROUTES['add_product.create']}
-          className="rounded-lg px-5 py-3 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:text-gray-400 dark:ring-gray-700"
+          className="rounded-lg px-5 py-3 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
         >
           Cancel
         </Link>
@@ -267,7 +267,7 @@ function SingleSection({
   defaults: ProductFormDefaults;
 }) {
   return (
-    <Card title={isService ? 'Service Pricing' : 'Pricing & Stock'}>
+    <Card title={isService ? 'Service Pricing':'Pricing & Stock'}>
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
         <FormInput
           label="SKU"
@@ -355,13 +355,13 @@ function VariableSection({
         {variants.map((variant) => (
           <label
             key={variant.id}
-            className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm dark:border-gray-700"
+            className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm"
           >
             <input
               type="checkbox"
               checked={selected.includes(variant.id)}
               onChange={() => toggle(variant.id)}
-              className="h-4 w-4 rounded border-gray-300"
+              className="h-4 w-4 rounded border-border"
             />
             {variant.name}
             {selected.includes(variant.id) ? (
@@ -377,7 +377,7 @@ function VariableSection({
             {rows.map((row, rowIndex) => (
               <div
                 key={rowIndex}
-                className="grid gap-4 rounded-lg border border-gray-200 p-4 md:grid-cols-2 lg:grid-cols-4 dark:border-gray-700"
+                className="grid gap-4 rounded-lg border border-border p-4 md:grid-cols-2 lg:grid-cols-4"
               >
                 {chosen.map((variant, i) => (
                   <div key={variant.id}>
@@ -442,7 +442,7 @@ function VariableSection({
                   <button
                     type="button"
                     onClick={() => setRows((prev) => prev.filter((_, i) => i !== rowIndex))}
-                    className="rounded-lg px-3 py-2 text-sm font-medium text-error-500 hover:bg-error-50 dark:hover:bg-error-500/10"
+                    className="rounded-lg px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10"
                   >
                     Remove
                   </button>
@@ -454,13 +454,13 @@ function VariableSection({
           <button
             type="button"
             onClick={() => setRows((prev) => [...prev, { valueIds: [] }])}
-            className="mt-4 rounded-lg px-4 py-2.5 text-sm font-medium text-brand-500 ring-1 ring-inset ring-brand-300 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+            className="mt-4 rounded-lg px-4 py-2.5 text-sm font-medium text-primary ring-1 ring-inset ring-ring/50 hover:bg-primary/10"
           >
             Add combination
           </button>
         </>
       ) : (
-        <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-4 text-sm text-muted-foreground">
           Select at least one variant to define combinations.
         </p>
       )}
@@ -498,7 +498,7 @@ function ComboSection({ skus }: { skus: Array<{ id: number; label: string }> }) 
                 <button
                   type="button"
                   onClick={() => setRows((prev) => prev.filter((_, i) => i !== index))}
-                  className="mb-0.5 self-end rounded-lg px-3 py-2.5 text-sm font-medium text-error-500 hover:bg-error-50 dark:hover:bg-error-500/10"
+                  className="mb-0.5 self-end rounded-lg px-3 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10"
                 >
                   Remove
                 </button>
@@ -511,7 +511,7 @@ function ComboSection({ skus }: { skus: Array<{ id: number; label: string }> }) 
       <button
         type="button"
         onClick={() => setRows((prev) => [...prev, Date.now()])}
-        className="mt-4 rounded-lg px-4 py-2.5 text-sm font-medium text-brand-500 ring-1 ring-inset ring-brand-300 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+        className="mt-4 rounded-lg px-4 py-2.5 text-sm font-medium text-primary ring-1 ring-inset ring-ring/50 hover:bg-primary/10"
       >
         Add item
       </button>

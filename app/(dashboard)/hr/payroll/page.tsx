@@ -58,13 +58,13 @@ export default async function PayrollPage({
   );
 
   const control =
-    'h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90';
+    'h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground   ';
 
   return (
     <>
       <PageHeader
         title="Payroll"
-        breadcrumb={[{ label: 'Human Resource' }, { label: 'Payroll' }]}
+        breadcrumb={[{ label: 'Human Resource'}, { label:'Payroll' }]}
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <form
@@ -100,7 +100,7 @@ export default async function PayrollPage({
               />
               <button
                 type="submit"
-                className="h-10 rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400"
+                className="h-10 rounded-lg border border-border px-4 text-sm font-medium text-muted-foreground hover:bg-muted"
               >
                 Filter
               </button>
@@ -147,10 +147,10 @@ export default async function PayrollPage({
           {payrollRows.map((row) => (
             <Tr key={row.payroll.id}>
               <Td>
-                <p className="font-medium text-gray-700 dark:text-gray-300">
+                <p className="font-medium text-foreground">
                   {row.staffName ?? '-'}
                 </p>
-                <p className="text-theme-xs text-gray-400">{row.employeeId ?? ''}</p>
+                <p className="text-xs text-muted-foreground">{row.employeeId ?? ''}</p>
               </Td>
               <Td>{`${row.payroll.payrollMonth ?? ''} ${row.payroll.payrollYear ?? ''}`}</Td>
               <Td>{`${symbol} ${numberFormat(row.payroll.basicSalary ?? 0)}`}</Td>

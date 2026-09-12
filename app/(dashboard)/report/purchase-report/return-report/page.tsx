@@ -83,10 +83,10 @@ export default async function PurchaseReturnReportPage({
           {decorated.map((row) => (
             <Tr key={row.order.id}>
               <Td>{row.dateLabel}</Td>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 <Link
                   href={route('purchase_order.show', { id: row.order.id })}
-                  className="text-brand-500 hover:text-brand-600"
+                  className="text-primary hover:text-primary"
                 >
                   {row.order.invoiceNo || row.order.id}
                 </Link>

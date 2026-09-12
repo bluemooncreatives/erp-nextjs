@@ -39,12 +39,12 @@ export default async function ContraVouchersPage({
     <>
       <PageHeader
         title="Contra Vouchers"
-        breadcrumb={[{ label: 'Accounts' }, { label: 'Contra Voucher' }]}
+        breadcrumb={[{ label: 'Accounts'}, { label:'Contra Voucher' }]}
         actions={
           canCreate ? (
             <Link
               href={ROUTES['contra.create']}
-              className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
             >
               Add Contra Voucher
             </Link>
@@ -67,11 +67,11 @@ export default async function ContraVouchersPage({
           empty="No contra vouchers found."
         >
           {voucherRows.map((voucher) => {
-            const from = voucher.legs.filter((l) => l.type === 'Cr').map((leg) => leg.accountName).join(', ');
-            const to = voucher.legs.filter((l) => l.type === 'Dr').map((leg) => leg.accountName).join(', ');
+            const from = voucher.legs.filter((l) => l.type === 'Cr').map((leg) => leg.accountName).join(',');
+            const to = voucher.legs.filter((l) => l.type === 'Dr').map((leg) => leg.accountName).join(',');
             return (
               <Tr key={voucher.id}>
-                <Td className="font-medium text-gray-700 dark:text-gray-300">
+                <Td className="font-medium text-foreground">
                   {voucher.txId ?? voucher.id}
                 </Td>
                 <Td>{voucher.dateLabel}</Td>
@@ -80,10 +80,10 @@ export default async function ContraVouchersPage({
                 <Td>{`${symbol} ${numberFormat(voucher.amount)}`}</Td>
                 <Td>
                   <Badge size="sm" color={voucher.isApprove === 1 ? 'success' : 'warning'}>
-                    {voucher.isApprove === 1 ? 'Approved' : 'Pending'}
+                    {voucher.isApprove === 1 ? 'Approved':'Pending'}
                   </Badge>
                 </Td>
-                <Td>{canEdit ? <Link className="text-brand-500" href={route('contra.edit', { id: voucher.id })}>Edit</Link> : '-'}</Td>
+                <Td>{canEdit ? <Link className="text-primary" href={route('contra.edit', { id: voucher.id })}>Edit</Link> : '-'}</Td>
               </Tr>
             );
           })}

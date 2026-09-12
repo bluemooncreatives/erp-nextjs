@@ -97,7 +97,10 @@ export function formatPrice(
   symbol: string | null | undefined,
 ): string {
   const n = numberFormat(price);
-  return symbol ? `${symbol} ${n}` : `${n} bdt`;
+  // A non-breaking space, so a table cell never wraps between the currency
+  // symbol and the figure - "$" alone on one line and "2,600.00" on the next
+  // is how every money column in a narrow table used to read.
+  return symbol ? `${symbol} ${n}` : `${n} bdt`;
 }
 
 /** PHP's `number_format($v, 2)`. */

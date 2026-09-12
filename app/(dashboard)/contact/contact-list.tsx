@@ -30,7 +30,7 @@ export async function ContactList({
   baseUrl: string;
   title: string;
   searchParams: Record<string, string | undefined>;
-  detailRoute?: 'add_contact.show' | 'customer.view' | 'supplier.view';
+  detailRoute?: 'add_contact.show'|'customer.view'|'supplier.view';
 }) {
   const { rows, total, page, perPage } = await listContacts(filters);
   const setting = await generalSetting();
@@ -88,10 +88,10 @@ export async function ContactList({
                   unoptimized
                 />
                 <div>
-                  <p className="font-medium text-gray-700 dark:text-gray-300">
+                  <p className="font-medium text-foreground">
                     {contact.name}
                   </p>
-                  <p className="text-theme-xs text-gray-400">
+                  <p className="text-xs text-muted-foreground">
                     {contact.businessName ?? contact.email ?? contact.contactType}
                   </p>
                 </div>
@@ -119,7 +119,7 @@ export async function ContactList({
               <div className="flex items-center gap-2">
                 <Link
                   href={route(detailRoute, { id: contact.id })}
-                  className="rounded-lg px-2 py-1 text-theme-xs font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5"
+                  className="rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted"
                 >
                   View
                 </Link>
@@ -128,7 +128,7 @@ export async function ContactList({
                 (detailRoute !== 'customer.view' || contact.id > WALK_IN_CUSTOMER_ID) ? (
                   <Link
                     href={route('add_contact.edit', { id: contact.id })}
-                    className="rounded-lg px-2 py-1 text-theme-xs font-medium text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+                    className="rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
                   >
                     Edit
                   </Link>

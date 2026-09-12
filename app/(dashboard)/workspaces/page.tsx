@@ -33,7 +33,7 @@ export default async function WorkspacesPage() {
           >
             {workspaces.map((workspace) => (
               <Tr key={workspace.id}>
-                <Td className="font-medium text-gray-700 dark:text-gray-300">
+                <Td className="font-medium text-foreground">
                   {workspace.name}
                 </Td>
                 <Td>

@@ -45,12 +45,12 @@ export default async function IncomeListPage({
     <>
       <PageHeader
         title="Income Lists"
-        breadcrumb={[{ label: 'Accounts' }, { label: 'Income Lists' }]}
+        breadcrumb={[{ label: 'Accounts'}, { label:'Income Lists' }]}
         actions={
           canCreate ? (
             <Link
               href={ROUTES['income.create']}
-              className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
             >
               Add Income
             </Link>
@@ -74,7 +74,7 @@ export default async function IncomeListPage({
         >
           {incomeRows.map((row) => (
             <Tr key={row.income.id}>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {row.voucher?.txId ?? '-'}
               </Td>
               <Td>{row.dateLabel}</Td>
@@ -83,7 +83,7 @@ export default async function IncomeListPage({
               <Td className="max-w-xs truncate">{row.voucher?.narration ?? '-'}</Td>
               <Td>{`${symbol} ${numberFormat(row.voucher?.amount ?? 0)}`}</Td>
               <Td>
-                {canEdit ? <Link className="mr-3 text-brand-500" href={`/account/income/${row.income.id}/edit`}>Edit</Link> : null}
+                {canEdit ? <Link className="mr-3 text-primary" href={`/account/income/${row.income.id}/edit`}>Edit</Link> : null}
                 {canDelete ? (
                   <form action={deleteIncomeAction}>
                     <input type="hidden" name="id" value={row.income.id} />

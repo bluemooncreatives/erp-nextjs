@@ -62,8 +62,8 @@ export default async function TranslateViewPage({
                 href={`${base}?file=${encodeURIComponent(group)}`}
                 className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
                   group === active
-                    ? 'bg-brand-500 text-white'
-                    : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5'
+                    ? 'bg-primary text-white'
+                    : 'text-muted-foreground hover:bg-muted  '
                 }`}
               >
                 {group}
@@ -81,7 +81,7 @@ export default async function TranslateViewPage({
               action={saveLanguagePhrases}
             />
           ) : (
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-muted-foreground">
               No translatable files found.
             </p>
           )}

@@ -36,8 +36,8 @@ export default async function CashFlowPage({
 
   const [paymentRows, receiveRows] = ready
     ? await Promise.all([
-        cashFlowRows('voucher_payment', 'Cr', from!, to!),
-        cashFlowRows('voucher_recieve', 'Dr', from!, to!),
+        cashFlowRows('voucher_payment','Cr', from!, to!),
+        cashFlowRows('voucher_recieve','Dr', from!, to!),
       ])
     : [[], []];
 
@@ -141,7 +141,7 @@ export default async function CashFlowPage({
           </div>
 
           <Card title="Net Cash Flow">
-            <p className="text-2xl font-semibold text-gray-800 dark:text-white/90">
+            <p className="text-2xl font-semibold text-foreground">
               {netLabel}
             </p>
           </Card>

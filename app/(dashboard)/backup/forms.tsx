@@ -23,7 +23,7 @@ export function ImportBackupForm() {
         name="db_file"
         accept=".sql"
         required
-        className="block w-full text-xs text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-500 file:px-3 file:py-2 file:text-xs file:font-medium file:text-white"
+        className="block w-full text-xs text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-xs file:font-medium file:text-white"
       />
 
       <FormActions>

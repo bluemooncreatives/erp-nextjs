@@ -102,10 +102,10 @@ export default async function CustomerBillPage({
           {decorated.map((row) => (
             <Tr key={row.sale.id}>
               <Td>{row.dateLabel}</Td>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 <Link
                   href={route('sale.show', { id: row.sale.id })}
-                  className="text-brand-500 hover:text-brand-600"
+                  className="text-primary hover:text-primary"
                 >
                   {row.sale.invoiceNo ?? row.sale.id}
                 </Link>
@@ -116,7 +116,7 @@ export default async function CustomerBillPage({
               <Td>{row.dueLabel}</Td>
               <Td>
                 <Badge color={row.sale.status === 1 ? 'success' : 'warning'} size="sm">
-                  {row.sale.status === 1 ? 'Paid' : 'Unpaid'}
+                  {row.sale.status === 1 ? 'Paid':'Unpaid'}
                 </Badge>
               </Td>
             </Tr>

@@ -28,7 +28,7 @@ export default async function IncomeByCustomerPage({
     <>
       <PageHeader
         title="Income By Customer"
-        breadcrumb={[{ label: 'Accounts' }, { label: 'Income By Customer' }]}
+        breadcrumb={[{ label: 'Accounts'}, { label:'Income By Customer' }]}
         actions={
           <ReportFilter
             action={ROUTES['income_by_customer']}
@@ -43,13 +43,13 @@ export default async function IncomeByCustomerPage({
         bodyClassName=""
       >
         <DataTable
-          columns={[{ label: 'Customer' }, { label: 'Invoices' }, { label: 'Total' }]}
+          columns={[{ label: 'Customer' }, { label: 'Invoices'}, { label:'Total' }]}
           isEmpty={rows.length === 0}
           empty="No income in this period."
         >
           {rows.map((r) => (
             <Tr key={r.customerId ?? 'none'}>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {r.customerName ?? 'Walk-in / unassigned'}
               </Td>
               <Td>{r.invoices}</Td>

@@ -34,11 +34,11 @@ export default async function BankAccountsPage() {
     <>
       <PageHeader
         title="Bank Accounts"
-        breadcrumb={[{ label: 'Accounts' }, { label: 'Bank Accounts' }]}
+        breadcrumb={[{ label: 'Accounts'}, { label:'Bank Accounts' }]}
         actions={
           <Link
             href={ROUTES['bank.account.csv_upload']}
-            className="rounded-lg px-4 py-2.5 text-sm font-medium text-brand-500 ring-1 ring-inset ring-brand-300 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+            className="rounded-lg px-4 py-2.5 text-sm font-medium text-primary ring-1 ring-inset ring-ring/50 hover:bg-primary/10"
           >
             Upload via CSV
           </Link>
@@ -52,7 +52,7 @@ export default async function BankAccountsPage() {
           </div>
         ) : null}
 
-        <div className={canCreate ? 'col-span-12 xl:col-span-8' : 'col-span-12'}>
+        <div className={canCreate ? 'col-span-12 xl:col-span-8':'col-span-12'}>
           <Card title={`Bank Accounts (${rows.length})`} bodyClassName="">
             <DataTable
               columns={[
@@ -68,7 +68,7 @@ export default async function BankAccountsPage() {
             >
               {rows.map((row) => (
                 <Tr key={row.account.id}>
-                  <Td className="font-medium text-gray-700 dark:text-gray-300">
+                  <Td className="font-medium text-foreground">
                     {row.account.bankName}
                   </Td>
                   <Td>{row.account.branchName ?? '-'}</Td>
@@ -80,8 +80,8 @@ export default async function BankAccountsPage() {
                     )}`}
                   </Td>
                   <Td>
-                    {canEdit ? <Link className="mr-3 text-brand-500" href={`/account/bank_accounts/${row.account.id}/edit`}>Edit</Link> : null}
-                    {canHistory ? <Link className="mr-3 text-brand-500" href={`/account/bank_accounts/history/${row.account.id}`}>History</Link> : null}
+                    {canEdit ? <Link className="mr-3 text-primary" href={`/account/bank_accounts/${row.account.id}/edit`}>Edit</Link> : null}
+                    {canHistory ? <Link className="mr-3 text-primary" href={`/account/bank_accounts/history/${row.account.id}`}>History</Link> : null}
                     {canDelete ? (
                       <form action={deleteBankAccountAction}>
                         <input type="hidden" name="id" value={row.account.id} />

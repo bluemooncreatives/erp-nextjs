@@ -41,7 +41,7 @@ export default async function VoucherApprovalPage({
     <>
       <PageHeader
         title="Voucher Approval"
-        breadcrumb={[{ label: 'Accounts' }, { label: 'Voucher Approval' }]}
+        breadcrumb={[{ label: 'Accounts'}, { label:'Voucher Approval' }]}
         actions={
           canApproveAll && total > 0 ? (
             <form action={approveAllVouchersAction}>
@@ -67,14 +67,14 @@ export default async function VoucherApprovalPage({
         >
           {voucherRows.map((voucher) => (
             <Tr key={voucher.id}>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {voucher.txId ?? voucher.id}
               </Td>
               <Td>{voucher.dateLabel}</Td>
               <Td>{voucher.voucherType}</Td>
               <Td className="max-w-sm">
                 {voucher.legs.map((leg, i) => (
-                  <span key={i} className="block text-theme-xs">
+                  <span key={i} className="block text-xs">
                     {leg.type}: {leg.accountName} {symbol} {numberFormat(leg.amount)}
                   </span>
                 ))}

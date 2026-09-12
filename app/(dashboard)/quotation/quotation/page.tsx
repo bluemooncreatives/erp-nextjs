@@ -57,7 +57,7 @@ export default async function QuotationListPage({
           canCreate ? (
             <Link
               href={ROUTES['quotation.create']}
-              className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
             >
               Add Quotation
             </Link>
@@ -94,7 +94,7 @@ export default async function QuotationListPage({
               <Td>
                 <Link
                   href={route('quotation.show', { id: q.id })}
-                  className="font-medium text-brand-500 hover:text-brand-600"
+                  className="font-medium text-primary hover:text-primary"
                 >
                   {q.invoiceNo ?? q.id}
                 </Link>
@@ -133,7 +133,7 @@ export default async function QuotationListPage({
                   {canEdit && q.convertStatus !== QuotationConvertStatus.Converted ? (
                     <Link
                       href={route('quotation.edit', { id: q.id })}
-                      className="rounded-lg px-2 py-1 text-theme-xs font-medium text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+                      className="rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
                     >
                       Edit
                     </Link>

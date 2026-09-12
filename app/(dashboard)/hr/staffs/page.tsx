@@ -53,19 +53,19 @@ export default async function StaffListPage({
     <>
       <PageHeader
         title="Staff"
-        breadcrumb={[{ label: 'Human Resource' }, { label: 'Staff' }]}
+        breadcrumb={[{ label: 'Human Resource'}, { label:'Staff' }]}
         actions={
           canCreate ? (
             <div className="flex flex-wrap items-center gap-3">
               <Link
                 href={ROUTES['staffs.csv_upload']}
-                className="rounded-lg px-4 py-2.5 text-sm font-medium text-brand-500 ring-1 ring-inset ring-brand-300 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+                className="rounded-lg px-4 py-2.5 text-sm font-medium text-primary ring-1 ring-inset ring-ring/50 hover:bg-primary/10"
               >
                 Upload via CSV
               </Link>
               <Link
                 href={ROUTES['staffs.create']}
-                className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+                className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
               >
                 Add Staff
               </Link>
@@ -112,10 +112,10 @@ export default async function StaffListPage({
                     unoptimized
                   />
                   <div>
-                    <p className="font-medium text-gray-700 dark:text-gray-300">
+                    <p className="font-medium text-foreground">
                       {row.user.name}
                     </p>
-                    <p className="text-theme-xs text-gray-400">{row.user.email}</p>
+                    <p className="text-xs text-muted-foreground">{row.user.email}</p>
                   </div>
                 </div>
               </Td>
@@ -138,7 +138,7 @@ export default async function StaffListPage({
                   {canView ? (
                     <Link
                       href={route('staffs.view', { id: row.staff.id })}
-                      className="rounded-lg px-2 py-1 text-theme-xs font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5"
+                      className="rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted"
                     >
                       View
                     </Link>
@@ -146,7 +146,7 @@ export default async function StaffListPage({
                   {canEdit ? (
                     <Link
                       href={route('staffs.edit', { id: row.staff.id })}
-                      className="rounded-lg px-2 py-1 text-theme-xs font-medium text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+                      className="rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
                     >
                       Edit
                     </Link>

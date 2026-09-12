@@ -88,7 +88,7 @@ export function TranslateForm({
         value={filter}
         onChange={(event) => setFilter(event.target.value)}
         placeholder="Filter phrases"
-        className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+        className="w-full rounded-lg border border-border bg-transparent px-4 py-2.5 text-sm text-foreground shadow-xs placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-3 focus:ring-ring/50"
       />
 
       {/* Filtered-out rows stay mounted so every phrase is still posted back,
@@ -100,16 +100,16 @@ export function TranslateForm({
             hidden={!matches(pair)}
             className="grid gap-3 sm:grid-cols-2 sm:items-center"
           >
-            <p className="text-sm text-gray-600 dark:text-gray-400">{pair.source}</p>
+            <p className="text-sm text-muted-foreground">{pair.source}</p>
             <input
               name={`key[${pair.key}]`}
               defaultValue={pair.value}
-              className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+              className="w-full rounded-lg border border-border bg-transparent px-4 py-2.5 text-sm text-foreground shadow-xs focus:border-ring focus:outline-none focus:ring-3 focus:ring-ring/50"
             />
           </div>
         ))}
         {visibleCount === 0 ? (
-          <p className="text-sm text-gray-500 dark:text-gray-400">No phrases match.</p>
+          <p className="text-sm text-muted-foreground">No phrases match.</p>
         ) : null}
       </div>
 

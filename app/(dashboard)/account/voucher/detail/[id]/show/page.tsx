@@ -28,18 +28,18 @@ export default async function VoucherDetailsPage({ params }: { params: Promise<{
   ]);
   const decorated = await Promise.all(legs.map(async (leg) => ({ ...leg, amountLabel: await singlePrice(leg.amount) })));
   return <div className="space-y-6">
-    <PageHeader title={`Voucher ${voucher.txId ?? id}`} breadcrumb={[{ label: 'Accounts' }, { label: 'Voucher Details' }]}
-      actions={<Link className="text-brand-500" href={voucher.paymentType === 'voucher_recieve' ? ROUTES['voucher_recieve.index'] : ROUTES['vouchers.index']}>Back to vouchers</Link>} />
-    <Card title="Voucher Details"><dl className="grid gap-4 text-sm text-gray-700 dark:text-gray-300 md:grid-cols-3">
+    <PageHeader title={`Voucher ${voucher.txId ?? id}`} breadcrumb={[{ label: 'Accounts'}, { label:'Voucher Details' }]}
+      actions={<Link className="text-primary" href={voucher.paymentType === 'voucher_recieve' ? ROUTES['voucher_recieve.index'] : ROUTES['vouchers.index']}>Back to vouchers</Link>} />
+    <Card title="Voucher Details"><dl className="grid gap-4 text-sm text-foreground md:grid-cols-3">
       <div><dt>Date</dt><dd>{await dateConvert(voucher.date)}</dd></div>
       <div><dt>Amount</dt><dd>{await singlePrice(voucher.amount)}</dd></div>
-      <div><dt>Approval</dt><dd>{voucher.isApprove === 1 ? 'Approved' : voucher.isApprove === 2 ? 'Cancelled' : 'Pending'}</dd></div>
+      <div><dt>Approval</dt><dd>{voucher.isApprove === 1 ? 'Approved' : voucher.isApprove === 2 ? 'Cancelled':'Pending'}</dd></div>
       <div><dt>Narration</dt><dd>{voucher.narration ?? '-'}</dd></div>
     </dl></Card>
-    <Card title="Postings" bodyClassName=""><DataTable columns={[{ label: 'Account' }, { label: 'Debit' }, { label: 'Credit' }, { label: 'Narration' }]} isEmpty={!legs.length}>
+    <Card title="Postings" bodyClassName=""><DataTable columns={[{ label: 'Account'}, { label:'Debit'}, { label:'Credit'}, { label:'Narration' }]} isEmpty={!legs.length}>
       {decorated.map((leg) => <Tr key={leg.id}><Td>{leg.accountName} ({leg.accountCode})</Td><Td>{leg.type === 'Dr' ? leg.amountLabel : '-'}</Td><Td>{leg.type === 'Cr' ? leg.amountLabel : '-'}</Td><Td>{leg.narration ?? '-'}</Td></Tr>)}
     </DataTable></Card>
-    {document ? <Card title="Bank Details"><dl className="grid gap-4 text-sm text-gray-700 dark:text-gray-300 md:grid-cols-2">
+    {document ? <Card title="Bank Details"><dl className="grid gap-4 text-sm text-foreground md:grid-cols-2">
       <div><dt>Bank</dt><dd>{document.bankName ?? '-'}</dd></div><div><dt>Branch</dt><dd>{document.bankBranch ?? '-'}</dd></div>
       <div><dt>Cheque Number</dt><dd>{document.chequeNo ?? '-'}</dd></div><div><dt>Cheque Date</dt><dd>{await dateConvert(document.chequeDate)}</dd></div>
     </dl></Card> : null}

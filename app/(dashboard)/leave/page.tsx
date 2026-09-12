@@ -89,7 +89,7 @@ export default async function ApplyLeavePage({
             >
               {leaveRows.map((row) => (
                 <Tr key={row.leave.id}>
-                  <Td className="font-medium text-gray-700 dark:text-gray-300">
+                  <Td className="font-medium text-foreground">
                     {row.userName ?? '-'}
                   </Td>
                   <Td>{row.leaveTypeName ?? '-'}</Td>

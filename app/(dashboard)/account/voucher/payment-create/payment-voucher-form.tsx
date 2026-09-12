@@ -115,7 +115,7 @@ export function PaymentVoucherForm({
       <Card title="Lines" bodyClassName="">
         <FormAlert variant="error" message={state.fieldErrors?.debit_account_amount} />
         {state.fieldErrors?.debit_account_id ? (
-          <p className="px-4 pt-4 text-xs text-error-500 sm:px-6">
+          <p className="px-4 pt-4 text-xs text-destructive sm:px-6">
             {state.fieldErrors.debit_account_id}
           </p>
         ) : null}
@@ -137,7 +137,7 @@ export function PaymentVoucherForm({
                   required
                   value={line.accountId}
                   onChange={(e) => patch(line.key, { accountId: e.target.value })}
-                  className="h-9 w-64 rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                  className="h-9 w-64 rounded-lg border border-border bg-transparent px-2 text-sm"
                 >
                   <option value="">Select account</option>
                   {allAccounts.map((a) => (
@@ -155,7 +155,7 @@ export function PaymentVoucherForm({
                   name="debit_account_amount"
                   value={line.amount}
                   onChange={(e) => patch(line.key, { amount: Number(e.target.value) })}
-                  className="h-9 w-32 rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                  className="h-9 w-32 rounded-lg border border-border bg-transparent px-2 text-sm"
                 />
               </Td>
               <Td>
@@ -164,7 +164,7 @@ export function PaymentVoucherForm({
                   name="debit_account_narration"
                   value={line.narration}
                   onChange={(e) => patch(line.key, { narration: e.target.value })}
-                  className="h-9 w-64 rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                  className="h-9 w-64 rounded-lg border border-border bg-transparent px-2 text-sm"
                 />
               </Td>
               <Td>
@@ -174,7 +174,7 @@ export function PaymentVoucherForm({
                     onClick={() =>
                       setLines((prev) => prev.filter((l) => l.key !== line.key))
                     }
-                    className="rounded-lg px-2 py-1 text-theme-xs font-medium text-error-500 hover:bg-error-50 dark:hover:bg-error-500/10"
+                    className="rounded-lg px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10"
                   >
                     Remove
                   </button>
@@ -193,11 +193,11 @@ export function PaymentVoucherForm({
                 { key: Date.now(), accountId: '', amount: 0, narration: '' },
               ])
             }
-            className="rounded-lg px-4 py-2.5 text-sm font-medium text-brand-500 ring-1 ring-inset ring-brand-300 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+            className="rounded-lg px-4 py-2.5 text-sm font-medium text-primary ring-1 ring-inset ring-ring/50 hover:bg-primary/10"
           >
             Add line
           </button>
-          <p className="text-base font-semibold text-gray-800 dark:text-white/90">
+          <p className="text-base font-semibold text-foreground">
             Total: {currencySymbol} {total.toFixed(2)}
           </p>
         </div>
@@ -210,7 +210,7 @@ export function PaymentVoucherForm({
       <div className="flex items-center justify-end gap-3">
         <Link
           href={ROUTES['vouchers.index']}
-          className="rounded-lg px-5 py-3 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:text-gray-400 dark:ring-gray-700"
+          className="rounded-lg px-5 py-3 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
         >
           Cancel
         </Link>

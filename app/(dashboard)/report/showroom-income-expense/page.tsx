@@ -106,7 +106,7 @@ export default async function ShowroomIncomeExpensePage({
           {decorated.map((row) => (
             <Tr key={row.id}>
               <Td>{row.dateLabel}</Td>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {`${row.accountName ?? '-'}${row.accountCode ? ` (${row.accountCode})` : ''}`}
               </Td>
               <Td>{row.narration ?? '-'}</Td>

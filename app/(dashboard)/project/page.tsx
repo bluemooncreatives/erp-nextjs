@@ -33,13 +33,13 @@ export default async function ProjectListPage() {
           <div className="flex items-center gap-2">
             <Link
               href={ROUTES['team.index']}
-              className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-300 transition hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700"
+              className="inline-flex items-center gap-2 rounded-lg bg-card px-4 py-2.5 text-sm font-medium text-foreground ring-1 ring-inset ring-border transition hover:bg-muted"
             >
               Teams
             </Link>
             <Link
               href={ROUTES['project.create']}
-              className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs transition hover:bg-brand-600"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-xs transition hover:bg-primary"
             >
               New Project
             </Link>
@@ -62,10 +62,10 @@ export default async function ProjectListPage() {
         >
           {rows.map((row) => (
             <Tr key={row.project.id}>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 <Link
                   href={route('project.show', { uuid: row.project.uuid })}
-                  className="text-brand-500 hover:text-brand-600"
+                  className="text-primary hover:text-primary"
                 >
                   {row.project.name}
                 </Link>

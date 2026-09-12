@@ -41,7 +41,7 @@ export default async function ProductMovementPage({
     <>
       <PageHeader
         title="Product Movement"
-        breadcrumb={[{ label: 'Inventory' }, { label: 'Product Movement' }]}
+        breadcrumb={[{ label: 'Inventory'}, { label:'Product Movement' }]}
       />
 
       <Card
@@ -55,7 +55,7 @@ export default async function ProductMovementPage({
             <select
               name="product_sku_id"
               defaultValue={sp.product_sku_id ?? ''}
-              className="h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+              className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
             >
               <option value="">All products</option>
               {skus.map((s) => (
@@ -82,7 +82,7 @@ export default async function ProductMovementPage({
           {movementRows.map((row) => (
             <Tr key={row.id}>
               <Td>{row.dateLabel}</Td>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {row.productName ?? row.sku ?? row.productSkuId}
               </Td>
               <Td>{row.type}</Td>
@@ -92,7 +92,7 @@ export default async function ProductMovementPage({
               <Td>{row.inOut}</Td>
               <Td>
                 <Badge size="sm" color={row.status === 1 ? 'success' : 'warning'}>
-                  {row.status === 1 ? 'Applied' : 'Pending'}
+                  {row.status === 1 ? 'Applied':'Pending'}
                 </Badge>
               </Td>
             </Tr>

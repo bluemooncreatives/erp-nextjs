@@ -35,7 +35,7 @@ export function CsvUploadForm({
           <a
             href={sampleHref}
             download
-            className="rounded-lg px-4 py-2.5 text-sm font-medium text-brand-500 ring-1 ring-inset ring-brand-300 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+            className="rounded-lg px-4 py-2.5 text-sm font-medium text-primary ring-1 ring-inset ring-ring/50 hover:bg-primary/10"
           >
             Sample File Download
           </a>
@@ -56,11 +56,11 @@ export function CsvUploadForm({
         />
 
         <div>
-          <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+          <p className="text-xs font-medium text-muted-foreground">
             Expected columns
           </p>
-          <p className="mt-1 text-sm text-gray-700 dark:text-gray-300">
-            {columns.join(', ')}
+          <p className="mt-1 text-sm text-foreground">
+            {columns.join(',')}
           </p>
         </div>
 
@@ -68,7 +68,7 @@ export function CsvUploadForm({
           <SubmitButton>Upload</SubmitButton>
           <Link
             href={backHref}
-            className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5"
+            className="rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted"
           >
             Cancel
           </Link>

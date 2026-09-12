@@ -59,7 +59,7 @@ export default async function SaleListPage({
           canCreate ? (
             <Link
               href={ROUTES['sale.create']}
-              className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
             >
               Add Sale
             </Link>
@@ -100,7 +100,7 @@ export default async function SaleListPage({
                 {canShow ? (
                   <Link
                     href={route('sale.show', { id: sale.id })}
-                    className="font-medium text-brand-500 hover:text-brand-600"
+                    className="font-medium text-primary hover:text-primary"
                   >
                     {sale.invoiceNo ?? sale.id}
                   </Link>
@@ -158,7 +158,7 @@ export default async function SaleListPage({
                   {canEdit && sale.isApproved !== 1 ? (
                     <Link
                       href={route('sale.edit', { id: sale.id })}
-                      className="rounded-lg px-2 py-1 text-theme-xs font-medium text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+                      className="rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
                     >
                       Edit
                     </Link>

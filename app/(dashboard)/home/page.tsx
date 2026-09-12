@@ -263,7 +263,7 @@ export default async function DashboardPage() {
             actions={
               <Link
                 href={ROUTES['sale.due.list']}
-                className="text-sm font-medium text-brand-500 hover:text-brand-600"
+                className="text-sm font-medium text-primary hover:text-primary"
               >
                 View all
               </Link>
@@ -285,7 +285,7 @@ export default async function DashboardPage() {
                   <Td>
                     <Link
                       href={ROUTES['sale.show'].replace('{id}', String(due.id))}
-                      className="font-medium text-brand-500 hover:text-brand-600"
+                      className="font-medium text-primary hover:text-primary"
                     >
                       {due.invoiceNo ?? due.id}
                     </Link>
@@ -294,8 +294,8 @@ export default async function DashboardPage() {
                   <Td>{due.partyName}</Td>
                   <Td>{money(Number(due.payableAmount))}</Td>
                   <Td>
-                    <Badge color={due.status === 2 ? 'warning' : 'error'} size="sm">
-                      {due.status === 2 ? 'Partial' : 'Unpaid'}
+                    <Badge color={due.status === 2 ? 'warning':'error'} size="sm">
+                      {due.status === 2 ? 'Partial':'Unpaid'}
                     </Badge>
                   </Td>
                 </Tr>
@@ -309,13 +309,13 @@ export default async function DashboardPage() {
         {showStockAlerts ? (
           <Card title="Stock Alert List" bodyClassName="">
             <DataTable
-              columns={[{ label: 'SKU' }, { label: 'In stock' }, { label: 'Alert at' }]}
+              columns={[{ label: 'SKU' }, { label: 'In stock'}, { label:'Alert at' }]}
               isEmpty={alerts.length === 0}
               empty="No stock alerts."
             >
               {alerts.map((alert) => (
                 <Tr key={alert.id}>
-                  <Td className="font-medium text-gray-700 dark:text-gray-300">
+                  <Td className="font-medium text-foreground">
                     {alert.sku ?? alert.productSkuId}
                   </Td>
                   <Td>{alert.stock}</Td>
@@ -329,7 +329,7 @@ export default async function DashboardPage() {
         {showTodos ? (
           <Card title="To Do List" bodyClassName="p-4 sm:p-6">
             {todoRows.length === 0 ? (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 Nothing on the list.
               </p>
             ) : (
@@ -339,13 +339,13 @@ export default async function DashboardPage() {
                     <span
                       className={`text-sm ${
                         todo.status === 1
-                          ? 'text-gray-400 line-through dark:text-gray-500'
-                          : 'text-gray-700 dark:text-gray-300'
+                          ? 'text-muted-foreground line-through '
+                          : 'text-foreground '
                       }`}
                     >
                       {todo.title}
                     </span>
-                    <span className="shrink-0 text-theme-xs text-gray-400">
+                    <span className="shrink-0 text-xs text-muted-foreground">
                       {todo.dateLabel}
                     </span>
                   </li>

@@ -18,7 +18,7 @@ export default async function UserLoginLogPage() {
     <>
       <PageHeader
         title="User Login History"
-        breadcrumb={[{ label: 'Settings' }, { label: 'User Login History' }]}
+        breadcrumb={[{ label: 'Settings'}, { label:'User Login History' }]}
       />
 
       <Card title={`Sessions (${activities.length})`} bodyClassName="">
@@ -38,7 +38,7 @@ export default async function UserLoginLogPage() {
           {activities.map((activity, index) => (
             <Tr key={activity.id}>
               <Td>{index + 1}</Td>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {activity.userName ?? '-'}
               </Td>
               <Td>{toDateTimeString(activity.loginTime) ?? '-'}</Td>

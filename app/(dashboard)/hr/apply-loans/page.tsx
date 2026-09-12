@@ -36,7 +36,7 @@ export default async function ApplyLoansPage() {
         actions={
           <Link
             href={ROUTES['apply_loans.create']}
-            className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs transition hover:bg-brand-600"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-xs transition hover:bg-primary"
           >
             Apply For Loan
           </Link>
@@ -63,7 +63,7 @@ export default async function ApplyLoansPage() {
             return (
               <Tr key={row.loan.id}>
                 <Td>{index + 1}</Td>
-                <Td className="font-medium text-gray-700 dark:text-gray-300">
+                <Td className="font-medium text-foreground">
                   {row.userName ?? 'Removed'}
                 </Td>
                 <Td>{row.loan.loanType}</Td>
@@ -82,7 +82,7 @@ export default async function ApplyLoansPage() {
                       <>
                         <Link
                           href={`${ROUTES['apply_loans.create']}?id=${row.loan.id}`}
-                          className="text-theme-xs font-medium text-brand-500 hover:text-brand-600"
+                          className="text-xs font-medium text-primary hover:text-primary"
                         >
                           Edit
                         </Link>

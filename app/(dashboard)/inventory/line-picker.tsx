@@ -102,14 +102,14 @@ export function LinePicker({
         />
       </div>
 
-      {error ? <p className="mb-3 text-xs text-error-500">{error}</p> : null}
+      {error ? <p className="mb-3 text-xs text-destructive">{error}</p> : null}
 
       <DataTable columns={columns} isEmpty={lines.length === 0} empty="No products added yet.">
         {lines.map((storedLine) => {
           const line = refreshStock ? { ...storedLine, stock: products.find((p) => p.id === storedLine.productId)?.stock ?? 0 } : storedLine;
           return (
           <Tr key={line.productId}>
-            <Td className="font-medium text-gray-700 dark:text-gray-300">
+            <Td className="font-medium text-foreground">
               {line.label}
               <input type="hidden" name={idFieldName} value={line.productId} />
             </Td>
@@ -125,7 +125,7 @@ export function LinePicker({
                   onChange={(e) =>
                     patch(line.productId, { price: Number(e.target.value) })
                   }
-                  className="h-9 w-28 rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                  className="h-9 w-28 rounded-lg border border-border bg-transparent px-2 text-sm"
                 />
               </Td>
             ) : null}
@@ -140,10 +140,10 @@ export function LinePicker({
                 onChange={(e) =>
                   patch(line.productId, { quantity: Number(e.target.value) })
                 }
-                className="h-9 w-24 rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                className="h-9 w-24 rounded-lg border border-border bg-transparent px-2 text-sm"
               />
               {line.stock != null && line.quantity > line.stock ? (
-                <p className="mt-1 text-theme-xs text-error-500">
+                <p className="mt-1 text-xs text-destructive">
                   Only {line.stock} in stock
                 </p>
               ) : null}
@@ -161,7 +161,7 @@ export function LinePicker({
                 onClick={() =>
                   setLines((prev) => prev.filter((l) => l.productId !== line.productId))
                 }
-                className="rounded-lg px-2 py-1 text-theme-xs font-medium text-error-500 hover:bg-error-50 dark:hover:bg-error-500/10"
+                className="rounded-lg px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10"
               >
                 Remove
               </button>

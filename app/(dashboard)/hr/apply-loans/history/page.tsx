@@ -66,7 +66,7 @@ export default async function LoanHistoryPage({
             {users.map((user, index) => (
               <Tr key={user.id}>
                 <Td>{index + 1}</Td>
-                <Td className="font-medium text-gray-700 dark:text-gray-300">{user.name}</Td>
+                <Td className="font-medium text-foreground">{user.name}</Td>
                 <Td>{user.employeeId ?? '-'}</Td>
                 <Td>{user.email ?? '-'}</Td>
                 <Td>{user.phone ?? '-'}</Td>
@@ -74,7 +74,7 @@ export default async function LoanHistoryPage({
                 <Td>
                   <Link
                     href={`${ROUTES['apply_loans.history']}?user=${user.id}`}
-                    className="text-theme-xs font-medium text-brand-500 hover:text-brand-600"
+                    className="text-xs font-medium text-primary hover:text-primary"
                   >
                     View
                   </Link>
@@ -87,7 +87,7 @@ export default async function LoanHistoryPage({
         {selected ? (
           <Card
             title={`Loan Detail's - (${selected.name})`}
-            desc={[selected.email, selected.phone].filter(Boolean).join(' · ')}
+            desc={[selected.email, selected.phone].filter(Boolean).join('·')}
             bodyClassName=""
           >
             <DataTable

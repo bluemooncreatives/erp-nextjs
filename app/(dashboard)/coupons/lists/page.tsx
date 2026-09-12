@@ -49,7 +49,7 @@ export default async function CouponsPage() {
           >
             {decorated.map((row) => (
               <Tr key={row.id}>
-                <Td className="font-medium text-gray-700 dark:text-gray-300">{row.code}</Td>
+                <Td className="font-medium text-foreground">{row.code}</Td>
                 <Td>{row.discountType === '1' ? 'Active' : 'Expired'}</Td>
                 <Td>{row.cause ?? '-'}</Td>
                 <Td>{row.startLabel || '-'}</Td>

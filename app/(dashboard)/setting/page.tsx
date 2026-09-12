@@ -35,7 +35,7 @@ export const metadata: Metadata = { title: 'Settings' };
 
 /** `strtoupper(str_replace("_", " ", $type))` */
 function typeLabel(type: string | null): string {
-  return (type ?? '').replace(/_/g, ' ').toUpperCase();
+  return (type ?? '').replace(/_/g, '').toUpperCase();
 }
 
 export default async function SettingsPage() {
@@ -118,7 +118,7 @@ export default async function SettingsPage() {
             {businessRows.map((row, index) => (
               <Tr key={row.id}>
                 <Td>{index + 1}</Td>
-                <Td className="font-medium text-gray-700 dark:text-gray-300">
+                <Td className="font-medium text-foreground">
                   {typeLabel(row.type)}
                 </Td>
                 <Td>
@@ -316,7 +316,7 @@ export default async function SettingsPage() {
         <Tabs tabs={tabs} />
       ) : (
         <Card title="Settings">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             You do not have access to any settings section.
           </p>
         </Card>

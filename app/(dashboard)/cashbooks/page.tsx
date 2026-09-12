@@ -42,7 +42,7 @@ export default async function CashbookPage({
   if (!accountId) {
     return (
       <>
-        <PageHeader title="Cashbook" breadcrumb={[{ label: 'Accounts' }, { label: 'Cashbook' }]} />
+        <PageHeader title="Cashbook" breadcrumb={[{ label: 'Accounts'}, { label:'Cashbook' }]} />
         <Card title="Cashbook">
           <EmptyState message="This branch has no chart account, so no cashbook can be built." />
         </Card>
@@ -94,7 +94,7 @@ export default async function CashbookPage({
     <>
       <PageHeader
         title="Cashbook"
-        breadcrumb={[{ label: 'Accounts' }, { label: 'Cashbook' }]}
+        breadcrumb={[{ label: 'Accounts'}, { label:'Cashbook' }]}
         actions={
           <SearchBar
             action={ROUTES['cashbook.index']}
@@ -112,13 +112,13 @@ export default async function CashbookPage({
           bodyClassName=""
         >
           <DataTable
-            columns={[{ label: 'Account Name' }, { label: 'Narration' }, { label: 'Amount' }]}
+            columns={[{ label: 'Account Name'}, { label:'Narration'}, { label:'Amount' }]}
             isEmpty={debitRows.length === 0}
             empty="No payments on this date."
           >
             {debitRows.map((row) => (
               <Tr key={row.transaction.id}>
-                <Td className="font-medium text-gray-700 dark:text-gray-300">
+                <Td className="font-medium text-foreground">
                   {row.accountName ?? '-'}
                 </Td>
                 <Td>{row.voucherNarration ?? row.transaction.narration ?? '-'}</Td>
@@ -130,13 +130,13 @@ export default async function CashbookPage({
 
         <Card title="Credit / Income" desc={`Total ${creditLabel}`} bodyClassName="">
           <DataTable
-            columns={[{ label: 'Account Name' }, { label: 'Narration' }, { label: 'Amount' }]}
+            columns={[{ label: 'Account Name'}, { label:'Narration'}, { label:'Amount' }]}
             isEmpty={creditRows.length === 0}
             empty="No receipts on this date."
           >
             {creditRows.map((row) => (
               <Tr key={row.transaction.id}>
-                <Td className="font-medium text-gray-700 dark:text-gray-300">
+                <Td className="font-medium text-foreground">
                   {row.accountName ?? '-'}
                 </Td>
                 <Td>{row.voucherNarration ?? row.transaction.narration ?? '-'}</Td>
@@ -167,10 +167,10 @@ export default async function CashbookPage({
               <Td className="text-right">{inHandLabel}</Td>
             </Tr>
             <Tr>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 Today Closing Balance
               </Td>
-              <Td className="text-right font-medium text-gray-700 dark:text-gray-300">
+              <Td className="text-right font-medium text-foreground">
                 {closingLabel}
               </Td>
             </Tr>

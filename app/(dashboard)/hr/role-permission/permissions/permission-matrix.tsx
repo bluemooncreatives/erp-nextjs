@@ -77,7 +77,7 @@ export function PermissionMatrix({
             type="checkbox"
             checked={checked.has(node.id)}
             onChange={() => toggle(node.id)}
-            className="h-4 w-4 rounded border-gray-300 text-brand-500"
+            className="h-4 w-4 rounded border-border text-primary"
           />
           {checked.has(node.id) ? (
             <input type="hidden" name="permission_id" value={node.id} />
@@ -85,16 +85,16 @@ export function PermissionMatrix({
           <span
             className={
               node.type === 1
-                ? 'font-semibold text-gray-800 dark:text-white/90'
+                ? 'font-semibold text-foreground '
                 : node.type === 2
-                  ? 'font-medium text-gray-700 dark:text-gray-300'
-                  : 'text-gray-600 dark:text-gray-400'
+                  ? 'font-medium text-foreground '
+                  : 'text-muted-foreground '
             }
           >
             {node.name}
           </span>
           {node.route ? (
-            <span className="text-theme-xs text-gray-400">{node.route}</span>
+            <span className="text-xs text-muted-foreground">{node.route}</span>
           ) : null}
         </label>
         {children.map((child) => renderNode(child, depth + 1))}
@@ -115,7 +115,7 @@ export function PermissionMatrix({
           {roots.map((root) => (
             <div
               key={root.id}
-              className="mb-4 rounded-lg border border-gray-200 p-3 dark:border-gray-800"
+              className="mb-4 rounded-lg border border-border p-3"
             >
               {renderNode(root, 0)}
             </div>

@@ -46,7 +46,7 @@ export default async function LeaveDefinePage() {
           </div>
         ) : null}
 
-        <div className={canCreate ? 'col-span-12 xl:col-span-8' : 'col-span-12'}>
+        <div className={canCreate ? 'col-span-12 xl:col-span-8':'col-span-12'}>
           <Card title={`Definitions (${rows.length})`} bodyClassName="">
             <DataTable
               columns={[
@@ -63,7 +63,7 @@ export default async function LeaveDefinePage() {
             >
               {rows.map((row) => (
                 <Tr key={row.define.id}>
-                  <Td className="font-medium text-gray-700 dark:text-gray-300">
+                  <Td className="font-medium text-foreground">
                     {row.roleName ?? '-'}
                   </Td>
                   <Td>{row.leaveTypeName ?? '-'}</Td>

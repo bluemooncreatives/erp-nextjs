@@ -100,10 +100,10 @@ export default async function SaleHistoryPage({
           {decorated.map((row) => (
             <Tr key={row.sale.id}>
               <Td>{row.dateLabel}</Td>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 <Link
                   href={route('sale.show', { id: row.sale.id })}
-                  className="text-brand-500 hover:text-brand-600"
+                  className="text-primary hover:text-primary"
                 >
                   {row.sale.invoiceNo ?? row.sale.id}
                 </Link>
@@ -111,8 +111,8 @@ export default async function SaleHistoryPage({
               <Td>{row.customerName ?? 'Walk-in'}</Td>
               <Td>{row.showroomName ?? '-'}</Td>
               <Td>
-                <Badge color={row.sale.status === 1 ? 'success' : 'warning'} size="sm">
-                  {row.sale.status === 1 ? 'Paid' : 'Unpaid'}
+                <Badge color={row.sale.status === 1 ? 'success':'warning'} size="sm">
+                  {row.sale.status === 1 ? 'Paid':'Unpaid'}
                 </Badge>
               </Td>
               <Td>{row.amountLabel}</Td>

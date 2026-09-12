@@ -43,10 +43,10 @@ function PaidStatus({ status }: { status: number | null }) {
   const label = status === 1 ? 'Paid' : status === 2 ? 'Partial' : 'Unpaid';
   return (
     <span
-      className={`rounded-full px-2 py-0.5 text-theme-xs font-medium ${
+      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
         status === 1
-          ? 'bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-400'
-          : 'bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-400'
+          ? 'bg-success/10 text-success'
+          : 'bg-destructive/10 text-destructive'
       }`}
     >
       {label}
@@ -98,7 +98,7 @@ export async function ContactDetail({
 
   const invoicePanel = (
     <Card
-      title={isCustomer ? 'Invoices' : 'Purchase Invoices'}
+      title={isCustomer ? 'Invoices':'Purchase Invoices'}
       bodyClassName=""
     >
       <DataTable
@@ -129,7 +129,7 @@ export async function ContactDetail({
               <Td>{r.date ?? '-'}</Td>
               <Td>
                 <Link
-                  className="text-brand-500"
+                  className="text-primary"
                   href={
                     isCustomer
                       ? route('sale.show', { id: r.id })
@@ -151,7 +151,7 @@ export async function ContactDetail({
           );
         })}
       </DataTable>
-      <div className="border-t border-gray-100 px-5 py-3 text-sm font-medium text-gray-700 dark:border-gray-800 dark:text-gray-300">
+      <div className="border-t border-border px-5 py-3 text-sm font-medium text-foreground">
         {isCustomer ? 'Total Sale' : 'Total Purchase'}: {money(symbol, totalApproved)}
       </div>
     </Card>
@@ -219,8 +219,8 @@ export async function ContactDetail({
           </Tr>
         ))}
       </DataTable>
-      <div className="border-t border-gray-100 px-5 py-3 text-sm font-medium text-gray-700 dark:border-gray-800 dark:text-gray-300">
-        Opening: {money(symbol, statement.opening)} &middot; Closing:{' '}
+      <div className="border-t border-border px-5 py-3 text-sm font-medium text-foreground">
+        Opening: {money(symbol, statement.opening)} &middot; Closing:{''}
         {money(symbol, statement.closing)}
       </div>
     </Card>
@@ -241,7 +241,7 @@ export async function ContactDetail({
           canEdit ? (
             <Link
               href={route('add_contact.edit', { id: contact.id })}
-              className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
             >
               Edit
             </Link>
@@ -291,7 +291,7 @@ export async function ContactDetail({
           </Card>
 
           <div className="space-y-5">
-            <Card title={isCustomer ? 'Sale Information' : 'Purchase Information'}>
+            <Card title={isCustomer ? 'Sale Information':'Purchase Information'}>
               <DetailList
                 columns={1}
                 items={[
@@ -305,7 +305,7 @@ export async function ContactDetail({
                     ? route('customerSaleProductList', { id: contact.id })
                     : route('supplierPurchaseProductList', { id: contact.id })
                 }
-                className="mt-4 inline-block rounded-lg px-4 py-2.5 text-sm font-medium text-brand-500 ring-1 ring-inset ring-brand-300 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+                className="mt-4 inline-block rounded-lg px-4 py-2.5 text-sm font-medium text-primary ring-1 ring-inset ring-ring/50 hover:bg-primary/10"
               >
                 Products
               </Link>
@@ -323,7 +323,7 @@ export async function ContactDetail({
                   { label: 'Due Balance', value: money(symbol, summary.due) },
                 ]}
               />
-              <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+              <p className="mt-3 text-xs text-muted-foreground">
                 {isCustomer
                   ? 'Total Sale = Sale + Opening Balance'
                   : 'Total Purchase = Purchase + Opening Balance'}
@@ -335,9 +335,9 @@ export async function ContactDetail({
         <Tabs
           orientation="horizontal"
           tabs={[
-            { id: 'invoice', label: 'Invoice', content: invoicePanel },
-            { id: 'return', label: 'Return', content: returnPanel },
-            { id: 'transactions', label: 'Transactions', content: transactionPanel },
+            { id: 'invoice', label:'Invoice', content: invoicePanel },
+            { id: 'return', label:'Return', content: returnPanel },
+            { id: 'transactions', label:'Transactions', content: transactionPanel },
           ]}
         />
 
@@ -352,7 +352,7 @@ export async function ContactDetail({
                 label: a.name ?? String(a.id),
                 isBank: a.configurationGroupId === ConfigurationGroup.Bank,
               }))}
-              accountField={isCustomer ? 'debit_account_id' : 'credit_account_id'}
+              accountField={isCustomer ? 'debit_account_id':'credit_account_id'}
               accountLabel={isCustomer ? 'Received By' : 'Payment From Account'}
               contactFieldLabel={isCustomer ? 'Received From' : 'Paid To'}
               title="Add Balance"

@@ -48,7 +48,7 @@ export default async function ChartOfAccountsPage() {
     <>
       <PageHeader
         title="Chart Of Accounts"
-        breadcrumb={[{ label: 'Accounts' }, { label: 'Chart Of Accounts' }]}
+        breadcrumb={[{ label: 'Accounts'}, { label:'Chart Of Accounts' }]}
       />
 
       <div className="grid grid-cols-12 gap-4 md:gap-6">
@@ -58,7 +58,7 @@ export default async function ChartOfAccountsPage() {
           </div>
         ) : null}
 
-        <div className={canCreate || canEdit ? 'col-span-12 xl:col-span-8' : 'col-span-12'}>
+        <div className={canCreate || canEdit ? 'col-span-12 xl:col-span-8':'col-span-12'}>
           <Card title={`Accounts (${flat.length})`} bodyClassName="">
             <DataTable
               columns={[
@@ -79,8 +79,8 @@ export default async function ChartOfAccountsPage() {
                       style={{ paddingLeft: `${depth * 16}px` }}
                       className={
                         node.isGroup === 1
-                          ? 'font-semibold text-gray-800 dark:text-white/90'
-                          : 'text-gray-600 dark:text-gray-300'
+                          ? 'font-semibold text-foreground '
+                          : 'text-muted-foreground '
                       }
                     >
                       {node.name}
@@ -95,7 +95,7 @@ export default async function ChartOfAccountsPage() {
                     </Badge>
                   </Td>
                   <Td>
-                    {canEdit ? <Link className="mr-3 text-brand-500" href={`/account/chart-account/${node.id}/edit`}>Edit</Link> : null}
+                    {canEdit ? <Link className="mr-3 text-primary" href={`/account/chart-account/${node.id}/edit`}>Edit</Link> : null}
                     {canDelete && node.isGroup === 0 ? (
                       <form action={deleteChartAccountAction}>
                         <input type="hidden" name="id" value={node.id} />

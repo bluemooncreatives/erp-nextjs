@@ -45,8 +45,8 @@ export default async function ContactReturnPage() {
   return (
     <>
       <PageHeader
-        title={isCustomer ? 'Customer Return' : 'Supplier Return'}
-        breadcrumb={[{ label: 'My Details' }, { label: 'Returns' }]}
+        title={isCustomer ? 'Customer Return':'Supplier Return'}
+        breadcrumb={[{ label: 'My Details'}, { label:'Returns' }]}
       />
 
       <Card title={`Returns (${rows.length}) - ${totalLabel}`} bodyClassName="">
@@ -63,7 +63,7 @@ export default async function ContactReturnPage() {
           {rows.map((row) => (
             <Tr key={row.id}>
               <Td>{row.dateLabel}</Td>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {row.invoiceNo ?? row.id}
               </Td>
               <Td>{row.refNo ?? '-'}</Td>

@@ -44,12 +44,12 @@ export default async function PaymentVouchersPage({
     <>
       <PageHeader
         title="Payment Vouchers"
-        breadcrumb={[{ label: 'Accounts' }, { label: 'Payment Vouchers' }]}
+        breadcrumb={[{ label: 'Accounts'}, { label:'Payment Vouchers' }]}
         actions={
           canCreate ? (
             <Link
               href={ROUTES['vouchers.create']}
-              className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
             >
               Add Voucher
             </Link>
@@ -73,14 +73,14 @@ export default async function PaymentVouchersPage({
         >
           {voucherRows.map((voucher) => (
             <Tr key={voucher.id}>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
-                {canView ? <Link href={route('vouchers.show', { id: voucher.id })} className="text-brand-500">{voucher.txId ?? voucher.id}</Link> : voucher.txId ?? voucher.id}
+              <Td className="font-medium text-foreground">
+                {canView ? <Link href={route('vouchers.show', { id: voucher.id })} className="text-primary">{voucher.txId ?? voucher.id}</Link> : voucher.txId ?? voucher.id}
               </Td>
               <Td>{voucher.dateLabel}</Td>
               <Td>{voucher.voucherType}</Td>
               <Td className="max-w-sm">
                 {voucher.legs.map((leg, i) => (
-                  <span key={i} className="block text-theme-xs">
+                  <span key={i} className="block text-xs">
                     {leg.type}: {leg.accountName} {symbol} {numberFormat(leg.amount)}
                   </span>
                 ))}
@@ -96,7 +96,7 @@ export default async function PaymentVouchersPage({
                 </Badge>
               </Td>
               <Td>
-                {canEdit ? <Link href={route('vouchers.edit', { id: voucher.id })} className="mr-3 text-brand-500">Edit</Link> : null}
+                {canEdit ? <Link href={route('vouchers.edit', { id: voucher.id })} className="mr-3 text-primary">Edit</Link> : null}
                 {canDelete ? (
                   <form action={deleteVoucherAction}>
                     <input type="hidden" name="id" value={voucher.id} />

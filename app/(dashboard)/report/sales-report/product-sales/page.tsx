@@ -86,7 +86,7 @@ export default async function ProductSalesReportPage({
               <Td>{r.invoiceNo ?? '-'}</Td>
               <Td>{r.dateLabel}</Td>
               <Td>{r.customerName ?? '-'}</Td>
-              <Td className="font-medium text-gray-700 dark:text-gray-300">
+              <Td className="font-medium text-foreground">
                 {r.productName ?? r.sku ?? r.item.productSkuId}
               </Td>
               <Td>{`${symbol} ${numberFormat(r.item.price)}`}</Td>

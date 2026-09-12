@@ -197,8 +197,8 @@ function ImageField({
   removeType: string;
 }) {
   return (
-    <div className="rounded-2xl border border-gray-200 p-5 text-center dark:border-gray-800">
-      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{title}</p>
+    <div className="rounded-2xl border border-border p-5 text-center">
+      <p className="text-sm font-medium text-foreground">{title}</p>
       <div className="my-4 flex h-24 items-center justify-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={url} alt={title} className="max-h-24 w-auto" />
@@ -207,7 +207,7 @@ function ImageField({
         type="file"
         name={name}
         accept="image/jpeg,image/png,image/jpg"
-        className="mx-auto block w-full text-xs text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-500 file:px-3 file:py-2 file:text-xs file:font-medium file:text-white"
+        className="mx-auto block w-full text-xs text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-xs file:font-medium file:text-white"
       />
       <RemoveImageButton type={removeType} />
     </div>
@@ -225,7 +225,7 @@ function RemoveImageButton({ type }: { type: string }) {
         data.set('type', type);
         await removeSettingImage(data);
       }}
-      className="mt-3 text-xs font-medium text-error-500 hover:text-error-600"
+      className="mt-3 text-xs font-medium text-destructive hover:text-destructive"
     >
       Remove
     </button>
@@ -358,7 +358,7 @@ export function SmtpSettingsForm({
         defaultValue={mailProtocol}
         options={[
           { value: 'smtp', label: 'SMTP' },
-          { value: 'sendmail', label: 'Send Mail' },
+          { value: 'sendmail', label:'Send Mail' },
         ]}
         error={state.fieldErrors?.mail_protocol}
       />
@@ -471,7 +471,7 @@ export function SmsSettingsForm({
       <Messages state={state} />
 
       <div className="space-y-2">
-        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <p className="text-sm font-medium text-foreground">
           Activate SMS Gateway
         </p>
         {gateways.map((gateway) => (
@@ -484,12 +484,12 @@ export function SmsSettingsForm({
           />
         ))}
         {state.fieldErrors?.sms_gateway_id ? (
-          <p className="text-xs text-error-500">{state.fieldErrors.sms_gateway_id}</p>
+          <p className="text-xs text-destructive">{state.fieldErrors.sms_gateway_id}</p>
         ) : null}
       </div>
 
-      <div className="space-y-4 rounded-2xl border border-gray-200 p-5 dark:border-gray-800">
-        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+      <div className="space-y-4 rounded-2xl border border-border p-5">
+        <p className="text-sm font-medium text-foreground">
           Twilio Settings
         </p>
         <div className="grid gap-5 sm:grid-cols-2">
@@ -507,8 +507,8 @@ export function SmsSettingsForm({
         </div>
       </div>
 
-      <div className="space-y-4 rounded-2xl border border-gray-200 p-5 dark:border-gray-800">
-        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+      <div className="space-y-4 rounded-2xl border border-border p-5">
+        <p className="text-sm font-medium text-foreground">
           Text To Local Settings
         </p>
         <div className="grid gap-5 sm:grid-cols-2">
@@ -587,10 +587,10 @@ export function TemplateForm({
 
       {availableVariable ? (
         <div>
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <p className="text-sm font-medium text-foreground">
             Available Variables
           </p>
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-xs text-muted-foreground">
             {availableVariable}
           </p>
         </div>
@@ -636,11 +636,11 @@ export function GuestBackgroundForm({
     <form action={action} className="space-y-5">
       <Messages state={state} />
       <div className="grid gap-5 sm:grid-cols-2">
-        <div className="rounded-2xl border border-gray-200 p-5 text-center dark:border-gray-800">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <div className="rounded-2xl border border-border p-5 text-center">
+          <p className="text-sm font-medium text-foreground">
             Login Background Image
           </p>
-          <div className="my-4 flex h-40 items-center justify-center overflow-hidden rounded-lg bg-gray-50 dark:bg-gray-900">
+          <div className="my-4 flex h-40 items-center justify-center overflow-hidden rounded-lg bg-muted">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={loginBgUrl} alt="Login background" className="max-h-40 w-auto" />
           </div>
@@ -648,14 +648,14 @@ export function GuestBackgroundForm({
             type="file"
             name="login_bg"
             accept="image/*"
-            className="mx-auto block w-full text-xs text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-500 file:px-3 file:py-2 file:text-xs file:font-medium file:text-white"
+            className="mx-auto block w-full text-xs text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-xs file:font-medium file:text-white"
           />
         </div>
-        <div className="rounded-2xl border border-gray-200 p-5 text-center dark:border-gray-800">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <div className="rounded-2xl border border-border p-5 text-center">
+          <p className="text-sm font-medium text-foreground">
             Error Page Background Image
           </p>
-          <div className="my-4 flex h-40 items-center justify-center overflow-hidden rounded-lg bg-gray-50 dark:bg-gray-900">
+          <div className="my-4 flex h-40 items-center justify-center overflow-hidden rounded-lg bg-muted">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={errorBgUrl} alt="Error page background" className="max-h-40 w-auto" />
           </div>
@@ -663,7 +663,7 @@ export function GuestBackgroundForm({
             type="file"
             name="error_page_bg"
             accept="image/*"
-            className="mx-auto block w-full text-xs text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-500 file:px-3 file:py-2 file:text-xs file:font-medium file:text-white"
+            className="mx-auto block w-full text-xs text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-xs file:font-medium file:text-white"
           />
         </div>
       </div>
@@ -696,7 +696,7 @@ export function ChangeViewForm({ defaultView }: { defaultView: string }) {
         />
       </div>
       {state.fieldErrors?.view ? (
-        <p className="text-xs text-error-500">{state.fieldErrors.view}</p>
+        <p className="text-xs text-destructive">{state.fieldErrors.view}</p>
       ) : null}
       <FormActions>
         <SubmitButton>Save</SubmitButton>

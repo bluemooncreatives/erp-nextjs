@@ -61,19 +61,19 @@ export default async function SaleDetailPage({
           <div className="flex items-center gap-2">
             <Link
               href={route('sale.print_view', { id: sale.id })}
-              className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:text-gray-400 dark:ring-gray-700"
+              className="rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
             >
               Print
             </Link>
             <Link
               href={route('sale.pdf', { id: sale.id })}
-              className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:text-gray-400 dark:ring-gray-700"
+              className="rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
             >
               Pdf
             </Link>
             <Link
               href={route('sale.challan_pdf', { id: sale.id })}
-              className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:text-gray-400 dark:ring-gray-700"
+              className="rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
             >
               Challan
             </Link>
@@ -99,7 +99,7 @@ export default async function SaleDetailPage({
             <DetailList
               items={[
                 { label: 'Invoice No', value: sale.invoiceNo ?? '-' },
-                { label: 'Reference No', value: sale.refNo ?? '-' },
+                { label: 'Reference No', value: sale.refNo ??'-' },
                 { label: 'Date', value: await dateConvert(sale.date) },
                 {
                   label: 'Customer',
@@ -152,7 +152,7 @@ export default async function SaleDetailPage({
               ]}
             />
             {sale.notes ? (
-              <p className="mt-5 whitespace-pre-line text-sm text-gray-600 dark:text-gray-400">
+              <p className="mt-5 whitespace-pre-line text-sm text-muted-foreground">
                 {sale.notes}
               </p>
             ) : null}
@@ -173,7 +173,7 @@ export default async function SaleDetailPage({
             >
               {items.map((item) => (
                 <Tr key={item.id}>
-                  <Td className="font-medium text-gray-700 dark:text-gray-300">
+                  <Td className="font-medium text-foreground">
                     {item.name ?? item.sku ?? item.productSkuId}
                   </Td>
                   <Td>{money(item.price)}</Td>
@@ -213,7 +213,7 @@ export default async function SaleDetailPage({
               <SummaryRow label="Tax" value={money(sale.totalTax)} />
               <SummaryRow label="Shipping" value={money(sale.shippingCharge)} />
               <SummaryRow label="Other charges" value={money(sale.otherCharge)} />
-              <div className="border-t border-gray-200 pt-3 dark:border-gray-700">
+              <div className="border-t border-border pt-3">
                 <SummaryRow label="Payable" value={money(sale.payableAmount)} strong />
                 <SummaryRow label="Paid" value={money(paidAmount)} />
                 <SummaryRow label="Due" value={money(dueAmount)} strong />
@@ -288,12 +288,12 @@ function SummaryRow({
 }) {
   return (
     <div className="flex items-center justify-between">
-      <dt className="text-gray-500 dark:text-gray-400">{label}</dt>
+      <dt className="text-muted-foreground">{label}</dt>
       <dd
         className={
           strong
-            ? 'text-base font-semibold text-gray-800 dark:text-white/90'
-            : 'text-gray-700 dark:text-gray-300'
+            ? 'text-base font-semibold text-foreground '
+            : 'text-foreground '
         }
       >
         {value}

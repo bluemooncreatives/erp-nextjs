@@ -28,8 +28,8 @@ export type PayableStaff = {
 type Line = { key: number; typeName: string; amount: number; kind: string };
 
 const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January','February','March','April','May','June',
+  'July','August','September','October','November','December',
 ];
 
 export function GeneratePayrollPanel({
@@ -123,8 +123,8 @@ export function GeneratePayrollPanel({
                 value={line.kind}
                 onChange={(e) => patch(line.key, { kind: e.target.value })}
                 options={[
-                  { value: 'earn', label: 'Earning' },
-                  { value: 'dedc', label: 'Deduction' },
+                  { value: 'earn', label:'Earning' },
+                  { value: 'dedc', label:'Deduction' },
                 ]}
               />
               <FormInput
@@ -142,7 +142,7 @@ export function GeneratePayrollPanel({
                   onClick={() =>
                     setLines((prev) => prev.filter((l) => l.key !== line.key))
                   }
-                  className="rounded-lg px-3 py-2 text-sm font-medium text-error-500 hover:bg-error-50 dark:hover:bg-error-500/10"
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10"
                 >
                   Remove
                 </button>
@@ -159,7 +159,7 @@ export function GeneratePayrollPanel({
               { key: Date.now(), typeName: '', amount: 0, kind: 'earn' },
             ])
           }
-          className="mt-4 rounded-lg px-4 py-2.5 text-sm font-medium text-brand-500 ring-1 ring-inset ring-brand-300 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+          className="mt-4 rounded-lg px-4 py-2.5 text-sm font-medium text-primary ring-1 ring-inset ring-ring/50 hover:bg-primary/10"
         >
           Add earning / deduction
         </button>
@@ -180,8 +180,8 @@ export function GeneratePayrollPanel({
             placeholder="Select"
             options={[
               { value: 'Cash', label: 'Cash' },
-              { value: 'Bank', label: 'Bank' },
-              { value: 'Cheque', label: 'Cheque' },
+              { value: 'Bank', label:'Bank' },
+              { value: 'Cheque', label:'Cheque' },
             ]}
           />
           <FormInput label="Payment Date" name="payment_date" type="date" />

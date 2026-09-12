@@ -44,7 +44,7 @@ export default async function ReceivePurchasePage({
     <>
       <PageHeader
         title="Recieve Your Product"
-        breadcrumb={[{ label: 'Inventory' }, { label: 'Recieve Your Product' }]}
+        breadcrumb={[{ label: 'Inventory'}, { label:'Recieve Your Product' }]}
       />
 
       <Card
@@ -77,7 +77,7 @@ export default async function ReceivePurchasePage({
               <Td>
                 <Link
                   href={route('purchase_order.show', { id: order.id })}
-                  className="font-medium text-brand-500 hover:text-brand-600"
+                  className="font-medium text-primary hover:text-primary"
                 >
                   {order.invoiceNo || order.id}
                 </Link>
@@ -91,16 +91,16 @@ export default async function ReceivePurchasePage({
                 <Badge
                   size="sm"
                   color={
-                    order.addedToStock === PurchaseStock.Partial ? 'warning' : 'light'
+                    order.addedToStock === PurchaseStock.Partial ? 'warning':'light'
                   }
                 >
-                  {order.addedToStock === PurchaseStock.Partial ? 'Partial' : 'Pending'}
+                  {order.addedToStock === PurchaseStock.Partial ? 'Partial':'Pending'}
                 </Badge>
               </Td>
               <Td>
                 <Link
                   href={route('purchase_order.show', { id: order.id })}
-                  className="rounded-lg px-3 py-1.5 text-theme-xs font-medium text-white bg-brand-500 hover:bg-brand-600"
+                  className="rounded-lg px-3 py-1.5 text-xs font-medium text-white bg-primary hover:bg-primary"
                 >
                   Receive
                 </Link>
