@@ -4,14 +4,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { authorize } from '@/lib/auth/permissions';
-import {
-  ledgerAccounts,
-  ledgerOpeningBalance,
-  ledgerRows,
-} from '@/lib/reports/statements';
-import { findAccount } from '@/lib/accounting/accounts';
+import { ledgerAccounts } from '@/lib/reports/statements';
 import { dateConvert, singlePrice } from '@/lib/settings';
-import { toDateString } from '@/lib/php-date';
+import { ledgerStatement } from '@/lib/reports/ledger';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card, EmptyState } from '@/components/erp/page';
 import { ReportSummary } from '@/components/erp/report-summary';
@@ -30,47 +25,8 @@ export default async function LedgerReportPage({
   const sp = await searchParams;
 
   const accounts = await ledgerAccounts();
-  const accountId = Number(sp.account_id) || null;
-  const from = toDateString(sp.dateFrom);
-  const to = toDateString(sp.dateTo);
-
-  // The controller's three guard messages.
-  const warning =
-    from && to && !accountId
-      ? 'Select Account First'
-      : to && !from
-        ? 'You need to set date-from when you select date-to.'
-        : from && !to
-          ? 'You need to set date-to when you select date-from.'
-          : null;
-
-  const account = accountId ? await findAccount(accountId) : null;
-
-  const opening =
-    account && from
-      ? await ledgerOpeningBalance(account.id, Number(account.type), from)
-      : 0;
-
-  const rows = account && !warning ? await ledgerRows(account.id, from, to) : [];
-
-  const debitPositive = account
-    ? Number(account.type) === 1 || Number(account.type) === 4
-    : true;
-
-  // Running balance per row, worked out before the labels are formatted: the
-  // awaits below resume out of order, so the balance cannot be accumulated
-  // inside the formatting pass.
-  const withBalances = rows.reduce<Array<{ row: (typeof rows)[number]; amount: number; balance: number }>>(
-    (acc, row) => {
-      const amount = Number(row.amount);
-      const signed =
-        row.type === 'Dr' ? (debitPositive ? amount : -amount) : debitPositive ? -amount : amount;
-      const balance = (acc.length ? acc[acc.length - 1].balance : opening) + signed;
-      acc.push({ row, amount, balance });
-      return acc;
-    },
-    [],
-  );
+  const { accountId, account, from, to, warning, rows, withBalances, opening, closing, totalDebit, totalCredit } =
+    await ledgerStatement(sp);
 
   const decorated = await Promise.all(
     withBalances.map(async ({ row, amount, balance }) => ({
@@ -88,12 +44,11 @@ export default async function LedgerReportPage({
   // Opening and closing bracket the period; the Dr/Cr totals say how it got
   // from one to the other. The table alone made you scroll to the last row to
   // find the closing balance.
-  const closing = withBalances.length ? withBalances[withBalances.length - 1].balance : opening;
   const [openingLabel, closingLabel, debitLabel, creditLabel] = await Promise.all([
     singlePrice(opening),
     singlePrice(closing),
-    singlePrice(rows.filter((r) => r.type === 'Dr').reduce((sum, r) => sum + Number(r.amount), 0)),
-    singlePrice(rows.filter((r) => r.type === 'Cr').reduce((sum, r) => sum + Number(r.amount), 0)),
+    singlePrice(totalDebit),
+    singlePrice(totalCredit),
   ]);
 
   return (
@@ -167,7 +122,9 @@ export default async function LedgerReportPage({
           bodyClassName=""
           actions={
             <Link
-              href={route('leadger_report.print_view', { slug: account.id })}
+              href={`${route('leadger_report.print_view', { slug: account.id })}?${new URLSearchParams(
+                { account_id: String(account.id), ...(from ? { dateFrom: from } : {}), ...(to ? { dateTo: to } : {}) },
+              )}`}
               className="text-xs font-medium text-primary hover:text-primary"
             >
               Print view
