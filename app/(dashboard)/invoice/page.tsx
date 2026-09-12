@@ -32,7 +32,7 @@ export default async function ContactInvoicePage() {
       refNo: 'refNo' in row ? row.refNo : null,
       amountLabel: await singlePrice('payableAmount' in row ? row.payableAmount : 0),
       dateLabel: await dateConvert(row.date),
-      status: 'status' in row ? row.status : 'isPaid' in row ? row.isPaid : null,
+      status: row.status,
     })),
   );
 
