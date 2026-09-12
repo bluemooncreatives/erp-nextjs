@@ -224,13 +224,29 @@ function methodExists(action) {
 
 // --- Matching ---------------------------------------------------------------
 
-/** `{id}` in the port's table, `{id}` or `{sale}` in Laravel. */
+/**
+ * One spelling for a parameter segment. Laravel writes `{id}` and `{view?}`;
+ * Next writes `[id]`, `[...rest]` and `[[...view]]`. An optional segment also
+ * matches when it is absent, so a trailing one is dropped as well as squashed.
+ */
 function normalise(url) {
-  return url
+  const segments = url
     .replace(/^\/+|\/+$/g, '')
-    .replace(/\[[^\]]+\]/g, '{}')
-    .replace(/\{[^}]*\}/g, '{}')
-    .toLowerCase();
+    .split('/')
+    .map((segment) =>
+      /^\[+\.{0,3}[^\]]+\]+$/.test(segment) || /^\{[^}]*\}$/.test(segment)
+        ? '{}'
+        : segment.toLowerCase(),
+    );
+  return segments.join('/');
+}
+
+/** Every url a route pattern answers, once optional segments are dropped. */
+function variants(url) {
+  const normalised = normalise(url);
+  const optional = /\[\[\.{3}[^\]]+\]\]$|\{[^}]*\?\}$/.test(url.replace(/\/+$/, ''));
+  if (!optional) return [normalised];
+  return [normalised, normalised.replace(/\/\{\}$/, '')];
 }
 
 const portedUrls = new Map();
@@ -238,7 +254,7 @@ for (const match of routesTs.matchAll(/^\s*"([^"]+)":\s*'([^']+)'/gm)) {
   portedUrls.set(match[1], match[2]);
 }
 
-const servedUrls = new Set([...pageUrls].map(normalise));
+const servedUrls = new Set([...pageUrls].flatMap(variants));
 
 /**
  * Not every GET route was a page. Checking the rest for a page url is noise:
@@ -264,7 +280,7 @@ function classify(route) {
 const results = laravelRoutes.map((route) => {
   const named = Boolean(route.name) && portedNames.has(route.name);
   const url = route.name ? portedUrls.get(route.name) : null;
-  const served = url ? servedUrls.has(normalise(url)) : false;
+  const served = url ? variants(url).some((v) => servedUrls.has(v)) : false;
   const kind = route.name ? classify(route) : 'unnamed';
   return { ...route, named, url, served, kind };
 });
@@ -283,10 +299,25 @@ const pageGaps = results.filter(
   (route) => route.named && route.kind === 'page' && !route.served,
 );
 
+/**
+ * Routes whose controller method exists but whose dependencies do not, so the
+ * route still fatals in Laravel. `methodExists` cannot see this - it reads the
+ * controller, not what the method reaches for - so each is named with its
+ * reason rather than left looking like a screen someone forgot.
+ */
+const DEAD_BY_DEPENDENCY = {
+  'packing.report.index': 'no Packing module: PackingOrder and its tables are absent',
+  'packing.report.product': 'no Packing module: PackingItemDetail is absent',
+  'packing.recieve_report.product':
+    'no Packing module: PackingOrderRecieveHistory is absent',
+};
+
 const dead = [];
 const missingPage = [];
 for (const route of pageGaps) {
-  (methodExists(route.action) === false ? dead : missingPage).push(route);
+  const gone =
+    methodExists(route.action) === false || route.name in DEAD_BY_DEPENDENCY;
+  (gone ? dead : missingPage).push(route);
 }
 
 const byName = new Map();
@@ -308,7 +339,8 @@ for (const route of missingName) {
 console.log('');
 console.log(`dead in the source (no such controller method): ${dead.length}`);
 for (const route of dead) {
-  console.log(`  ${route.name.padEnd(42)} ${route.action}`);
+  const why = DEAD_BY_DEPENDENCY[route.name] ?? `no ${route.action}`;
+  console.log(`  ${route.name.padEnd(42)} ${why}`);
 }
 
 console.log('');

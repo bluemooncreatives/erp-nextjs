@@ -305,6 +305,60 @@ export async function retailerInvoiceList(userId: number) {
     .orderBy(desc(sales.id));
 }
 
+/**
+ * `dueInvoiceList()` - the unpaid invoices of one party, excluding POS sales.
+ *
+ * The PHP read the party from `session('customer')`, a `"<prefix>-<id>"` string
+ * the sale form set over AJAX; `agent-` meant the agent user, anything else the
+ * customer. The branch and paid total are joined here because the screen shows
+ * them, which the Blade did through Eloquent relations.
+ */
+export async function dueInvoiceList(party: { id: number; asAgent: boolean }) {
+  const rows = await db
+    .select({
+      sale: sales,
+      customerName: contacts.name,
+      agentName: users.name,
+      showroomName: showRooms.name,
+      warehouseName: wareHouses.name,
+      paidAmount: sql<number>`(
+        select coalesce(sum(p.amount - p.return_amount), 0)
+        from payments p
+        where p.payable_id = ${sales.id}
+          and p.payable_type = ${MorphType.Sale}
+      )`,
+    })
+    .from(sales)
+    .leftJoin(contacts, eq(contacts.id, sales.customerId))
+    .leftJoin(users, eq(users.id, sales.agentUserId))
+    .leftJoin(
+      showRooms,
+      and(eq(showRooms.id, sales.saleableId), eq(sales.saleableType, MorphType.ShowRoom)),
+    )
+    .leftJoin(
+      wareHouses,
+      and(eq(wareHouses.id, sales.saleableId), eq(sales.saleableType, MorphType.WareHouse)),
+    )
+    .where(
+      and(
+        party.asAgent
+          ? eq(sales.agentUserId, party.id)
+          : eq(sales.customerId, party.id),
+        ne(sales.type, SaleKind.Pos),
+        ne(sales.status, SaleStatus.Paid),
+      ),
+    )
+    .orderBy(desc(sales.id));
+
+  return rows.map((row) => ({
+    ...row.sale,
+    customerName: row.customerName,
+    agentName: row.agentName,
+    paidAmount: Number(row.paidAmount ?? 0),
+    locationName: row.showroomName ?? row.warehouseName,
+  }));
+}
+
 /** `customerDues($customer_id, $sale_id)` - totals across a customer's OTHER sales. */
 export async function customerDues(customerId: number, excludeSaleId: number) {
   const [row] = await db

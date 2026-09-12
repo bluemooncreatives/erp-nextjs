@@ -42,19 +42,30 @@ export default async function StaffReportPrintPage({
 
   // `$currentBalance = 0 + $staffDetails->opening_balance`, then debits add and
   // credits subtract as the Blade walked the rows in order.
+  //
+  // The balances are worked out before any formatting, because the formatting
+  // pass awaits and would resume out of order - accumulating inside it gives
+  // every row the closing balance.
   const opening = Number(found.staff.openingBalance ?? 0);
-  let running = opening;
+  const withBalances = transactions.reduce<
+    Array<{ row: (typeof transactions)[number]; balance: number }>
+  >((acc, row) => {
+    const previous = acc.length ? acc[acc.length - 1].balance : opening;
+    const signed = row.type === 'Cr' ? -Number(row.amount) : Number(row.amount);
+    acc.push({ row, balance: previous + signed });
+    return acc;
+  }, []);
+
   const rows = await Promise.all(
-    transactions.map(async (row) => {
-      running += row.type === 'Cr' ? -Number(row.amount) : Number(row.amount);
-      return {
-        ...row,
-        dateLabel: row.date ? await dateConvert(row.date) : '',
-        balance: running,
-      };
-    }),
+    withBalances.map(async ({ row, balance }) => ({
+      ...row,
+      dateLabel: row.date ? await dateConvert(row.date) : '',
+      balance,
+    })),
   );
-  const closing = running;
+  const closing = withBalances.length
+    ? withBalances[withBalances.length - 1].balance
+    : opening;
 
   const logo = assetUrl(setting.logo);
 

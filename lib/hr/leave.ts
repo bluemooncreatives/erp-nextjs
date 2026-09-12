@@ -119,6 +119,29 @@ export async function listLeaveApplications(filters: {
   return { rows, total: Number(countRow?.count ?? 0), page, perPage };
 }
 
+/** `LeaveRepository::find($id)` with the names the leave application PDF shows. */
+export async function findLeaveApplication(id: number) {
+  const [row] = await db
+    .select({
+      leave: applyLeaves,
+      userName: users.name,
+      userEmail: users.email,
+      leaveTypeName: leaveTypes.name,
+      approvedByName: sql<string | null>`(
+        select u.name from users u where u.id = ${applyLeaves.approvedBy}
+      )`,
+      createdByName: sql<string | null>`(
+        select u.name from users u where u.id = ${applyLeaves.createdBy}
+      )`,
+    })
+    .from(applyLeaves)
+    .leftJoin(users, eq(users.id, applyLeaves.userId))
+    .leftJoin(leaveTypes, eq(leaveTypes.id, applyLeaves.leaveTypeId))
+    .where(eq(applyLeaves.id, id))
+    .limit(1);
+  return row ?? null;
+}
+
 export async function createLeaveApplication(
   input: LeaveInput,
   actorId: number,
