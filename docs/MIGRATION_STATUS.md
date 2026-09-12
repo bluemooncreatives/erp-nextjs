@@ -89,6 +89,13 @@ passes is in the git history; this document covers the state of the whole port.
   every row's formatted balance showed the closing balance. It is computed before formatting.
 - **Bank ledger account code.** `createBankAccount` wrote `01-03-<id>`; the PHP writes
   `03-<id>`.
+- **Permissions that could never be granted.** Payroll (`payroll.store/edit/delete`), sale
+  shipping (`sale.shipping.store`) and the new contact balance actions guarded with names that
+  are not Laravel route names, so every non-admin was refused while an admin - who bypasses the
+  check - saw nothing wrong. They now use `save_payroll`, `payroll_payment_store`,
+  `store.shipping`, `vouchers.store` and `journal.store`.
+- **The branch filter on the sale and purchase history reports** was fetched but never
+  rendered; `house_id` now filters as it does in the Blade.
 - Unused TailAdmin template components (ecommerce widgets, demo calendar) were removed; they
   were dead code and the calendar broke lint.
 
@@ -103,6 +110,7 @@ from `software_erp.sql`, plus the usual static checks.
 | Type check | `npx tsc --noEmit` | clean |
 | Lint | `npx eslint app lib components scripts` | no errors (17 unused-symbol warnings) |
 | Production build | `npm run build` | compiled |
+| Permission names | `npm run verify:permissions` | 313 guarded names, all resolve to a route name or a known module permission |
 | Schema parity | `npm run verify:schema <url>` | 107 tables / 1180 columns, no missing tables, columns or type mismatches |
 | Query layer | `npm run verify:db` | 103 repository queries executed, 0 failures |
 | Write paths | `npm run verify:writes` | 9 scenarios passed |
@@ -129,7 +137,12 @@ DB_HOST=127.0.0.1 DB_PORT=3307 DB_USERNAME=root DB_PASSWORD= DB_DATABASE=softwar
 
 `verify:writes` and `seed-demo.mjs` write to the database they are pointed at - use a scratch
 copy, never production. `verify:http` needs a running server and mints its own session cookie
-from `SESSION_SECRET`.
+from `SESSION_SECRET`; `ROLE_ID=<id>` runs the sweep as a user of that role.
+`verify:permissions` needs no database, and `--db` additionally reports which guarded names a
+given install has not seeded.
+
+The database used for this pass was a disposable MariaDB on port 3307 created from
+`software_erp.sql`; nothing was pointed at the configured `DB_HOST`.
 
 ## Remaining work
 
