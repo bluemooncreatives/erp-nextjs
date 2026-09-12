@@ -1,9 +1,11 @@
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const path = require('node:path');
-const vm = require('node:vm');
-const test = require('node:test');
-const ts = require('typescript');
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import vm from 'node:vm';
+import test from 'node:test';
+import ts from 'typescript';
+import { fileURLToPath } from 'node:url';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Exercise the real Server Action with isolated persistence and auth boundaries.
 // These tests do not connect to or modify the ERP database.
