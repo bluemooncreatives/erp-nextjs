@@ -91,8 +91,6 @@ export function parseCsv(text: string): SheetRows {
 
 // --- xlsx ------------------------------------------------------------------
 
-type ZipEntry = { name: string; data: Buffer };
-
 /** Reads the entries of a zip archive (stored or deflated members only). */
 function readZip(buffer: Buffer): Map<string, Buffer> {
   const entries = new Map<string, Buffer>();

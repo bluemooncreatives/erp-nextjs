@@ -23,12 +23,7 @@ import { MorphType } from '@/lib/db/morph';
 import { AccountType, ConfigurationGroup, RootAccountId } from '@/lib/accounting/accounts';
 import { defaultPurchaseAccountId } from '@/lib/accounting/defaults';
 import { createJournalVoucher } from '@/lib/accounting/journal';
-import {
-  createOpeningBalance,
-  createOpeningBalanceHistory,
-  openingBalanceControlAccountId,
-} from '@/lib/accounting/opening-balance';
-import { openAccountingPeriod } from '@/lib/accounting/periods';
+import { openingBalanceControlAccountId } from '@/lib/accounting/opening-balance';
 import { isEnabled } from '@/lib/business-settings';
 import { createContact } from '@/lib/contact/repository';
 import { createStaff } from '@/lib/hr/staff';
@@ -218,8 +213,8 @@ export async function importStaff(
         email: text(record, 'email') ?? '',
         username: text(record, 'username'),
         password: text(record, 'password'),
-        // `role_id => 3` in the importer: the staff role, as a system user.
-        roleRef: '3-system_user',
+        // `role_id => 3` in the importer: the seeded Staff role.
+        roleRef: '3-regular_user',
         departmentId: 1,
         showroomId: 1,
         phone: text(record, 'phone'),
@@ -234,7 +229,7 @@ export async function importStaff(
         openingBalance: number(record, 'opening_balance'),
         employmentType: text(record, 'employment_type'),
         leaveApplicableDate: text(record, 'leave_applicable_date'),
-      } as Parameters<typeof createStaff>[0],
+      },
       userId,
     );
   }
@@ -266,7 +261,7 @@ export async function importProducts(
     const stock = number(record, 'stock');
     const purchasePrice = number(record, 'purchase_price');
 
-    const { productId, productSkuId } = await runInTransaction(async (tx) => {
+    await runInTransaction(async (tx) => {
       const [productRow] = await tx.insert(products).values({
         productName: text(record, 'product_name') ?? '',
         productType: text(record, 'product_type') ?? 'Single',
@@ -319,11 +314,7 @@ export async function importProducts(
       }
       await adjustStock(location, newSkuId, stock, tx);
 
-      return { productId: newProductId, productSkuId: newSkuId };
     });
-
-    void productId;
-    void productSkuId;
 
     if (stock > 0 && controlAccountId) {
       const amount = purchasePrice * stock;

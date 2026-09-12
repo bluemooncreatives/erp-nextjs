@@ -50,6 +50,9 @@ export type StaffInput = {
   avatar?: string | null;
   signature?: string | null;
 
+  /** The staff row's own phone; the forms posted the username into it. */
+  phone?: string | null;
+
   departmentId?: number | null;
   showroomId?: number | null;
   warehouseId?: number | null;
@@ -199,7 +202,7 @@ export async function createStaff(
       departmentId: data.departmentId ?? null,
       showroomId: data.showroomId ?? null,
       warehouseId: data.warehouseId ?? null,
-      phone: data.username ?? null,
+      phone: data.phone ?? data.username ?? null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -321,7 +324,7 @@ export async function updateStaff(
       departmentId: data.departmentId ?? null,
       showroomId: data.showroomId ?? null,
       warehouseId: data.warehouseId ?? null,
-      phone: data.username ?? null,
+      phone: data.phone ?? data.username ?? null,
       updatedAt: new Date(),
     };
 
