@@ -59,7 +59,13 @@ const SETTING_DESCRIPTION: Record<string, string> = {
   sms_notification: 'Send the document text messages through the configured SMS gateway.',
 };
 
-export default async function SettingsPage() {
+/**
+ * `setting::index`. `HomeController@company` renders the same view with
+ * `$company` set, which the Blade uses only to open the Company tab - so
+ * `/company_info` renders this with `initialTab="company"` rather than
+ * duplicating the screen.
+ */
+export async function SettingsScreen({ initialTab }: { initialTab?: string } = {}) {
   await authorize('setting.index');
 
   const [
@@ -336,7 +342,7 @@ export default async function SettingsPage() {
     <>
       <PageHeader title="Settings" breadcrumb={[{ label: 'Settings' }]} />
       {tabs.length ? (
-        <Tabs tabs={tabs} />
+        <Tabs tabs={tabs} initial={initialTab} />
       ) : (
         <Card title="Settings">
           <p className="text-sm text-muted-foreground">
@@ -346,4 +352,8 @@ export default async function SettingsPage() {
       )}
     </>
   );
+}
+
+export default async function SettingsPage() {
+  return <SettingsScreen />;
 }

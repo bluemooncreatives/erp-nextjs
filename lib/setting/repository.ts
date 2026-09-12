@@ -29,6 +29,16 @@ export async function activationSettings() {
     .orderBy(asc(businessSettings.id));
 }
 
+/** `BusinessSetting::where('category_type', 'sale&purchase_type')` - the
+ *  auto-approval switches on `sale::sale.configurations`. */
+export async function saleApprovalSettings() {
+  return db
+    .select()
+    .from(businessSettings)
+    .where(eq(businessSettings.categoryType, 'sale&purchase_type'))
+    .orderBy(asc(businessSettings.id));
+}
+
 export async function allEmailTemplates() {
   return db.select().from(emailTemplates).orderBy(asc(emailTemplates.id));
 }
