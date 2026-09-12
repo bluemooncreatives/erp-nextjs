@@ -1,12 +1,12 @@
 // Contra vouchers - port of ContraVoucherController@index.
-// A contra voucher moves money between two of the business's own accounts.
+// A main account against one or more opposite-side accounts, as in Laravel.
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { authorize, can } from '@/lib/auth/permissions';
 import { listVouchers } from '@/lib/accounting/reports';
 import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
-import { ROUTES } from '@/lib/routes';
+import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import Badge from '@/components/ui/badge/Badge';
@@ -24,11 +24,12 @@ export default async function ContraVouchersPage({
   const symbol = setting.currencySymbol ?? '$';
 
   const { rows, total, page, perPage } = await listVouchers({
-    voucherType: 'CRV',
+    paymentType: 'contra_voucher',
     page: Number(sp.page ?? 1),
   });
 
   const canCreate = await can('contra.store');
+  const canEdit = await can('contra.edit');
 
   const voucherRows = await Promise.all(
     rows.map(async (v) => ({ ...v, dateLabel: await dateConvert(v.date) })),
@@ -60,27 +61,29 @@ export default async function ContraVouchersPage({
             { label: 'To' },
             { label: 'Amount' },
             { label: 'Approval' },
+            { label: 'Actions' },
           ]}
           isEmpty={voucherRows.length === 0}
           empty="No contra vouchers found."
         >
           {voucherRows.map((voucher) => {
-            const from = voucher.legs.find((l) => l.type === 'Cr');
-            const to = voucher.legs.find((l) => l.type === 'Dr');
+            const from = voucher.legs.filter((l) => l.type === 'Cr').map((leg) => leg.accountName).join(', ');
+            const to = voucher.legs.filter((l) => l.type === 'Dr').map((leg) => leg.accountName).join(', ');
             return (
               <Tr key={voucher.id}>
                 <Td className="font-medium text-gray-700 dark:text-gray-300">
                   {voucher.txId ?? voucher.id}
                 </Td>
                 <Td>{voucher.dateLabel}</Td>
-                <Td>{from?.accountName ?? '-'}</Td>
-                <Td>{to?.accountName ?? '-'}</Td>
+                <Td>{from || '-'}</Td>
+                <Td>{to || '-'}</Td>
                 <Td>{`${symbol} ${numberFormat(voucher.amount)}`}</Td>
                 <Td>
                   <Badge size="sm" color={voucher.isApprove === 1 ? 'success' : 'warning'}>
                     {voucher.isApprove === 1 ? 'Approved' : 'Pending'}
                   </Badge>
                 </Td>
+                <Td>{canEdit ? <Link className="text-brand-500" href={route('contra.edit', { id: voucher.id })}>Edit</Link> : '-'}</Td>
               </Tr>
             );
           })}

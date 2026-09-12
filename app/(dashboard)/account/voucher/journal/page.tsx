@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { authorize, can } from '@/lib/auth/permissions';
 import { listVouchers } from '@/lib/accounting/reports';
 import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
-import { ROUTES } from '@/lib/routes';
+import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import Badge from '@/components/ui/badge/Badge';
@@ -28,6 +28,7 @@ export default async function JournalVouchersPage({
   });
 
   const canCreate = await can('journal.store');
+  const canEdit = await can('journal.edit');
 
   const voucherRows = await Promise.all(
     rows.map(async (v) => ({ ...v, dateLabel: await dateConvert(v.date) })),
@@ -58,6 +59,7 @@ export default async function JournalVouchersPage({
             { label: 'Postings' },
             { label: 'Amount' },
             { label: 'Approval' },
+            { label: 'Actions' },
           ]}
           isEmpty={voucherRows.length === 0}
           empty="No journal vouchers found."
@@ -81,6 +83,7 @@ export default async function JournalVouchersPage({
                   {voucher.isApprove === 1 ? 'Approved' : 'Pending'}
                 </Badge>
               </Td>
+              <Td>{canEdit ? <Link className="text-brand-500" href={route('journal.edit', { id: voucher.id })}>Edit</Link> : '-'}</Td>
             </Tr>
           ))}
         </DataTable>
