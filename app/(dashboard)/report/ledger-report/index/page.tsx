@@ -168,10 +168,10 @@ export default async function LedgerReportPage({
               <Td className="font-medium text-foreground">
                 Opening Balance
               </Td>
-              <Td>{''}</Td>
-              <Td>{''}</Td>
-              <Td>{''}</Td>
-              <Td>{''}</Td>
+              <Td />
+              <Td />
+              <Td />
+              <Td />
               <Td className="text-right">{openingLabel}</Td>
             </Tr>
 

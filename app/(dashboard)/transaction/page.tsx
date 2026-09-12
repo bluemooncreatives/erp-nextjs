@@ -55,10 +55,10 @@ export default async function ContactTransactionPage() {
         >
           <Tr>
             <Td className="font-medium text-foreground">Openning Balance</Td>
-            <Td>{''}</Td>
-            <Td>{''}</Td>
-            <Td>{''}</Td>
-            <Td>{''}</Td>
+            <Td />
+            <Td />
+            <Td />
+            <Td />
             <Td className="text-right">{openingLabel}</Td>
           </Tr>
 

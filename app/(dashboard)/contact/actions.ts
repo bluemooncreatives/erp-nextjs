@@ -83,7 +83,7 @@ async function readInput(formData: FormData): Promise<ContactInput> {
   const avatar = await saveAvatar(fileFrom(formData, 'file'));
 
   return {
-    contactType: (str(formData, 'contact_type') ?? 'Customer') as 'Customer' | 'Supplier',
+    contactType: (str(formData, 'contact_type') ?? 'Customer') as'Customer' | 'Supplier',
     name: String(formData.get('name') ?? '').trim(),
     businessName: str(formData, 'business_name'),
     taxNumber: str(formData, 'tax_number'),

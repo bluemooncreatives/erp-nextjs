@@ -515,7 +515,7 @@ export function SaleForm({
 
             {paymentAmount > 0 ? (
               <p className="sm:col-span-2 text-sm text-muted-foreground">
-                Due after payment:{''}
+                Due after payment:{' '}
                 <strong>{money(Math.max(0, totals.payable - paymentAmount))}</strong>
               </p>
             ) : null}

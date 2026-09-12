@@ -42,10 +42,10 @@ export function LedgerTable({
       >
         <Tr>
           <Td className="font-medium">Openning Balance</Td>
-          <Td>{''}</Td>
-          <Td>{''}</Td>
-          <Td>{''}</Td>
-          <Td>{''}</Td>
+          <Td />
+          <Td />
+          <Td />
+          <Td />
           <Td className="text-right">{openingLabel}</Td>
         </Tr>
 

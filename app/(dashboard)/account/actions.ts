@@ -92,7 +92,7 @@ async function readExpenseInput(formData: FormData): Promise<ExpenseInput> {
     narration: str(formData, 'narration'),
     paymentType: String(formData.get('payment_type') ?? 'voucher_payment'),
     isApprove: 1,
-    accountType: (str(formData, 'account_type') ?? 'debit') as 'debit' | 'credit',
+    accountType: (str(formData, 'account_type') ?? 'debit') as'debit' | 'credit',
     accountId: num(formData, 'account_id'),
     mainAmount: amount,
     subAccountId,

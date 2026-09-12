@@ -263,7 +263,7 @@ export async function removeProjectMember(formData: FormData): Promise<void> {
 export async function updateProjectPreference(formData: FormData): Promise<void> {
   const user = await requireUser();
   const projectId = Number(formData.get('project_id'));
-  const element = String(formData.get('element')) as 'icon' | 'color' | 'favourite';
+  const element = String(formData.get('element')) as'icon' | 'color' | 'favourite';
   const value = String(formData.get('value') ?? '');
 
   await updateProjectElement(

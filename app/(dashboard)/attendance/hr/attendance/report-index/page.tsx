@@ -96,7 +96,7 @@ export default async function AttendanceReportPage({
         ) : (
           <div className="max-w-full overflow-x-auto custom-scrollbar">
             <table className="min-w-full">
-              <thead className="border-b border-border ]">
+              <thead className="border-b border-border">
                 <tr>
                   <th className="px-4 py-3 text-start text-xs font-medium text-muted-foreground">
                     Staff
@@ -111,7 +111,7 @@ export default async function AttendanceReportPage({
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border ]">
+              <tbody className="divide-y divide-border">
                 {report.map((row) => (
                   <tr key={row.userId}>
                     <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-foreground">

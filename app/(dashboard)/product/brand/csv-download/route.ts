@@ -12,8 +12,8 @@ export async function GET() {
 
   return new Response(body, {
     headers: {
-      'Content-Type': 'text/csv',
-      'Content-Disposition': 'attachment; filename="brands_tbl.csv"',
+      'Content-Type':'text/csv',
+      'Content-Disposition':'attachment; filename="brands_tbl.csv"',
     },
   });
 }

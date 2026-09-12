@@ -220,7 +220,7 @@ export async function ContactDetail({
         ))}
       </DataTable>
       <div className="border-t border-border px-5 py-3 text-sm font-medium text-foreground">
-        Opening: {money(symbol, statement.opening)} &middot; Closing:{''}
+        Opening: {money(symbol, statement.opening)} &middot; Closing:{' '}
         {money(symbol, statement.closing)}
       </div>
     </Card>
