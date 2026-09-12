@@ -42,9 +42,9 @@ export function FieldLabel({
   );
 }
 
-export function FieldError({ message }: { message?: string }) {
+export function FieldError({ message, id }: { message?: string; id?: string }) {
   if (!message) return null;
-  return <p className="text-destructive mt-1.5 text-xs">{message}</p>;
+  return <p id={id} role="alert" className="text-destructive mt-1.5 text-xs">{message}</p>;
 }
 
 export function Field({
@@ -73,9 +73,9 @@ export function Field({
       ) : null}
       {children}
       {hint && !error ? (
-        <p className="text-muted-foreground mt-1.5 text-xs">{hint}</p>
+        <p id={htmlFor ? `${htmlFor}-hint` : undefined} className="text-muted-foreground mt-1.5 text-xs">{hint}</p>
       ) : null}
-      <FieldError message={error} />
+      <FieldError message={error} id={htmlFor ? `${htmlFor}-error` : undefined} />
     </div>
   );
 }
@@ -103,7 +103,7 @@ export function FormInput({
       hint={hint}
       className={wrapperClassName}
     >
-      <Input id={id} aria-invalid={Boolean(error)} className={className} {...props} />
+      <Input id={id} aria-invalid={Boolean(error)} aria-describedby={id && (error || hint) ? `${id}-${error ? 'error' : 'hint'}` : undefined} className={className} {...props} />
     </Field>
   );
 }
@@ -135,7 +135,7 @@ export function FormTextarea({
       <Textarea
         id={id}
         rows={rows}
-        aria-invalid={Boolean(error)}
+        aria-invalid={Boolean(error)} aria-describedby={id && (error || hint) ? `${id}-${error ? 'error' : 'hint'}` : undefined}
         className={className}
         {...props}
       />
@@ -183,7 +183,7 @@ export function FormSelect({
       <select
         id={id}
         data-slot="native-select"
-        aria-invalid={Boolean(error)}
+        aria-invalid={Boolean(error)} aria-describedby={id && (error || hint) ? `${id}-${error ? 'error' : 'hint'}` : undefined}
         className={cn(
           SELECT_CONTROL,
           "bg-[length:0.65rem] bg-[position:right_0.75rem_center] bg-no-repeat pr-9 bg-[image:url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%23888' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E\")]",
@@ -288,6 +288,6 @@ export function FormAlert({
 /** Row of form buttons, right-aligned like the Blade forms' footer. */
 export function FormActions({ children }: { children: ReactNode }) {
   return (
-    <div className="flex flex-wrap items-center justify-end gap-3 pt-2">{children}</div>
+    <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border pt-5 max-sm:[&>*]:flex-1">{children}</div>
   );
 }

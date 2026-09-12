@@ -284,14 +284,14 @@ export async function StaffDetail({ id }: { id: number }) {
         }
       />
 
-      <div className="space-y-5">
-        <Card title={staff.employeeId ?? 'Staff'}>
-          <div className="flex flex-wrap items-center gap-6">
+      <div className="grid items-start gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
+        <Card className="lg:sticky lg:top-20" title={staff.employeeId ?? 'Staff'}>
+          <div className="flex flex-col items-center gap-4 text-center">
             <Image
               src={avatarUrl(user.avatar, user.name)}
               alt={user.name}
-              width={72}
-              height={72}
+              width={96}
+              height={96}
               className="rounded-full object-cover"
               unoptimized
             />

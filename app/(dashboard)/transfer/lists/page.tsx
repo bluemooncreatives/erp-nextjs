@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Money transfer list - port of TransferController@index
 // (`account::transfers.index`).
 
@@ -33,12 +34,12 @@ export default async function TransferListPage() {
         title="Money Transfer"
         breadcrumb={[{ label: 'Accounts'}, { label:'Money Transfer' }]}
         actions={
-          <Link
+          <LinkButton
             href={ROUTES['transfer_showroom.create']}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-xs transition hover:bg-primary"
+            
           >
             Transfer Money
-          </Link>
+          </LinkButton>
         }
       />
 

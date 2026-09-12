@@ -1,3 +1,4 @@
+import { ListSummary } from '@/components/common/list-summary';
 import { LinkButton } from '@/components/common/link-button';
 // Quotation list - port of QuotationController@index.
 
@@ -65,6 +66,8 @@ export default async function QuotationListPage({
           ) : null
         }
       />
+
+      <ListSummary total={total} visible={quotationRows.length} amount={`${symbol} ${numberFormat(quotationRows.reduce((sum, row) => sum + Number(row.payableAmount ?? 0), 0))}`} />
 
       <Card
         title={`Quotations (${total})`}

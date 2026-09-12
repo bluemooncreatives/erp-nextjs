@@ -250,16 +250,15 @@ export async function ContactDetail({
         }
       />
 
-      <div className="space-y-5">
-        <div className="grid gap-5 lg:grid-cols-3">
-          <Card title="Profile" className="lg:col-span-2">
-            <div className="flex flex-wrap items-start gap-6">
+      <div className="grid items-start gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+          <Card title="Profile" className="lg:sticky lg:top-20">
+            <div className="flex flex-col gap-6">
               <Image
                 src={avatarUrl(contact.avatar, contact.name)}
                 alt={contact.name}
-                width={72}
-                height={72}
-                className="rounded-full object-cover"
+                width={96}
+                height={96}
+                className="mx-auto rounded-full object-cover"
                 unoptimized
               />
               <DetailList
@@ -291,7 +290,8 @@ export async function ContactDetail({
             </div>
           </Card>
 
-          <div className="space-y-5">
+          <div className="min-w-0 space-y-6">
+          <div className="grid gap-6 sm:grid-cols-2">
             <Card title={isCustomer ? 'Sale Information':'Purchase Information'}>
               <DetailList
                 columns={1}
@@ -331,7 +331,6 @@ export async function ContactDetail({
               </p>
             </Card>
           </div>
-        </div>
 
         <Tabs
           orientation="horizontal"
@@ -369,6 +368,7 @@ export async function ContactDetail({
             />
           </div>
         ) : null}
+        </div>
       </div>
     </>
   );

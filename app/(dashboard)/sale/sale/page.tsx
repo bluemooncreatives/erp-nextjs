@@ -1,3 +1,4 @@
+import { ListSummary } from '@/components/common/list-summary';
 import { LinkButton } from '@/components/common/link-button';
 // Sale list - port of SaleController@index (`sale::sale.index`).
 
@@ -67,6 +68,8 @@ export default async function SaleListPage({
           ) : null
         }
       />
+
+      <ListSummary total={total} visible={saleRows.length} amount={`${symbol} ${numberFormat(saleRows.reduce((sum, row) => sum + Number(row.payableAmount ?? 0), 0))}`} />
 
       <Card
         title={`Sales (${total})`}

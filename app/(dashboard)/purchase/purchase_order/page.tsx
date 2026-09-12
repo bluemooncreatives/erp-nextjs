@@ -1,3 +1,4 @@
+import { ListSummary } from '@/components/common/list-summary';
 import { LinkButton } from '@/components/common/link-button';
 // Purchase order list - port of PurchaseOrderController@index.
 
@@ -69,6 +70,8 @@ export default async function PurchaseOrderListPage({
           ) : null
         }
       />
+
+      <ListSummary total={total} visible={orderRows.length} amount={`${symbol} ${numberFormat(orderRows.reduce((sum, row) => sum + Number(row.payableAmount ?? 0), 0))}`} />
 
       <Card
         title={`Purchase Orders (${total})`}

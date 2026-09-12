@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Team detail - port of TeamController@show, with its projects, members and
 // the invite form (`team.invite.create`).
 
@@ -49,12 +50,12 @@ export default async function TeamShowPage({
           { label: team.name ?? '' },
         ]}
         actions={
-          <Link
+          <LinkButton
             href={`${ROUTES['project.create']}?team_id=${team.id}`}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-xs transition hover:bg-primary"
+            
           >
             New Project
-          </Link>
+          </LinkButton>
         }
       />
 

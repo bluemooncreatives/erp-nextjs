@@ -4,8 +4,10 @@
 // matching the "submitting..." swap the Blade forms did with jQuery.
 
 import { useFormStatus } from 'react-dom';
-import React, { type ReactNode } from 'react';
+import React, { useRef, useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
+import { ConfirmDialog } from '@/components/common/confirm-dialog';
 
 export function SubmitButton({
   children,
@@ -36,7 +38,7 @@ export function SubmitButton({
       className={className}
       {...props}
     >
-      {pending ? pendingLabel : children}
+      {pending ? <><Loader2 className="size-4 animate-spin" aria-hidden="true" />{pendingLabel}</> : children}
     </Button>
   );
 }
@@ -47,6 +49,7 @@ export function ActionButton({
   confirm,
   variant = 'danger',
   className = '',
+  onClick,
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode;
@@ -54,6 +57,9 @@ export function ActionButton({
   variant?: 'primary' | 'outline' | 'danger';
 }) {
   const { pending } = useFormStatus();
+  const [open, setOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const confirmed = useRef(false);
 
   // Row actions read as text, not as filled buttons, so the table stays legible
   // with several of them per row.
@@ -64,18 +70,38 @@ export function ActionButton({
   }[variant];
 
   return (
+    <>
     <Button
+      ref={buttonRef}
       type="submit"
       variant="ghost"
       size="xs"
-      disabled={pending}
+      disabled={pending || props.disabled}
       onClick={(event) => {
-        if (confirm && !window.confirm(confirm)) event.preventDefault();
+        onClick?.(event);
+        if (event.defaultPrevented) return;
+        if (confirm && !confirmed.current) {
+          event.preventDefault();
+          setOpen(true);
+        }
+        confirmed.current = false;
       }}
       className={`${tone} ${className}`}
       {...props}
     >
       {children}
     </Button>
+    {confirm ? <ConfirmDialog open={open} onOpenChange={setOpen}
+      title={typeof children === 'string' ? children : 'Confirm action'} description={confirm}
+      confirmLabel={typeof children === 'string' ? children : 'Continue'}
+      tone={variant === 'danger' ? 'danger' : 'default'} pending={pending}
+      onConfirm={() => {
+        setOpen(false);
+        confirmed.current = true;
+        const button = buttonRef.current;
+        if (button?.form) button.form.requestSubmit(button);
+        confirmed.current = false;
+      }} /> : null}
+    </>
   );
 }

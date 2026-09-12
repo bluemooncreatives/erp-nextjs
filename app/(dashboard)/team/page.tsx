@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Teams - port of TeamController@index, listing the current workspace's teams.
 
 import type { Metadata } from 'next';
@@ -25,12 +26,12 @@ export default async function TeamListPage() {
         title="Teams"
         breadcrumb={[{ label: 'Projects' }, { label: 'Teams' }]}
         actions={
-          <Link
+          <LinkButton
             href={ROUTES['workspaces.index']}
-            className="inline-flex items-center gap-2 rounded-lg bg-card px-4 py-2.5 text-sm font-medium text-foreground ring-1 ring-inset ring-border transition hover:bg-muted"
+            variant="outline"
           >
             Workspaces
-          </Link>
+          </LinkButton>
         }
       />
 
