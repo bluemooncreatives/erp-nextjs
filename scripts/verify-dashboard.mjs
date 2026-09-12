@@ -18,6 +18,8 @@ try {
  console.log('Loaded page:', await page.currentUrl());
  console.log('Initial errors:', JSON.stringify(await page.errors()));
  await page.waitUntil("document.body.innerText.includes('Welcome back')",{timeout:15000});
+ await page.waitUntil("document.querySelectorAll('.recharts-surface').length >= 1",{timeout:60000});
+ await page.evaluate('new Promise(r=>setTimeout(r,2000))');
  mkdirSync('artifacts/dashboard',{recursive:true});
  for (const [name,width,dark] of [['desktop',1440,false],['mobile',390,false],['dark',1440,true]]) {
   await browser.send('Emulation.setDeviceMetricsOverride',{width,height:1000,deviceScaleFactor:1,mobile:width<600},page.sessionId);

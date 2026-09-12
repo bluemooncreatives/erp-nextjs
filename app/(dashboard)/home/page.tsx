@@ -68,7 +68,7 @@ import {
 import { NAV_ICONS } from '@/layout/nav-icons';
 import { PrimaryCell } from '@/components/common/cells';
 import { StatusBadge } from '@/components/common/status-badge';
-import { Button } from '@/components/ui/button';
+import { DashboardActions, DashboardLink } from '@/components/dashboard/dashboard-actions';
 import { Card as UICard } from '@/components/ui/card';
 import { Card } from '@/components/erp/page';
 
@@ -214,7 +214,7 @@ export default async function DashboardPage() {
       icon: <ShoppingCart className="size-4" />,
       value: money(purchase.net),
       title: 'Total purchase',
-      detail: `${purchaseCount} received orders`,
+      detail: `${purchaseCount} received`,
     },
     {
       permission: 'widget.expense',
@@ -228,28 +228,28 @@ export default async function DashboardPage() {
       icon: <FileText className="size-4" />,
       value: money(invoiceDue),
       title: 'Invoice due',
-      detail: 'owed by customers',
+      detail: 'owed to you',
     },
     {
       permission: 'widget.net_profit',
       icon: <TrendingUp className="size-4" />,
       value: money(netProfit),
       title: 'Net profit',
-      detail: 'sales less purchases and expenses',
+      detail: 'after costs',
     },
     {
       permission: 'widget.purchase_due',
       icon: <CreditCard className="size-4" />,
       value: money(purchaseDue.net),
       title: 'Purchase due',
-      detail: 'owed to suppliers',
+      detail: 'owed by you',
     },
     {
       permission: 'widget.total_in_bank',
       icon: <Landmark className="size-4" />,
       value: money(bank),
       title: 'Total in bank',
-      detail: 'across bank accounts',
+      detail: 'bank accounts',
     },
     {
       permission: 'widget.total_in_cash',
@@ -304,17 +304,7 @@ export default async function DashboardPage() {
             .
           </p>
         </div>
-        <div className="flex min-w-0 flex-wrap items-center gap-2">
-          <Button asChild>
-            <Link href={ROUTES['sale.create']}>New sale</Link>
-          </Button>
-          <Button variant="soft" asChild>
-            <Link href={ROUTES['sale.index']}>
-              Review sales
-              <ArrowRight />
-            </Link>
-          </Button>
-        </div>
+        <DashboardActions createHref={ROUTES['sale.create']} reviewHref={ROUTES['sale.index']} />
       </header>
 
       <div className="grid grid-cols-2 gap-6 lg:grid-cols-3">
@@ -494,12 +484,10 @@ export default async function DashboardPage() {
                   The five oldest invoices still owing.
                 </p>
               </div>
-              <Button variant="soft" size="sm" asChild>
-                <Link href={ROUTES['sale.due.list']}>
+              <DashboardLink variant="soft" size="sm" href={ROUTES['sale.due.list']}>
                   View all
                   <ArrowRight />
-                </Link>
-              </Button>
+                </DashboardLink>
             </div>
 
             {dueRows.length === 0 ? (
@@ -523,9 +511,7 @@ export default async function DashboardPage() {
                     <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
                       <span className="text-muted-foreground">{due.dateLabel}</span>
                       <span className="font-medium tabular-nums">{money(Number(due.payableAmount))}</span>
-                      <Button variant="soft" size="sm" asChild>
-                        <Link href={ROUTES['sale.show'].replace('{id}', String(due.id))}>Open invoice<ArrowRight /></Link>
-                      </Button>
+                      <DashboardLink variant="soft" size="sm" href={ROUTES['sale.show'].replace('{id}', String(due.id))}>Open invoice<ArrowRight /></DashboardLink>
                     </div>
                   </div>
                 ))}
@@ -577,13 +563,9 @@ export default async function DashboardPage() {
                           </StatusBadge>
                         </td>
                         <td className="pr-4 text-right sm:pr-6">
-                          <Button variant="ghost" size="sm" asChild>
-                            <Link
-                              href={ROUTES['sale.show'].replace('{id}', String(due.id))}
-                            >
+                          <DashboardLink variant="ghost" size="sm" href={ROUTES['sale.show'].replace('{id}', String(due.id))}>
                               Open
-                            </Link>
-                          </Button>
+                            </DashboardLink>
                         </td>
                       </tr>
                     ))}
@@ -662,7 +644,7 @@ export default async function DashboardPage() {
         <h2 className="text-base font-semibold">Workspace</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {modules.map((module) => {
-            const Icon = NAV_ICONS[module.icon] ?? ArrowRight;
+            const Icon = (module.icon ? NAV_ICONS[module.icon] : null) ?? ArrowRight;
             return (
             <Link
               key={module.href}

@@ -6,9 +6,10 @@
 // semantic tokens so every screen sits on the same surfaces.
 // ---------------------------------------------------------------------------
 
-import Link from 'next/link';
 import React, { type ReactNode } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { Inbox } from 'lucide-react';
+import { PageHeader as ProductPageHeader } from '@/components/common/page-header';
+import { EmptyState as ProductEmptyState } from '@/components/common/empty-state';
 import {
   Card as UICard,
   CardAction,
@@ -21,71 +22,20 @@ import { cn } from '@/components/ui/utils';
 
 export type Crumb = { label: string; href?: string };
 
-export function PageHeader({
-  title,
-  breadcrumb = [],
-  actions,
-}: {
+export function PageHeader({ title, breadcrumb = [], actions, description, children }: {
   title: string;
   breadcrumb?: Crumb[];
   actions?: ReactNode;
+  description?: ReactNode;
+  children?: ReactNode;
 }) {
-  return (
-    <header className="mb-6 space-y-2">
-      <nav aria-label="Breadcrumb">
-        <ol className="text-muted-foreground flex flex-wrap items-center gap-1 text-sm">
-          <li>
-            <Link href="/home" className="hover:text-foreground transition-colors">
-              Home
-            </Link>
-          </li>
-          {breadcrumb.length === 0 ? (
-            <li className="flex items-center gap-1">
-              <ChevronRight className="size-3.5 shrink-0 opacity-60" aria-hidden="true" />
-              <span className="text-foreground" aria-current="page">
-                {title}
-              </span>
-            </li>
-          ) : (
-            breadcrumb.map((crumb, index) => (
-              <li key={`${crumb.label}-${index}`} className="flex items-center gap-1">
-                <ChevronRight
-                  className="size-3.5 shrink-0 opacity-60"
-                  aria-hidden="true"
-                />
-                {crumb.href ? (
-                  <Link
-                    href={crumb.href}
-                    className="hover:text-foreground transition-colors"
-                  >
-                    {crumb.label}
-                  </Link>
-                ) : (
-                  <span
-                    className="text-foreground"
-                    aria-current={index === breadcrumb.length - 1 ? 'page' : undefined}
-                  >
-                    {crumb.label}
-                  </span>
-                )}
-              </li>
-            ))
-          )}
-        </ol>
-      </nav>
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
-        <h1 className="min-w-48 flex-1 text-2xl font-bold tracking-tight text-balance">
-          {title}
-        </h1>
-        {actions ? (
-          // `min-w-0` so a wide actions cluster wraps instead of squeezing the
-          // heading to nothing.
-          <div className="flex min-w-0 flex-wrap items-center gap-2">{actions}</div>
-        ) : null}
-      </div>
-    </header>
-  );
+  return <ProductPageHeader
+    title={title}
+    description={description}
+    className="mb-6"
+    breadcrumbs={[{ label: 'Home', to: '/home' }, ...(breadcrumb.length ? breadcrumb.map((crumb) => ({ label: crumb.label, to: crumb.href })) : [{ label: title }])]}
+    actions={actions}
+  >{children}</ProductPageHeader>;
 }
 
 /** The standard panel. */
@@ -95,7 +45,7 @@ export function Card({
   actions,
   children,
   className = '',
-  bodyClassName = 'px-4 py-4 sm:px-6',
+  bodyClassName = 'flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6',
   noBodyBorder = false,
 }: {
   title?: ReactNode;
@@ -117,11 +67,11 @@ export function Card({
       {hasHeader ? (
         <CardHeader
           className={cn(
-            'px-4 py-4 sm:px-6',
+            'flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6',
             noBodyBorder ? '' : 'border-b [.border-b]:pb-4',
           )}
         >
-          {title ? <CardTitle className="text-base">{title}</CardTitle> : null}
+          {title ? <CardTitle className="text-lg font-semibold">{title}</CardTitle> : null}
           {desc ? <CardDescription>{desc}</CardDescription> : null}
           {actions ? (
             <CardAction className="flex flex-wrap gap-2">{actions}</CardAction>
@@ -147,17 +97,15 @@ export function DetailList({
   return (
     <dl className={cn('grid gap-x-6 gap-y-4', grid)}>
       {items.map((item) => (
-        <div key={item.label}>
+        <div key={item.label} className="min-w-0 space-y-1 rounded-lg bg-muted/40 p-3">
           <dt className="text-muted-foreground text-xs font-medium">{item.label}</dt>
-          <dd className="mt-0.5 text-sm">{item.value ?? '-'}</dd>
+          <dd className="text-sm font-medium break-words">{item.value ?? '-'}</dd>
         </div>
       ))}
     </dl>
   );
 }
 
-export function EmptyState({ message }: { message: string }) {
-  return (
-    <div className="text-muted-foreground py-12 text-center text-sm">{message}</div>
-  );
+export function EmptyState({ message, description, action }: { message: string; description?: string; action?: ReactNode }) {
+  return <ProductEmptyState icon={Inbox} title={message} description={description} action={action} variant="bare" />;
 }
