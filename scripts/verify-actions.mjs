@@ -111,6 +111,16 @@ async function submit(target, fields, options = {}) {
   return response;
 }
 
+/** The polymorphic class names, bound as parameters - MySQL unescapes
+ * backslashes inside string literals, so these cannot be inlined. */
+const MORPH = {
+  sale: 'Modules\\Sale\\Entities\\Sale',
+  purchaseOrder: 'Modules\\Purchase\\Entities\\PurchaseOrder',
+  voucher: 'Modules\\Account\\Entities\\Voucher',
+  showRoom: 'Modules\\Inventory\\Entities\\ShowRoom',
+  contact: 'Modules\\Contact\\Entities\\ContactModel',
+};
+
 const rows = async (sql, params = []) => (await connection.query(sql, params))[0];
 const one = async (sql, params = []) => (await rows(sql, params))[0];
 
@@ -246,8 +256,8 @@ await scenario('branch: the reference form writes name and contact details', asy
 
   // A branch gets its own ledger account, as `createShowRoomWithAccount` does.
   const account = await one(
-    "select * from chart_accounts where contactable_id = ? and contactable_type = 'Modules\\\\Inventory\\\\Entities\\\\ShowRoom'",
-    [row.id],
+    'select * from chart_accounts where contactable_id = ? and contactable_type = ?',
+    [row.id, MORPH.showRoom],
   );
   assert.ok(account, 'the branch has a ledger account');
 });
@@ -270,8 +280,8 @@ await scenario('contact: the form creates the contact and its ledger account', a
   assert.ok(row.contact_id, 'the contact code was stamped');
 
   const account = await one(
-    "select * from chart_accounts where contactable_id = ? and contactable_type = 'Modules\\\\Contact\\\\Entities\\\\ContactModel'",
-    [row.id],
+    'select * from chart_accounts where contactable_id = ? and contactable_type = ?',
+    [row.id, MORPH.contact],
   );
   assert.ok(account, 'the contact has a ledger account');
 });
@@ -303,8 +313,8 @@ await scenario('receipt voucher: the form posts both legs', async () => {
 
   const voucher = await one('select * from vouchers order by id desc limit 1');
   const legs = await rows(
-    "select * from transactions where voucherable_id = ? and voucherable_type = 'Modules\\\\Account\\\\Entities\\\\Voucher'",
-    [voucher.id],
+    'select * from transactions where voucherable_id = ? and voucherable_type = ?',
+    [voucher.id, MORPH.voucher],
   );
   assert.equal(legs.length, 2, 'two legs were posted');
   assert.equal(
@@ -392,6 +402,158 @@ await scenario('signed out: an action writes nothing', async () => {
     await one('select * from printers where name = ?', [name]),
     undefined,
     'an unauthenticated action wrote nothing',
+  );
+});
+
+
+await scenario('sale: the form fields the action reads produce an invoice', async () => {
+  const store = action('storeSale');
+
+  // A SKU with stock at the branch the session is scoped to.
+  const stock = await one(
+    `select s.*, ps.id as sku_id from stock_reports s
+       join product_sku ps on ps.id = s.product_sku_id
+      where cast(s.stock as decimal(20,2)) >= 2
+      limit 1`,
+  );
+  const customer = await one("select * from contacts where contact_type = 'Customer' limit 1");
+  if (!stock || !customer) return;
+
+  const locationRef =
+    stock.houseable_type.endsWith('WareHouse')
+      ? `warehouse-${stock.houseable_id}`
+      : `showroom-${stock.houseable_id}`;
+
+  const before = (await rows('select count(*) as n from sales'))[0].n;
+
+  const response = await submit(store, {
+    customer_id: `customer-${customer.id}`,
+    warehouse_id: locationRef,
+    date: new Date().toISOString().slice(0, 10),
+    ref_no: `VERIFY-SALE-${stamp}`,
+    items: stock.sku_id,
+    item_price: '100',
+    item_quantity: '1',
+    product_tax: '0',
+    item_discount: '0',
+    item_amount: '100',
+    total_quantity: '1',
+    total_tax: '0-0',
+    shipping_charge: '0',
+    other_charge: '0',
+    total_discount_amount: '0',
+    discount_type: '2',
+    total_discount: '0',
+    total_amount: '100',
+  });
+  assert.ok(response.status < 400, `create returned ${response.status}`);
+
+  const after = (await rows('select count(*) as n from sales'))[0].n;
+  assert.equal(after, before + 1, 'one sale was written');
+
+  const sale = await one('select * from sales where ref_no = ?', [`VERIFY-SALE-${stamp}`]);
+  assert.ok(sale, 'the sale carries the reference the form posted');
+  assert.equal(Number(sale.payable_amount), 100, 'the posted total was stored');
+
+  const items = await rows(
+    'select * from product_item_details where itemable_id = ? and itemable_type = ?',
+    [sale.id, MORPH.sale],
+  );
+  assert.equal(items.length, 1, 'the line reached product_item_details');
+  assert.equal(Number(items[0].quantity), 1);
+});
+
+await scenario('sale: a form with no lines is refused', async () => {
+  const store = action('storeSale');
+  const customer = await one("select * from contacts where contact_type = 'Customer' limit 1");
+  if (!customer) return;
+
+  const before = (await rows('select count(*) as n from sales'))[0].n;
+  await submit(store, {
+    customer_id: `customer-${customer.id}`,
+    warehouse_id: 'showroom-1',
+    date: new Date().toISOString().slice(0, 10),
+    ref_no: `VERIFY-EMPTY-${stamp}`,
+    total_amount: '0',
+  });
+  const after = (await rows('select count(*) as n from sales'))[0].n;
+  assert.equal(after, before, 'an empty sale was not written');
+});
+
+await scenario('purchase: the order form writes the order and its lines', async () => {
+  const store = action('storePurchaseOrder');
+  const supplier = await one("select * from contacts where contact_type = 'Supplier' limit 1");
+  const sku = await one('select * from product_sku limit 1');
+  const branch = await one('select * from show_rooms limit 1');
+  if (!supplier || !sku || !branch) return;
+
+  const response = await submit(store, {
+    supplier_id: supplier.id,
+    showroom: `showroom-${branch.id}`,
+    date: new Date().toISOString().slice(0, 10),
+    ref_no: `VERIFY-PO-${stamp}`,
+    product_id: sku.id,
+    product_price: '50',
+    product_selling_price: '75',
+    product_quantity: '4',
+    product_tax: '0',
+    product_discount: '0',
+    item_amount: '200',
+    total_quantity: '4',
+    total_tax: '0-0',
+    shipping_charge: '0',
+    other_charge: '0',
+    total_discount_amount: '0',
+    discount_type: '2',
+    total_discount: '0',
+    total_amount: '200',
+  });
+  assert.ok(response.status < 400, `create returned ${response.status}`);
+
+  const order = await one('select * from purchase_orders where ref_no = ?', [`VERIFY-PO-${stamp}`]);
+  assert.ok(order, 'the purchase order was written');
+  assert.equal(Number(order.payable_amount), 200);
+
+  const items = await rows(
+    'select * from product_item_details where itemable_id = ? and itemable_type = ?',
+    [order.id, MORPH.purchaseOrder],
+  );
+  assert.equal(items.length, 1, 'the line reached product_item_details');
+  assert.equal(Number(items[0].quantity), 4);
+});
+
+await scenario('stock adjustment: the form writes lines and leaves stock alone', async () => {
+  const store = action('storeStockAdjustment');
+  const stock = await one(
+    'select * from stock_reports where cast(stock as decimal(20,2)) >= 1 limit 1',
+  );
+  if (!stock) return;
+
+  const locationRef = stock.houseable_type.endsWith('WareHouse')
+    ? `warehouse-${stock.houseable_id}`
+    : `showroom-${stock.houseable_id}`;
+  const stockBefore = Number(stock.stock);
+
+  const response = await submit(store, {
+    warehouse_id: locationRef,
+    date: new Date().toISOString().slice(0, 10),
+    ref_no: `VERIFY-ADJ-${stamp}`,
+    recovery_amount: '0',
+    product_id: stock.product_sku_id,
+    product_quantity: '1',
+  });
+  assert.ok(response.status < 400, `create returned ${response.status}`);
+
+  const adjustment = await one('select * from stock_adjustments where ref_no = ?', [
+    `VERIFY-ADJ-${stamp}`,
+  ]);
+  assert.ok(adjustment, 'the adjustment was written');
+
+  const after = await one('select * from stock_reports where id = ?', [stock.id]);
+  assert.equal(
+    Number(after.stock),
+    stockBefore,
+    'stock only moves once the adjustment is approved',
   );
 });
 

@@ -11,6 +11,7 @@
     "verify:schema": "node scripts/verify-schema.mjs",
     "verify:db": "node scripts/db-smoke.mjs",
     "verify:writes": "node scripts/db-writes.mjs",
+    "verify:actions": "node scripts/verify-actions.mjs",
     "verify:http": "node scripts/http-smoke.mjs",
     "test": "node --test tests/receipt-vouchers.test.mjs tests/account-vouchers.test.mjs tests/settings-and-leave.test.mjs tests/inventory.test.mjs tests/spreadsheet.test.mjs tests/signed-url.test.mjs"
   },
