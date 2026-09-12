@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Sale on Condition - port of SaleController@conditionalSale
 // (`sale::conditional_sale.index`): the sales whose `type` is 0, with the
 // approval action and the delivery receipt the Blade's modal recorded.
@@ -119,12 +120,12 @@ export default async function ConditionalSalePage({
                     </Link>
                   ) : null}
                   {canEdit ? (
-                    <Link
+                    <LinkButton
                       href={route('sale.edit', { id: sale.id })}
-                      className="rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
+                      
                     >
                       Edit
-                    </Link>
+                    </LinkButton>
                   ) : null}
                   {canApprove && sale.isApproved !== 1 ? (
                     <form action={approveSaleAction}>

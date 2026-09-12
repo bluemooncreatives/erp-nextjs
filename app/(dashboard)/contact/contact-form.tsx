@@ -1,11 +1,11 @@
 'use client';
 
+import { LinkButton } from '@/components/common/link-button';
 // Contact form - port of contact::contact.create / contact.edit.
 //
 // The password fields only appear when `general_settings.contact_login` is on,
 // matching the Blade view's `@if(app('general_setting')->contact_login)`.
 
-import Link from 'next/link';
 import { useActionState } from 'react';
 import { Card } from '@/components/erp/page';
 import {
@@ -230,12 +230,12 @@ export function ContactForm({
       </Card>
 
       <div className="flex items-center justify-end gap-3">
-        <Link
+        <LinkButton
           href={ROUTES['add_contact.index']}
-          className="rounded-lg px-5 py-3 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
+          variant="outline"
         >
           Cancel
-        </Link>
+        </LinkButton>
         <SubmitButton>{isEdit ? 'Update Contact':'Save Contact'}</SubmitButton>
       </div>
     </form>

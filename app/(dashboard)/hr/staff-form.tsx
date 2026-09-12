@@ -1,12 +1,12 @@
 'use client';
 
+import { LinkButton } from '@/components/common/link-button';
 // Staff form - port of `backEnd.staffs.create` / `edit`.
 //
 // The employment and bank blocks are hidden for a system user, mirroring the
 // `if ($role[1] != "system_user")` branch in UserRepository.
 
 import { useActionState, useState } from 'react';
-import Link from 'next/link';
 import { Card } from '@/components/erp/page';
 import {
   FormAlert,
@@ -253,12 +253,12 @@ export function StaffForm({
       ) : null}
 
       <div className="flex items-center justify-end gap-3">
-        <Link
+        <LinkButton
           href={ROUTES['staffs.index']}
-          className="rounded-lg px-5 py-3 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
+          variant="outline"
         >
           Cancel
-        </Link>
+        </LinkButton>
         <SubmitButton>{isEdit ? 'Update Staff' : 'Save Staff'}</SubmitButton>
       </div>
     </form>

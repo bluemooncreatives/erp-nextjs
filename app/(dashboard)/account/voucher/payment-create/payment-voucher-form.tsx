@@ -1,12 +1,12 @@
 'use client';
 
+import { LinkButton } from '@/components/common/link-button';
 // Payment voucher form - port of `account::voucher.create`.
 //
 // One paying account (credited) against one or more accounts being settled
 // (debited), which is the shape `VoucherRepository::create()` expects.
 
 import { useActionState, useState } from 'react';
-import Link from 'next/link';
 import { Card } from '@/components/erp/page';
 import {
   FormAlert,
@@ -208,12 +208,12 @@ export function PaymentVoucherForm({
       </Card>
 
       <div className="flex items-center justify-end gap-3">
-        <Link
+        <LinkButton
           href={ROUTES['vouchers.index']}
-          className="rounded-lg px-5 py-3 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
+          variant="outline"
         >
           Cancel
-        </Link>
+        </LinkButton>
         <SubmitButton disabled={total <= 0}>{defaults ? 'Update Voucher' : 'Save Voucher'}</SubmitButton>
       </div>
     </form>

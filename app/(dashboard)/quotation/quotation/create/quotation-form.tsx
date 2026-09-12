@@ -1,12 +1,12 @@
 'use client';
 
+import { LinkButton } from '@/components/common/link-button';
 // Quotation form - port of `quotation::quotation.create`.
 //
 // Same cart maths as the sale form; quotations move no stock, so any product
 // can be quoted whether or not it is currently in stock.
 
 import { useActionState, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { Card } from '@/components/erp/page';
 import {
   FormAlert,
@@ -398,12 +398,12 @@ export function QuotationForm({
       <input type="hidden" name="preview_status" value={preview ? '1' : ''} />
 
       <div className="flex items-center justify-end gap-3">
-        <Link
+        <LinkButton
           href={ROUTES['quotation.index']}
-          className="rounded-lg px-5 py-3 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
+          variant="outline"
         >
           Cancel
-        </Link>
+        </LinkButton>
         <button
           type="submit"
           disabled={lines.length === 0}

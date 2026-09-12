@@ -1,7 +1,7 @@
+import { LinkButton } from '@/components/common/link-button';
 // Service list - port of ProductController@service (`product::product.list_service`).
 
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { authorize, can } from '@/lib/auth/permissions';
 import { listProductSkus } from '@/lib/product/products';
 import { generalSetting, numberFormat } from '@/lib/settings';
@@ -40,12 +40,12 @@ export default async function ServiceListPage({
         title="Service"
         breadcrumb={[{ label: 'Products' }, { label: 'Service' }]}
         actions={
-          <Link
+          <LinkButton
             href={ROUTES['add_product.index']}
-            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
+            
           >
             Add Service
-          </Link>
+          </LinkButton>
         }
       />
 
@@ -84,12 +84,12 @@ export default async function ServiceListPage({
               <Td>
                 <div className="flex items-center gap-2">
                   {canEdit && row.productId ? (
-                    <Link
+                    <LinkButton
                       href={route('add_product.edit', { id: row.productId })}
-                      className="rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
+                      
                     >
                       Edit
-                    </Link>
+                    </LinkButton>
                   ) : null}
                   {canDelete && row.productId ? (
                     <form action={deleteProductAction}>

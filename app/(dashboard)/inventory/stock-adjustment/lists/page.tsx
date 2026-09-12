@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Stock adjustment list - port of StockAdjustmentController@index.
 
 import type { Metadata } from 'next';
@@ -51,12 +52,12 @@ export default async function StockAdjustmentListPage({
         breadcrumb={[{ label: 'Inventory'}, { label:'Stock Adjustment' }]}
         actions={
           canCreate ? (
-            <Link
+            <LinkButton
               href={ROUTES['stock_adjustment.create']}
-              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
+              
             >
               Add Adjustment
-            </Link>
+            </LinkButton>
           ) : null
         }
       />

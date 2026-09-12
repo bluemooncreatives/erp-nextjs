@@ -1,76 +1,31 @@
-'use client';
+"use client";
 
-// The Bootstrap `nav custom_nav` / `tab-content` pair the Settings and payment
-// method screens used, as a client component. Panels are rendered on the server
-// and passed in as children, so nothing about the data flow changes.
+import { useState, type ReactNode } from "react";
+import { Tabs as UITabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/components/ui/utils";
 
-import { useState, type ReactNode } from 'react';
-import { Card } from '@/components/ui/card';
-import { cn } from '@/components/ui/utils';
+export type TabItem = { id: string; label: string; content: ReactNode };
 
-export type TabItem = {
-  id: string;
-  label: string;
-  content: ReactNode;
-};
-
-export function Tabs({
-  tabs,
-  initial,
-  orientation = 'vertical',
-}: {
+/** Shared product tabs, with Radix focus management and linked tab panels. */
+export function Tabs({ tabs, initial, orientation = "vertical" }: {
   tabs: TabItem[];
   initial?: string;
-  orientation?: 'vertical' | 'horizontal';
+  orientation?: "vertical" | "horizontal";
 }) {
-  const [active, setActive] = useState(initial ?? tabs[0]?.id ?? '');
-  const current = tabs.find((tab) => tab.id === active) ?? tabs[0];
-
-  const list = (
-    <Card
-      role="tablist"
-      aria-orientation={orientation}
-      className={cn(
-        'gap-1 p-2',
-        orientation === 'vertical' ? 'flex flex-col' : 'flex flex-row flex-wrap',
-      )}
-    >
-      {tabs.map((tab) => {
-        const selected = tab.id === current?.id;
-        return (
-          <button
-            key={tab.id}
-            type="button"
-            role="tab"
-            aria-selected={selected}
-            onClick={() => setActive(tab.id)}
-            className={cn(
-              'rounded-md px-3 py-2 text-left text-sm font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
-              selected
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-            )}
-          >
-            {tab.label}
-          </button>
-        );
-      })}
-    </Card>
-  );
-
-  if (orientation === 'horizontal') {
-    return (
-      <div className="space-y-5">
-        {list}
-        <div role="tabpanel">{current?.content}</div>
-      </div>
-    );
-  }
-
+  const [active, setActive] = useState(initial ?? tabs[0]?.id ?? "");
+  const value = tabs.some((tab) => tab.id === active) ? active : tabs[0]?.id;
+  const vertical = orientation === "vertical";
   return (
-    <div className="grid gap-5 lg:grid-cols-[260px_1fr]">
-      {list}
-      <div role="tabpanel">{current?.content}</div>
-    </div>
+    <UITabs value={value} onValueChange={setActive} orientation={orientation}
+      className={cn("min-w-0 gap-6", vertical && "lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:items-start")}>
+      <TabsList aria-label="Sections" className={cn("minimal-scrollbar h-auto max-w-full justify-start gap-1 overflow-x-auto p-1", vertical ? "w-full flex-row lg:sticky lg:top-20 lg:flex-col lg:items-stretch" : "w-fit")}>
+        {tabs.map((tab) => (
+          <TabsTrigger key={tab.id} value={tab.id} className={cn("h-9 flex-none px-3", vertical && "lg:justify-start")}>{tab.label}</TabsTrigger>
+        ))}
+      </TabsList>
+      <div className="min-w-0">
+        {tabs.map((tab) => <TabsContent key={tab.id} value={tab.id} className="min-w-0 space-y-6">{tab.content}</TabsContent>)}
+      </div>
+    </UITabs>
   );
 }

@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Bank accounts - port of BankAccountController.
 
 import type { Metadata } from 'next';
@@ -36,12 +37,12 @@ export default async function BankAccountsPage() {
         title="Bank Accounts"
         breadcrumb={[{ label: 'Accounts'}, { label:'Bank Accounts' }]}
         actions={
-          <Link
+          <LinkButton
             href={ROUTES['bank.account.csv_upload']}
-            className="rounded-lg px-4 py-2.5 text-sm font-medium text-primary ring-1 ring-inset ring-ring/50 hover:bg-primary/10"
+            
           >
             Upload via CSV
-          </Link>
+          </LinkButton>
         }
       />
 

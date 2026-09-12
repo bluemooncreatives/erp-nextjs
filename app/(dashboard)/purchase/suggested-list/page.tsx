@@ -1,8 +1,8 @@
+import { LinkButton } from '@/components/common/link-button';
 // Stock alert list - port of PurchaseOrderController@suggestList
 // (`purchase::suggest_list`): SKUs at or below their alert quantity.
 
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { authorize } from '@/lib/auth/permissions';
 import { getSession } from '@/lib/auth/session';
 import { stockAlertList } from '@/lib/purchase/repository';
@@ -39,12 +39,12 @@ export default async function StockAlertPage({
         title="Stock Alert List"
         breadcrumb={[{ label: 'Purchase' }, { label: 'Stock Alert List' }]}
         actions={
-          <Link
+          <LinkButton
             href={ROUTES['purchase_order.create']}
-            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
+            
           >
             Create Purchase Order
-          </Link>
+          </LinkButton>
         }
       />
 

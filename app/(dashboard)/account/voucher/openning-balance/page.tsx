@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Accounting periods / opening balances - port of
 // OpeningBalanceHistoryController@index (`account::opening_balances.index`).
 
@@ -39,12 +40,12 @@ export default async function OpeningBalanceIndexPage() {
         title="Opening Balance"
         breadcrumb={[{ label: 'Accounts'}, { label:'Opening Balance' }]}
         actions={
-          <Link
+          <LinkButton
             href={ROUTES['openning_balance.create']}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-xs transition hover:bg-primary"
+            
           >
             Add Opening Balance
-          </Link>
+          </LinkButton>
         }
       />
 

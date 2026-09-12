@@ -1,9 +1,9 @@
 'use client';
 
+import { LinkButton } from '@/components/common/link-button';
 // Stock transfer form - port of `inventory::stock_transfer.create`.
 
 import { useActionState } from 'react';
-import Link from 'next/link';
 import { Card } from '@/components/erp/page';
 import {
   FormAlert,
@@ -94,12 +94,12 @@ export function TransferForm({
       </Card>
 
       <div className="flex items-center justify-end gap-3">
-        <Link
+        <LinkButton
           href={ROUTES['stock-transfer.index']}
-          className="rounded-lg px-5 py-3 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
+          variant="outline"
         >
           Cancel
-        </Link>
+        </LinkButton>
         <SubmitButton>Save Transfer</SubmitButton>
       </div>
     </form>

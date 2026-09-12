@@ -1,9 +1,9 @@
+import { LinkButton } from '@/components/common/link-button';
 // Branch details - port of ShowRoomController@show (`inventory::showroom.show`):
 // the branch profile, its sale and earnings summaries, the ledger of its own
 // chart account, and the opening-balance form.
 
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { eq, sql } from 'drizzle-orm';
 import { authorize, can } from '@/lib/auth/permissions';
@@ -105,12 +105,12 @@ export default async function ShowroomDetailsPage({
           { label: showroom.name },
         ]}
         actions={
-          <Link
+          <LinkButton
             href={route('product_movement.index', {}, { showroom_id: showroom.id })}
-            className="rounded-lg px-4 py-2.5 text-sm font-medium text-primary ring-1 ring-inset ring-ring/50 hover:bg-primary/10"
+            
           >
             Products
-          </Link>
+          </LinkButton>
         }
       />
 

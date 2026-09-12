@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Purchase order list - port of PurchaseOrderController@index.
 
 import type { Metadata } from 'next';
@@ -59,12 +60,12 @@ export default async function PurchaseOrderListPage({
         breadcrumb={[{ label: 'Purchase' }, { label: 'Purchase Order' }]}
         actions={
           canCreate ? (
-            <Link
+            <LinkButton
               href={ROUTES['purchase_order.create']}
-              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
+              
             >
               Add Purchase Order
-            </Link>
+            </LinkButton>
           ) : null
         }
       />

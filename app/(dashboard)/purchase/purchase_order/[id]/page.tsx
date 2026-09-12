@@ -1,7 +1,7 @@
+import { LinkButton } from '@/components/common/link-button';
 // Purchase order detail - port of PurchaseOrderController@show.
 
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { authorize, can } from '@/lib/auth/permissions';
 import {
@@ -71,18 +71,18 @@ export default async function PurchaseOrderDetailPage({
         ]}
         actions={
           <div className="flex items-center gap-2">
-            <Link
+            <LinkButton
               href={route('purchase.order.print_view', { id: order.id })}
-              className="rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
+              variant="outline"
             >
               Print
-            </Link>
-            <Link
+            </LinkButton>
+            <LinkButton
               href={route('purchase.order.pdf', { id: order.id })}
-              className="rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
+              variant="outline"
             >
               Export
-            </Link>
+            </LinkButton>
             {order.status !== PurchaseStatus.Approved && canApprove ? (
             <form action={approvePurchaseAction}>
               <input type="hidden" name="id" value={order.id} />

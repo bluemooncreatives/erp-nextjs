@@ -1,10 +1,10 @@
+import { LinkButton } from '@/components/common/link-button';
 // Product / combo detail - port of ProductController@product_Detail, which
 // returned `product::product.product_details` or `product::product.combo_product_details`
 // into a modal. The route carries `id` and, for a combo, `type=combo`.
 
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { authorize } from '@/lib/auth/permissions';
 import { findComboProduct, productDetail } from '@/lib/product/products';
@@ -142,12 +142,12 @@ export default async function ProductDetailPage({
           { label: 'Details' },
         ]}
         actions={
-          <Link
+          <LinkButton
             href={route('add_product.edit', { id: product.id })}
-            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
+            
           >
             Edit
-          </Link>
+          </LinkButton>
         }
       />
 

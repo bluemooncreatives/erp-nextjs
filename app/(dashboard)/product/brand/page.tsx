@@ -1,8 +1,8 @@
+import { LinkButton } from '@/components/common/link-button';
 // Port of Modules/Product/Http/Controllers/BrandController (index/create/store/
 // edit/update/delete) and product::brand.brand.
 
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { authorize, can } from '@/lib/auth/permissions';
 import { brandRepository } from '@/lib/product/repositories';
 import { PageHeader } from '@/components/erp/page';
@@ -42,12 +42,12 @@ export default async function BrandPage({
             >
               Download CSV
             </a>
-            <Link
+            <LinkButton
               href={ROUTES['brand.csv_upload']}
-              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
+              
             >
               Upload via CSV
-            </Link>
+            </LinkButton>
           </div>
         }
       />

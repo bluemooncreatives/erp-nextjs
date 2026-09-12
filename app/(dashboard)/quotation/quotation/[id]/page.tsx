@@ -1,7 +1,7 @@
+import { LinkButton } from '@/components/common/link-button';
 // Quotation detail - port of QuotationController@show.
 
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { authorize, can } from '@/lib/auth/permissions';
 import { QuotationConvertStatus, findQuotation } from '@/lib/quotation/repository';
@@ -47,18 +47,18 @@ export default async function QuotationDetailPage({
         ]}
         actions={
           <div className="flex items-center gap-2">
-            <Link
+            <LinkButton
               href={route('quotation.order.print_view', { id: quotation.id })}
-              className="rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
+              variant="outline"
             >
               Print
-            </Link>
-            <Link
+            </LinkButton>
+            <LinkButton
               href={route('quotation.order.pdf', { id: quotation.id })}
-              className="rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
+              variant="outline"
             >
               Export
-            </Link>
+            </LinkButton>
             {canConvert &&
             quotation.convertStatus !== QuotationConvertStatus.Converted ? (
               <form action={convertQuotation}>

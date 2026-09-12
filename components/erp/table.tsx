@@ -11,12 +11,13 @@
 // throughout, so a listing matches every other surface in the product.
 // ---------------------------------------------------------------------------
 
-import Link from 'next/link';
 import React, { type ReactNode } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
 import { Badge } from '@/components/erp/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { EmptyState } from './page';
+import { LinkButton } from '@/components/common/link-button';
 import { cn } from '@/components/ui/utils';
 
 export function DataTable({
@@ -30,13 +31,29 @@ export function DataTable({
   isEmpty?: boolean;
   empty?: string;
 }) {
+  // Retain one set of controls/forms in the DOM while presenting source-style
+  // labeled rows on mobile. Summary tables with spanning cells keep scrolling.
+  const rowElements = React.Children.toArray(children);
+  let responsive = true;
+  const labeledRows = rowElements.map((row) => {
+    if (!React.isValidElement<{ children?: ReactNode }>(row)) return row;
+    const cells = React.Children.toArray(row.props.children);
+    if (cells.some((cell) => React.isValidElement<{ colSpan?: number; rowSpan?: number }>(cell) && ((cell.props.colSpan ?? 1) > 1 || (cell.props.rowSpan ?? 1) > 1))) responsive = false;
+    return React.cloneElement(row, {}, cells.map((cell, index) => {
+      if (!React.isValidElement(cell)) return cell;
+      const label = columns[index]?.label;
+      return React.cloneElement(cell as React.ReactElement<{ 'data-label'?: string }>, {
+        'data-label': typeof label === 'string' ? label : '',
+      });
+    }));
+  });
   return (
     <div className="minimal-scrollbar max-w-full overflow-x-auto">
-      <table className="table-unified w-full">
+      <table className={cn("table-unified w-full", responsive && "erp-responsive-table")}>
         <thead>
           <tr>
             {columns.map((column, index) => (
-              <th key={index} className={cn('text-left', column.className)}>
+              <th scope="col" key={index} className={cn('text-left', column.className)}>
                 {column.label}
               </th>
             ))}
@@ -48,13 +65,13 @@ export function DataTable({
             <tr>
               <td
                 colSpan={Math.max(1, columns.length)}
-                className="text-muted-foreground py-10 text-center text-sm"
+                className="p-0"
               >
-                {empty}
+                <EmptyState message={empty} />
               </td>
             </tr>
           ) : (
-            children
+            labeledRows
           )}
         </tbody>
       </table>
@@ -67,14 +84,16 @@ export function Td({
   children,
   className = '',
   colSpan,
+  ...props
 }: {
   /** Optional, so an intentionally blank cell can be written `<Td />`. */
   children?: ReactNode;
   className?: string;
   colSpan?: number;
+  'data-label'?: string;
 }) {
   return (
-    <td colSpan={colSpan} className={cn('text-sm', className)}>
+    <td {...props} colSpan={colSpan} className={cn('text-sm', className)}>
       {children}
     </td>
   );
@@ -95,7 +114,7 @@ export function StatusBadge({ status }: { status: number | boolean | null }) {
   const active = status === 1 || status === true;
   return (
     <Badge color={active ? 'success' : 'error'} size="sm">
-      {active ? 'Active' : 'DeActive'}
+      {active ? 'Active' : 'Inactive'}
     </Badge>
   );
 }
@@ -201,14 +220,14 @@ function PageLink({
   }
 
   return (
-    <Button
-      asChild
+    <LinkButton
+      href={href}
       size="sm"
       variant={active ? 'default' : 'ghost'}
       aria-current={active ? 'page' : undefined}
     >
-      <Link href={href}>{children}</Link>
-    </Button>
+      {children}
+    </LinkButton>
   );
 }
 
@@ -233,22 +252,22 @@ export function SearchBar({
   children?: ReactNode;
 }) {
   return (
-    <form action={action} method="get" className="flex flex-wrap items-center gap-2">
+    <form action={action} method="get" className="flex w-full flex-wrap items-end gap-3 sm:w-auto">
       {Object.entries(hidden).map(([key, value]) =>
         value == null || value === '' ? null : (
           <input key={key} type="hidden" name={key} value={String(value)} />
         ),
       )}
-      <Input
-        type="search"
-        name={name}
-        defaultValue={defaultValue}
-        placeholder={placeholder}
-        aria-label={placeholder}
-        className="w-full sm:w-64"
-      />
+      <label className="min-w-0 flex-1 space-y-2 sm:min-w-64">
+        <span className="block text-xs font-medium">Search</span>
+        <span className="relative block">
+          <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" aria-hidden="true" />
+          <Input type="search" name={name} defaultValue={defaultValue} placeholder={placeholder} className="pl-9" />
+        </span>
+      </label>
+      <Button type="submit" variant="soft">Search</Button>
+      {defaultValue ? <LinkButton href={`${action}${Object.entries(hidden).filter(([, v]) => v != null && v !== '').length ? '?' + new URLSearchParams(Object.entries(hidden).filter(([, v]) => v != null && v !== '').map(([k,v]) => [k,String(v)])) : ''}`} variant="ghost" aria-label="Clear search"><X className="size-4" />Clear</LinkButton> : null}
       {children}
-      <Button type="submit">Search</Button>
     </form>
   );
 }

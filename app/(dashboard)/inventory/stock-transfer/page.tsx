@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Stock transfer list - port of StockTransferController@index.
 
 import type { Metadata } from 'next';
@@ -61,12 +62,12 @@ export default async function StockTransferListPage({
         breadcrumb={[{ label: 'Inventory'}, { label:'Stock Transfer' }]}
         actions={
           canCreate ? (
-            <Link
+            <LinkButton
               href={ROUTES['stock-transfer.create']}
-              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
+              
             >
               Add Transfer
-            </Link>
+            </LinkButton>
           ) : null
         }
       />

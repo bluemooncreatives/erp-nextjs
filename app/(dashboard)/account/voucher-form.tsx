@@ -1,5 +1,6 @@
 'use client';
 
+import { LinkButton } from '@/components/common/link-button';
 // ---------------------------------------------------------------------------
 // Shared voucher form for Expense, Income and Journal entry.
 //
@@ -9,7 +10,6 @@
 // ---------------------------------------------------------------------------
 
 import { useActionState, useState } from 'react';
-import Link from 'next/link';
 import { Card } from '@/components/erp/page';
 import {
   FormAlert,
@@ -246,12 +246,12 @@ export function VoucherForm({
       </Card>
 
       <div className="flex items-center justify-end gap-3">
-        <Link
+        <LinkButton
           href={cancelHref}
-          className="rounded-lg px-5 py-3 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
+          variant="outline"
         >
           Cancel
-        </Link>
+        </LinkButton>
         <SubmitButton disabled={total <= 0}>{submitLabel}</SubmitButton>
       </div>
     </form>

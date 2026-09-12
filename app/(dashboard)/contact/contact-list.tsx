@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Shared contact listing, used by the Contacts, Customer and Supplier screens
 // (contact::contact.index / customer / supplier in the PHP stack).
 
@@ -126,12 +127,12 @@ export async function ContactList({
                 {/* The customer list hid Edit for the walk-in customer. */}
                 {canEdit &&
                 (detailRoute !== 'customer.view' || contact.id > WALK_IN_CUSTOMER_ID) ? (
-                  <Link
+                  <LinkButton
                     href={route('add_contact.edit', { id: contact.id })}
-                    className="rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
+                    
                   >
                     Edit
-                  </Link>
+                  </LinkButton>
                 ) : null}
                 {canDelete ? (
                   <form action={deleteContactAction}>

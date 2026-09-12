@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Product list.
 //
 // Port of ProductController@create (which rendered `product::product.list_products`
@@ -172,12 +173,12 @@ export default async function ProductListPage({
                       </Link>
                     ) : null}
                     {canEdit && row.productId ? (
-                      <Link
+                      <LinkButton
                         href={route('add_product.edit', { id: row.productId })}
-                        className="rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
+                        
                       >
                         Edit
-                      </Link>
+                      </LinkButton>
                     ) : null}
                     {canDelete && row.productId ? (
                       <form action={deleteProductAction}>
@@ -274,12 +275,12 @@ export default async function ProductListPage({
                   </Link>
                 ) : null}
                 {canComboEdit && (comboItemCounts.get(combo.id) ?? 0) > 0 ? (
-                  <Link
+                  <LinkButton
                     href={route('add_product.editCombo', { id: combo.id })}
-                    className="rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
+                    
                   >
                     Edit
-                  </Link>
+                  </LinkButton>
                 ) : null}
                 {canComboDelete ? (
                   <form action={deleteComboAction}>
@@ -302,18 +303,18 @@ export default async function ProductListPage({
         breadcrumb={[{ label: 'Products' }, { label: 'Product List' }]}
         actions={
           <div className="flex flex-wrap items-center gap-3">
-            <Link
+            <LinkButton
               href={ROUTES['add_product.csv_upload']}
-              className="rounded-lg px-4 py-2.5 text-sm font-medium text-primary ring-1 ring-inset ring-ring/50 hover:bg-primary/10"
+              
             >
               Upload via CSV
-            </Link>
-            <Link
+            </LinkButton>
+            <LinkButton
               href={ROUTES['add_product.index']}
-              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
+              
             >
               Add Product
-            </Link>
+            </LinkButton>
           </div>
         }
       />

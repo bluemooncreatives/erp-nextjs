@@ -1,7 +1,7 @@
+import { LinkButton } from '@/components/common/link-button';
 // Supplier list - port of ContactController@supplier.
 
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { authorize } from '@/lib/auth/permissions';
 import { ContactType } from '@/lib/contact/queries';
 import { ROUTES } from '@/lib/routes';
@@ -24,12 +24,12 @@ export default async function SupplierPage({
         title="Supplier"
         breadcrumb={[{ label: 'Contacts'}, { label:'Supplier' }]}
         actions={
-          <Link
+          <LinkButton
             href={`${ROUTES['add_contact.create']}?type=Supplier`}
-            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
+            
           >
             Add Supplier
-          </Link>
+          </LinkButton>
         }
       />
       <ContactList

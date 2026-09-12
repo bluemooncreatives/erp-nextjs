@@ -1,12 +1,12 @@
 'use client';
 
+import { LinkButton } from '@/components/common/link-button';
 // Purchase order entry - port of `purchase::purchase_order.create`.
 //
 // Same cart model as the sale form, with the purchase-specific fields
 // (LC number, CNF agent, supplier, per-line selling price to apply on approval).
 
 import { useActionState, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { Card } from '@/components/erp/page';
 import {
   FormAlert,
@@ -449,12 +449,12 @@ export function PurchaseForm({
       </div>
 
       <div className="flex items-center justify-end gap-3">
-        <Link
+        <LinkButton
           href={ROUTES['purchase_order.index']}
-          className="rounded-lg px-5 py-3 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
+          variant="outline"
         >
           Cancel
-        </Link>
+        </LinkButton>
         <SubmitButton disabled={lines.length === 0}>
           {submitLabel ?? 'Save Purchase Order'}
         </SubmitButton>

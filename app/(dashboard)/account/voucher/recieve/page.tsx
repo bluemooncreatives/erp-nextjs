@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { authorize, can } from '@/lib/auth/permissions';
@@ -25,7 +26,7 @@ export default async function ReceiptVouchersPage({ searchParams }: { searchPara
   })));
   return <>
     <PageHeader title="Receipt Vouchers" breadcrumb={[{ label: 'Accounts'}, { label:'Receipt Vouchers' }]}
-      actions={canCreate ? <Link href={ROUTES['voucher_recieve.create']} className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white">Add Receipt</Link> : null} />
+      actions={canCreate ? <LinkButton href={ROUTES['voucher_recieve.create']} >Add Receipt</LinkButton> : null} />
     <Card title={`Receipts (${total})`} bodyClassName="">
       <DataTable columns={[{ label: 'Voucher' }, { label: 'Date' }, { label: 'Type' }, { label: 'Accounts'}, { label:'Amount'}, { label:'Approval'}, { label:'Actions' }]} isEmpty={!rows.length} empty="No receipt vouchers found.">
         {decorated.map((voucher) => <Tr key={voucher.id}>

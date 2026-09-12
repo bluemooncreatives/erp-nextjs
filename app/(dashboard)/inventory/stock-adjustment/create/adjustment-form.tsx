@@ -1,9 +1,9 @@
 'use client';
 
+import { LinkButton } from '@/components/common/link-button';
 // Stock adjustment form - port of `inventory::stock_adjustment.create`.
 
 import { useActionState } from 'react';
-import Link from 'next/link';
 import { Card } from '@/components/erp/page';
 import {
   FormAlert,
@@ -98,12 +98,12 @@ export function AdjustmentForm({
       </Card>
 
       <div className="flex items-center justify-end gap-3">
-        <Link
+        <LinkButton
           href={ROUTES['stock_adjustment.index']}
-          className="rounded-lg px-5 py-3 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
+          variant="outline"
         >
           Cancel
-        </Link>
+        </LinkButton>
         <SubmitButton>Save Adjustment</SubmitButton>
       </div>
     </form>

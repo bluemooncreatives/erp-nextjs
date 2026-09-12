@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Staff list - port of StaffController@index.
 
 import type { Metadata } from 'next';
@@ -57,18 +58,18 @@ export default async function StaffListPage({
         actions={
           canCreate ? (
             <div className="flex flex-wrap items-center gap-3">
-              <Link
+              <LinkButton
                 href={ROUTES['staffs.csv_upload']}
-                className="rounded-lg px-4 py-2.5 text-sm font-medium text-primary ring-1 ring-inset ring-ring/50 hover:bg-primary/10"
+                
               >
                 Upload via CSV
-              </Link>
-              <Link
+              </LinkButton>
+              <LinkButton
                 href={ROUTES['staffs.create']}
-                className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
+                
               >
                 Add Staff
-              </Link>
+              </LinkButton>
             </div>
           ) : null
         }
@@ -144,12 +145,12 @@ export default async function StaffListPage({
                     </Link>
                   ) : null}
                   {canEdit ? (
-                    <Link
+                    <LinkButton
                       href={route('staffs.edit', { id: row.staff.id })}
-                      className="rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
+                      
                     >
                       Edit
-                    </Link>
+                    </LinkButton>
                   ) : null}
                   {canDelete ? (
                     <form action={deleteStaffAction}>

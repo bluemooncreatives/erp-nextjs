@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Income list - port of IncomeController@index.
 
 import type { Metadata } from 'next';
@@ -48,12 +49,12 @@ export default async function IncomeListPage({
         breadcrumb={[{ label: 'Accounts'}, { label:'Income Lists' }]}
         actions={
           canCreate ? (
-            <Link
+            <LinkButton
               href={ROUTES['income.create']}
-              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
+              
             >
               Add Income
-            </Link>
+            </LinkButton>
           ) : null
         }
       />

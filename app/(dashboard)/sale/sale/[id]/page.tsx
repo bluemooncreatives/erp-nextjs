@@ -1,8 +1,8 @@
+import { LinkButton } from '@/components/common/link-button';
 // Sale detail - port of SaleController@show (`sale::sale.show` /
 // `invoice_details`), including the payment panel and return entry.
 
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { authorize, can } from '@/lib/auth/permissions';
 import { findSale, SaleStatus, SaleReturnStatus } from '@/lib/sale/queries';
@@ -59,24 +59,24 @@ export default async function SaleDetailPage({
         ]}
         actions={
           <div className="flex items-center gap-2">
-            <Link
+            <LinkButton
               href={route('sale.print_view', { id: sale.id })}
-              className="rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
+              variant="outline"
             >
               Print
-            </Link>
-            <Link
+            </LinkButton>
+            <LinkButton
               href={route('sale.pdf', { id: sale.id })}
-              className="rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
+              variant="outline"
             >
               Pdf
-            </Link>
-            <Link
+            </LinkButton>
+            <LinkButton
               href={route('sale.challan_pdf', { id: sale.id })}
-              className="rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
+              variant="outline"
             >
               Challan
-            </Link>
+            </LinkButton>
             {sale.isApproved !== 1 && canApprove ? (
               <form action={approveSaleAction}>
                 <input type="hidden" name="id" value={sale.id} />

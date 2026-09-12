@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Projects - the list the PHP rendered from the sidebar's project tree
 // (`Modules/Project`, ProjectRepository + my_project_configuration()).
 
@@ -31,18 +32,18 @@ export default async function ProjectListPage() {
         breadcrumb={[{ label: 'Projects' }]}
         actions={
           <div className="flex items-center gap-2">
-            <Link
+            <LinkButton
               href={ROUTES['team.index']}
-              className="inline-flex items-center gap-2 rounded-lg bg-card px-4 py-2.5 text-sm font-medium text-foreground ring-1 ring-inset ring-border transition hover:bg-muted"
+              variant="outline"
             >
               Teams
-            </Link>
-            <Link
+            </LinkButton>
+            <LinkButton
               href={ROUTES['project.create']}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-xs transition hover:bg-primary"
+              
             >
               New Project
-            </Link>
+            </LinkButton>
           </div>
         }
       />

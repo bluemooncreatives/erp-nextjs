@@ -1503,3 +1503,17 @@ span.flatpickr-weekday,
   opacity: 0.8;
   cursor: grabbing; /* Changes the cursor to indicate dragging */
 }
+
+/* The shared listing table follows emp-dashboard's labeled mobile rows.
+   A single DOM tree keeps form names, IDs and server actions unambiguous. */
+@media (max-width: 767px) {
+  .erp-responsive-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .erp-responsive-table, .erp-responsive-table tbody { display: block; width: 100%; }
+  .erp-responsive-table tbody tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 16px; border-bottom: 1px solid var(--border); }
+  .erp-responsive-table tbody tr:last-child { border-bottom: 0; }
+  .erp-responsive-table tbody td { display: block; min-width: 0; padding: 0; border: 0; text-align: left; white-space: normal; overflow-wrap: anywhere; }
+  .erp-responsive-table tbody td::before { content: attr(data-label); display: block; margin-bottom: 4px; font-size: 11px; font-weight: 500; color: var(--muted-foreground); }
+  .erp-responsive-table tbody td:first-child, .erp-responsive-table tbody td:last-child { grid-column: 1 / -1; }
+  .erp-responsive-table tbody td:first-child { font-weight: 500; }
+  .erp-responsive-table tbody td[colspan] { grid-column: 1 / -1; }
+}

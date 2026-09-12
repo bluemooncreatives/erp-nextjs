@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Contra vouchers - port of ContraVoucherController@index.
 // A main account against one or more opposite-side accounts, as in Laravel.
 
@@ -42,12 +43,12 @@ export default async function ContraVouchersPage({
         breadcrumb={[{ label: 'Accounts'}, { label:'Contra Voucher' }]}
         actions={
           canCreate ? (
-            <Link
+            <LinkButton
               href={ROUTES['contra.create']}
-              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
+              
             >
               Add Contra Voucher
-            </Link>
+            </LinkButton>
           ) : null
         }
       />

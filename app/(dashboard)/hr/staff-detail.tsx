@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Staff profile - port of StaffController@show (`backEnd.staffs.viewStaff`):
 // the profile card, the documents tab with its upload form, the leave, payroll
 // and loan histories, and the staff account's transactions.
@@ -7,7 +8,6 @@
 // `staffs.show`; each page authorizes its own permission and renders this.
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { can } from '@/lib/auth/permissions';
 import { findStaff } from '@/lib/hr/staff';
@@ -274,12 +274,12 @@ export async function StaffDetail({ id }: { id: number }) {
         ]}
         actions={
           canEdit ? (
-            <Link
+            <LinkButton
               href={route('staffs.edit', { id: staff.id })}
-              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
+              
             >
               Edit
-            </Link>
+            </LinkButton>
           ) : null
         }
       />

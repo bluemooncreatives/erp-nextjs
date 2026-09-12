@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Contact self-service - port of ContactController@my_details
 // (`contact::contact.my_details.customer` / `.supplier`).
 //
@@ -146,12 +147,12 @@ export default async function MyDetailsPage() {
                     {row.status === 1 ? (
                       '-'
                     ) : (
-                      <Link
+                      <LinkButton
                         href={route('contact.my_payment', { id: row.id })}
-                        className="rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
+                        
                       >
                         Pay
-                      </Link>
+                      </LinkButton>
                     )}
                   </Td>
                 ) : null}

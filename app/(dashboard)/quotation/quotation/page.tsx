@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Quotation list - port of QuotationController@index.
 
 import type { Metadata } from 'next';
@@ -55,12 +56,12 @@ export default async function QuotationListPage({
         breadcrumb={[{ label: 'Quotation' }]}
         actions={
           canCreate ? (
-            <Link
+            <LinkButton
               href={ROUTES['quotation.create']}
-              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
+              
             >
               Add Quotation
-            </Link>
+            </LinkButton>
           ) : null
         }
       />
@@ -131,12 +132,12 @@ export default async function QuotationListPage({
                     </form>
                   ) : null}
                   {canEdit && q.convertStatus !== QuotationConvertStatus.Converted ? (
-                    <Link
+                    <LinkButton
                       href={route('quotation.edit', { id: q.id })}
-                      className="rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
+                      
                     >
                       Edit
-                    </Link>
+                    </LinkButton>
                   ) : null}
                   {canDelete ? (
                     <form action={deleteQuotationAction}>

@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Receive your product - port of the `purchase_order.recieve.index` screen:
 // purchase orders that have not been fully received into stock.
 
@@ -98,12 +99,12 @@ export default async function ReceivePurchasePage({
                 </Badge>
               </Td>
               <Td>
-                <Link
+                <LinkButton
                   href={route('purchase_order.show', { id: order.id })}
-                  className="rounded-lg px-3 py-1.5 text-xs font-medium text-white bg-primary hover:bg-primary"
+                  
                 >
                   Receive
-                </Link>
+                </LinkButton>
               </Td>
             </Tr>
           ))}

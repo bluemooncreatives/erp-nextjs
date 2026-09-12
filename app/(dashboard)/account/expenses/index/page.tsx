@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Expense list - port of ExpenseController@index.
 
 import type { Metadata } from 'next';
@@ -54,12 +55,12 @@ export default async function ExpenseListPage({
         breadcrumb={[{ label: 'Accounts'}, { label:'Expense Lists' }]}
         actions={
           canCreate ? (
-            <Link
+            <LinkButton
               href={ROUTES['expenses.create']}
-              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
+              
             >
               Add Expense
-            </Link>
+            </LinkButton>
           ) : null
         }
       />

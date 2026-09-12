@@ -1,7 +1,7 @@
+import { LinkButton } from '@/components/common/link-button';
 // Port of Modules/Product/Http/Controllers/ModelController.
 
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { authorize, can } from '@/lib/auth/permissions';
 import { modelRepository } from '@/lib/product/repositories';
 import { PageHeader } from '@/components/erp/page';
@@ -41,12 +41,12 @@ export default async function ModelPage({
             >
               Download CSV
             </a>
-            <Link
+            <LinkButton
               href={ROUTES['model.csv_upload']}
-              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
+              
             >
               Upload via CSV
-            </Link>
+            </LinkButton>
           </div>
         }
       />

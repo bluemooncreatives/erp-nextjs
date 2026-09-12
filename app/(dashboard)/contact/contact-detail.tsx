@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Contact profile - port of contact::contact.supplier_view (ContactController@show)
 // and contact::contact.customer_view (ContactController@customer_details).
 //
@@ -239,12 +240,12 @@ export async function ContactDetail({
         ]}
         actions={
           canEdit ? (
-            <Link
+            <LinkButton
               href={route('add_contact.edit', { id: contact.id })}
-              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
+              
             >
               Edit
-            </Link>
+            </LinkButton>
           ) : null
         }
       />
@@ -299,16 +300,16 @@ export async function ContactDetail({
                   { label: 'Due Invoice', value: summary.dueInvoice },
                 ]}
               />
-              <Link
+              <LinkButton
                 href={
                   isCustomer
                     ? route('customerSaleProductList', { id: contact.id })
                     : route('supplierPurchaseProductList', { id: contact.id })
                 }
-                className="mt-4 inline-block rounded-lg px-4 py-2.5 text-sm font-medium text-primary ring-1 ring-inset ring-ring/50 hover:bg-primary/10"
+                
               >
                 Products
-              </Link>
+              </LinkButton>
             </Card>
 
             <Card title="Finance Information">

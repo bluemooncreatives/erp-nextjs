@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Journal vouchers - port of JournalController@index.
 
 import type { Metadata } from 'next';
@@ -41,12 +42,12 @@ export default async function JournalVouchersPage({
         breadcrumb={[{ label: 'Accounts'}, { label:'Journal' }]}
         actions={
           canCreate ? (
-            <Link
+            <LinkButton
               href={ROUTES['journal.create']}
-              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
+              
             >
               Add Journal
-            </Link>
+            </LinkButton>
           ) : null
         }
       />

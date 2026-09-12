@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Staff loans - port of Modules/Setup ApplyLoanController@index
 // (`setup::staff_loans.index`).
 
@@ -34,12 +35,12 @@ export default async function ApplyLoansPage() {
         title="Apply For Loan"
         breadcrumb={[{ label: 'HR' }, { label: 'Apply For Loan' }]}
         actions={
-          <Link
+          <LinkButton
             href={ROUTES['apply_loans.create']}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-xs transition hover:bg-primary"
+            
           >
             Apply For Loan
-          </Link>
+          </LinkButton>
         }
       />
 

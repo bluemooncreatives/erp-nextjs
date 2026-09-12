@@ -1,7 +1,7 @@
+import { LinkButton } from '@/components/common/link-button';
 // Roles - port of Modules/RolePermission RoleController.
 
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { sql } from 'drizzle-orm';
 import { authorize, can } from '@/lib/auth/permissions';
 import { db } from '@/lib/db/client';
@@ -86,12 +86,12 @@ export default async function RolesPage() {
                   <Td>
                     <div className="flex items-center gap-2">
                       {canEditPermissions && row.role.type !== 'system_user' ? (
-                        <Link
+                        <LinkButton
                           href={`${ROUTES['permission.permissions.index']}?role_id=${row.role.id}`}
-                          className="rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
+                          
                         >
                           Permissions
-                        </Link>
+                        </LinkButton>
                       ) : null}
                       {canDelete && row.role.id > 5 ? (
                         <form action={deleteRole}>

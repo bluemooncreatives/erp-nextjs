@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Sale list - port of SaleController@index (`sale::sale.index`).
 
 import type { Metadata } from 'next';
@@ -57,12 +58,12 @@ export default async function SaleListPage({
         breadcrumb={[{ label: 'Sale' }]}
         actions={
           canCreate ? (
-            <Link
+            <LinkButton
               href={ROUTES['sale.create']}
-              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
+              
             >
               Add Sale
-            </Link>
+            </LinkButton>
           ) : null
         }
       />
@@ -156,12 +157,12 @@ export default async function SaleListPage({
               <Td>
                 <div className="flex items-center gap-2">
                   {canEdit && sale.isApproved !== 1 ? (
-                    <Link
+                    <LinkButton
                       href={route('sale.edit', { id: sale.id })}
-                      className="rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
+                      
                     >
                       Edit
-                    </Link>
+                    </LinkButton>
                   ) : null}
                   {canDelete ? (
                     <form action={deleteSaleAction}>

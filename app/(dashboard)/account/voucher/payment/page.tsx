@@ -1,3 +1,4 @@
+import { LinkButton } from '@/components/common/link-button';
 // Payment vouchers - port of VoucherController@index.
 
 import type { Metadata } from 'next';
@@ -47,12 +48,12 @@ export default async function PaymentVouchersPage({
         breadcrumb={[{ label: 'Accounts'}, { label:'Payment Vouchers' }]}
         actions={
           canCreate ? (
-            <Link
+            <LinkButton
               href={ROUTES['vouchers.create']}
-              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary"
+              
             >
               Add Voucher
-            </Link>
+            </LinkButton>
           ) : null
         }
       />
