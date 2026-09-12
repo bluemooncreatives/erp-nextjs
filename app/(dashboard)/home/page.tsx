@@ -66,6 +66,7 @@ import {
   type StatAccent,
 } from '@/components/dashboard';
 import { NAV_ICONS } from '@/layout/nav-icons';
+import { PageHeader, Section } from '@/components/common/page-header';
 import { PrimaryCell } from '@/components/common/cells';
 import { StatusBadge } from '@/components/common/status-badge';
 import { DashboardActions, DashboardLink } from '@/components/dashboard/dashboard-actions';
@@ -291,21 +292,21 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
-        <div className="min-w-48 flex-1 space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-balance md:text-3xl">
-            Welcome back, {firstName}
-          </h1>
-          <p className="text-muted-foreground max-w-3xl text-sm">
+      <PageHeader
+        title={`Welcome back, ${firstName}`}
+        description={
+          <>
             {salesCount} approved sales and {purchaseCount} received purchases across{' '}
             {scope.showroomId && scope.showroomId !== 1
               ? (user.showroomName ?? 'this branch')
               : 'every branch'}
             .
-          </p>
-        </div>
-        <DashboardActions createHref={ROUTES['sale.create']} reviewHref={ROUTES['sale.index']} />
-      </header>
+          </>
+        }
+        actions={
+          <DashboardActions createHref={ROUTES['sale.create']} reviewHref={ROUTES['sale.index']} />
+        }
+      />
 
       <div className="grid grid-cols-2 gap-6 lg:grid-cols-3">
         {/* The figure the row is about, leading it, with the supporting tiles
@@ -640,8 +641,7 @@ export default async function DashboardPage() {
         </div>
       ) : null}
 
-      <section className="space-y-3">
-        <h2 className="text-base font-semibold">Workspace</h2>
+      <Section title="Workspace" headingLevel="h2">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {modules.map((module) => {
             const Icon = (module.icon ? NAV_ICONS[module.icon] : null) ?? ArrowRight;
@@ -662,7 +662,7 @@ export default async function DashboardPage() {
           );
           })}
         </div>
-      </section>
+      </Section>
     </div>
   );
 }
