@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, ReactElement, cloneElement, Children } from "react";
+import { ReactNode, ReactElement, cloneElement, Children, isValidElement } from "react";
 import { ChevronDown, Filter } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
@@ -47,14 +47,15 @@ export function FilterDropdown({ label, value, onChange, children }: FilterDropd
           align="start"
         >
           {Children.map(children, (child, index) => {
-            if (child && typeof child === 'object' && 'props' in child) {
-              return cloneElement(child as ReactElement<any>, {
-                key: `filter-item-${index}`,
-                ...child.props,
-                onSelect: () => onChange((child as any).props.value),
-              });
-            }
-            return child;
+            if (!isValidElement(child)) return child;
+            // React 19 types `props` as `unknown`; each item is one of this
+            // file's own `FilterItem`s, so its shape is known here.
+            const item = child as ReactElement<{ value: string }>;
+            return cloneElement(item, {
+              key: `filter-item-${index}`,
+              ...item.props,
+              onSelect: () => onChange(item.props.value),
+            } as Partial<{ value: string }>);
           })}
         </DropdownMenu.Content>
       </DropdownMenu.Portal>

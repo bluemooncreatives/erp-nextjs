@@ -8,7 +8,7 @@ import { roles } from '@/lib/db/schema';
 import { attendanceReport } from '@/lib/hr/leave';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card, EmptyState } from '@/components/erp/page';
-import Badge from '@/components/ui/badge/Badge';
+import { Badge } from '@/components/erp/badge';
 
 export const metadata: Metadata = { title: 'Attendance Report' };
 

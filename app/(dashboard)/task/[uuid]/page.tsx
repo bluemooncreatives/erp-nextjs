@@ -11,7 +11,7 @@ import { route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ActionButton, SubmitButton } from '@/components/erp/submit-button';
-import Badge from '@/components/ui/badge/Badge';
+import { Badge } from '@/components/erp/badge';
 import {
   commentOnTask,
   destroyTaskComment,

@@ -5,18 +5,19 @@
 // same server-rendered model - paging and searching are URL parameters, so a
 // listing works without client JavaScript, as the Blade version effectively did
 // for its first paint.
+//
+// Presentation comes from the design system: `.table-unified` for the table
+// chrome, the Button/Input primitives for the controls, and semantic tokens
+// throughout, so a listing matches every other surface in the product.
 // ---------------------------------------------------------------------------
 
 import Link from 'next/link';
 import React, { type ReactNode } from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import Badge from '@/components/ui/badge/Badge';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Badge } from '@/components/erp/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/components/ui/utils';
 
 export function DataTable({
   columns,
@@ -30,41 +31,38 @@ export function DataTable({
   empty?: string;
 }) {
   return (
-    <div className="max-w-full overflow-x-auto custom-scrollbar">
-      <Table>
-        <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
-          <TableRow>
-            {columns.map((col, i) => (
-              <TableCell
-                key={i}
-                isHeader
-                className={`px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400 whitespace-nowrap ${
-                  col.className ?? ''
-                }`}
-              >
-                {col.label}
-              </TableCell>
+    <div className="minimal-scrollbar max-w-full overflow-x-auto">
+      <table className="table-unified w-full">
+        <thead>
+          <tr>
+            {columns.map((column, index) => (
+              <th key={index} className={cn('text-left', column.className)}>
+                {column.label}
+              </th>
             ))}
-          </TableRow>
-        </TableHeader>
+          </tr>
+        </thead>
 
-        <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+        <tbody>
           {isEmpty ? (
-            <TableRow>
-              <TableCell className="px-5 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+            <tr>
+              <td
+                colSpan={Math.max(1, columns.length)}
+                className="text-muted-foreground py-10 text-center text-sm"
+              >
                 {empty}
-              </TableCell>
-            </TableRow>
+              </td>
+            </tr>
           ) : (
             children
           )}
-        </TableBody>
-      </Table>
+        </tbody>
+      </table>
     </div>
   );
 }
 
-/** A body cell with the table's standard padding. */
+/** A body cell. Padding and rules come from `.table-unified`. */
 export function Td({
   children,
   className = '',
@@ -74,25 +72,11 @@ export function Td({
   className?: string;
   colSpan?: number;
 }) {
-  const content = (
-    <TableCell
-      className={`px-5 py-4 text-start text-theme-sm text-gray-600 dark:text-gray-300 ${className}`}
-    >
+  return (
+    <td colSpan={colSpan} className={cn('text-sm', className)}>
       {children}
-    </TableCell>
+    </td>
   );
-  // `TableCell` does not forward colSpan; fall back to a plain cell when needed.
-  if (colSpan) {
-    return (
-      <td
-        colSpan={colSpan}
-        className={`px-5 py-4 text-start text-theme-sm text-gray-600 dark:text-gray-300 ${className}`}
-      >
-        {children}
-      </td>
-    );
-  }
-  return content;
 }
 
 export function Tr({
@@ -102,7 +86,7 @@ export function Tr({
   children: ReactNode;
   className?: string;
 }) {
-  return <TableRow className={className}>{children}</TableRow>;
+  return <tr className={className}>{children}</tr>;
 }
 
 /** `showStatus($status)` from Helper.php. */
@@ -135,14 +119,16 @@ export function Pagination({
   const lastPage = Math.max(1, Math.ceil(total / perPage));
   if (total === 0) return null;
 
-  const href = (p: number) => {
-    const sp = new URLSearchParams();
-    for (const [k, v] of Object.entries(params)) {
-      if (v != null && v !== '' && k !== 'page') sp.set(k, String(v));
+  const href = (target: number) => {
+    const search = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (value != null && value !== '' && key !== 'page') {
+        search.set(key, String(value));
+      }
     }
-    if (p > 1) sp.set('page', String(p));
-    const qs = sp.toString();
-    return qs ? `${baseUrl}?${qs}` : baseUrl;
+    if (target > 1) search.set('page', String(target));
+    const query = search.toString();
+    return query ? `${baseUrl}?${query}` : baseUrl;
   };
 
   const from = (page - 1) * perPage + 1;
@@ -153,34 +139,44 @@ export function Pagination({
   for (let p = start; p <= Math.min(lastPage, start + 2); p++) pages.push(p);
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 px-5 py-4 dark:border-white/[0.05]">
-      <p className="text-sm text-gray-500 dark:text-gray-400">
-        Showing <span className="font-medium text-gray-700 dark:text-gray-300">{from}</span>{' '}
-        to <span className="font-medium text-gray-700 dark:text-gray-300">{to}</span> of{' '}
-        <span className="font-medium text-gray-700 dark:text-gray-300">{total}</span>{' '}
-        entries
+    <nav
+      aria-label="Pagination"
+      className="flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3"
+    >
+      <p className="text-muted-foreground text-sm">
+        Showing <span className="text-foreground font-medium">{from}</span> to{' '}
+        <span className="text-foreground font-medium">{to}</span> of{' '}
+        <span className="text-foreground font-medium">{total}</span> entries
       </p>
 
-      <div className="flex items-center">
-        <PageLink href={href(page - 1)} disabled={page <= 1} edge="prev">
-          Previous
+      <div className="flex items-center gap-1">
+        <PageLink href={href(page - 1)} disabled={page <= 1}>
+          <ChevronLeft />
+          <span className="hidden sm:inline">Previous</span>
         </PageLink>
 
-        <div className="flex items-center gap-2">
-          {start > 1 ? <span className="px-2 text-gray-400">...</span> : null}
-          {pages.map((p) => (
-            <PageLink key={p} href={href(p)} active={p === page}>
-              {p}
-            </PageLink>
-          ))}
-          {start + 2 < lastPage ? <span className="px-2 text-gray-400">...</span> : null}
-        </div>
+        {start > 1 ? <Ellipsis /> : null}
+        {pages.map((target) => (
+          <PageLink key={target} href={href(target)} active={target === page}>
+            {target}
+          </PageLink>
+        ))}
+        {start + 2 < lastPage ? <Ellipsis /> : null}
 
-        <PageLink href={href(page + 1)} disabled={page >= lastPage} edge="next">
-          Next
+        <PageLink href={href(page + 1)} disabled={page >= lastPage}>
+          <span className="hidden sm:inline">Next</span>
+          <ChevronRight />
         </PageLink>
       </div>
-    </div>
+    </nav>
+  );
+}
+
+function Ellipsis() {
+  return (
+    <span aria-hidden="true" className="text-muted-foreground px-1.5 text-sm">
+      …
+    </span>
   );
 }
 
@@ -189,42 +185,29 @@ function PageLink({
   children,
   active,
   disabled,
-  edge,
 }: {
   href: string;
   children: ReactNode;
   active?: boolean;
   disabled?: boolean;
-  edge?: 'prev' | 'next';
 }) {
-  const edgeClass =
-    edge === 'prev'
-      ? 'mr-2.5 px-3.5 py-2.5 border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-800'
-      : edge === 'next'
-        ? 'ml-2.5 px-3.5 py-2.5 border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-800'
-        : 'w-10';
-
-  const base = `flex h-10 items-center justify-center rounded-lg text-sm font-medium ${edgeClass}`;
-
   if (disabled) {
     return (
-      <span className={`${base} text-gray-400 opacity-50 dark:text-gray-600`}>
+      <Button variant="ghost" size="sm" disabled aria-disabled="true">
         {children}
-      </span>
+      </Button>
     );
   }
 
   return (
-    <Link
-      href={href}
-      className={`${base} ${
-        active
-          ? 'bg-brand-500 text-white'
-          : 'text-gray-700 hover:bg-blue-500/[0.08] hover:text-brand-500 dark:text-gray-400 dark:hover:text-brand-500'
-      }`}
+    <Button
+      asChild
+      size="sm"
+      variant={active ? 'default' : 'ghost'}
+      aria-current={active ? 'page' : undefined}
     >
-      {children}
-    </Link>
+      <Link href={href}>{children}</Link>
+    </Button>
   );
 }
 
@@ -250,25 +233,21 @@ export function SearchBar({
 }) {
   return (
     <form action={action} method="get" className="flex flex-wrap items-center gap-2">
-      {Object.entries(hidden).map(([k, v]) =>
-        v == null || v === '' ? null : (
-          <input key={k} type="hidden" name={k} value={String(v)} />
+      {Object.entries(hidden).map(([key, value]) =>
+        value == null || value === '' ? null : (
+          <input key={key} type="hidden" name={key} value={String(value)} />
         ),
       )}
-      <input
+      <Input
         type="search"
         name={name}
         defaultValue={defaultValue}
         placeholder={placeholder}
-        className="h-10 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 sm:w-64"
+        aria-label={placeholder}
+        className="w-full sm:w-64"
       />
       {children}
-      <button
-        type="submit"
-        className="h-10 rounded-lg bg-brand-500 px-4 text-sm font-medium text-white hover:bg-brand-600"
-      >
-        Search
-      </button>
+      <Button type="submit">Search</Button>
     </form>
   );
 }

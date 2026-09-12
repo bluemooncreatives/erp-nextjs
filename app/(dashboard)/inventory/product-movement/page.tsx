@@ -11,7 +11,7 @@ import { morphName } from '@/lib/db/morph';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, SearchBar, Td, Tr } from '@/components/erp/table';
-import Badge from '@/components/ui/badge/Badge';
+import { Badge } from '@/components/erp/badge';
 
 export const metadata: Metadata = { title: 'Product Movement' };
 

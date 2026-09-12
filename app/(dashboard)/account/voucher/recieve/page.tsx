@@ -7,7 +7,7 @@ import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
-import Badge from '@/components/ui/badge/Badge';
+import { Badge } from '@/components/erp/badge';
 import { deleteVoucherAction } from '../../actions';
 
 export const metadata: Metadata = { title: 'Receipt Vouchers' };

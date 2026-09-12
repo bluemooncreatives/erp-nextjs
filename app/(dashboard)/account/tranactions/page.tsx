@@ -9,7 +9,7 @@ import { morphName } from '@/lib/db/morph';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
-import Badge from '@/components/ui/badge/Badge';
+import { Badge } from '@/components/erp/badge';
 import { DateRangeFilter } from '../date-range-filter';
 
 export const metadata: Metadata = { title: 'Transactions' };

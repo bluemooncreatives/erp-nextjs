@@ -9,7 +9,7 @@ import { singlePrice } from '@/lib/settings';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
-import Badge from '@/components/ui/badge/Badge';
+import { Badge } from '@/components/erp/badge';
 import { ReportFilter } from '../../../report/report-filter';
 
 export const metadata: Metadata = { title: 'Payroll Report' };

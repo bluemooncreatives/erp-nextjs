@@ -9,7 +9,7 @@ import { leaveTypeRepository, listLeaveDefines } from '@/lib/hr/leave';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
-import Badge from '@/components/ui/badge/Badge';
+import { Badge } from '@/components/erp/badge';
 import { removeLeaveDefine } from '../actions';
 import { LeaveDefineForm } from './leave-define-form';
 

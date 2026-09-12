@@ -8,7 +8,7 @@ import { generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Pagination, SearchBar, Td, Tr } from '@/components/erp/table';
-import Badge from '@/components/ui/badge/Badge';
+import { Badge } from '@/components/erp/badge';
 
 export const metadata: Metadata = { title: 'Stock List' };
 

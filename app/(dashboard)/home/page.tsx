@@ -46,7 +46,7 @@ import {
 } from '@/components/dashboard/charts';
 import { Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
-import Badge from '@/components/ui/badge/Badge';
+import { Badge } from '@/components/erp/badge';
 
 export const metadata: Metadata = { title: 'Dashboard' };
 

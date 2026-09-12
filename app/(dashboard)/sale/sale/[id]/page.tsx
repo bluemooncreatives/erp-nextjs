@@ -12,7 +12,7 @@ import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card, DetailList } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
-import Badge from '@/components/ui/badge/Badge';
+import { Badge } from '@/components/erp/badge';
 import { approveSaleAction } from '../../actions';
 import { PaymentPanel } from './payment-panel';
 import { ReturnPanel } from './return-panel';

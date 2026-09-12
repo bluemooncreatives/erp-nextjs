@@ -7,7 +7,7 @@ import { teamsInWorkspace } from '@/lib/project/repository';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
-import Badge from '@/components/ui/badge/Badge';
+import { Badge } from '@/components/erp/badge';
 import { TeamForm } from '../project/forms';
 
 export const metadata: Metadata = { title: 'Teams' };

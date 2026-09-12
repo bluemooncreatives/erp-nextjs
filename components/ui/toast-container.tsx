@@ -2,7 +2,7 @@
 
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
-import { useTheme } from "../../theme-provider";
+import { useTheme } from "@/context/ThemeContext";
 
 /**
  * The toast surface — react-toastify's container, themed off the app's own

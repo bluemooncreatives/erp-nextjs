@@ -7,7 +7,7 @@ import { dateConvert } from '@/lib/settings';
 import { Card } from '@/components/erp/page';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
-import Badge from '@/components/ui/badge/Badge';
+import { Badge } from '@/components/erp/badge';
 import { setLeaveApprovalAction } from './actions';
 
 export async function LeaveApprovalList({

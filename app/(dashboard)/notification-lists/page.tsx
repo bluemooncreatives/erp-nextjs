@@ -10,7 +10,7 @@ import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { FormCheckbox, FormActions } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
-import Badge from '@/components/ui/badge/Badge';
+import { Badge } from '@/components/erp/badge';
 import { markSelectedRead, markAllRead } from '../notification-actions';
 
 export const metadata: Metadata = { title: 'Notifications' };

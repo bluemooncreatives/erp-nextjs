@@ -16,7 +16,7 @@ import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
-import Badge from '@/components/ui/badge/Badge';
+import { Badge } from '@/components/erp/badge';
 import { deleteLeaveApplicationAction } from './actions';
 import { ApplyLeaveForm } from './apply-leave-form';
 
