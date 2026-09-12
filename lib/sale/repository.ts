@@ -21,7 +21,6 @@ import * as schema from '@/lib/db/schema';
 import {
   comboProductDetails,
   comboProducts,
-  contacts,
   partNumbers,
   payments,
   productItemDetailsPartNumbers,
@@ -31,7 +30,6 @@ import {
   quotations,
   sales,
   shippings,
-  users,
 } from '@/lib/db/schema';
 import { MorphType } from '@/lib/db/morph';
 import {

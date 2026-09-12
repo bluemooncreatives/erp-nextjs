@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 import { and, eq, sql } from 'drizzle-orm';
 import { authorize } from '@/lib/auth/permissions';
 import { db } from '@/lib/db/client';
-import { roles, sales, staffs, users } from '@/lib/db/schema';
+import { roles, staffs, users } from '@/lib/db/schema';
 import { singlePrice } from '@/lib/settings';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';

@@ -7,6 +7,7 @@ import { authorize } from '@/lib/auth/permissions';
 import { getSession } from '@/lib/auth/session';
 import { purchaseHistory } from '@/lib/reports/queries';
 import { supplierOptions } from '@/lib/contact/queries';
+import { locationOptions } from '@/lib/setup/repositories';
 import { dateConvert, singlePrice } from '@/lib/settings';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
@@ -19,21 +20,28 @@ export const metadata: Metadata = { title: 'Purchase History' };
 export default async function PurchaseHistoryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ from?: string; to?: string; supplier_id?: string }>;
+  searchParams: Promise<{
+    from?: string;
+    to?: string;
+    supplier_id?: string;
+    house_id?: string;
+  }>;
 }) {
   const user = await authorize('purchase.history');
   const sp = await searchParams;
   const session = await getSession();
 
-  const [rows, suppliers] = await Promise.all([
+  const [rows, suppliers, locations] = await Promise.all([
     purchaseHistory({
       from: sp.from,
       to: sp.to,
       supplierId: sp.supplier_id ? Number(sp.supplier_id) : undefined,
+      locationRef: sp.house_id,
       showroomId: session?.showroomId ?? user.showroomId,
       allBranches: user.role.type === 'system_user',
     }),
     supplierOptions(),
+    locationOptions(),
   ]);
 
   const decorated = await Promise.all(
@@ -64,6 +72,12 @@ export default async function PurchaseHistoryPage({
                 placeholder: 'All suppliers',
                 value: sp.supplier_id,
                 options: suppliers.map((s) => ({ value: s.id, label: s.name })),
+              },
+              {
+                name: 'house_id',
+                placeholder: 'All branches and warehouses',
+                value: sp.house_id,
+                options: locations,
               },
             ]}
           />

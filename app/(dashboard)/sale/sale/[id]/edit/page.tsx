@@ -30,7 +30,7 @@ export default async function EditSalePage({
   const record = await findSale(Number(id));
   if (!record) notFound();
 
-  const { sale, items, location } = record;
+  const { sale, items } = record;
   const setting = await generalSetting();
 
   const isWarehouse = sale.saleableType === MorphType.WareHouse;

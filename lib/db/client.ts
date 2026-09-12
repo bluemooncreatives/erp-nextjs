@@ -11,7 +11,6 @@ import { config } from '@/lib/config';
 import * as schema from './schema';
 
 declare global {
-  // eslint-disable-next-line no-var
   var __erpPool: mysql.Pool | undefined;
 }
 

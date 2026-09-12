@@ -11,7 +11,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { eq, inArray } from 'drizzle-orm';
+import { inArray } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { contacts, users } from '@/lib/db/schema';
 import { requireUser, userCan } from '@/lib/auth/permissions';

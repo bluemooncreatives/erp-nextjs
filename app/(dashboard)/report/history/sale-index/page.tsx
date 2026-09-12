@@ -20,7 +20,12 @@ export const metadata: Metadata = { title: 'Sale History' };
 export default async function SaleHistoryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ from?: string; to?: string; customer_id?: string }>;
+  searchParams: Promise<{
+    from?: string;
+    to?: string;
+    customer_id?: string;
+    house_id?: string;
+  }>;
 }) {
   const user = await authorize('sale.history');
   const sp = await searchParams;
@@ -31,6 +36,7 @@ export default async function SaleHistoryPage({
       from: sp.from,
       to: sp.to,
       customerId: sp.customer_id ? Number(sp.customer_id) : undefined,
+      locationRef: sp.house_id,
       showroomId: session?.showroomId ?? user.showroomId,
       allBranches: user.role.type === 'system_user',
     }),
@@ -66,6 +72,12 @@ export default async function SaleHistoryPage({
                 placeholder: 'All customers',
                 value: sp.customer_id,
                 options: customers.map((c) => ({ value: c.id, label: c.name })),
+              },
+              {
+                name: 'house_id',
+                placeholder: 'All branches and warehouses',
+                value: sp.house_id,
+                options: locations,
               },
             ]}
           />

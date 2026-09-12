@@ -14,8 +14,7 @@
 // ---------------------------------------------------------------------------
 
 import 'server-only';
-import { and, desc, eq, inArray, like, ne, or, sql, type SQL } from 'drizzle-orm';
-import type { MySql2Database } from 'drizzle-orm/mysql2';
+import { and, desc, eq, like, ne, or, sql, type SQL } from 'drizzle-orm';
 import { db, transaction as runInTransaction } from '@/lib/db/client';
 import * as schema from '@/lib/db/schema';
 import {
@@ -59,8 +58,6 @@ import { accountBalance, findContactAccount } from '@/lib/accounting/accounts';
 import { VoucherApproval, voucherAutoApproved } from '@/lib/business-settings';
 import { IntroPrefixId, introPrefixFor } from '@/lib/settings';
 import { today, toDateString } from '@/lib/php-date';
-
-type Tx = MySql2Database<typeof schema>;
 
 /** `purchase_orders.status` - 0 pending, 1 approved/received. */
 export const PurchaseStatus = { Pending: 0, Approved: 1 } as const;

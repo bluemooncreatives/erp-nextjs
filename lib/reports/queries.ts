@@ -27,6 +27,8 @@ export type ReportScope = {
 };
 
 export type ReportFilters = ReportScope & {
+  /** The history screens' `house_id`, posted as `"<id>-showroom"` / `"<id>-warehouse"`. */
+  locationRef?: string;
   from?: string;
   to?: string;
   customerId?: number;
@@ -37,11 +39,26 @@ export type ReportFilters = ReportScope & {
   type?: number;
 };
 
+
+/** `"<id>-showroom"` / `"<id>-warehouse"` - the `house_id` the history forms posted. */
+function parseHouse(ref?: string): { id: number; type: string } | null {
+  if (!ref) return null;
+  const [rawId, kind] = String(ref).split('-');
+  const id = Number(rawId);
+  if (!Number.isFinite(id) || id <= 0) return null;
+  return { id, type: kind === 'warehouse' ? MorphType.WareHouse : MorphType.ShowRoom };
+}
+
 function saleScope(filters: ReportFilters): SQL[] {
   const where: SQL[] = [];
   if (filters.showroomId != null && !filters.allBranches) {
     where.push(eq(sales.saleableType, MorphType.ShowRoom));
     where.push(eq(sales.saleableId, filters.showroomId));
+  }
+  const house = parseHouse(filters.locationRef);
+  if (house) {
+    where.push(eq(sales.saleableType, house.type));
+    where.push(eq(sales.saleableId, house.id));
   }
   if (filters.from) where.push(gte(sales.date, filters.from));
   if (filters.to) where.push(lte(sales.date, filters.to));
@@ -171,6 +188,11 @@ function purchaseScope(filters: ReportFilters): SQL[] {
   if (filters.showroomId != null && !filters.allBranches) {
     where.push(eq(purchaseOrders.purchasableType, MorphType.ShowRoom));
     where.push(eq(purchaseOrders.purchasableId, filters.showroomId));
+  }
+  const house = parseHouse(filters.locationRef);
+  if (house) {
+    where.push(eq(purchaseOrders.purchasableType, house.type));
+    where.push(eq(purchaseOrders.purchasableId, house.id));
   }
   if (filters.from) where.push(gte(purchaseOrders.date, filters.from));
   if (filters.to) where.push(lte(purchaseOrders.date, filters.to));

@@ -29,9 +29,6 @@ export default async function CurrencyPage({
     can('currencies.delete'),
   ]);
 
-  const codeById = new Map(rows.map((r) => [r.id, r.code]));
-  const symbolById = new Map(rows.map((r) => [r.id, r.symbol]));
-
   return (
     <>
       <PageHeader title="Currency" breadcrumb={[{ label: 'Settings' }, { label: 'Currencies' }]} />
