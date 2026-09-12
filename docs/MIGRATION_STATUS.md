@@ -1,53 +1,157 @@
 # Laravel to Next.js migration status
 
-Updated 2026-09-12. The overall migration is **not complete**. Do not run the final publication step on the basis of successful compilation alone.
+Updated 2026-09-12. The port now covers every screen reachable from the sidebar plus the
+secondary screens listed below, and it has been validated against a real MySQL-compatible
+database for the first time. The remaining gaps are listed under **Remaining work**; read
+that section before treating the migration as finished.
 
-## Recovered continuation point
+## What was completed earlier
 
-The supplied transcript contains 19,254 lines. Its opening summary is older than the work recorded later in the attachment. Settings, localization, backup, profile, loans, transfers, opening balances, events, projects, contact self-service, sale/purchase/quotation edit and print views, and additional reports were added later. The actual stopping point was receipt vouchers, after adding `receiveFromAccounts()` and `receiveByAccounts()`.
+Receipt, payment, journal and contra vouchers (create, edit, approval rules, posting order),
+voucher details, expense and income editing, bank and chart account editing, themes, contact
+login settings, CNF, stock product information, leave carry-forward, the system-update
+screen, and stock transfer / adjustment editing with their detail pages. The detail of those
+passes is in the git history; this document covers the state of the whole port.
 
 ## Completed in this continuation
 
-- Receipt voucher list, create, and edit pages at the original `/account/voucher/recieve*` paths.
-- Receipt invoice lookup for customer and retailer accounts, filtering unpaid sales and displaying the original payable-minus-payments calculation.
-- Cash/bank account selection, bank documents, and server-side approval settings. Receipt edits retain the existing invoice reference, as in PHP.
-- Shared voucher details page at `/account/voucher/detail/[id]/show`.
-- Payment voucher edit page at `/account/voucher/payments/[id]/edit`, including existing posting lines and bank details.
-- Payment creation now fixes its payment type on the server, obtains approval from business settings, and checks the current accounting period's start date.
-- Journal and contra edit pages, links from their lists, and server-side checks for voucher type, permissions, line amounts, and balancing.
-- Contra creation now supports one main account and multiple opposite-side lines, matching `ContraRepository`. It previously exposed only a two-account transfer.
-- Preserved journal `array_unshift` ordering and contra `array_push` ordering, including deterministic transaction loading for editing.
-- Contact login settings, CNF inline CRUD, stock product information with value totals, and leave carry-forward generation/toggling.
-- Theme list/create/edit/clone/default/delete, image validation, palette persistence, and dashboard appearance. Restored original default background and missing-product image assets.
-- System update information and version history. Installing legacy PHP update ZIP files is **not implemented**: those packages invoke Artisan and modify the PHP application. A compatible Next.js update mechanism remains outstanding.
-- Bank-account editing and transaction history with opening balances; chart-account editing and list alias. Chart creation now inherits the parent type and code prefix, and editing rejects cyclic parent assignments.
-- Expense and income editing with links from the lists. Income creation/editing now reproduces the PHP single posting, account choices, note/narration distinction, and approval setting rather than using the generic two-sided voucher form.
-- Expense creation now uses the source approval setting and `contra_voucher` payment type. Its edit action retains the PHP controller's distinct `CRV` / debit behavior; this differs from creation and is covered by a regression test.
-- Stock-transfer and stock-adjustment detail pages, list links, variant descriptions, stored totals, transfer documents, and adjustment printing.
+### Product
 
-The stock-transfer detail Blade references an undefined sale although the controller supplies a transfer. The new page displays the actual transfer fields. The adjustment Blade shifts creator/date labels and reads recovery money from the final line; the new page uses the corresponding adjustment fields. These are explicit source-template corrections, not new stock calculations.
+- Combo products: the Combo tab on the product list (image, prices, item count, active
+  toggle), the combo edit screen at `add_product.show` / `add_product.editCombo`, and the
+  active-status action. The Blade disabled the picker on edit, and `ProductRepository::update()`
+  only rewrites quantities of rows that already exist - that is preserved.
+- Product / combo detail view at `add_product.product_Detail` (`/product/view?id=&type=`),
+  including per-branch stock and variant rows.
 
-Carry-forward calculations retain the original unusual scope: entitlement is not restricted to a year, and used leave includes applications whose start **or** end is in the previous year, without filtering approval status. Generation excludes user IDs 1 and 2, retains negative balances, and preserves the staff activation flag.
+### Contacts
 
-The original journal edit Blade uses `last()` even though its repository inserts the main leg first. The Next.js editor reads the stored main leg first for journals and last for contra vouchers so an edit preserves the posting structure. This source inconsistency is documented in `compound-edit.tsx`.
+- Customer and supplier detail screens (`add_contact.show`, `customer.view`, `supplier.view`)
+  with profile, invoice / return / transaction tabs, and the finance summaries.
+- "Add balance" and "Subtract balance", ported from `addBalanceCustomer`, `addBalanceSupplier`
+  and `minusBalance`. Both subtract modals post an `account_type` that is not the string
+  `'debit'` (the supplier one is the misspelled `'dedit'`), so `trranactionEntry()` takes the
+  same branch either way; the port does the same and says so in the code.
+- The customer/supplier "Products" screens (`customerSaleProductList`, `supplierPurchaseProductList`).
+- "View" links on the contact lists, with the walk-in customer's Edit hidden as in the Blade.
+
+### Import and export
+
+- A spreadsheet reader (`lib/import/spreadsheet.ts`) that parses CSV and reads .xlsx directly
+  (zip + XML), with no new dependency. Binary .xls is reported as unsupported rather than
+  silently ignored - the PHP importer accepted it and this port does not.
+- Upload screens and importers for products, contacts, brands, models, unit types, bank
+  accounts and staff, matching each `csv_upload_*` repository method, plus the sample
+  workbooks the Blade linked to.
+- `csv_download` endpoints for brand, model and unit type.
+- The bank-account importer reads `openning_balance` and ignores it, because the column is
+  neither in `bank_accounts` nor in the model's `$fillable`: the PHP dropped it too, which
+  makes `create_chart_account()` dead code there.
+- PDF routes (`sale.pdf`, `sale.challan_pdf`, `purchase.order.pdf`, `quotation.order.pdf`)
+  render the existing print sheet and open the browser's print dialog. dompdf has no
+  equivalent here; "Save as PDF" produces the same document.
+
+### Payments
+
+- Stripe card page and charge (`stripe.index` / `stripe.process`) through Stripe's REST API,
+  and the PayPal handoff and execute routes through PayPal's v1 payments API. The PHP kept
+  the sale and amount in the session between redirect legs; they travel on the return URL.
+- The customer's own "pay this invoice" screen (`contact.my_payment`) and the Pay links on
+  My Details.
+
+### Authentication
+
+- Register, forgot-password, reset-password and email-verification screens - `Auth::routes()`
+  generated these and only the login page existed.
+- Signed verification links equivalent to `URL::temporarySignedRoute()`, and a proxy exception
+  so a signed-in user can open the link they were mailed.
+
+### Other screens
+
+- Printer setup (`printer.index`), now in the Settings menu as in the PHP menu.
+- Coupons (`coupon.index`): list and create only, because `CouponController` has no edit,
+  update or destroy method even though routes point at them.
+- Staff profile (`staffs.view` / `staffs.show`) with documents, leave, payroll, loans and the
+  staff ledger.
+- Branch details (`showroom.show`) with the opening-balance form.
+- Sale on Condition (`conditional.sale.index`) with approval and the delivery-receipt action.
+- Stock alert list can now convert the chosen SKUs into a prefilled purchase order, which is
+  what `convertSuggest()` did.
+
+### Fixes found by running the app
+
+- **Reference screens returned 500.** `ReferenceCrud` took `extraFields` as a render function
+  passed from server components; React refuses functions across that boundary, so Branch,
+  Warehouse, Category, Variant, Currency, Country, Tax and Printer all failed at request time.
+  Extra inputs are now declared as serializable specs, which also fixes Branch and Warehouse
+  losing email/phone/address when editing.
+- **Ledger report balances.** The running balance was accumulated inside an async `map`, so
+  every row's formatted balance showed the closing balance. It is computed before formatting.
+- **Bank ledger account code.** `createBankAccount` wrote `01-03-<id>`; the PHP writes
+  `03-<id>`.
+- Unused TailAdmin template components (ecommerce widgets, demo calendar) were removed; they
+  were dead code and the calendar broke lint.
 
 ## Validation
 
-- `npm test`: 29 tests passed. Tests exercise voucher actions/posting builders, expense/income action inputs and income posting direction, theme persistence rules/style sanitization, and carry-forward generation/toggling with mocked database or persistence boundaries.
-- `npm run build`: passed, including TypeScript and route generation.
-- Targeted ESLint checks on changed voucher/accounting, settings, themes, leave, and inventory pages and libraries: passed.
-- No live MySQL validation was performed. No MySQL/MariaDB service or client was found by the local service/command check. These tests do not establish SQL, browser, or end-to-end production parity.
+All of the following were run on 2026-09-12 against a throwaway MariaDB 11.4 instance loaded
+from `software_erp.sql`, plus the usual static checks.
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Unit tests | `npm test` | 43 passed |
+| Type check | `npx tsc --noEmit` | clean |
+| Lint | `npx eslint app lib components scripts` | no errors (17 unused-symbol warnings) |
+| Production build | `npm run build` | compiled |
+| Schema parity | `npm run verify:schema <url>` | 107 tables / 1180 columns, no missing tables, columns or type mismatches |
+| Query layer | `npm run verify:db` | 103 repository queries executed, 0 failures |
+| Write paths | `npm run verify:writes` | 9 scenarios passed |
+| Seeded end-to-end | `node scripts/seed-demo.mjs` | products, contacts, purchase (approved + received), sale (approved + paid), conditional sale, 4 vouchers, transfer, adjustment |
+| Pages, as super admin | `npm run verify:http` | 202 routes, 0 server errors (177 rendered, 18 not-found for absent rows, 7 expected redirects) |
+| Pages, as staff with no permissions | `ROLE_ID=3 npm run verify:http` | 202 routes, 0 server errors (135 permission denials handled, 51 rendered) |
+
+The write scenarios assert the behaviour the PHP relied on: a receipt posts one Dr and one Cr
+leg; editing a voucher **replaces** its transactions and its cheque document instead of
+appending, and keeps the invoice reference; a journal writes the main leg first and balances;
+deleting a voucher removes its transactions; account balances follow the posted legs; a stock
+transfer moves stock only on receipt and a repeated receipt does not move it twice; a sale
+payment is booked against the invoice; a new contact gets a ledger account coded
+`0<type>-<parent>-<id>`; and the brand importer writes what it parsed.
+
+### Running the validation locally
+
+The scripts take the database from the usual `DB_*` environment variables:
+
+```bash
+DB_HOST=127.0.0.1 DB_PORT=3307 DB_USERNAME=root DB_PASSWORD= DB_DATABASE=software_erp \
+  npm run verify:db
+```
+
+`verify:writes` and `seed-demo.mjs` write to the database they are pointed at - use a scratch
+copy, never production. `verify:http` needs a running server and mints its own session cookie
+from `SESSION_SECRET`.
 
 ## Remaining work
 
-`node scripts/audit-pages.mjs` performs a structural route check. The current app has 171 page files and 90 sidebar links. All sidebar links match pages. This establishes route presence only; the system updater is one concrete example of an incomplete workflow behind an existing page.
+- **No production data has been touched.** The validation ran against a copy of the schema with
+  seeded rows, not against the live database, and the live database may hold data shapes this
+  dump does not (legacy rows, other branches, partially migrated records).
+- **Server actions are only covered indirectly.** The HTTP sweep is GET-only; form submissions
+  are exercised through the repository layer instead. A browser pass over the main forms
+  (sale, purchase, vouchers, product) is still worth doing before cutover.
+- **Legacy PHP update packages** remain unimplemented: they extract PHP files and run Artisan.
+  The system-update screen explains this rather than pretending to install.
+- **The Packing module referenced by the source is absent**, so `report/packing-report` has no
+  implementation and none was invented.
+- Routes that exist in the PHP router but have no controller method - `suggest.create`,
+  `to_dos.*` beyond store/complete, `coupon.edit/update/destroy`, `income.show`,
+  `apply_loans.show/edit` as pages - are intentionally not ported; they are dead in the source.
+- Reference screens that the PHP served as modals (brand, category, model, unit type, variant,
+  tax, country, currency, language, holiday, event, role, permission, CNF, printer) are inline
+  forms here. That is a deliberate interface change, not a missing screen.
+- Audit note: `node scripts/audit-pages.mjs` reports 203 page files and 92 sidebar links, with
+  every sidebar link resolving. Its "missing screen candidates" list is structural only; each
+  remaining entry is one of the dead or inline cases above.
 
-The audit also reports standalone screen candidates for manual review. Some Laravel routes are intentionally represented by inline forms or Server Actions; absence of a page alone is not proof of a missing feature. Prioritize inventory edits, product and contact details, import/export and PDF workflows, and payment gateways. Compare each with its controller, repository, request validation, and Blade view before implementing.
-
-The original source references a Packing module that is not present. Do not invent its business logic. Legacy PHP system update packages still need explicit mapping to the new runtime rather than a success placeholder.
-
-Continue auditing behavior as well as routes: the inherited payment voucher actions still need the Laravel notification side effects checked, and a database-backed test pass is necessary for balances, posting replacement, bank-document changes, and invoice references.
-
-Inventory inspection also found existing differences requiring a dedicated pass: transfer receiving checks net rather than gross quantity, creates a new movement instead of updating the source purchase history, and changes approval status although PHP only stamps receipt. Transfer update must preserve existing item identity and distinguish added items; the source contains a sender-type typo. Validate receive/approve replay and concurrent operations against real stock data before calling these workflows complete. Bank/chart request-validation parity and expense-account option scope also remain to audit.
-
-The user's final Git publication sequence remains contingent on completing the migration. No push was performed in this continuation.
+The user's final Git publication step has not been taken: everything is committed on `main`
+locally and nothing has been pushed.
