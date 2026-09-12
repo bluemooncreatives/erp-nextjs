@@ -1,13 +1,16 @@
 'use client';
 
-// The TailAdmin AdminLayout frame (sidebar + backdrop + header + content),
-// taking its data from the server layout.
+// The authenticated frame: sidebar + header + content, taking its data from the
+// server layout. `SidebarProvider` lives here rather than in the root layout
+// because only the authenticated surfaces have a sidebar - and `Sidebar` and
+// `SidebarInset` must stay its direct children for the collapse selectors to
+// match.
 
 import React from 'react';
-import { useSidebar } from '@/context/SidebarContext';
 import AppHeader, { type HeaderUser } from '@/layout/AppHeader';
 import AppSidebar, { type SidebarItem } from '@/layout/AppSidebar';
-import Backdrop from '@/layout/Backdrop';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import type { HeaderNotification } from '@/components/header/NotificationDropdown';
 
 export function AdminShell({
@@ -43,43 +46,42 @@ export function AdminShell({
   children: React.ReactNode;
   appearance?: React.CSSProperties;
 }) {
-  const { isExpanded, isHovered, isMobileOpen } = useSidebar();
-
-  const mainContentMargin = isMobileOpen
-    ? 'ml-0'
-    : isExpanded || isHovered
-      ? 'lg:ml-[290px]'
-      : 'lg:ml-[90px]';
-
   return (
-    <div className="erp-theme min-h-screen xl:flex" style={appearance}>
-      <AppSidebar
-        items={nav}
-        logo={logo}
-        logoDark={logoDark}
-        siteTitle={siteTitle}
-      />
-      <Backdrop />
+    // `erp-theme` is where the saved Appearance palette lands; globals.css
+    // feeds those `--erp-*` values into the design tokens.
+    <TooltipProvider delayDuration={300}>
+      <SidebarProvider className="erp-theme" style={appearance}>
+        <a
+          href="#main"
+          className="bg-primary text-primary-foreground sr-only z-50 rounded-md px-4 py-2 text-sm font-medium focus:not-sr-only focus:fixed focus:top-4 focus:left-4"
+        >
+          Skip to content
+        </a>
 
-      <div
-        className={`flex-1 transition-all duration-300 ease-in-out ${mainContentMargin}`}
-      >
-        <AppHeader
-          user={user}
-          branches={branches}
-          currentBranchId={currentBranchId}
-          canSwitchBranch={canSwitchBranch}
-          languages={languages}
-          currentLocale={currentLocale}
-          notifications={notifications}
-          unreadCount={unreadCount}
+        <AppSidebar
+          items={nav}
           logo={logo}
           logoDark={logoDark}
           siteTitle={siteTitle}
-          showNotifications={showNotifications}
         />
-        <div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">{children}</div>
-      </div>
-    </div>
+
+        <SidebarInset className="flex min-w-0 flex-1 flex-col">
+          <AppHeader
+            user={user}
+            branches={branches}
+            currentBranchId={currentBranchId}
+            canSwitchBranch={canSwitchBranch}
+            languages={languages}
+            currentLocale={currentLocale}
+            notifications={notifications}
+            unreadCount={unreadCount}
+            showNotifications={showNotifications}
+          />
+          <div id="main" className="mx-auto w-full max-w-360 flex-1 p-4 sm:p-6">
+            {children}
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    </TooltipProvider>
   );
 }

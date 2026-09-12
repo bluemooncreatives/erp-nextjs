@@ -1,21 +1,18 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
-/* Laravel color-theme values mapped onto the TailAdmin components. */
-.erp-theme .bg-brand-500 { background: var(--erp-primary-background, var(--color-brand-500)); }
-html:not(.dark) .erp-theme .text-white { color: var(--erp-text-white, #fff); }
-html:not(.dark) .erp-theme .text-black { color: var(--erp-text-black, #000); }
-html:not(.dark) .erp-theme .text-gray-500 { color: var(--erp-text-color, var(--color-gray-500)); }
-html:not(.dark) .erp-theme .bg-white { background-color: var(--erp-bg-white, #fff); }
-html:not(.dark) .erp-theme .bg-black { background-color: var(--erp-bg-black, #000); }
-html:not(.dark) .erp-theme .border-gray-200 { border-color: var(--erp-border-color, var(--color-gray-200)); }
-html:not(.dark) .erp-theme input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
-html:not(.dark) .erp-theme select, html:not(.dark) .erp-theme textarea { background-color: var(--erp-input--bg); }
-.erp-theme { scrollbar-color: var(--erp-scroll-color, auto) transparent; }
-.erp-theme .text-success-500 { color: var(--erp-success, var(--color-success-500)); }
-.erp-theme .text-warning-500 { color: var(--erp-warning, var(--color-warning-500)); }
-.erp-theme .text-error-500 { color: var(--erp-danger, var(--color-error-500)); }
+/* ---------------------------------------------------------------------------
+ * Appearance > Themes, from the database.
+ *
+ * `themeStyle()` puts the saved palette on the shell as inline `--erp-*`
+ * custom properties. Those feed the design tokens below, so an admin's chosen
+ * colours reach every ported component - a `--erp-base-color` of #415094 is
+ * what `bg-primary` paints with - instead of only the handful of TailAdmin
+ * classes the old rules could reach. Each falls back to the shipped token, so
+ * a theme that sets only some colours keeps the rest.
+ * ------------------------------------------------------------------------ */
 
 @theme {
   --font-*: initial;
@@ -306,6 +303,713 @@ html:not(.dark) .erp-theme select, html:not(.dark) .erp-theme textarea { backgro
     -webkit-appearance: none;
   }
 }
+
+
+/* ===========================================================================
+ * Design system, ported from `erp/ui` (@ingent/ui).
+ *
+ * Everything below this line is the shared product palette: semantic tokens
+ * (--primary, --card, --muted, --sidebar-*, status colours), typography,
+ * radii, shadows and the base element rules the `components/ui` primitives
+ * are written against.
+ *
+ * It sits AFTER the TailAdmin block on purpose. The block above resets
+ * `--font-*` to `initial`, which would wipe `--font-sans` if this came first,
+ * and the legacy `brand-*`/`gray-*` scales above are still referenced by the
+ * third-party library CSS at the end of this file.
+ * ======================================================================== */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-serif: var(--font-serif);
+  --font-heading: var(--font-sans);
+
+  /* One notch below Tailwind's text-xs, for dense sidebar/meta copy. */
+  --text-2xs: 0.75rem;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+
+  --shadow-2xs: var(--shadow-2xs);
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow: var(--shadow);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+  --shadow-2xl: var(--shadow-2xl);
+
+  --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
+  --tracking-tight: calc(var(--tracking-normal) - 0.025em);
+  --tracking-normal: var(--tracking-normal);
+  --tracking-wide: calc(var(--tracking-normal) + 0.025em);
+  --tracking-wider: calc(var(--tracking-normal) + 0.05em);
+  --tracking-widest: calc(var(--tracking-normal) + 0.1em);
+
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-elevated: var(--elevated);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-neutral: var(--neutral);
+  --color-neutral-foreground: var(--neutral-foreground);
+}
+
+:root {
+  --background: oklch(1.0000 0 0);
+  --foreground: oklch(0.2697 0 0);
+  --card: oklch(1.0000 0 0);
+  --card-foreground: oklch(0.2697 0 0);
+  --popover: oklch(1.0000 0 0);
+  --popover-foreground: oklch(0.2697 0 0);
+  --primary: oklch(0.5296 0.1863 258.1459);
+  --primary-foreground: oklch(1.0000 0 0);
+  --secondary: oklch(0.9686 0.0035 247.8590);
+  --secondary-foreground: oklch(0.2697 0 0);
+  --muted: oklch(0.9696 0 0);
+  --muted-foreground: oklch(0.5547 0 0);
+  --accent: oklch(0.9633 0.0154 255.0359);
+  --accent-foreground: oklch(0.4430 0.1522 257.9241);
+  --destructive: oklch(0.5409 0.2143 28.4788);
+  --destructive-foreground: oklch(1.0000 0 0);
+  --border: oklch(0.8610 0 0);
+  --input: oklch(0.9234 0 0);
+  --ring: oklch(0.5296 0.1863 258.1459);
+  --chart-1: oklch(0.5296 0.1863 258.1459);
+  --chart-2: oklch(0.6902 0.1481 162.3676);
+  --chart-3: oklch(0.6683 0.1657 54.1917);
+  --chart-4: oklch(0.5815 0.2477 311.2650);
+  --chart-5: oklch(0.6057 0.2357 11.9397);
+  /* Added for admin-frontend's MRR "Churned" bar series (dual-bar-metric-card.tsx),
+     which has no other color slot to reach for — same value admin-frontend used directly. */
+  --chart-6: oklch(0.6300 0.2100 300.0000);
+  --sidebar: oklch(0.9848 0 0);
+  --sidebar-foreground: oklch(0.3705 0 0);
+  --sidebar-primary: oklch(0.5296 0.1863 258.1459);
+  --sidebar-primary-foreground: oklch(1.0000 0 0);
+  --sidebar-accent: oklch(0.9498 0.0109 255.0143);
+  --sidebar-accent-foreground: oklch(0.4430 0.1522 257.9241);
+  --sidebar-border: oklch(0.9234 0 0);
+  --sidebar-ring: oklch(0.5296 0.1863 258.1459);
+  --font-sans: DM Sans, ui-sans-serif, sans-serif, system-ui;
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-mono: monospace;
+  --radius: 0.4rem;
+  --shadow-x: 0px;
+  --shadow-y: 1px;
+  --shadow-blur: 4px;
+  --shadow-spread: 0px;
+  --shadow-opacity: 0.05;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-2xs: 0px 1px 4px 0px hsl(0 0% 0% / 0.03);
+  --shadow-xs: 0px 1px 4px 0px hsl(0 0% 0% / 0.03);
+  --shadow-sm: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 1px 2px -1px hsl(0 0% 0% / 0.05);
+  --shadow: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 1px 2px -1px hsl(0 0% 0% / 0.05);
+  --shadow-md: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 2px 4px -1px hsl(0 0% 0% / 0.05);
+  --shadow-lg: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 4px 6px -1px hsl(0 0% 0% / 0.05);
+  --shadow-xl: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 8px 10px -1px hsl(0 0% 0% / 0.05);
+  --shadow-2xl: 0px 1px 4px 0px hsl(0 0% 0% / 0.13);
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
+  --font-size: 16px;
+
+  /* Semantic status colours */
+  --success: oklch(0.6902 0.1481 162.3676);
+  --success-foreground: oklch(1.0000 0 0);
+  --warning: oklch(0.6683 0.1657 54.1917);
+  --warning-foreground: oklch(1.0000 0 0);
+  --info: oklch(0.5296 0.1863 258.1459);
+  --info-foreground: oklch(1.0000 0 0);
+  --neutral: oklch(0.5547 0 0);
+  --neutral-foreground: oklch(1.0000 0 0);
+
+  /* Project aliases */
+  --input-background: var(--background);
+  --switch-background: var(--muted);
+  --button-primary: var(--primary);
+  --button-primary-hover: oklch(0.4800 0.1863 258.1459);
+  --button-secondary: var(--secondary);
+  --button-secondary-hover: oklch(0.9400 0.0100 247.8590);
+  --button-soft: var(--accent);
+  --button-soft-hover: oklch(0.9300 0.0200 255.0359);
+  --button-outline: var(--foreground);
+  --auth-background: var(--background);
+  --auth-card: var(--card);
+  --elevated: var(--card);
+}
+
+.dark {
+  /*
+   * Rebuilt from the light theme's actual character rather than an
+   * auto-generated invert: light mode's punch comes from a vivid, fully
+   * saturated primary (chroma 0.186) on a pure white surface. The previous
+   * dark values desaturated primary down to 0.116 (a washed-out periwinkle)
+   * and used chroma-0 neutral grays everywhere else, which read as a
+   * generic "any app" dark mode with no tie back to the brand. This keeps
+   * the same lightness relationships between background/card/secondary/
+   * muted/border, but restores primary's saturation to match light mode
+   * and gives the neutral surfaces a whisper of the brand's blue hue
+   * (258) instead of true chroma-0 gray.
+   */
+  --background: oklch(0.1900 0.0060 258);
+  --foreground: oklch(0.9600 0 0);
+  --card: oklch(0.2300 0.0080 258);
+  --card-foreground: oklch(0.9600 0 0);
+  --popover: oklch(0.2300 0.0080 258);
+  --popover-foreground: oklch(0.9600 0 0);
+  --primary: oklch(0.7000 0.1750 258.0000);
+  --primary-foreground: oklch(0.1500 0.0300 258.0000);
+  --secondary: oklch(0.2800 0.0080 258);
+  --secondary-foreground: oklch(0.9600 0 0);
+  --muted: oklch(0.2600 0.0060 258);
+  --muted-foreground: oklch(0.7100 0.0100 258);
+  --accent: oklch(0.2900 0.0550 258);
+  --accent-foreground: oklch(0.8700 0.0700 252.0000);
+  --destructive: oklch(0.6200 0.2100 27.0000);
+  --destructive-foreground: oklch(1.0000 0 0);
+  --border: oklch(0.3200 0.0100 258);
+  --input: oklch(0.3200 0.0100 258);
+  --ring: oklch(0.7000 0.1750 258.0000);
+  --chart-1: oklch(0.7000 0.1750 258.0000);
+  --chart-2: oklch(0.7750 0.1362 166.9055);
+  --chart-3: oklch(0.8380 0.1371 82.1273);
+  --chart-4: oklch(0.6863 0.1603 305.6668);
+  --chart-5: oklch(0.6856 0.1898 352.1927);
+  --chart-6: oklch(0.7000 0.1850 300.0000);
+  --sidebar: oklch(0.1700 0.0060 258);
+  --sidebar-foreground: oklch(0.9000 0 0);
+  --sidebar-primary: oklch(0.7000 0.1750 258.0000);
+  --sidebar-primary-foreground: oklch(0.1500 0.0300 258.0000);
+  --sidebar-accent: oklch(0.2800 0.0080 258);
+  --sidebar-accent-foreground: oklch(0.9600 0 0);
+  --sidebar-border: oklch(0.3000 0.0100 258);
+  --sidebar-ring: oklch(0.7000 0.1750 258.0000);
+  --font-sans: DM Sans, ui-sans-serif, sans-serif, system-ui;
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-mono: monospace;
+  --radius: 0.4rem;
+  --shadow-x: 0px;
+  --shadow-y: 2px;
+  --shadow-blur: 6px;
+  --shadow-spread: 0px;
+  --shadow-opacity: 0.15;
+  --shadow-color: rgba(0, 0, 0, 0.4);
+  --shadow-2xs: 0px 2px 6px 0px hsl(0 0% 0% / 0.07);
+  --shadow-xs: 0px 2px 6px 0px hsl(0 0% 0% / 0.07);
+  --shadow-sm: 0px 2px 6px 0px hsl(0 0% 0% / 0.15), 0px 1px 2px -1px hsl(0 0% 0% / 0.15);
+  --shadow: 0px 2px 6px 0px hsl(0 0% 0% / 0.15), 0px 1px 2px -1px hsl(0 0% 0% / 0.15);
+  --shadow-md: 0px 2px 6px 0px hsl(0 0% 0% / 0.15), 0px 2px 4px -1px hsl(0 0% 0% / 0.15);
+  --shadow-lg: 0px 2px 6px 0px hsl(0 0% 0% / 0.15), 0px 4px 6px -1px hsl(0 0% 0% / 0.15);
+  --shadow-xl: 0px 2px 6px 0px hsl(0 0% 0% / 0.15), 0px 8px 10px -1px hsl(0 0% 0% / 0.15);
+  --shadow-2xl: 0px 2px 6px 0px hsl(0 0% 0% / 0.38);
+
+  --success: oklch(0.7750 0.1362 166.9055);
+  --success-foreground: oklch(0.2074 0.0625 252.2461);
+  --warning: oklch(0.7500 0.1500 70.0000);
+  --warning-foreground: oklch(0.2074 0.0625 252.2461);
+  --info: oklch(0.7000 0.1750 258.0000);
+  --info-foreground: oklch(0.1500 0.0300 258.0000);
+  --neutral: oklch(0.7244 0 0);
+  --neutral-foreground: oklch(0.2074 0.0625 252.2461);
+
+  --input-background: oklch(1 0 0 / 6%);
+  --switch-background: var(--muted);
+  --button-primary: var(--primary);
+  --button-primary-hover: oklch(0.7600 0.1650 258.0000);
+  --button-secondary: var(--secondary);
+  --button-secondary-hover: oklch(0.3300 0.0080 258);
+  --button-soft: var(--accent);
+  --button-soft-hover: oklch(0.3400 0.0700 258);
+  --button-outline: var(--foreground);
+  --auth-background: var(--background);
+  --auth-card: var(--card);
+  --elevated: var(--card);
+}
+
+/* ---------------------------------------------------------------------------
+ * Bridges, written once for both themes.
+ *
+ * `--font-sans`/`--font-mono` name the families the ported theme asks for, but
+ * loaded through `next/font` in app/layout.tsx rather than an @import - same
+ * two faces, self-hosted and preloaded.
+ *
+ * The `--erp-*` bridge is the Appearance > Themes palette described at the top
+ * of this file. Every rule is `var(--erp-x, <shipped token>)`, so an unset
+ * colour changes nothing.
+ * ------------------------------------------------------------------------ */
+:root,
+.dark {
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+}
+
+.erp-theme {
+  --primary: var(--erp-base-color, var(--primary));
+  --ring: var(--erp-base-color, var(--ring));
+  --sidebar-primary: var(--erp-base-color, var(--sidebar-primary));
+  --sidebar-ring: var(--erp-base-color, var(--sidebar-ring));
+  --chart-1: var(--erp-base-color, var(--chart-1));
+  --border: var(--erp-border-color, var(--border));
+  --sidebar-border: var(--erp-border-color, var(--sidebar-border));
+  --muted-foreground: var(--erp-text-color, var(--muted-foreground));
+  --input-background: var(--erp-input--bg, var(--input-background));
+  --success: var(--erp-success, var(--success));
+  --warning: var(--erp-warning, var(--warning));
+  --destructive: var(--erp-danger, var(--destructive));
+}
+
+/* Surface colours are swapped in light mode only: the saved palette's
+   `bg_white` is white, which would blank out a dark theme. */
+html:not(.dark) .erp-theme {
+  --background: var(--erp-bg-white, var(--background));
+  --card: var(--erp-bg-white, var(--card));
+  --popover: var(--erp-bg-white, var(--popover));
+  --foreground: var(--erp-text-black, var(--foreground));
+  --card-foreground: var(--erp-text-black, var(--card-foreground));
+}
+
+/* The scrollbar colour has its own slot in the palette. */
+.erp-theme .minimal-scrollbar {
+  scrollbar-color: var(--erp-scroll-color, color-mix(in srgb, var(--ring) 70%, transparent)) transparent;
+}
+
+.erp-theme .minimal-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--erp-scroll-color, color-mix(in srgb, var(--ring) 70%, transparent));
+}
+
+/* Structural layout tokens — geometry, not brand. */
+:root {
+  --layout-sidebar-w: 16rem;
+  --layout-sidebar-icon-w: 3rem;
+  --layout-header-h: 4rem;
+  --layout-content-max: 90rem;
+  --layout-gutter: 1rem;
+  --layout-gutter-md: 1.5rem;
+
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 40;
+  --z-drawer: 50;
+  --z-overlay: 60;
+  --z-toast: 70;
+}
+
+/* ── admin-main's input sizing helpers ──────────────────────────────────
+   admin-main writes these as `@apply h-9` etc. That only resolves inside the
+   file that imports Tailwind itself; from this imported file the utility is
+   not in scope, so the same sizes are written out directly. Identical output,
+   one less build-order dependency. */
+.input-default {
+  height: calc(var(--spacing) * 9);
+}
+.input-lg {
+  height: calc(var(--spacing) * 10);
+}
+.input-sm {
+  height: calc(var(--spacing) * 8);
+}
+.input-size-lg {
+  width: calc(var(--spacing) * 10);
+  height: calc(var(--spacing) * 10);
+}
+
+/* ── admin-main's global element rules, verbatim ───────────────────────── */
+
+/* For native button elements and elements with role="button". */
+button:not(:disabled),
+[role='checkbox']:not(:disabled),
+[role='radio']:not(:disabled),
+[role='switch']:not(:disabled),
+[role='button']:not(:disabled) {
+  cursor: pointer;
+}
+
+/* For labels associated with form controls */
+label[for],
+label:has([role='checkbox']):not(:disabled),
+label:has([role='radio']):not(:disabled),
+label:has([role='switch']):not(:disabled) {
+  cursor: pointer;
+}
+
+/* For slider component */
+[role='slider']:not([data-disabled]),
+[data-slot='slider-track']:not([data-disabled]),
+[data-slot='slider-thumb']:not([data-disabled]) {
+  cursor: pointer;
+}
+
+/* For components with menuitems, e.g., dropdown, context menu, etc. */
+[role='menuitem']:not(:disabled),
+[role='menuitemcheckbox']:not(:disabled),
+[role='menuitemradio']:not(:disabled) {
+  cursor: pointer !important;
+}
+
+/* For components with options, e.g., combobox, command, select etc. */
+[role='option']:not(:disabled),
+select[data-slot='native-select']:not(:disabled) {
+  cursor: pointer !important;
+}
+
+/* For number input spin buttons */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  cursor: pointer;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+    outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+  html {
+    font-family: var(--font-sans);
+  }
+}
+
+@layer base {
+  html {
+    font-size: var(--font-size);
+    background: var(--background);
+    /*
+      Reserve the scrollbar's width whether or not the page actually scrolls.
+      Without it every centred column jogs sideways by the scrollbar width as
+      you move between a short screen and a tall one — most visible stepping
+      through onboarding, where the logo and stepper shift under the cursor.
+    */
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    letter-spacing: var(--tracking-normal);
+    min-width: 320px;
+  }
+
+  /*
+    Radix (dropdown-menu, dialog, popover, etc.) locks body scroll while open
+    and compensates for the vanished scrollbar by adding padding-right (and,
+    in some versions, margin-right) equal to its width — on top of the gutter
+    `html` already reserves above. That double compensation is what shifts
+    the whole page left every time a dropdown/dialog opens and back when it
+    closes. The gutter alone is enough, so neutralise Radix's own inline
+    compensation wherever it stamps the lock marker.
+  */
+  html[data-scroll-locked] {
+    padding-right: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  body[data-scroll-locked] {
+    padding-right: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    font-family: inherit;
+  }
+
+  input,
+  textarea,
+  select {
+    background: var(--input-background);
+    color: var(--foreground);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--muted-foreground);
+  }
+}
+
+/* admin-main's heartbeat keyframes, verbatim. */
+@theme inline {
+  --animate-heartbeat: heartbeat 2s infinite ease-in-out;
+
+  @keyframes heartbeat {
+    0% {
+      box-shadow: 0 0 0 0 var(--heartbeat-color, var(--primary));
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 0 0 6px transparent;
+      transform: scale(1.03);
+    }
+    100% {
+      box-shadow: 0 0 0 0 transparent;
+      transform: scale(1);
+    }
+  }
+}
+
+@layer utilities {
+  /* Auth surface. admin-main draws a decorative SVG behind a plain card; this
+     keeps the equivalent as a soft wash so the auth pages do not sit on bare
+     white with nothing behind them. */
+  .admin-auth-shell {
+    background:
+      radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--muted) 90%, transparent), transparent 26rem),
+      radial-gradient(circle at 90% 10%, color-mix(in srgb, var(--accent) 70%, transparent), transparent 22rem),
+      var(--auth-background);
+  }
+
+  /* Candidate interview flow — same soft radial wash as .admin-auth-shell
+     (another standalone, unauthenticated card page) so a candidate isn't
+     staring at a bare void either. Kept off the --auth-* tokens since this
+     flow has nothing to do with staff sign-in. */
+  .candidate-flow-shell {
+    background:
+      radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--muted) 90%, transparent), transparent 26rem),
+      radial-gradient(circle at 90% 10%, color-mix(in srgb, var(--accent) 70%, transparent), transparent 22rem),
+      var(--background);
+  }
+
+  .admin-auth-card {
+    background: var(--auth-card);
+    border-color: var(--border);
+    box-shadow: var(--shadow-xl);
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--muted) 0%,
+      color-mix(in srgb, var(--foreground) 8%, transparent) 50%,
+      var(--muted) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s ease-in-out infinite;
+  }
+
+  /*
+    react-toastify themed off the app's own tokens instead of its default
+    light/dark palette, so a toast reads as a native part of the product.
+    Unconditional (not repeated under .dark) because --popover/--border/
+    --primary already resolve differently there — one definition, correct in
+    both themes.
+  */
+  :root {
+    --toastify-color-light: var(--popover);
+    --toastify-color-dark: var(--popover);
+    --toastify-text-color-light: var(--popover-foreground);
+    --toastify-text-color-dark: var(--popover-foreground);
+    --toastify-color-progress-light: var(--primary);
+    --toastify-color-progress-dark: var(--primary);
+    --toastify-font-family: var(--font-sans);
+  }
+
+  .Toastify__toast {
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+  }
+
+  .minimal-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--ring) 70%, transparent) transparent;
+    scrollbar-gutter: stable;
+  }
+
+  /*
+    scrollbar-gutter reserves space for a vertical scrollbar regardless of
+    whether one appears. Tables and other horizontal-only scroll areas never
+    grow a vertical scrollbar, so that reservation shows up as unwanted
+    padding on their right edge — drop it there.
+  */
+  .minimal-scrollbar.overflow-x-auto {
+    scrollbar-gutter: auto;
+  }
+
+  .minimal-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .minimal-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+    margin-block: 4px;
+  }
+
+  .minimal-scrollbar::-webkit-scrollbar-thumb {
+    background-color: color-mix(in srgb, var(--ring) 70%, transparent);
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    background-clip: content-box;
+    min-height: 36px;
+  }
+
+  .minimal-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in srgb, var(--ring) 90%, transparent);
+  }
+
+  .minimal-scrollbar::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+    background: transparent;
+  }
+
+  /* Table chrome, restyled to match admin-main's tables: a plain header row on
+     the card surface with a hairline rule, not a filled grey band. */
+  .table-unified {
+    border-collapse: collapse;
+  }
+
+  .table-unified thead {
+    border-bottom: 1px solid var(--border);
+  }
+
+  /*
+    No text-align here on purpose: every <th> in every table.table-unified
+    now carries its own explicit text-left/-center/-right class, and a base
+    rule this specific (.table-unified th) outranks a bare Tailwind utility
+    class on the element, silently winning the alignment fight. Let each
+    header cell own its own alignment.
+  */
+  .table-unified th {
+    padding: 0.75rem 1rem;
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .table-unified td {
+    padding: 0.875rem 1rem;
+    vertical-align: middle;
+  }
+
+  .table-unified tbody tr {
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+    transition: background-color 150ms ease;
+  }
+
+  .table-unified tbody tr:hover {
+    background: color-mix(in srgb, var(--muted) 55%, transparent);
+  }
+
+  .table-unified tbody tr:last-child {
+    border-bottom: none;
+  }
+}
+
+/**
+ * Button aliases.
+ *
+ * admin-main's Button is a cva component with no equivalent class hooks, but a
+ * number of screens here apply `.ingent-*-button` / `.koilink-*-button`
+ * directly. They are kept, re-pointed at the copied palette, so those call
+ * sites pick up the new colours instead of breaking.
+ */
+.ingent-primary-button,
+.koilink-primary-button {
+  background-color: var(--button-primary) !important;
+  color: var(--primary-foreground) !important;
+}
+
+.ingent-primary-button:hover,
+.koilink-primary-button:hover {
+  background-color: var(--button-primary-hover) !important;
+  color: var(--primary-foreground) !important;
+}
+
+.ingent-secondary-button,
+.koilink-secondary-button {
+  background-color: var(--button-secondary) !important;
+  color: var(--secondary-foreground) !important;
+}
+
+.ingent-secondary-button:hover,
+.koilink-secondary-button:hover {
+  background-color: var(--button-secondary-hover) !important;
+  color: var(--secondary-foreground) !important;
+}
+
+.ingent-outline-button,
+.koilink-outline-button {
+  background-color: transparent !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+.ingent-outline-button:hover,
+.koilink-outline-button:hover {
+  background-color: var(--accent) !important;
+  border-color: var(--border) !important;
+  color: var(--accent-foreground) !important;
+}
+
+.ingent-ghost-button,
+.koilink-ghost-button {
+  background-color: transparent !important;
+  color: var(--foreground) !important;
+}
+
+.ingent-ghost-button:hover,
+.koilink-ghost-button:hover {
+  background-color: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+}
+
 
 /* third-party libraries CSS */
 .apexcharts-legend-text {

@@ -1,44 +1,47 @@
 // ---------------------------------------------------------------------------
-// Maps the ERP navigation's icon names onto the TailAdmin icon set, so
-// lib/navigation.ts stays free of JSX and can be imported on the server.
+// Maps the ERP navigation's icon names onto Lucide, the icon set the design
+// system's components draw with, so lib/navigation.ts stays free of JSX and can
+// be imported on the server.
+//
+// The names in `lib/navigation.ts` were already Lucide's own, so each one is
+// simply the icon it asks for rather than the nearest TailAdmin equivalent.
 // ---------------------------------------------------------------------------
 
 import {
-  BoxCubeIcon,
-  BoxIconLine,
-  CalenderIcon,
-  DocsIcon,
-  DollarLineIcon,
-  GridIcon,
-  GroupIcon,
-  ListIcon,
-  PageIcon,
-  PieChartIcon,
-  PlugInIcon,
-  ShootingStarIcon,
-  TableIcon,
-  TaskIcon,
-  TimeIcon,
-  UserCircleIcon,
-} from '@/icons/index';
+  BarChart3,
+  Boxes,
+  Briefcase,
+  CalendarDays,
+  FileText,
+  History,
+  IdCard,
+  LayoutGrid,
+  MapPin,
+  Package,
+  Settings,
+  Store,
+  Table,
+  Truck,
+  Users,
+  Wallet,
+  type LucideIcon,
+} from 'lucide-react';
 
-type IconComponent = React.ComponentType<{ className?: string }>;
-
-export const NAV_ICONS: Record<string, IconComponent> = {
-  grid: GridIcon,
-  briefcase: TaskIcon,
-  store: ShootingStarIcon,
-  users: GroupIcon,
-  package: BoxCubeIcon,
-  boxes: BoxIconLine,
-  truck: PageIcon,
-  'file-text': DocsIcon,
-  wallet: DollarLineIcon,
-  'bar-chart': PieChartIcon,
-  'map-pin': PlugInIcon,
-  'id-card': UserCircleIcon,
-  calendar: CalenderIcon,
-  settings: ListIcon,
-  history: TimeIcon,
-  table: TableIcon,
+export const NAV_ICONS: Record<string, LucideIcon> = {
+  grid: LayoutGrid,
+  briefcase: Briefcase,
+  store: Store,
+  users: Users,
+  package: Package,
+  boxes: Boxes,
+  truck: Truck,
+  'file-text': FileText,
+  wallet: Wallet,
+  'bar-chart': BarChart3,
+  'map-pin': MapPin,
+  'id-card': IdCard,
+  calendar: CalendarDays,
+  settings: Settings,
+  history: History,
+  table: Table,
 };
