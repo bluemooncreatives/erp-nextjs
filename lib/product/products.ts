@@ -18,12 +18,18 @@ import {
   comboProductDetails,
   comboProducts,
   models,
+  partNumbers,
+  productItemDetailsPartNumbers,
+  productSellingPriceHistories,
   productSku,
   productVariations,
   products,
   showRooms,
   stockReports,
   unitTypes,
+  purchaseOrders,
+  sales,
+  users,
   variantValues,
   variants,
   wareHouses,
@@ -869,3 +875,79 @@ export async function skuStockAt(
 }
 
 export type { ProductsRow };
+
+/** `findSku($id)` with its product - the SKU plus the name the Blade titles with. */
+export async function findSkuWithProduct(id: number) {
+  const [row] = await db
+    .select({
+      id: productSku.id,
+      sku: productSku.sku,
+      productId: productSku.productId,
+      productName: products.productName,
+      origin: products.origin,
+    })
+    .from(productSku)
+    .leftJoin(products, eq(products.id, productSku.productId))
+    .where(eq(productSku.id, id))
+    .limit(1);
+  return row ?? null;
+}
+
+/**
+ * `ProductController@serial_key_index` - the serial numbers recorded for one
+ * SKU, with the sale that consumed each. The Blade reached the sale through
+ * `product_item_details_part_number`, which is one row per sold serial.
+ */
+export async function skuSerialKeys(productSkuId: number) {
+  return db
+    .select({
+      id: partNumbers.id,
+      serialNo: partNumbers.seiralNo,
+      isSold: partNumbers.isSold,
+      isReturned: partNumbers.isReturned,
+      saleId: productItemDetailsPartNumbers.saleId,
+      invoiceNo: sales.invoiceNo,
+      soldAt: productItemDetailsPartNumbers.createdAt,
+    })
+    .from(partNumbers)
+    .leftJoin(
+      productItemDetailsPartNumbers,
+      eq(productItemDetailsPartNumbers.partNumberId, partNumbers.id),
+    )
+    .leftJoin(sales, eq(sales.id, productItemDetailsPartNumbers.saleId))
+    .where(eq(partNumbers.productSkuId, productSkuId))
+    .orderBy(partNumbers.id);
+}
+
+/**
+ * `ProductController@selling_price_history` - every time a purchase changed
+ * this SKU's selling price, newest first.
+ */
+export async function skuSellingPriceHistory(productSkuId: number) {
+  return db
+    .select({
+      id: productSellingPriceHistories.id,
+      oldPrice: productSellingPriceHistories.oldPrice,
+      newSellingPrice: productSellingPriceHistories.newSellingPrice,
+      createdAt: productSellingPriceHistories.createdAt,
+      purchaseOrderId: productSellingPriceHistories.purchaseOrderId,
+      purchaseInvoiceNo: purchaseOrders.invoiceNo,
+      productName: products.productName,
+      origin: products.origin,
+      brandName: brands.name,
+      modelName: models.name,
+      updatedByName: users.name,
+    })
+    .from(productSellingPriceHistories)
+    .leftJoin(
+      purchaseOrders,
+      eq(purchaseOrders.id, productSellingPriceHistories.purchaseOrderId),
+    )
+    .leftJoin(productSku, eq(productSku.id, productSellingPriceHistories.productSkuId))
+    .leftJoin(products, eq(products.id, productSku.productId))
+    .leftJoin(brands, eq(brands.id, products.brandId))
+    .leftJoin(models, eq(models.id, products.modelId))
+    .leftJoin(users, eq(users.id, productSellingPriceHistories.updatedBy))
+    .where(eq(productSellingPriceHistories.productSkuId, productSkuId))
+    .orderBy(desc(productSellingPriceHistories.id));
+}
