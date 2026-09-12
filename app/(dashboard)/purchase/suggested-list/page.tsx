@@ -71,8 +71,15 @@ export default async function StockAlertPage({
           </SearchBar>
         }
       >
+        {/* `convertSuggest()` - the picked SKUs open a prefilled purchase order. */}
+        <form method="get" action={ROUTES['purchase_order.create']}>
+          {sp.supplier_id ? (
+            <input type="hidden" name="supplier_id" value={sp.supplier_id} />
+          ) : null}
+
         <DataTable
           columns={[
+            { label: '' },
             { label: 'Product' },
             { label: 'SKU' },
             { label: 'In stock' },
@@ -84,6 +91,14 @@ export default async function StockAlertPage({
         >
           {rows.map((row) => (
             <Tr key={row.productSkuId}>
+              <Td>
+                <input
+                  type="checkbox"
+                  name="sku"
+                  value={row.productSkuId}
+                  className="h-4 w-4 rounded border-gray-300 text-brand-500 dark:border-gray-700 dark:bg-gray-900"
+                />
+              </Td>
               <Td className="font-medium text-gray-700 dark:text-gray-300">
                 {row.productName}
               </Td>
@@ -94,6 +109,18 @@ export default async function StockAlertPage({
             </Tr>
           ))}
         </DataTable>
+
+          {rows.length ? (
+            <div className="flex justify-end border-t border-gray-100 px-5 py-3 dark:border-gray-800">
+              <button
+                type="submit"
+                className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+              >
+                Convert to Purchase Order
+              </button>
+            </div>
+          ) : null}
+        </form>
       </Card>
     </>
   );

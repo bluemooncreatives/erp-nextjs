@@ -52,7 +52,8 @@ type CartLine = {
 
 /** The order being edited, as `purchase::purchase.edit` pre-filled its form. */
 export type PurchaseFormDefaults = {
-  id: number;
+  /** Absent when the form is prefilled for a NEW order (the stock alert list). */
+  id?: number;
   supplierId: string;
   locationRef: string;
   date: string;
@@ -187,7 +188,7 @@ export function PurchaseForm({
       <input type="hidden" name="total_discount" value={discountValue} />
       <input type="hidden" name="total_amount" value={totals.payable.toFixed(2)} />
 
-      {defaults ? <input type="hidden" name="id" value={defaults.id} /> : null}
+      {defaults?.id ? <input type="hidden" name="id" value={defaults.id} /> : null}
 
       <Card title="Purchase Order">
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
