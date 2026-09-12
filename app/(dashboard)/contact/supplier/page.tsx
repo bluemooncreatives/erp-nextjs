@@ -41,6 +41,7 @@ export default async function SupplierPage({
           type: ContactType.Supplier,
         }}
         searchParams={sp}
+        detailRoute="supplier.view"
       />
     </>
   );

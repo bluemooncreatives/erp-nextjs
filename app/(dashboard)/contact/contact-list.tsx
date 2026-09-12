@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { can } from '@/lib/auth/permissions';
 import {
+  WALK_IN_CUSTOMER_ID,
   contactAccounts,
   listContacts,
   type ContactListFilters,
@@ -22,11 +23,14 @@ export async function ContactList({
   baseUrl,
   title,
   searchParams,
+  /** Route name of the detail screen the Blade's "View" item linked to. */
+  detailRoute = 'add_contact.show',
 }: {
   filters: ContactListFilters;
   baseUrl: string;
   title: string;
   searchParams: Record<string, string | undefined>;
+  detailRoute?: 'add_contact.show' | 'customer.view' | 'supplier.view';
 }) {
   const { rows, total, page, perPage } = await listContacts(filters);
   const setting = await generalSetting();
@@ -113,7 +117,15 @@ export async function ContactList({
             </Td>
             <Td>
               <div className="flex items-center gap-2">
-                {canEdit ? (
+                <Link
+                  href={route(detailRoute, { id: contact.id })}
+                  className="rounded-lg px-2 py-1 text-theme-xs font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5"
+                >
+                  View
+                </Link>
+                {/* The customer list hid Edit for the walk-in customer. */}
+                {canEdit &&
+                (detailRoute !== 'customer.view' || contact.id > WALK_IN_CUSTOMER_ID) ? (
                   <Link
                     href={route('add_contact.edit', { id: contact.id })}
                     className="rounded-lg px-2 py-1 text-theme-xs font-medium text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-500/10"

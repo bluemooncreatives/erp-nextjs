@@ -15,10 +15,13 @@ import { and, desc, eq, like, ne, or, sql, type SQL } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import {
   chartAccounts,
+  comboProducts,
   contacts,
   countries,
   payments,
   productItemDetails,
+  productSku,
+  products,
   purchaseOrders,
   sales,
   transactions,
@@ -349,4 +352,59 @@ export async function supplierReturns(contactId: number) {
     .from(purchaseOrders)
     .where(and(eq(purchaseOrders.supplierId, contactId), eq(purchaseOrders.returnStatus, 1)))
     .orderBy(desc(purchaseOrders.id));
+}
+
+/**
+ * `ContactRepository::customerSaleHistory($id)` / `supplierPurchaseHistory($id)`
+ * - the line items of every sale or purchase order belonging to the contact,
+ * behind the "Products" button on the contact detail screens. Combo lines have
+ * no product SKU row, which is why the Blade printed the combo name instead.
+ */
+async function contactProductItems(
+  contactId: number,
+  itemableType: string,
+  documentTable: typeof sales | typeof purchaseOrders,
+  contactColumn: typeof sales.customerId | typeof purchaseOrders.supplierId,
+) {
+  return db
+    .select({
+      item: productItemDetails,
+      sku: productSku.sku,
+      productName: products.productName,
+      comboName: comboProducts.name,
+      invoiceNo: documentTable.invoiceNo,
+      date: documentTable.date,
+    })
+    .from(productItemDetails)
+    .innerJoin(
+      documentTable,
+      and(
+        eq(documentTable.id, productItemDetails.itemableId),
+        eq(productItemDetails.itemableType, itemableType),
+      ),
+    )
+    .leftJoin(productSku, eq(productSku.id, productItemDetails.productSkuId))
+    .leftJoin(products, eq(products.id, productSku.productId))
+    .leftJoin(
+      comboProducts,
+      and(
+        eq(comboProducts.id, productItemDetails.productableId),
+        eq(productItemDetails.productableType, MorphType.ComboProduct),
+      ),
+    )
+    .where(eq(contactColumn, contactId))
+    .orderBy(productItemDetails.id);
+}
+
+export function customerSaleProductItems(contactId: number) {
+  return contactProductItems(contactId, MorphType.Sale, sales, sales.customerId);
+}
+
+export function supplierPurchaseProductItems(contactId: number) {
+  return contactProductItems(
+    contactId,
+    MorphType.PurchaseOrder,
+    purchaseOrders,
+    purchaseOrders.supplierId,
+  );
 }

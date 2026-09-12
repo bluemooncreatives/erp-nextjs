@@ -41,6 +41,7 @@ export default async function CustomerPage({
           type: ContactType.Customer,
         }}
         searchParams={sp}
+        detailRoute="customer.view"
       />
     </>
   );
