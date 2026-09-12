@@ -1,6 +1,6 @@
 // Drives the running app in a real headless browser.
 //
-//   BASE_URL=http://127.0.0.1:3100 DB_HOST=... node scripts/verify-browser.mjs
+//   BASE_URL=http://localhost:3100 DB_HOST=... node scripts/verify-browser.mjs
 //
 // `verify:actions` posts forms the way a browser without JavaScript does, which
 // leaves the interactive half of the bigger screens untested: the product
@@ -9,6 +9,12 @@
 // both what the page shows and what reached the database.
 //
 // It WRITES through the UI. Point it at a scratch database.
+//
+// Against a `next dev` server, use an origin that `allowedDevOrigins` in
+// next.config.ts covers (localhost is always allowed). Development rejects the
+// hot-reload WebSocket handshake from any other origin, and the dev client then
+// never boots, so the page renders but nothing hydrates and every click is a
+// no-op - a failure that looks like broken application code.
 
 import { createRequire } from 'node:module';
 import assert from 'node:assert/strict';
@@ -18,7 +24,7 @@ import { launchBrowser, openPage, findBrowser, sleep } from './lib/cdp.mjs';
 const require = createRequire(import.meta.url);
 const mysql = require('mysql2/promise');
 
-const base = process.env.BASE_URL ?? 'http://127.0.0.1:3100';
+const base = process.env.BASE_URL ?? 'http://localhost:3100';
 const secret = process.env.SESSION_SECRET || process.env.APP_KEY || 'infix-biz-dev-secret';
 const cookieName = process.env.SESSION_COOKIE ?? 'infix_biz_session';
 

@@ -9,7 +9,7 @@
 // this component only handles expansion, hover-collapse and active state.
 // ---------------------------------------------------------------------------
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -44,7 +44,12 @@ export default function AppSidebar({
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const pathname = usePathname();
 
-  const [openSubmenu, setOpenSubmenu] = useState<number | null>(null);
+  // The group holding the current page is derived, not stored: a click only
+  // records an override, and navigating away discards it.
+  const [override, setOverride] = useState<{
+    pathname: string;
+    index: number | null;
+  } | null>(null);
   const [subMenuHeight, setSubMenuHeight] = useState<Record<number, number>>({});
   const subMenuRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
@@ -53,21 +58,21 @@ export default function AppSidebar({
     [pathname],
   );
 
-  // Open the group that owns the current page, matching the Blade `mm-active`.
-  useEffect(() => {
-    let matched = false;
+  // The group that owns the current page, matching the Blade `mm-active`.
+  const activeGroup = useMemo(() => {
+    let found: number | null = null;
     items.forEach((nav, index) => {
       if (nav.kind !== 'group') return;
       const inSection =
         nav.match.some((m) => pathname === m || pathname.startsWith(`${m}/`)) ||
         nav.children.some((c) => c.kind === 'link' && isActive(c.href));
-      if (inSection) {
-        setOpenSubmenu(index);
-        matched = true;
-      }
+      if (inSection) found = index;
     });
-    if (!matched) setOpenSubmenu(null);
+    return found;
   }, [pathname, items, isActive]);
+
+  const openSubmenu =
+    override && override.pathname === pathname ? override.index : activeGroup;
 
   useEffect(() => {
     if (openSubmenu === null) return;
@@ -78,7 +83,7 @@ export default function AppSidebar({
   }, [openSubmenu, items]);
 
   const toggleSubmenu = (index: number) =>
-    setOpenSubmenu((prev) => (prev === index ? null : index));
+    setOverride({ pathname, index: openSubmenu === index ? null : index });
 
   const showLabels = isExpanded || isHovered || isMobileOpen;
 

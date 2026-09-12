@@ -4,7 +4,6 @@ import vm from 'node:vm';
 import test from 'node:test';
 import ts from 'typescript';
 import { inflateRawSync } from 'node:zlib';
-import crypto from 'node:crypto';
 
 function load(file, modules = {}) {
   const exports = {};

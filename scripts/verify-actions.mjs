@@ -1,6 +1,6 @@
 // Submits server actions to a RUNNING server and checks what they wrote.
 //
-//   BASE_URL=http://127.0.0.1:3100 DB_HOST=... node scripts/verify-actions.mjs
+//   BASE_URL=http://localhost:3100 DB_HOST=... node scripts/verify-actions.mjs
 //
 // The HTTP sweep only issues GETs, so form handling was never exercised over
 // the wire. This posts each action the way a browser without JavaScript does -
@@ -17,7 +17,7 @@ import { SignJWT } from 'jose';
 const require = createRequire(import.meta.url);
 const mysql = require('mysql2/promise');
 
-const base = process.env.BASE_URL ?? 'http://127.0.0.1:3100';
+const base = process.env.BASE_URL ?? 'http://localhost:3100';
 const secret = process.env.SESSION_SECRET || process.env.APP_KEY || 'infix-biz-dev-secret';
 const cookieName = process.env.SESSION_COOKIE ?? 'infix_biz_session';
 

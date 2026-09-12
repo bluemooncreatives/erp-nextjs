@@ -1,6 +1,14 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  // Development serves hot reloading over a WebSocket and rejects the handshake
+  // when the page's origin is not on this list, answering with a bare
+  // "Unauthorized" that the browser reports as ERR_INVALID_HTTP_RESPONSE. The
+  // client then never finishes booting: the page renders but nothing hydrates,
+  // so every button and dropdown is inert. Next allows `localhost` by default;
+  // opening the same server on 127.0.0.1 (or over the LAN) needs it spelled out.
+  allowedDevOrigins: ['127.0.0.1', '[::1]'],
+
   // `forbidden()` / `unauthorized()` back the ported `permission` middleware,
   // which answered with abort(401)/abort(403) in the Laravel stack.
   experimental: {

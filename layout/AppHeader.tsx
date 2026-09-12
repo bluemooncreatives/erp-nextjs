@@ -196,21 +196,24 @@ function MenuSearch() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const term = query.trim();
+
   useEffect(() => {
-    if (query.trim().length < 2) {
-      setResults([]);
-      return;
-    }
+    if (term.length < 2) return;
     let cancelled = false;
     const timer = setTimeout(async () => {
-      const found = await searchMenu(query.trim());
+      const found = await searchMenu(term);
       if (!cancelled) setResults(found);
     }, 200);
     return () => {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [query]);
+  }, [term]);
+
+  // Whether a short term shows anything is a render-time decision; clearing the
+  // state from the effect would only cost an extra render pass.
+  const visible = term.length < 2 ? [] : results;
 
   return (
     <div className="relative">
@@ -248,10 +251,10 @@ function MenuSearch() {
         <span> K </span>
       </button>
 
-      {open && results.length > 0 ? (
+      {open && visible.length > 0 ? (
         <div className="absolute left-0 right-0 z-50 mt-1 overflow-hidden bg-white border border-gray-200 rounded-lg shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark">
           <ul className="max-h-80 overflow-y-auto py-1">
-            {results.map((r) => (
+            {visible.map((r) => (
               <li key={`${r.route}-${r.name}`}>
                 <Link
                   href={r.href}

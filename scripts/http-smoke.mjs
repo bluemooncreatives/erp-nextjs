@@ -1,6 +1,6 @@
 // Fetches every page of a RUNNING server and reports non-OK responses.
 //
-//   BASE_URL=http://127.0.0.1:3000 node scripts/http-smoke.mjs
+//   BASE_URL=http://localhost:3000 node scripts/http-smoke.mjs
 //
 // A session cookie is minted with the app's own SESSION_SECRET so the pages
 // render as a signed-in super admin instead of redirecting to the login screen.
@@ -12,7 +12,7 @@ import path from 'node:path';
 import { SignJWT } from 'jose';
 import mysql from 'mysql2/promise';
 
-const base = process.env.BASE_URL ?? 'http://127.0.0.1:3000';
+const base = process.env.BASE_URL ?? 'http://localhost:3000';
 const root = process.cwd();
 
 // --- Session cookie --------------------------------------------------------
