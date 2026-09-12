@@ -1,0 +1,80 @@
+// Contact invoices - port of ContactController@invoice
+// (`contact::contact.my_details.customer_invoice` / `.supplier_invoice`).
+
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { requireUser } from '@/lib/auth/permissions';
+import { ContactType, findContact } from '@/lib/contact/queries';
+import { customerSaleHistory, supplierPurchaseHistory } from '@/lib/contact/repository';
+import { dateConvert, singlePrice } from '@/lib/settings';
+import { PageHeader, Card } from '@/components/erp/page';
+import { DataTable, Td, Tr } from '@/components/erp/table';
+import Badge from '@/components/ui/badge/Badge';
+
+export const metadata: Metadata = { title: 'My Invoices' };
+
+export default async function ContactInvoicePage() {
+  const user = await requireUser();
+
+  const contactId = Number(user.contactId);
+  const contact = contactId ? await findContact(contactId) : null;
+  if (!contact) notFound();
+
+  const isCustomer = contact.contactType === ContactType.Customer;
+  const history = isCustomer
+    ? await customerSaleHistory(contact.id)
+    : await supplierPurchaseHistory(contact.id);
+
+  const rows = await Promise.all(
+    history.map(async (row) => ({
+      id: row.id,
+      invoiceNo: 'invoiceNo' in row ? row.invoiceNo : null,
+      refNo: 'refNo' in row ? row.refNo : null,
+      amountLabel: await singlePrice('payableAmount' in row ? row.payableAmount : 0),
+      dateLabel: await dateConvert(row.date),
+      status: 'status' in row ? row.status : 'isPaid' in row ? row.isPaid : null,
+    })),
+  );
+
+  return (
+    <>
+      <PageHeader
+        title={isCustomer ? 'Customer Invoice' : 'Supplier Invoice'}
+        breadcrumb={[{ label: 'My Details' }, { label: 'Invoices' }]}
+      />
+
+      <Card title={`Invoices (${rows.length})`} bodyClassName="">
+        <DataTable
+          columns={[
+            { label: 'Date' },
+            { label: 'Invoice' },
+            { label: 'Reference No' },
+            { label: 'Paid Status' },
+            { label: 'Amount' },
+          ]}
+          isEmpty={rows.length === 0}
+          empty="No invoices."
+        >
+          {rows.map((row) => (
+            <Tr key={row.id}>
+              <Td>{row.dateLabel}</Td>
+              <Td className="font-medium text-gray-700 dark:text-gray-300">
+                {row.invoiceNo ?? row.id}
+              </Td>
+              <Td>{row.refNo ?? '-'}</Td>
+              <Td>
+                <Badge
+                  color={row.status === 1 || row.status === 2 ? 'success' : 'warning'}
+                  size="sm"
+                >
+                  {row.status === 1 || row.status === 2 ? 'Paid' : 'Unpaid'}
+                </Badge>
+              </Td>
+              <Td>{row.amountLabel}</Td>
+            </Tr>
+          ))}
+        </DataTable>
+      </Card>
+    </>
+  );
+}
