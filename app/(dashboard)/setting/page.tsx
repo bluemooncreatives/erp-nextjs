@@ -15,8 +15,8 @@ import {
   templatesFor,
 } from '@/lib/setting/repository';
 import { PageHeader, Card } from '@/components/erp/page';
-import { DataTable, Td, Tr } from '@/components/erp/table';
 import { Tabs, type TabItem } from '@/components/erp/tabs';
+import { SettingsRow } from '@/components/common/settings-section';
 import { ToggleSwitch } from '@/components/erp/toggle';
 import { toggleBusinessSetting } from './actions';
 import {
@@ -35,8 +35,28 @@ export const metadata: Metadata = { title: 'Settings' };
 
 /** `strtoupper(str_replace("_", " ", $type))` */
 function typeLabel(type: string | null): string {
-  return (type ?? '').replace(/_/g, '').toUpperCase();
+  return (type ?? '').replace(/_/g, ' ').toUpperCase();
 }
+
+/** Sentence case for a settings row: "email_verification" -> "Email verification". */
+function settingTitle(type: string | null): string {
+  const words = (type ?? '').replace(/_/g, ' ').trim().toLowerCase();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+/** What each switch actually turns on, so a row is more than a key name. */
+const SETTING_DESCRIPTION: Record<string, string> = {
+  emailverification: 'Require a new account to confirm its email address before signing in.',
+  email_verification: 'Require a new account to confirm its email address before signing in.',
+  mailnotification: 'Send the document emails - invoices, orders and payment receipts.',
+  mail_notification: 'Send the document emails - invoices, orders and payment receipts.',
+  systemnotification: 'Raise in-app notifications for staff when documents change.',
+  system_notification: 'Raise in-app notifications for staff when documents change.',
+  systemregistration: 'Let visitors create their own account from the sign-up page.',
+  system_registration: 'Let visitors create their own account from the sign-up page.',
+  smsnotification: 'Send the document text messages through the configured SMS gateway.',
+  sms_notification: 'Send the document text messages through the configured SMS gateway.',
+};
 
 export default async function SettingsPage() {
   await authorize('setting.index');
@@ -109,27 +129,29 @@ export default async function SettingsPage() {
       id: 'activation',
       label: 'Activation',
       content: (
-        <Card title="Activation" bodyClassName="">
-          <DataTable
-            columns={[{ label: 'Sl' }, { label: 'Type' }, { label: 'Activate' }]}
-            isEmpty={businessRows.length === 0}
-            empty="No business settings."
-          >
-            {businessRows.map((row, index) => (
-              <Tr key={row.id}>
-                <Td>{index + 1}</Td>
-                <Td className="font-medium text-foreground">
-                  {typeLabel(row.type)}
-                </Td>
-                <Td>
-                  <form action={toggleBusinessSetting}>
-                    <input type="hidden" name="id" value={row.id} />
-                    <ToggleSwitch checked={row.status === 1} />
-                  </form>
-                </Td>
-              </Tr>
-            ))}
-          </DataTable>
+        <Card title="Activation" desc="What this installation does automatically.">
+          {businessRows.length === 0 ? (
+            <p className="text-muted-foreground text-sm">No business settings.</p>
+          ) : (
+            <div className="space-y-6">
+              {businessRows.map((row) => (
+                <SettingsRow
+                  key={row.id}
+                  title={settingTitle(row.type)}
+                  description={
+                    SETTING_DESCRIPTION[(row.type ?? '').toLowerCase()] ??
+                    `Turns ${typeLabel(row.type).toLowerCase()} on for the whole business.`
+                  }
+                  control={
+                    <form action={toggleBusinessSetting}>
+                      <input type="hidden" name="id" value={row.id} />
+                      <ToggleSwitch checked={row.status === 1} />
+                    </form>
+                  }
+                />
+              ))}
+            </div>
+          )}
         </Card>
       ),
     });
