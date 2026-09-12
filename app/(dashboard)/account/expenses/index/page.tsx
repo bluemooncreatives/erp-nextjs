@@ -34,9 +34,10 @@ export default async function ExpenseListPage({
     allBranches: canSeeAll,
   });
 
-  const [canCreate, canDelete] = await Promise.all([
+  const [canCreate, canDelete, canEdit] = await Promise.all([
     can('expenses.store'),
     can('expenses.delete'),
+    can('expenses.edit'),
   ]);
 
   const expenseRows = await Promise.all(
@@ -95,6 +96,7 @@ export default async function ExpenseListPage({
                 </Badge>
               </Td>
               <Td>
+                {canEdit ? <Link className="mr-3 text-brand-500" href={`/account/expenses/${row.expense.id}/edit`}>Edit</Link> : null}
                 {canDelete ? (
                   <form action={deleteExpenseAction}>
                     <input type="hidden" name="id" value={row.expense.id} />

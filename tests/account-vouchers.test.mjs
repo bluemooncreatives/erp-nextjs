@@ -38,6 +38,7 @@ function fixture({ approved = false, existingType = 'voucher_payment', denied = 
     } },
     '@/lib/auth/session': {}, '@/lib/db/client': {}, '@/lib/db/schema': {}, 'drizzle-orm': {},
     '@/lib/accounting/expenses': {},
+    '@/lib/accounting/income': {},
     '@/lib/activity-log': { successLog: async () => {}, errorLog: async () => {} },
     '@/lib/routes': { ROUTES: { 'vouchers.index': '/payment', 'journal.index': '/journal', 'contra.index': '/contra' } },
     '@/lib/accounting/vouchers': {

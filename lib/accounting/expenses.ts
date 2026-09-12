@@ -169,24 +169,7 @@ export async function createExpense(data: ExpenseInput): Promise<number> {
   });
 }
 
-/** `IncomeController@store` - the same shape, recorded in `incomes`. */
-export async function createIncome(data: ExpenseInput): Promise<number> {
-  return runInTransaction(async (tx) => {
-    const voucherId = await writeVoucherWithLegs(tx, data);
-
-    await tx.insert(incomes).values({
-      showroomId: data.showroomId ?? null,
-      voucherId,
-      accountId: data.accountId,
-      status: 0,
-      createdBy: data.createdBy ?? null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
-
-    return voucherId;
-  });
-}
+export { createIncome, updateIncome, incomeAccounts as incomeAccountList } from './income';
 
 async function replaceLegs(conn: Tx, voucherId: number, data: ExpenseInput) {
   const existing = await conn
@@ -263,37 +246,6 @@ export async function updateExpense(
       .update(vouchers)
       .set({ txId: `${data.voucherType}-${expense.voucherId}` })
       .where(eq(vouchers.id, expense.voucherId!));
-  });
-}
-
-export async function updateIncome(incomeId: number, data: ExpenseInput): Promise<void> {
-  const [income] = await db
-    .select()
-    .from(incomes)
-    .where(eq(incomes.id, incomeId))
-    .limit(1);
-  if (!income?.voucherId) return;
-
-  await runInTransaction(async (tx) => {
-    await tx
-      .update(vouchers)
-      .set({
-        amount: data.amount,
-        date: toDateString(data.date) ?? today(),
-        narration: data.narration ?? null,
-        voucherType: data.voucherType,
-        paymentType: data.paymentType,
-        updatedBy: data.createdBy ?? null,
-        updatedAt: new Date(),
-      })
-      .where(eq(vouchers.id, income.voucherId!));
-
-    await replaceLegs(tx, income.voucherId!, data);
-
-    await tx
-      .update(vouchers)
-      .set({ txId: `${data.voucherType}-${income.voucherId}` })
-      .where(eq(vouchers.id, income.voucherId!));
   });
 }
 
@@ -451,20 +403,6 @@ export async function expenseAccounts() {
     .where(
       and(
         eq(chartAccounts.type, String(AccountType.Expense)),
-        eq(chartAccounts.isGroup, 0),
-      ),
-    )
-    .orderBy(chartAccounts.code);
-}
-
-/** Income-type accounts (type 4), for the income form. */
-export async function incomeAccountList() {
-  return db
-    .select()
-    .from(chartAccounts)
-    .where(
-      and(
-        eq(chartAccounts.type, String(AccountType.Income)),
         eq(chartAccounts.isGroup, 0),
       ),
     )
