@@ -51,28 +51,37 @@ export default async function LedgerReportPage({
 
   const rows = account && !warning ? await ledgerRows(account.id, from, to) : [];
 
-  let running = opening;
   const debitPositive = account
     ? Number(account.type) === 1 || Number(account.type) === 4
     : true;
 
-  const decorated = await Promise.all(
-    rows.map(async (row) => {
+  // Running balance per row, worked out before the labels are formatted: the
+  // awaits below resume out of order, so the balance cannot be accumulated
+  // inside the formatting pass.
+  const withBalances = rows.reduce<Array<{ row: (typeof rows)[number]; amount: number; balance: number }>>(
+    (acc, row) => {
       const amount = Number(row.amount);
       const signed =
         row.type === 'Dr' ? (debitPositive ? amount : -amount) : debitPositive ? -amount : amount;
-      running += signed;
-      return {
-        ...row,
-        amount,
-        balance: running,
-        dateLabel: await dateConvert(row.date ?? row.createdAt),
-        debitLabel: row.type === 'Dr' ? await singlePrice(amount) : '',
-        creditLabel: row.type === 'Cr' ? await singlePrice(amount) : '',
-        balanceLabel: await singlePrice(running),
-      };
-    }),
+      const balance = (acc.length ? acc[acc.length - 1].balance : opening) + signed;
+      acc.push({ row, amount, balance });
+      return acc;
+    },
+    [],
   );
+
+  const decorated = await Promise.all(
+    withBalances.map(async ({ row, amount, balance }) => ({
+      ...row,
+      amount,
+      balance,
+      dateLabel: await dateConvert(row.date ?? row.createdAt),
+      debitLabel: row.type === 'Dr' ? await singlePrice(amount) : '',
+      creditLabel: row.type === 'Cr' ? await singlePrice(amount) : '',
+      balanceLabel: await singlePrice(balance),
+    })),
+  );
+
 
   const openingLabel = await singlePrice(opening);
 

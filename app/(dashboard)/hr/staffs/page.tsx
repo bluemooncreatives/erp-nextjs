@@ -56,12 +56,20 @@ export default async function StaffListPage({
         breadcrumb={[{ label: 'Human Resource' }, { label: 'Staff' }]}
         actions={
           canCreate ? (
-            <Link
-              href={ROUTES['staffs.create']}
-              className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
-            >
-              Add Staff
-            </Link>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href={ROUTES['staffs.csv_upload']}
+                className="rounded-lg px-4 py-2.5 text-sm font-medium text-brand-500 ring-1 ring-inset ring-brand-300 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+              >
+                Upload via CSV
+              </Link>
+              <Link
+                href={ROUTES['staffs.create']}
+                className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+              >
+                Add Staff
+              </Link>
+            </div>
           ) : null
         }
       />

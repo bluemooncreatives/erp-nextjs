@@ -6,6 +6,7 @@ import { authorize, can } from '@/lib/auth/permissions';
 import { listBankAccounts } from '@/lib/accounting/expenses';
 import { accountBalances } from '@/lib/accounting/reports';
 import { generalSetting, numberFormat } from '@/lib/settings';
+import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
@@ -34,6 +35,14 @@ export default async function BankAccountsPage() {
       <PageHeader
         title="Bank Accounts"
         breadcrumb={[{ label: 'Accounts' }, { label: 'Bank Accounts' }]}
+        actions={
+          <Link
+            href={ROUTES['bank.account.csv_upload']}
+            className="rounded-lg px-4 py-2.5 text-sm font-medium text-brand-500 ring-1 ring-inset ring-brand-300 hover:bg-brand-50 dark:hover:bg-brand-500/10"
+          >
+            Upload via CSV
+          </Link>
+        }
       />
 
       <div className="grid grid-cols-12 gap-4 md:gap-6">

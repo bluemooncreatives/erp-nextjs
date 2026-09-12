@@ -2,6 +2,7 @@
 // edit/update/delete) and product::brand.brand.
 
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { authorize, can } from '@/lib/auth/permissions';
 import { brandRepository } from '@/lib/product/repositories';
 import { PageHeader } from '@/components/erp/page';
@@ -32,7 +33,24 @@ export default async function BrandPage({
 
   return (
     <>
-      <PageHeader title="Brand" breadcrumb={[{ label: 'Products' }, { label: 'Brand' }]} />
+      <PageHeader title="Brand" breadcrumb={[{ label: 'Products' }, { label: 'Brand' }]}
+        actions={
+          <div className="flex flex-wrap items-center gap-3">
+            <a
+              href={ROUTES['brand.csv_download']}
+              className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-500 ring-1 ring-inset ring-gray-300 hover:bg-gray-100 dark:ring-gray-700 dark:hover:bg-white/5"
+            >
+              Download CSV
+            </a>
+            <Link
+              href={ROUTES['brand.csv_upload']}
+              className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+            >
+              Upload via CSV
+            </Link>
+          </div>
+        }
+      />
       <ReferenceCrud
         title="Brands"
         singular="Brand"
