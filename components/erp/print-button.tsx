@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+
 // The `window.print()` button the print_view blades rendered above the sheet.
 
 export function PrintButton({ label = 'Print' }: { label?: string }) {
@@ -14,4 +16,18 @@ export function PrintButton({ label = 'Print' }: { label?: string }) {
       </button>
     </div>
   );
+}
+
+/**
+ * The `*_pdf` routes handed the browser a finished PDF (dompdf). There is no
+ * PDF engine here, so those routes render the same sheet and open the browser's
+ * print dialog, where "Save as PDF" produces the same document.
+ */
+export function AutoPrint() {
+  useEffect(() => {
+    const timer = window.setTimeout(() => window.print(), 300);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  return null;
 }

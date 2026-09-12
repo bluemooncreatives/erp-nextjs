@@ -65,6 +65,18 @@ export default async function SaleDetailPage({
             >
               Print
             </Link>
+            <Link
+              href={route('sale.pdf', { id: sale.id })}
+              className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:text-gray-400 dark:ring-gray-700"
+            >
+              Pdf
+            </Link>
+            <Link
+              href={route('sale.challan_pdf', { id: sale.id })}
+              className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:text-gray-400 dark:ring-gray-700"
+            >
+              Challan
+            </Link>
             {sale.isApproved !== 1 && canApprove ? (
               <form action={approveSaleAction}>
                 <input type="hidden" name="id" value={sale.id} />

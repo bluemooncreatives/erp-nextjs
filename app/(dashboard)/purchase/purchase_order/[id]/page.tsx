@@ -1,6 +1,7 @@
 // Purchase order detail - port of PurchaseOrderController@show.
 
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { authorize, can } from '@/lib/auth/permissions';
 import {
@@ -10,7 +11,7 @@ import {
 } from '@/lib/purchase/repository';
 import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { paymentAccountOptions } from '@/lib/dashboard/queries';
-import { ROUTES } from '@/lib/routes';
+import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card, DetailList } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
@@ -69,7 +70,20 @@ export default async function PurchaseOrderDetailPage({
           { label: order.invoiceNo || String(order.id) },
         ]}
         actions={
-          order.status !== PurchaseStatus.Approved && canApprove ? (
+          <div className="flex items-center gap-2">
+            <Link
+              href={route('purchase.order.print_view', { id: order.id })}
+              className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:text-gray-400 dark:ring-gray-700"
+            >
+              Print
+            </Link>
+            <Link
+              href={route('purchase.order.pdf', { id: order.id })}
+              className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:text-gray-400 dark:ring-gray-700"
+            >
+              Export
+            </Link>
+            {order.status !== PurchaseStatus.Approved && canApprove ? (
             <form action={approvePurchaseAction}>
               <input type="hidden" name="id" value={order.id} />
               <ActionButton
@@ -80,7 +94,8 @@ export default async function PurchaseOrderDetailPage({
                 Approve
               </ActionButton>
             </form>
-          ) : null
+            ) : null}
+          </div>
         }
       />
 
