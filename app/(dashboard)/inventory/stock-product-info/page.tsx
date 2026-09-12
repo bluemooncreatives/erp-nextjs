@@ -17,7 +17,7 @@ export default async function StockProductInfoPage() {
   return <><PageHeader title="Stock Product Information" /><Card title="Stock Valuation" bodyClassName="">
     <DataTable columns={[{ label: 'Product' }, { label: 'SKU' }, { label: 'In Stock' }, { label: 'Purchase Value' }, { label: 'Selling Value' }]} isEmpty={!rows.length}>
       {decorated.map((row) => <Tr key={row.id}><Td>{row.name}</Td><Td>{row.sku}</Td><Td>{row.quantity} {row.unit}</Td><Td>{row.costLabel}</Td><Td>{row.priceLabel}</Td></Tr>)}
-      {rows.length ? <Tr><Td>Total</Td><Td /><Td>{totals.quantity}</Td><Td>{await singlePrice(totals.cost)}</Td><Td>{await singlePrice(totals.price)}</Td></Tr> : null}
+      {rows.length ? <Tr><Td>Total</Td><Td>{''}</Td><Td>{totals.quantity}</Td><Td>{await singlePrice(totals.cost)}</Td><Td>{await singlePrice(totals.price)}</Td></Tr> : null}
     </DataTable>
   </Card></>;
 }

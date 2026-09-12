@@ -17,6 +17,8 @@ import { getSession } from '@/lib/auth/session';
 import { NAVIGATION, navHref, navPermission } from '@/lib/navigation';
 import { unreadNotificationCount } from '@/lib/notifications';
 import { AdminShell } from './admin-shell';
+import { themeList, themeColors } from '@/lib/setting/themes';
+import { themeStyle } from '@/lib/setting/theme-style';
 import type { SidebarItem, SidebarLink, SidebarHeading } from '@/layout/AppSidebar';
 
 // Every screen reads live data for the signed-in user, exactly as the PHP
@@ -31,6 +33,8 @@ export default async function DashboardLayout({
   const user = await requireUser();
   const session = await getSession();
   const setting = await generalSetting();
+  const currentTheme = (await themeList()).find((theme) => theme.isDefault === 1);
+  const appearance = currentTheme ? themeStyle(currentTheme, await themeColors(currentTheme.id)) : undefined;
 
   const nav = resolveNavigation(user);
 
@@ -74,6 +78,7 @@ export default async function DashboardLayout({
 
   return (
     <AdminShell
+      appearance={appearance}
       nav={nav}
       logo={assetUrl(setting.logo)}
       logoDark={assetUrl(setting.logo)}

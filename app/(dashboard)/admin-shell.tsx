@@ -25,6 +25,7 @@ export function AdminShell({
   unreadCount,
   showNotifications,
   children,
+  appearance,
 }: {
   nav: SidebarItem[];
   logo: string | null;
@@ -40,6 +41,7 @@ export function AdminShell({
   unreadCount: number;
   showNotifications: boolean;
   children: React.ReactNode;
+  appearance?: React.CSSProperties;
 }) {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
 
@@ -50,7 +52,7 @@ export function AdminShell({
       : 'lg:ml-[90px]';
 
   return (
-    <div className="min-h-screen xl:flex">
+    <div className="erp-theme min-h-screen xl:flex" style={appearance}>
       <AppSidebar
         items={nav}
         logo={logo}
