@@ -185,10 +185,14 @@ await scenario('reference screen: Edit loads the row into the form', async () =>
 });
 
 await scenario('sale form: the picker adds a line and the totals follow', async () => {
+  // The most-stocked SKU, not merely the first one with two on hand: earlier
+  // runs of this suite consume stock, and a row that only just cleared the
+  // threshold leaves the sale below it by the time the form posts.
   const stock = await one(
     `select s.*, ps.id as sku_id from stock_reports s
        join product_sku ps on ps.id = s.product_sku_id
-      where cast(s.stock as decimal(20,2)) >= 2 limit 1`,
+      where cast(s.stock as decimal(20,2)) >= 4
+      order by cast(s.stock as decimal(20,2)) desc limit 1`,
   );
   if (!stock) return;
 
@@ -221,9 +225,12 @@ await scenario('sale form: the picker adds a line and the totals follow', async 
       const select = document.querySelector('select[name="_picker"]');
       if (!select) throw new Error('no product picker');
       const wanted = 'sku:' + ${JSON.stringify(String(stock.sku_id))};
-      const option = [...select.options].find((o) => o.value === wanted)
-        ?? [...select.options].find((o) => o.value.startsWith('sku:'));
-      if (!option) throw new Error('the picker has no products');
+      const option = [...select.options].find((o) => o.value === wanted);
+      if (!option) {
+        throw new Error(
+          'the stocked SKU is not in the picker for this location: ' + wanted,
+        );
+      }
       const setter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set;
       setter.call(select, option.value);
       select.dispatchEvent(new Event('change', { bubbles: true }));
