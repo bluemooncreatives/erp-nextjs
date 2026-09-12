@@ -18,13 +18,11 @@ import { eq } from 'drizzle-orm';
 import {
   createBankAccount,
   createExpense,
-  createIncome,
   deleteBankAccount,
   deleteExpense,
   deleteIncome,
   updateBankAccount,
   updateExpense,
-  updateIncome,
   type ExpenseInput,
 } from '@/lib/accounting/expenses';
 import {
@@ -40,6 +38,7 @@ import {
 import { activeAccounts, createJournalVoucher, updateJournalVoucher as updateJournalEntry, type JournalInput } from '@/lib/accounting/journal';
 import { isEnabled } from '@/lib/business-settings';
 import { openAccountingPeriod } from '@/lib/accounting/periods';
+import { createIncome, updateIncome, incomeAccounts, type IncomeInput } from '@/lib/accounting/income';
 
 export type AccountFormState = {
   error?: string;
@@ -122,7 +121,8 @@ export async function storeExpense(
 ): Promise<AccountFormState> {
   const user = await authorize('expenses.store');
   const input = await readExpenseInput(formData);
-  input.paymentType = 'voucher_payment';
+  input.paymentType = 'contra_voucher';
+  input.isApprove = (await isEnabled('expense_voucher_approval')) ? 1 : 0;
   // An expense credits the paying account and debits the expense accounts.
   input.accountType = 'credit';
 
@@ -149,8 +149,11 @@ export async function updateExpenseAction(
   const user = await authorize('expenses.edit');
 
   const input = await readExpenseInput(formData);
-  input.paymentType = 'voucher_payment';
-  input.accountType = 'credit';
+  // ExpenseController::update explicitly uses CRV and a debit main account,
+  // unlike its create action. Preserve this source behavior.
+  input.paymentType = 'contra_voucher';
+  input.voucherType = VoucherType.Contra;
+  input.accountType = 'debit';
 
   const fieldErrors = validateVoucherForm(input);
   if (fieldErrors) return { fieldErrors };
@@ -181,44 +184,31 @@ export async function storeIncome(
   _prev: AccountFormState,
   formData: FormData,
 ): Promise<AccountFormState> {
-  const user = await authorize('income.store');
-  const input = await readExpenseInput(formData);
-  input.paymentType = 'voucher_recieve';
-  // Income debits the receiving account and credits the income accounts.
-  input.accountType = 'debit';
-
-  const fieldErrors = validateVoucherForm(input);
-  if (fieldErrors) return { fieldErrors };
-
-  try {
-    await createIncome({ ...input, createdBy: user.id });
-    await successLog('Income created', user.id);
-  } catch (error) {
-    await errorLog(String(error), user.id);
-    return { error: 'Something Went Wrong' };
-  }
-
-  revalidatePath(ROUTES['income.index']);
-  redirect(ROUTES['income.index']);
+  return saveIncomeForm(formData, false);
 }
 
 export async function updateIncomeAction(
   _prev: AccountFormState,
   formData: FormData,
 ): Promise<AccountFormState> {
-  const id = Number(formData.get('id'));
-  const user = await authorize('income.edit');
+  return saveIncomeForm(formData, true);
+}
 
-  const input = await readExpenseInput(formData);
-  input.paymentType = 'voucher_recieve';
-  input.accountType = 'debit';
-
-  const fieldErrors = validateVoucherForm(input);
-  if (fieldErrors) return { fieldErrors };
-
+async function saveIncomeForm(formData: FormData, editing: boolean): Promise<AccountFormState> {
+  const user = await authorize(editing ? 'income.edit' : 'income.store');
+  const account = (await incomeAccounts()).find((row) => row.id === Number(formData.get('account_id')));
+  if (!account) return { fieldErrors: { account_id: 'Select an income or bank account.' } };
+  const amount = Number(formData.get('amount'));
+  if (!Number.isFinite(amount) || amount <= 0) return { fieldErrors: { amount: 'Enter an amount greater than zero.' } };
+  const date = str(formData, 'date') ?? '';
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date))) return { fieldErrors: { date: 'Enter a valid date.' } };
+  const input: IncomeInput = { accountId: account.id, accountType: ['1', '3'].includes(account.type ?? '') ? 'debit' : 'credit', amount, date,
+    narration: str(formData, 'narration'), note: str(formData, 'note'), isApprove: (await isEnabled('expense_voucher_approval')) ? 1 : 0,
+    showroomId: (await getSession())?.showroomId ?? null, createdBy: user.id };
   try {
-    await updateIncome(id, { ...input, createdBy: user.id });
-    await successLog(`Income updated: ${id}`, user.id);
+    if (editing) await updateIncome(Number(formData.get('id')), input);
+    else await createIncome(input);
+    await successLog(editing ? 'Income updated' : 'Income created', user.id);
   } catch (error) {
     await errorLog(String(error), user.id);
     return { error: 'Something Went Wrong' };
