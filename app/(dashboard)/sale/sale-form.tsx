@@ -68,6 +68,7 @@ export type SaleFormDefaults = {
   locationRef: string;
   date: string;
   refNo: string;
+  invoiceNo?: string;
   notes: string;
   discountType: string;
   discountValue: number;
@@ -105,6 +106,10 @@ export function SaleForm({
 }) {
   const [state, formAction] = useActionState(action, INITIAL);
 
+  // Which button submitted the form - the Blade set these hidden fields from
+  // its three save buttons.
+  const [sendMail, setSendMail] = useState(false);
+  const [preview, setPreview] = useState(false);
   const [lines, setLines] = useState<CartLine[]>(
     defaults?.lines.map((l) => ({
       key: `${l.isCombo ? 'c' : 'p'}-${l.productId}`,
@@ -252,6 +257,12 @@ export function SaleForm({
             error={state.fieldErrors?.date}
           />
           <FormInput label="Reference No" name="ref_no" defaultValue={defaults?.refNo ?? ''} />
+          <FormInput
+            label="Invoice No"
+            name="invoice_no"
+            placeholder="Generated automatically when empty"
+            defaultValue={defaults?.invoiceNo ?? ''}
+          />
         </div>
       </Card>
 
@@ -512,6 +523,11 @@ export function SaleForm({
         </Card>
       </div>
 
+      {/* The Blade's three buttons: plain save, save and mail the invoice, and
+          save then reopen the sale for a preview. */}
+      <input type="hidden" name="send_mail" value={sendMail ? '1' : ''} />
+      <input type="hidden" name="preview_status" value={preview ? '1' : ''} />
+
       <div className="flex items-center justify-end gap-3">
         <Link
           href={ROUTES['sale.index']}
@@ -519,7 +535,37 @@ export function SaleForm({
         >
           Cancel
         </Link>
-        <SubmitButton disabled={lines.length === 0}>{submitLabel ?? 'Save Sale'}</SubmitButton>
+        <button
+          type="submit"
+          disabled={lines.length === 0}
+          onClick={() => {
+            setSendMail(false);
+            setPreview(true);
+          }}
+          className="rounded-lg px-5 py-3 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 dark:text-gray-400 dark:ring-gray-700"
+        >
+          Save &amp; Preview
+        </button>
+        <button
+          type="submit"
+          disabled={lines.length === 0}
+          onClick={() => {
+            setPreview(false);
+            setSendMail(true);
+          }}
+          className="rounded-lg px-5 py-3 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 dark:text-gray-400 dark:ring-gray-700"
+        >
+          Save &amp; Send Mail
+        </button>
+        <SubmitButton
+          disabled={lines.length === 0}
+          onClick={() => {
+            setSendMail(false);
+            setPreview(false);
+          }}
+        >
+          {submitLabel ?? 'Save Sale'}
+        </SubmitButton>
       </div>
     </form>
   );

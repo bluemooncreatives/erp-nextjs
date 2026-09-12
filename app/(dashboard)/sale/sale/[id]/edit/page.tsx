@@ -106,6 +106,7 @@ export default async function EditSalePage({
           locationRef,
           date: sale.date ?? '',
           refNo: sale.refNo ?? '',
+          invoiceNo: sale.invoiceNo ?? '',
           notes: sale.notes ?? '',
           // `discount_type` 1 is a fixed amount, 2 a percentage.
           discountType: String(sale.discountType ?? 1),

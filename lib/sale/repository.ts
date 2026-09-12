@@ -1504,3 +1504,11 @@ export async function quotationToSale(
 }
 
 export { parseCustomerRef, parseTotalTax };
+
+/** `$data->mail_status = 1; $data->save();` after the invoice mail is sent. */
+export async function markSaleMailed(saleId: number): Promise<void> {
+  await db
+    .update(schema.sales)
+    .set({ mailStatus: 1, updatedAt: new Date() })
+    .where(eq(schema.sales.id, saleId));
+}

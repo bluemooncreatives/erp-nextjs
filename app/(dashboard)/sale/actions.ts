@@ -17,6 +17,7 @@ import {
   createSale,
   updateSale,
   deleteSale,
+  markSaleMailed,
   quotationToSale,
   recordSalePayments,
   recordSaleReturn,
@@ -26,6 +27,10 @@ import {
   type SaleLineInput,
 } from '@/lib/sale/repository';
 import { saveUpload, fileFrom } from '@/lib/uploads';
+import { findSale } from '@/lib/sale/queries';
+import { sendSaleMail } from '@/lib/mail';
+import { isEnabled } from '@/lib/business-settings';
+import { config } from '@/lib/config';
 
 export type SaleFormState = {
   error?: string;
@@ -182,6 +187,11 @@ export async function storeSale(
       await recordSalePayments(saleId, paymentInputs, user.id, true);
     }
 
+    // `if ($request->send_mail == 1) $this->send_mail_quotation($sale->id);`
+    if (formData.get('send_mail')) {
+      await mailSaleInvoice(saleId, user.id);
+    }
+
     await successLog(`Sale created: ${saleId}`, user.id);
   } catch (error) {
     await errorLog(String(error), user.id);
@@ -189,7 +199,50 @@ export async function storeSale(
   }
 
   revalidatePath(ROUTES['sale.index']);
+
+  // `if ($request->preview_status == 1) return redirect()->route('sale.edit', ...)`
+  if (formData.get('preview_status')) {
+    redirect(route('sale.edit', { id: saleId }));
+  }
+
+  // Otherwise the controller approved the sale straight away when the
+  // `sale_approval` business setting was on.
+  if (await isEnabled('sale_approval')) {
+    try {
+      await approveSale(saleId, user.id);
+      await successLog(`Sale approved: ${saleId}`, user.id);
+    } catch (error) {
+      await errorLog(String(error), user.id);
+    }
+  }
+
   redirect(route('sale.show', { id: saleId }));
+}
+
+/**
+ * `send_mail_quotation($id)` - mail the invoice to the customer and stamp
+ * `mail_status`. The PHP reported a missing customer email to the user; here it
+ * is recorded in the activity log, since the action redirects on success.
+ */
+async function mailSaleInvoice(saleId: number, userId: number): Promise<void> {
+  const record = await findSale(saleId);
+  const email = record?.customer?.email;
+  if (!record || !email) {
+    await errorLog(`Customer email doesn't exist for sale ${saleId}`, userId);
+    return;
+  }
+
+  const sent = await sendSaleMail({
+    to: email,
+    customerName: record.customer?.name ?? '',
+    invoiceNo: record.sale.invoiceNo ?? String(saleId),
+    invoiceUrl: `${config.app.url}${route('sale.print_view', { id: saleId })}`,
+  });
+
+  if (sent) {
+    await markSaleMailed(saleId);
+    await successLog(`Mail sent to ${email} for sale ${saleId}`, userId);
+  }
 }
 
 /** `SaleController@update` */

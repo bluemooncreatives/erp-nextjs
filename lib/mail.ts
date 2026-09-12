@@ -190,3 +190,37 @@ export async function sendTestMail(to: string): Promise<boolean> {
     html: '<p>This is a test message confirming your mail configuration works.</p>',
   });
 }
+
+/**
+ * `SaleController@send_mail_quotation($id)` - mails the invoice to the customer
+ * from the `sale_template` row, substituting the same tokens the PHP did.
+ *
+ * The PHP attached a dompdf rendering of `sale::sale.pdf`; there is no PDF
+ * engine here, so the message carries a link to the invoice's print view
+ * instead of an attachment.
+ */
+export async function sendSaleMail(options: {
+  to: string;
+  customerName: string;
+  invoiceNo: string;
+  invoiceUrl: string;
+}): Promise<boolean> {
+  const setting = await generalSetting();
+
+  return sendTemplateMail({
+    type: EmailTemplateType.Sale,
+    to: options.to,
+    variables: {
+      USER_FIRST_NAME: options.customerName,
+      EMAIL_SIGNATURE: setting.mailSignature ?? '',
+      EMAIL_FOOTER: setting.mailFooter ?? '',
+      INVOICE_NO: options.invoiceNo,
+      INVOICE_URL: options.invoiceUrl,
+    },
+    fallbackHtml: `
+      <p>Dear ${options.customerName},</p>
+      <p>Your invoice ${options.invoiceNo} is ready.</p>
+      <p><a href="${options.invoiceUrl}">View the invoice</a></p>
+    `,
+  });
+}
