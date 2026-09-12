@@ -466,10 +466,12 @@ export async function createBankAccount(
     });
 
     const chartAccountId = Number(accountRow.insertId);
+    // `$chart_account->update(['code' => '03-'.$chart_account->id])` - the bank
+    // account code is the parent id and the account id, with no type prefix.
     await tx
       .update(chartAccounts)
       .set({
-        code: `0${AccountType.Asset}-${String(RootAccountId.Bank).padStart(2, '0')}-${chartAccountId}`,
+        code: `${String(RootAccountId.Bank).padStart(2, '0')}-${chartAccountId}`,
       })
       .where(eq(chartAccounts.id, chartAccountId));
 
