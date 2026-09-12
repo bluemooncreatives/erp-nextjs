@@ -325,6 +325,7 @@ export const NAVIGATION: NavItem[] = [
       { kind: 'link', label: 'Currencies', route: 'currencies.index' },
       { kind: 'link', label: 'Language', route: 'languages.index' },
       { kind: 'link', label: 'Country', route: 'country.index' },
+      { kind: 'link', label: 'Printer', route: 'printer.index', permission: 'printer.create' },
 
       { kind: 'heading', label: 'Styles' },
       { kind: 'link', label: 'Theme Customization', route: 'themes.index' },
