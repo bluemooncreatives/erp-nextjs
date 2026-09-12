@@ -59,6 +59,9 @@ const vouchers = require('@/lib/accounting/vouchers');
 const journal = require('@/lib/accounting/journal');
 const transfers = require('@/lib/inventory/transfers');
 const accounts = require('@/lib/accounting/accounts');
+const expenses = require('@/lib/accounting/expenses');
+const income = require('@/lib/accounting/income');
+const quotations = require('@/lib/quotation/repository');
 
 const today = new Date().toISOString().slice(0, 10);
 const stamp = Date.now().toString().slice(-6);
@@ -149,7 +152,38 @@ const customerId = await contacts.createContact(
   },
   1,
 );
+// A customer who can sign in, so the customer-portal screens (/my-details,
+// /invoice, /profile, /return, /transaction, /product/view) have a user whose
+// `contact_id` resolves. They render 404 for staff, exactly as `findOrFail`
+// did in Laravel.
+await db
+  .update(schema.generalSettings)
+  .set({ contactLogin: 1 })
+  .where(eq(schema.generalSettings.id, 1));
+
+const portalEmail = `seed.customer.${stamp}@example.com`;
+const portalCustomerId = await contacts.createContact(
+  {
+    contactType: 'Customer',
+    name: `Seed Portal Customer ${stamp}`,
+    openingBalance: '0',
+    payTermCondition: '',
+    email: portalEmail,
+    password: 'password',
+    mobile: '0190000000',
+    address: 'Seed Portal Road',
+  },
+  1,
+);
+
+const [portalUser] = await db
+  .select({ id: schema.users.id })
+  .from(schema.users)
+  .where(eq(schema.users.contactId, String(portalCustomerId)))
+  .limit(1);
+
 log(`contacts: supplier ${supplierId}, customer ${customerId}`);
+log(`portal customer: contact ${portalCustomerId}, user ${portalUser?.id ?? 'none'} (${portalEmail} / password)`);
 
 // --- Purchase, received into stock ----------------------------------------
 
@@ -272,6 +306,37 @@ const conditionalId = await sales.createSale(
 );
 log(`conditional sale: ${conditionalId}`);
 
+// A sale the portal customer owns, so `/my-details` lists an invoice and
+// `/my-details/sale/payment/{id}` has a row that belongs to the signed-in
+// contact rather than answering 404.
+const portalSaleId = await sales.createSale(
+  {
+    customerRef: `customer-${portalCustomerId}`,
+    locationRef,
+    date: today,
+    refNo: `SEED-PORTAL-${stamp}`,
+    itemAmount: 150,
+    totalQuantity: 1,
+    totalTax: '0-0',
+    shippingCharge: 0,
+    otherCharge: 0,
+    totalDiscountAmount: 0,
+    discountType: 2,
+    totalDiscount: 0,
+    totalAmount: 150,
+    saleType: 1,
+    lines: [
+      { productableId: firstSku.id, productSkuId: firstSku.id, price: 150, quantity: 1, tax: 0, discount: 0 },
+    ],
+  },
+  1,
+);
+if (portalSaleId === sales.INSUFFICIENT_STOCK) {
+  throw new Error('portal sale rejected: not enough stock');
+}
+await sales.approveSale(portalSaleId, 1);
+log(`portal sale: ${portalSaleId}`);
+
 // --- Vouchers --------------------------------------------------------------
 
 const postable = await db
@@ -340,6 +405,87 @@ const contraId = await journal.createJournalVoucher({
   createdBy: 1,
 });
 log(`vouchers: receipt ${receiptId}, payment ${paymentId}, journal ${journalId}, contra ${contraId}`);
+
+// --- Expense, income, bank account and quotation ---------------------------
+//
+// Four screens the sweeps could not reach before: with these tables empty,
+// `/account/expenses/1/edit` and friends answered 404 for a row that simply
+// did not exist, which the sweep counts as an acceptable response.
+
+const expenseId = await expenses.createExpense({
+  voucherType: 'BV',
+  amount: 40,
+  date: today,
+  narration: 'Seeded expense',
+  paymentType: 'cash_voucher',
+  isApprove: 1,
+  accountType: 'credit',
+  accountId: postable[0].id,
+  mainAmount: 40,
+  subAccountId: [postable[2].id],
+  subAmount: [40],
+  subNarration: ['Seeded expense line'],
+  showroomId: branch.id,
+  createdBy: 1,
+});
+
+const [incomeAccount] = await income.incomeAccounts();
+
+const incomeId = await income.createIncome({
+  accountId: (incomeAccount ?? postable[0]).id,
+  accountType: 'debit',
+  amount: 55,
+  date: today,
+  narration: 'Seeded income',
+  note: 'Seeded income line',
+  isApprove: 1,
+  showroomId: branch.id,
+  createdBy: 1,
+});
+
+const bankAccountId = await expenses.createBankAccount(
+  {
+    bankName: `Seed Bank ${stamp}`,
+    branchName: 'Seed Branch',
+    accountName: 'Seed Account',
+    accountNo: `SEED-${stamp}`,
+    description: 'Seeded bank account',
+  },
+  1,
+);
+
+const quotationId = await quotations.createQuotation(
+  {
+    customerId,
+    locationRef,
+    date: today,
+    validTillDate: today,
+    notes: 'Seeded quotation',
+    refNo: `SEED-QT-${stamp}`,
+    itemAmount: 300,
+    totalQuantity: 2,
+    totalTax: '0-0',
+    totalDiscountAmount: 0,
+    discountType: 0,
+    totalDiscount: 0,
+    totalAmount: 300,
+    shippingCharge: 0,
+    otherCharge: 0,
+    lines: [
+      {
+        productableId: firstSku.id,
+        productSkuId: firstSku.id,
+        price: 150,
+        quantity: 2,
+        tax: 0,
+        discount: 0,
+      },
+    ],
+  },
+  1,
+);
+
+log(`expense ${expenseId}, income ${incomeId}, bank account ${bankAccountId}, quotation ${quotationId}`);
 
 // --- Stock transfer and adjustment ----------------------------------------
 

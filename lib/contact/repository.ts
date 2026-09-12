@@ -357,6 +357,30 @@ export async function setContactActive(id: number, isActive: number): Promise<vo
 }
 
 /** `customerSaleHistory($id)` */
+/** The `users` row a contact is linked to, if `contact_login` ever made one. */
+export async function contactUserId(id: number): Promise<number | null> {
+  if (!Number.isSafeInteger(id) || id <= 0) return null;
+  const [row] = await db
+    .select({ userId: contacts.userId })
+    .from(contacts)
+    .where(eq(contacts.id, id))
+    .limit(1);
+  const userId = row?.userId ? Number(row.userId) : null;
+  return Number.isSafeInteger(userId) && userId ? userId : null;
+}
+
+/** `unique:users,email,<ignoreUserId>` */
+export async function emailTaken(
+  email: string,
+  ignoreUserId: number | null,
+): Promise<boolean> {
+  const rows = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.email, email));
+  return rows.some((row) => row.id !== ignoreUserId);
+}
+
 export async function customerSaleHistory(contactId: number) {
   return db
     .select()

@@ -11,13 +11,16 @@ import { readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { SignJWT } from 'jose';
 import mysql from 'mysql2/promise';
+import { loadEnv, requireSessionSecret } from './lib/env.mjs';
+
+loadEnv();
 
 const base = process.env.BASE_URL ?? 'http://localhost:3000';
 const root = process.cwd();
 
 // --- Session cookie --------------------------------------------------------
 
-const secret = process.env.SESSION_SECRET || process.env.APP_KEY || 'infix-biz-dev-secret';
+const secret = requireSessionSecret();
 const cookieName = process.env.SESSION_COOKIE ?? 'infix_biz_session';
 
 const connection = await mysql.createConnection({
@@ -29,16 +32,20 @@ const connection = await mysql.createConnection({
 });
 
 // ROLE_ID lets the sweep run as a less privileged user, to check that missing
-// permissions redirect rather than crash.
-const roleFilter = process.env.ROLE_ID ? `where u.role_id = ${Number(process.env.ROLE_ID)}` : '';
+// permissions redirect rather than crash; USER_ID picks one exact account, which
+// is how the customer-portal pages get a user whose `contact_id` resolves.
+const filters = [];
+if (process.env.ROLE_ID) filters.push(`u.role_id = ${Number(process.env.ROLE_ID)}`);
+if (process.env.USER_ID) filters.push(`u.id = ${Number(process.env.USER_ID)}`);
+const where = filters.length ? `where ${filters.join(' and ')}` : '';
 const [[admin]] = await connection.query(
-  `select u.id, u.role_id, r.type from users u
+  `select u.id, u.role_id, u.contact_id, r.type from users u
      left join roles r on r.id = u.role_id
-   ${roleFilter}
+   ${where}
     order by u.role_id asc limit 1`,
 );
 if (!admin) {
-  console.error(`no user found${roleFilter ? ` for ROLE_ID=${process.env.ROLE_ID}` : ''}`);
+  console.error(`no user found${where ? ` for ${where.slice(6)}` : ''}`);
   process.exit(2);
 }
 const [[showroom]] = await connection.query('select id from show_rooms limit 1');
@@ -69,8 +76,36 @@ async function firstId(table, column = 'id') {
   }
 }
 
+/** Vouchers share one table, so each screen needs one of its own kind. */
+async function firstVoucherId(paymentType) {
+  try {
+    const [rows] = await connection.query(
+      'select id from vouchers where payment_type = ? order by id asc limit 1',
+      [paymentType],
+    );
+    return rows[0]?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// A contact user only ever sees its own documents, so the portal screens need
+// a sale that belongs to it rather than the lowest id in the table.
+async function ownSaleId(contactId) {
+  if (!contactId) return null;
+  try {
+    const [rows] = await connection.query(
+      'select id from sales where customer_id = ? order by id asc limit 1',
+      [Number(contactId)],
+    );
+    return rows[0]?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
 const ids = {
-  sale: await firstId('sales'),
+  sale: (await ownSaleId(admin.contact_id)) ?? (await firstId('sales')),
   purchase: await firstId('purchase_orders'),
   quotation: await firstId('quotations'),
   contact: await firstId('contacts'),
@@ -78,6 +113,10 @@ const ids = {
   combo: await firstId('combo_products'),
   staff: await firstId('staffs'),
   voucher: await firstId('vouchers'),
+  journalVoucher: await firstVoucherId('journal_voucher'),
+  contraVoucher: await firstVoucherId('contra_voucher'),
+  paymentVoucher: await firstVoucherId('voucher_payment'),
+  receiveVoucher: await firstVoucherId('voucher_recieve'),
   account: await firstId('chart_accounts'),
   bank: await firstId('bank_accounts'),
   showroom: await firstId('show_rooms'),
@@ -94,13 +133,17 @@ const ids = {
 
 /** Which sample id a given route should use for its `[id]`. */
 function idFor(route) {
-  if (route.startsWith('/sale/')) return ids.sale;
+  if (route.startsWith('/sale/') || route.startsWith('/my-details/sale')) return ids.sale;
   if (route.startsWith('/purchase/purchase_order')) return ids.purchase;
   if (route.startsWith('/quotation')) return ids.quotation;
   if (route.startsWith('/contact')) return ids.contact;
   if (route.includes('/combo-edit')) return ids.combo;
   if (route.startsWith('/product/add_product')) return ids.product;
   if (route.startsWith('/hr/staff')) return ids.staff;
+  if (route.includes('/voucher/journal')) return ids.journalVoucher;
+  if (route.includes('/voucher/contra')) return ids.contraVoucher;
+  if (route.includes('/voucher/payment')) return ids.paymentVoucher;
+  if (route.includes('/voucher/recieve')) return ids.receiveVoucher;
   if (route.includes('/voucher/')) return ids.voucher;
   if (route.includes('bank_accounts')) return ids.bank;
   if (route.includes('chart-account')) return ids.account;

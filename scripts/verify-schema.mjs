@@ -9,6 +9,9 @@
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import vm from 'node:vm';
+import { loadEnv } from './lib/env.mjs';
+
+loadEnv();
 
 const require = createRequire(import.meta.url);
 const ts = require('typescript');

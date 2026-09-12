@@ -14,6 +14,9 @@ import { createRequire } from 'node:module';
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import Module from 'node:module';
+import { loadEnv } from './lib/env.mjs';
+
+loadEnv();
 
 const require = createRequire(import.meta.url);
 const ts = require('typescript');

@@ -9,8 +9,10 @@ import { errorLog, successLog } from '@/lib/activity-log';
 import { fileFrom, saveAvatar } from '@/lib/uploads';
 import { ROUTES } from '@/lib/routes';
 import {
+  contactUserId,
   createContact,
   deleteContact,
+  emailTaken,
   setContactActive,
   updateContact,
   type ContactInput,
@@ -48,16 +50,29 @@ async function validate(
     errors.email = 'The email must be a valid email address.';
   }
 
-  // A login is only created when `contact_login` is enabled, and only then does
-  // the password matter.
+  // `contact_login` swaps the email rule for
+  // `required|email|max:191|unique:users,email,<user_id>` and adds
+  // `password => required|min:6`, the password only while the contact has no
+  // login yet - editing one that already has a user leaves it alone.
   const setting = await generalSetting();
-  if (setting.contactLogin && !isUpdate) {
-    if (!email) errors.email = 'An email is required to create the contact login.';
-    const password = str(formData, 'password');
-    if (!password) {
-      errors.password = 'The password field is required.';
-    } else if (password.length < 8) {
-      errors.password = 'The password must be at least 8 characters.';
+  if (setting.contactLogin) {
+    const linkedUserId = isUpdate ? await contactUserId(Number(formData.get('id'))) : null;
+
+    if (!email) {
+      errors.email = 'The email field is required.';
+    } else if (email.length > 191) {
+      errors.email = 'The email may not be greater than 191 characters.';
+    } else if (await emailTaken(email, linkedUserId)) {
+      errors.email = 'The email has already been taken.';
+    }
+
+    if (!linkedUserId) {
+      const password = str(formData, 'password');
+      if (!password) {
+        errors.password = 'The password field is required.';
+      } else if (password.length < 6) {
+        errors.password = 'The password must be at least 6 characters.';
+      }
     }
   }
 

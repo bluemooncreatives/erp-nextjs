@@ -20,12 +20,15 @@ import { createRequire } from 'node:module';
 import assert from 'node:assert/strict';
 import { SignJWT } from 'jose';
 import { launchBrowser, openPage, findBrowser, sleep } from './lib/cdp.mjs';
+import { loadEnv, requireSessionSecret } from './lib/env.mjs';
+
+loadEnv();
 
 const require = createRequire(import.meta.url);
 const mysql = require('mysql2/promise');
 
 const base = process.env.BASE_URL ?? 'http://localhost:3100';
-const secret = process.env.SESSION_SECRET || process.env.APP_KEY || 'infix-biz-dev-secret';
+const secret = requireSessionSecret();
 const cookieName = process.env.SESSION_COOKIE ?? 'infix_biz_session';
 
 if (!findBrowser()) {
@@ -66,7 +69,10 @@ const token = await new SignJWT({
 
 const browser = await launchBrowser({ port: Number(process.env.CDP_PORT ?? 9333) });
 const page = await openPage(browser);
-await page.setCookie(cookieName, token, '127.0.0.1');
+// The cookie has to be scoped to the host BASE_URL actually uses: a cookie set
+// for 127.0.0.1 is never sent to localhost, and every scenario then times out
+// on a login page.
+await page.setCookie(cookieName, token, new URL(base).hostname);
 
 // Bound as a parameter: MySQL unescapes backslashes inside string literals.
 const SALE_MORPH = 'Modules\\Sale\\Entities\\Sale';

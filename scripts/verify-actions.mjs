@@ -13,12 +13,15 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import assert from 'node:assert/strict';
 import { SignJWT } from 'jose';
+import { loadEnv, requireSessionSecret } from './lib/env.mjs';
+
+loadEnv();
 
 const require = createRequire(import.meta.url);
 const mysql = require('mysql2/promise');
 
 const base = process.env.BASE_URL ?? 'http://localhost:3100';
-const secret = process.env.SESSION_SECRET || process.env.APP_KEY || 'infix-biz-dev-secret';
+const secret = requireSessionSecret();
 const cookieName = process.env.SESSION_COOKIE ?? 'infix_biz_session';
 
 // --- Action ids ------------------------------------------------------------
@@ -36,7 +39,12 @@ function action(exportedName, fileHint) {
   );
   assert.equal(entries.length > 0, true, `no action named ${exportedName}`);
   const [id, value] = entries[0];
-  const page = Object.keys(value.workers)[0];
+  // An action is served by every page that imports it. Post to one with no
+  // dynamic segment: posting to `/contact/add_contact/[id]/edit` would run the
+  // action and then fail rendering the reply, because the literal `[id]` is
+  // not a row id - a 500 that says nothing about the action under test.
+  const pages = Object.keys(value.workers);
+  const page = pages.find((name) => !name.includes('[')) ?? pages[0];
   return { id, url: pageUrl(page) };
 }
 
@@ -266,9 +274,13 @@ await scenario('contact: the form creates the contact and its ledger account', a
   const store = action('storeContact');
   const name = `Verify Customer ${stamp}`;
 
+  // `contact_login` is on in the seeded database, so the form must carry the
+  // login fields the way Laravel's ContactFormRequest demands.
   const response = await submit(store, {
     contact_type: 'Customer',
     name,
+    email: `verify.contact.${stamp}@example.com`,
+    password: 'secret123',
     mobile: '0180000000',
     address: 'Verify Avenue',
     opening_balance: '0',
@@ -284,6 +296,24 @@ await scenario('contact: the form creates the contact and its ledger account', a
     [row.id, MORPH.contact],
   );
   assert.ok(account, 'the contact has a ledger account');
+});
+
+await scenario('contact: a short password is refused while contact_login is on', async () => {
+  const store = action('storeContact');
+  const name = `Verify Rejected ${stamp}`;
+
+  // `password => required|min:6`, so five characters must not be written.
+  await submit(store, {
+    contact_type: 'Customer',
+    name,
+    email: `verify.short.${stamp}@example.com`,
+    password: 'short',
+    mobile: '0180000000',
+    opening_balance: '0',
+  });
+
+  const row = await one('select * from contacts where name = ?', [name]);
+  assert.equal(row, undefined, 'nothing was written');
 });
 
 await scenario('receipt voucher: the form posts both legs', async () => {
