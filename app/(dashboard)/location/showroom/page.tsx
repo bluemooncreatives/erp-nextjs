@@ -3,7 +3,7 @@
 import type { Metadata } from 'next';
 import { authorize, can } from '@/lib/auth/permissions';
 import { showRoomRepository } from '@/lib/setup/repositories';
-import { ROUTES } from '@/lib/routes';
+import { ROUTES, route } from '@/lib/routes';
 import { PageHeader } from '@/components/erp/page';
 import { ReferenceCrud } from '@/components/erp/reference-crud';
 import { saveShowRoom, deleteShowRoom } from '../../setup/actions';
@@ -54,6 +54,7 @@ export default async function BranchPage({
         canDelete={canDelete}
         hasDescription={false}
         hasStatus={true}
+        detailHref={(row) => route('showroom.show', { id: row.id })}
         saveAction={saveShowRoom}
         deleteAction={deleteShowRoom}
       extraFields={() => <ContactFields />}

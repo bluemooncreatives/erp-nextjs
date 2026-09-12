@@ -53,6 +53,8 @@ export function ReferenceCrud({
   hasStatus = true,
   extraFields,
   breadcrumbLabel,
+  /** Optional "View" link per row - the Branch list had one. */
+  detailHref,
 }: {
   title: string;
   singular: string;
@@ -76,18 +78,27 @@ export function ReferenceCrud({
   /** Extra inputs for entities with more than name/description/status. */
   extraFields?: (row: ReferenceRow | null) => React.ReactNode;
   breadcrumbLabel?: string;
+  detailHref?: (row: ReferenceRow) => string;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [editing, setEditing] = useState<ReferenceRow | null>(null);
   const [state, formAction] = useActionState(saveAction, INITIAL);
 
-  // Clear the form once a save succeeds.
+  // The row being edited, remembered together with the success message that was
+  // showing when it was picked: once a save reports a NEW success the selection
+  // is stale, so the form falls back to "add" without a state update.
+  const [selection, setSelection] = useState<{
+    row: ReferenceRow | null;
+    afterSuccess?: string;
+  }>({ row: null });
+
+  const editing = selection.afterSuccess === state.success ? selection.row : null;
+  const setEditing = (row: ReferenceRow | null) =>
+    setSelection({ row, afterSuccess: state.success });
+
+  // Pull the saved row back from the server once a save succeeds.
   useEffect(() => {
-    if (state.success) {
-      setEditing(null);
-      router.refresh();
-    }
+    if (state.success) router.refresh();
   }, [state.success, router]);
 
   const params = Object.fromEntries(searchParams.entries());
@@ -186,7 +197,7 @@ export function ReferenceCrud({
               ...extraColumns.map((label) => ({ label })),
               ...(hasDescription ? [{ label: 'Description' }] : []),
               ...(hasStatus ? [{ label: 'Status' }] : []),
-              ...(canEdit || canDelete ? [{ label: 'Action' }] : []),
+              ...(canEdit || canDelete || detailHref ? [{ label: 'Action' }] : []),
             ]}
             isEmpty={rows.length === 0}
             empty={`No ${title.toLowerCase()} found.`}
@@ -209,9 +220,17 @@ export function ReferenceCrud({
                   </Td>
                 ) : null}
 
-                {canEdit || canDelete ? (
+                {canEdit || canDelete || detailHref ? (
                   <Td>
                     <div className="flex items-center gap-2">
+                      {detailHref ? (
+                        <Link
+                          href={detailHref(row)}
+                          className="rounded-lg px-2 py-1 text-theme-xs font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5"
+                        >
+                          View
+                        </Link>
+                      ) : null}
                       {canEdit ? (
                         <button
                           type="button"
