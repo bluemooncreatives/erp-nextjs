@@ -55,7 +55,6 @@ export default async function CustomerReportPage({
 
       />
 
-
       <Card
         title="Invoices"
         bodyClassName=""

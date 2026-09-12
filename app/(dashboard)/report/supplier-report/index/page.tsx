@@ -55,7 +55,6 @@ export default async function SupplierReportPage({
 
       />
 
-
       <Card
         title="Orders"
         bodyClassName=""

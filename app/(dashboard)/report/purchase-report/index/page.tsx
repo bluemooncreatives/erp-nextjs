@@ -68,7 +68,6 @@ export default async function PurchaseReportPage({
 
       />
 
-
       <Card
         title="Purchases"
         bodyClassName=""

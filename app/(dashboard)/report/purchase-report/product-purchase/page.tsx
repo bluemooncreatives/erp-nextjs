@@ -57,7 +57,6 @@ export default async function ProductPurchaseReportPage({
 
       />
 
-
       <Card
         title="Product purchases"
         bodyClassName=""
