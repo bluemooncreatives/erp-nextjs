@@ -23,9 +23,14 @@ const INITIAL: LeaveFormState = {};
 export function ApplyLeaveForm({
   leaveTypes,
   balance,
+  /** Staff to apply on behalf of - the Blade only showed this to system users. */
+  users,
+  currentUserId,
 }: {
   leaveTypes: SelectOption[];
   balance: { entitlement: number; taken: number; remaining: number };
+  users?: SelectOption[];
+  currentUserId?: number;
 }) {
   const [state, formAction] = useActionState(storeLeaveApplication, INITIAL);
   const [day, setDay] = useState('1');
@@ -40,6 +45,16 @@ export function ApplyLeaveForm({
     >
       <form action={formAction} className="space-y-4">
         <FormAlert variant="error" message={state.error} />
+
+        {users?.length ? (
+          <FormSelect
+            label="User"
+            name="user"
+            required
+            options={users}
+            defaultValue={currentUserId != null ? String(currentUserId) : ''}
+          />
+        ) : null}
 
         <FormSelect
           label="Leave Type"
@@ -107,7 +122,21 @@ export function ApplyLeaveForm({
           onChange={(e) => setMakeup(e.target.checked)}
         />
 
-        {makeup ? <FormInput label="Makeup Date" name="makeup_date" type="date" /> : null}
+        {makeup ? (
+          <>
+            <FormInput label="Makeup Date" name="makeup_date" type="date" />
+            {/* `makeup_half` - which half of the makeup day is worked. */}
+            <FormSelect
+              label="Makeup Half"
+              name="makeup_half"
+              placeholder="Full day"
+              options={[
+                { value: 1, label: 'First Half' },
+                { value: 2, label: 'Second Half' },
+              ]}
+            />
+          </>
+        ) : null}
 
         <FormInput label="Attachment" name="file" type="file" />
 

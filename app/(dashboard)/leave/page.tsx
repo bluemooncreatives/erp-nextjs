@@ -4,6 +4,7 @@
 
 import type { Metadata } from 'next';
 import { authorize, can } from '@/lib/auth/permissions';
+import { activeUserOptions } from '@/lib/hr/staff';
 import {
   LeaveStatus,
   leaveBalance,
@@ -32,13 +33,14 @@ export default async function ApplyLeavePage({
   // Approvers see every application; everyone else sees only their own.
   const canApprove = await can('set_approval_leave');
 
-  const [{ rows, total, page, perPage }, types, balance] = await Promise.all([
+  const [{ rows, total, page, perPage }, types, balance, staffUsers] = await Promise.all([
     listLeaveApplications({
       userId: canApprove ? undefined : user.id,
       page: Number(sp.page ?? 1),
     }),
     leaveTypeRepository.all(),
     leaveBalance(user.id),
+    user.isSystemUser ? activeUserOptions() : Promise.resolve([]),
   ]);
 
   const leaveRows = await Promise.all(
@@ -61,6 +63,12 @@ export default async function ApplyLeavePage({
           <ApplyLeaveForm
             leaveTypes={types.map((t) => ({ value: t.id, label: t.name }))}
             balance={balance}
+            users={
+              user.isSystemUser
+                ? staffUsers.map((u) => ({ value: u.id, label: u.name }))
+                : undefined
+            }
+            currentUserId={user.id}
           />
         </div>
 

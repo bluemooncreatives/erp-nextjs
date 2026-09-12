@@ -433,3 +433,12 @@ export async function regularUserRoles() {
     .where(eq(roles.type, 'regular_user'))
     .orderBy(roles.id);
 }
+
+/** Active users, for the "apply on behalf of" select the Blade showed admins. */
+export async function activeUserOptions() {
+  return db
+    .select({ id: users.id, name: users.name })
+    .from(users)
+    .where(eq(users.isActive, 1))
+    .orderBy(users.name);
+}
