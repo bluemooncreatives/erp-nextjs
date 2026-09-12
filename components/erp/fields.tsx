@@ -1,21 +1,26 @@
 // ---------------------------------------------------------------------------
 // Form fields for server-action forms.
 //
-// TailAdmin's own Select/Checkbox are controlled client components; the ERP
-// forms post through `<form action={serverAction}>` with native inputs, so
-// these mirror the template's styling while staying uncontrolled.
+// The ERP forms post through `<form action={serverAction}>` with native inputs,
+// so these stay uncontrolled and keep working without client JavaScript - which
+// rules out the design system's Radix Select and Checkbox, both of which are
+// buttons that post nothing on their own. The controls here are native
+// elements wearing the same tokens, so they match the rest of the product while
+// still submitting on a plain form post.
 //
-// They render the same structure the Blade forms did: a label, the control and
-// the validation message the action returns.
+// They render the structure the Blade forms did: a label, the control and the
+// validation message the action returns.
 // ---------------------------------------------------------------------------
 
 import React, { type ReactNode } from 'react';
+import { AlertCircle, CheckCircle2, Info, TriangleAlert } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/components/ui/utils';
 
-const CONTROL =
-  'h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800';
-
-const CONTROL_ERROR =
-  'h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 text-error-800 border-error-500 focus:ring-error-500/10 dark:text-error-400 dark:border-error-500 dark:bg-gray-900';
+/** The native `<select>`, matching `Input`'s box. */
+const SELECT_CONTROL =
+  'border-input bg-input-background dark:bg-input/30 flex h-9 w-full min-w-0 appearance-none rounded-md border px-3 py-1 text-base transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm';
 
 export function FieldLabel({
   children,
@@ -29,17 +34,17 @@ export function FieldLabel({
   return (
     <label
       htmlFor={htmlFor}
-      className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
+      className="mb-1.5 flex items-center gap-1 text-sm leading-none font-medium select-none"
     >
       {children}
-      {required ? <span className="text-error-500"> *</span> : null}
+      {required ? <span className="text-destructive">*</span> : null}
     </label>
   );
 }
 
 export function FieldError({ message }: { message?: string }) {
   if (!message) return null;
-  return <p className="mt-1.5 text-xs text-error-500">{message}</p>;
+  return <p className="text-destructive mt-1.5 text-xs">{message}</p>;
 }
 
 export function Field({
@@ -68,7 +73,7 @@ export function Field({
       ) : null}
       {children}
       {hint && !error ? (
-        <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">{hint}</p>
+        <p className="text-muted-foreground mt-1.5 text-xs">{hint}</p>
       ) : null}
       <FieldError message={error} />
     </div>
@@ -98,11 +103,7 @@ export function FormInput({
       hint={hint}
       className={wrapperClassName}
     >
-      <input
-        id={id}
-        className={`${error ? CONTROL_ERROR : CONTROL} ${className}`}
-        {...props}
-      />
+      <Input id={id} aria-invalid={Boolean(error)} className={className} {...props} />
     </Field>
   );
 }
@@ -131,10 +132,11 @@ export function FormTextarea({
       hint={hint}
       className={wrapperClassName}
     >
-      <textarea
+      <Textarea
         id={id}
         rows={rows}
-        className={`w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 ${className}`}
+        aria-invalid={Boolean(error)}
+        className={className}
         {...props}
       />
     </Field>
@@ -176,20 +178,23 @@ export function FormSelect({
       hint={hint}
       className={wrapperClassName}
     >
+      {/* The chevron is drawn as a background image rather than an overlaid
+          element, so the control stays a single native <select>. */}
       <select
         id={id}
-        className={`${error ? CONTROL_ERROR : CONTROL} pr-11 ${className}`}
+        data-slot="native-select"
+        aria-invalid={Boolean(error)}
+        className={cn(
+          SELECT_CONTROL,
+          "bg-[length:0.65rem] bg-[position:right_0.75rem_center] bg-no-repeat pr-9 bg-[image:url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%23888' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E\")]",
+          className,
+        )}
         {...props}
       >
         {placeholder ? <option value="">{placeholder}</option> : null}
-        {options.map((o) => (
-          <option
-            key={o.value}
-            value={o.value}
-            disabled={o.disabled}
-            className="text-gray-700 dark:bg-gray-900 dark:text-gray-400"
-          >
-            {o.label}
+        {options.map((option) => (
+          <option key={option.value} value={option.value} disabled={option.disabled}>
+            {option.label}
           </option>
         ))}
         {children}
@@ -200,18 +205,19 @@ export function FormSelect({
 
 export function FormCheckbox({
   label,
+  className = '',
   ...props
 }: React.InputHTMLAttributes<HTMLInputElement> & { label: ReactNode }) {
   const id = props.id ?? props.name;
   return (
-    <label
-      htmlFor={id}
-      className="flex cursor-pointer items-center gap-3 text-sm text-gray-700 dark:text-gray-400"
-    >
+    <label htmlFor={id} className="flex cursor-pointer items-center gap-2.5 text-sm">
       <input
         id={id}
         type="checkbox"
-        className="h-5 w-5 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900"
+        className={cn(
+          'border-input text-primary accent-primary focus-visible:ring-ring/50 size-4 rounded-[4px] border outline-none focus-visible:ring-[3px]',
+          className,
+        )}
         {...props}
       />
       <span>{label}</span>
@@ -221,18 +227,19 @@ export function FormCheckbox({
 
 export function FormRadio({
   label,
+  className = '',
   ...props
 }: React.InputHTMLAttributes<HTMLInputElement> & { label: ReactNode }) {
   const id = props.id ?? `${props.name}-${props.value}`;
   return (
-    <label
-      htmlFor={id}
-      className="flex cursor-pointer items-center gap-3 text-sm text-gray-700 dark:text-gray-400"
-    >
+    <label htmlFor={id} className="flex cursor-pointer items-center gap-2.5 text-sm">
       <input
         id={id}
         type="radio"
-        className="h-5 w-5 border-gray-300 text-brand-500 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900"
+        className={cn(
+          'border-input text-primary accent-primary focus-visible:ring-ring/50 size-4 border outline-none focus-visible:ring-[3px]',
+          className,
+        )}
         {...props}
       />
       <span>{label}</span>
@@ -240,7 +247,7 @@ export function FormRadio({
   );
 }
 
-/** Banner for an action-level error message (the Toastr error the PHP flashed). */
+/** Banner for an action-level message (the Toastr flash the PHP showed). */
 export function FormAlert({
   variant = 'error',
   message,
@@ -251,18 +258,29 @@ export function FormAlert({
   if (!message) return null;
 
   const styles = {
-    error:
-      'border-error-500 bg-error-50 text-error-600 dark:border-error-500/30 dark:bg-error-500/15 dark:text-error-400',
-    success:
-      'border-success-500 bg-success-50 text-success-600 dark:border-success-500/30 dark:bg-success-500/15 dark:text-success-400',
-    warning:
-      'border-warning-500 bg-warning-50 text-warning-600 dark:border-warning-500/30 dark:bg-warning-500/15 dark:text-warning-400',
-    info: 'border-blue-light-500 bg-blue-light-50 text-blue-light-600 dark:border-blue-light-500/30 dark:bg-blue-light-500/15 dark:text-blue-light-400',
+    error: 'border-destructive/30 bg-destructive/10 text-destructive',
+    success: 'border-success/30 bg-success/10 text-success',
+    warning: 'border-warning/30 bg-warning/10 text-warning',
+    info: 'border-info/30 bg-info/10 text-info',
   } as const;
 
+  const Icon = {
+    error: AlertCircle,
+    success: CheckCircle2,
+    warning: TriangleAlert,
+    info: Info,
+  }[variant];
+
   return (
-    <div role="alert" className={`rounded-lg border px-4 py-3 text-sm ${styles[variant]}`}>
-      {message}
+    <div
+      role="alert"
+      className={cn(
+        'flex items-start gap-2.5 rounded-xl border px-4 py-3 text-sm',
+        styles[variant],
+      )}
+    >
+      <Icon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+      <span>{message}</span>
     </div>
   );
 }

@@ -16,6 +16,8 @@ import { Card } from './page';
 import { DataTable, Pagination, Td, Tr, StatusBadge } from './table';
 import { FormAlert, FormInput, FormSelect, FormTextarea } from './fields';
 import { SubmitButton } from './submit-button';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 export type ReferenceRow = {
   id: number;
@@ -229,13 +231,9 @@ export function ReferenceCrud({
               <div className="flex items-center gap-3">
                 <SubmitButton>{editing ? 'Update' : 'Save'}</SubmitButton>
                 {editing ? (
-                  <button
-                    type="button"
-                    onClick={() => setEditing(null)}
-                    className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-600 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:text-gray-400 dark:ring-gray-700"
-                  >
+                  <Button type="button" variant="outline" onClick={() => setEditing(null)}>
                     Cancel
-                  </button>
+                  </Button>
                 ) : null}
               </div>
             </form>
@@ -253,19 +251,15 @@ export function ReferenceCrud({
           bodyClassName=""
           actions={
             <form method="get" action={baseUrl} className="flex items-center gap-2">
-              <input
+              <Input
                 type="search"
                 name="search"
                 defaultValue={search ?? ''}
                 placeholder={`Search ${title.toLowerCase()}...`}
-                className="h-10 w-44 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 sm:w-56"
+                aria-label={`Search ${title.toLowerCase()}`}
+                className="w-44 sm:w-56"
               />
-              <button
-                type="submit"
-                className="h-10 rounded-lg bg-brand-500 px-4 text-sm font-medium text-white hover:bg-brand-600"
-              >
-                Search
-              </button>
+              <Button type="submit">Search</Button>
             </form>
           }
         >
@@ -282,9 +276,7 @@ export function ReferenceCrud({
           >
             {rows.map((row) => (
               <Tr key={row.id}>
-                <Td className="font-medium text-gray-700 dark:text-gray-300">
-                  {row.name}
-                </Td>
+                <Td className="font-medium">{row.name}</Td>
 
                 {row.extra?.map((value, i) => <Td key={i}>{value ?? '-'}</Td>)}
 
@@ -302,21 +294,22 @@ export function ReferenceCrud({
                   <Td>
                     <div className="flex items-center gap-2">
                       {detailRoute ? (
-                        <Link
-                          href={detailRoute.replace('{id}', String(row.id))}
-                          className="rounded-lg px-2 py-1 text-theme-xs font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5"
-                        >
-                          View
-                        </Link>
+                        <Button asChild variant="ghost" size="xs">
+                          <Link href={detailRoute.replace('{id}', String(row.id))}>
+                            View
+                          </Link>
+                        </Button>
                       ) : null}
                       {canEdit ? (
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="xs"
+                          className="text-primary hover:bg-primary/10 hover:text-primary"
                           onClick={() => setEditing(row)}
-                          className="rounded-lg px-2 py-1 text-theme-xs font-medium text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-500/10"
                         >
                           Edit
-                        </button>
+                        </Button>
                       ) : null}
                       {canDelete ? (
                         <form action={deleteAction}>
@@ -341,7 +334,7 @@ export function ReferenceCrud({
         </Card>
 
         {breadcrumbLabel ? (
-          <p className="mt-3 text-xs text-gray-400">
+          <p className="text-muted-foreground mt-3 text-xs">
             <Link href="/home">Home</Link> / {breadcrumbLabel}
           </p>
         ) : null}
@@ -352,16 +345,18 @@ export function ReferenceCrud({
 
 function DeleteButton({ name, singular }: { name: string; singular: string }) {
   return (
-    <button
+    <Button
       type="submit"
-      onClick={(e) => {
+      variant="ghost"
+      size="xs"
+      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+      onClick={(event) => {
         if (!window.confirm(`Delete ${singular.toLowerCase()} "${name}"?`)) {
-          e.preventDefault();
+          event.preventDefault();
         }
       }}
-      className="rounded-lg px-2 py-1 text-theme-xs font-medium text-error-500 hover:bg-error-50 dark:hover:bg-error-500/10"
     >
       Delete
-    </button>
+    </Button>
   );
 }

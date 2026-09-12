@@ -11,8 +11,8 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { BrandLogo } from '@/components/common/BrandLogo';
 import { ChevronRight } from 'lucide-react';
 import {
   Sidebar,
@@ -93,20 +93,14 @@ export default function AppSidebar({
     <Sidebar collapsible="icon" className="border-r">
       <SidebarHeader className="h-[49px] justify-center border-b px-3">
         <Link href="/home" className="flex items-center gap-2 overflow-hidden">
-          {logo ? (
-            <Image
-              src={logo}
-              alt={siteTitle}
-              width={132}
-              height={28}
-              className="h-7 w-auto object-contain group-data-[collapsible=icon]:hidden"
-              unoptimized
-            />
-          ) : (
-            <span className="text-sidebar-foreground truncate text-base font-semibold group-data-[collapsible=icon]:hidden">
-              {siteTitle}
-            </span>
-          )}
+          <BrandLogo
+            src={logo}
+            name={siteTitle}
+            width={132}
+            height={28}
+            className="h-7 w-auto object-contain group-data-[collapsible=icon]:hidden"
+            fallbackClassName="text-sidebar-foreground truncate text-base font-semibold group-data-[collapsible=icon]:hidden"
+          />
           {/* The collapsed rail keeps a mark where the logo was. */}
           <span className="bg-sidebar-primary text-sidebar-primary-foreground hidden size-7 shrink-0 items-center justify-center rounded-md text-sm font-semibold group-data-[collapsible=icon]:flex">
             {siteTitle.trim().charAt(0).toUpperCase() || 'I'}

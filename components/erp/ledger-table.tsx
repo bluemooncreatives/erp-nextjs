@@ -41,7 +41,7 @@ export function LedgerTable({
         isEmpty={false}
       >
         <Tr>
-          <Td className="font-medium text-gray-700 dark:text-gray-300">Openning Balance</Td>
+          <Td className="font-medium">Openning Balance</Td>
           <Td>{''}</Td>
           <Td>{''}</Td>
           <Td>{''}</Td>
@@ -62,7 +62,7 @@ export function LedgerTable({
 
         {rows.length === 0 ? (
           <Tr>
-            <Td colSpan={6} className="text-center text-gray-500 dark:text-gray-400">
+            <Td colSpan={6} className="text-muted-foreground text-center">
               {empty}
             </Td>
           </Tr>

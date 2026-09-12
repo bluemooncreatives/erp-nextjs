@@ -38,11 +38,9 @@ export function ToggleSwitch({
           event.currentTarget.form?.requestSubmit();
         }}
       />
-      <span className="block h-6 w-11 rounded-full bg-gray-300 transition peer-checked:bg-brand-500 dark:bg-gray-700" />
-      <span className="pointer-events-none absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition peer-checked:translate-x-5" />
-      {label ? (
-        <span className="text-sm text-gray-700 dark:text-gray-400">{label}</span>
-      ) : null}
+      <span className="bg-switch-background peer-checked:bg-primary peer-focus-visible:ring-ring/50 block h-5 w-9 rounded-full border border-transparent transition-colors peer-focus-visible:ring-[3px]" />
+      <span className="bg-background pointer-events-none absolute top-0.5 left-0.5 size-4 rounded-full shadow-sm ring-1 ring-black/5 transition-transform peer-checked:translate-x-4" />
+      {label ? <span className="text-sm">{label}</span> : null}
     </label>
   );
 }

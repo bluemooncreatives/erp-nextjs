@@ -5,6 +5,8 @@
 // and passed in as children, so nothing about the data flow changes.
 
 import { useState, type ReactNode } from 'react';
+import { Card } from '@/components/ui/card';
+import { cn } from '@/components/ui/utils';
 
 export type TabItem = {
   id: string;
@@ -22,34 +24,38 @@ export function Tabs({
   orientation?: 'vertical' | 'horizontal';
 }) {
   const [active, setActive] = useState(initial ?? tabs[0]?.id ?? '');
-  const current = tabs.find((t) => t.id === active) ?? tabs[0];
+  const current = tabs.find((tab) => tab.id === active) ?? tabs[0];
 
   const list = (
-    <div
+    <Card
       role="tablist"
-      className={
-        orientation === 'vertical'
-          ? 'flex flex-col gap-1 rounded-2xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-white/[0.03]'
-          : 'flex flex-wrap gap-2 rounded-2xl border border-gray-200 bg-white p-2 dark:border-gray-800 dark:bg-white/[0.03]'
-      }
+      aria-orientation={orientation}
+      className={cn(
+        'gap-1 p-2',
+        orientation === 'vertical' ? 'flex flex-col' : 'flex flex-row flex-wrap',
+      )}
     >
-      {tabs.map((tab) => (
-        <button
-          key={tab.id}
-          type="button"
-          role="tab"
-          aria-selected={tab.id === current?.id}
-          onClick={() => setActive(tab.id)}
-          className={`rounded-lg px-4 py-2.5 text-left text-sm font-medium transition ${
-            tab.id === current?.id
-              ? 'bg-brand-500 text-white shadow-theme-xs'
-              : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5'
-          }`}
-        >
-          {tab.label}
-        </button>
-      ))}
-    </div>
+      {tabs.map((tab) => {
+        const selected = tab.id === current?.id;
+        return (
+          <button
+            key={tab.id}
+            type="button"
+            role="tab"
+            aria-selected={selected}
+            onClick={() => setActive(tab.id)}
+            className={cn(
+              'rounded-md px-3 py-2 text-left text-sm font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
+              selected
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+            )}
+          >
+            {tab.label}
+          </button>
+        );
+      })}
+    </Card>
   );
 
   if (orientation === 'horizontal') {

@@ -1,13 +1,23 @@
 // ---------------------------------------------------------------------------
 // Page chrome - the breadcrumb header and card wrappers every ERP screen uses.
 //
-// Styled with the TailAdmin tokens so ported screens sit inside the template's
-// design system, and shaped like the Blade partials they replace
-// (`backEnd/partials/*` plus the `main-title` / `white-box` blocks).
+// Shaped like the Blade partials they replace (`backEnd/partials/*` plus the
+// `main-title` / `white-box` blocks), drawn with the design system's Card and
+// semantic tokens so every screen sits on the same surfaces.
 // ---------------------------------------------------------------------------
 
 import Link from 'next/link';
 import React, { type ReactNode } from 'react';
+import { ChevronRight } from 'lucide-react';
+import {
+  Card as UICard,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { cn } from '@/components/ui/utils';
 
 export type Crumb = { label: string; href?: string };
 
@@ -21,81 +31,71 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-      <h2 className="text-xl font-semibold text-gray-800 dark:text-white/90">
-        {title}
-      </h2>
-
-      <div className="flex flex-wrap items-center gap-3">
-        {actions}
-        <nav>
-          <ol className="flex items-center gap-1.5">
-            <li>
-              <Link
-                className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400"
-                href="/home"
-              >
-                Home
-                <Chevron />
-              </Link>
+    <header className="mb-6 space-y-2">
+      <nav aria-label="Breadcrumb">
+        <ol className="text-muted-foreground flex flex-wrap items-center gap-1 text-sm">
+          <li>
+            <Link href="/home" className="hover:text-foreground transition-colors">
+              Home
+            </Link>
+          </li>
+          {breadcrumb.length === 0 ? (
+            <li className="flex items-center gap-1">
+              <ChevronRight className="size-3.5 shrink-0 opacity-60" aria-hidden="true" />
+              <span className="text-foreground" aria-current="page">
+                {title}
+              </span>
             </li>
-            {breadcrumb.map((crumb) => (
-              <li key={crumb.label} className="inline-flex items-center gap-1.5">
+          ) : (
+            breadcrumb.map((crumb, index) => (
+              <li key={`${crumb.label}-${index}`} className="flex items-center gap-1">
+                <ChevronRight
+                  className="size-3.5 shrink-0 opacity-60"
+                  aria-hidden="true"
+                />
                 {crumb.href ? (
-                  <>
-                    <Link
-                      href={crumb.href}
-                      className="text-sm text-gray-500 dark:text-gray-400"
-                    >
-                      {crumb.label}
-                    </Link>
-                    <Chevron />
-                  </>
+                  <Link
+                    href={crumb.href}
+                    className="hover:text-foreground transition-colors"
+                  >
+                    {crumb.label}
+                  </Link>
                 ) : (
-                  <span className="text-sm text-gray-800 dark:text-white/90">
+                  <span
+                    className="text-foreground"
+                    aria-current={index === breadcrumb.length - 1 ? 'page' : undefined}
+                  >
                     {crumb.label}
                   </span>
                 )}
               </li>
-            ))}
-            {breadcrumb.length === 0 ? (
-              <li className="text-sm text-gray-800 dark:text-white/90">{title}</li>
-            ) : null}
-          </ol>
-        </nav>
+            ))
+          )}
+        </ol>
+      </nav>
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+        <h1 className="min-w-48 flex-1 text-2xl font-bold tracking-tight text-balance">
+          {title}
+        </h1>
+        {actions ? (
+          // `min-w-0` so a wide actions cluster wraps instead of squeezing the
+          // heading to nothing.
+          <div className="flex min-w-0 flex-wrap items-center gap-2">{actions}</div>
+        ) : null}
       </div>
-    </div>
+    </header>
   );
 }
 
-function Chevron() {
-  return (
-    <svg
-      className="stroke-current"
-      width="17"
-      height="16"
-      viewBox="0 0 17 16"
-      fill="none"
-    >
-      <path
-        d="M6.0765 12.667L10.2432 8.50033L6.0765 4.33366"
-        stroke=""
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-/** The standard white panel. */
+/** The standard panel. */
 export function Card({
   title,
   desc,
   actions,
   children,
   className = '',
-  bodyClassName = 'p-4 sm:p-6',
+  bodyClassName = 'px-4 py-4 sm:px-6',
   noBodyBorder = false,
 }: {
   title?: ReactNode;
@@ -103,39 +103,34 @@ export function Card({
   actions?: ReactNode;
   children: ReactNode;
   className?: string;
+  /**
+   * Replaces the body's padding rather than adding to it - screens whose body
+   * is a full-width table pass `''` so the rows meet the card's edges.
+   */
   bodyClassName?: string;
   noBodyBorder?: boolean;
 }) {
+  const hasHeader = Boolean(title || actions);
+
   return (
-    <div
-      className={`rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] ${className}`}
-    >
-      {title || actions ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-5">
-          <div>
-            <h3 className="text-base font-medium text-gray-800 dark:text-white/90">
-              {title}
-            </h3>
-            {desc ? (
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{desc}</p>
-            ) : null}
-          </div>
-          {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
-        </div>
+    <UICard className={cn('gap-0 py-0', className)}>
+      {hasHeader ? (
+        <CardHeader
+          className={cn(
+            'px-4 py-4 sm:px-6',
+            noBodyBorder ? '' : 'border-b [.border-b]:pb-4',
+          )}
+        >
+          {title ? <CardTitle className="text-base">{title}</CardTitle> : null}
+          {desc ? <CardDescription>{desc}</CardDescription> : null}
+          {actions ? (
+            <CardAction className="flex flex-wrap gap-2">{actions}</CardAction>
+          ) : null}
+        </CardHeader>
       ) : null}
 
-      <div
-        className={`${
-          title || actions
-            ? noBodyBorder
-              ? ''
-              : 'border-t border-gray-100 dark:border-gray-800'
-            : ''
-        } ${bodyClassName}`}
-      >
-        {children}
-      </div>
-    </div>
+      <CardContent className={cn('px-0', bodyClassName)}>{children}</CardContent>
+    </UICard>
   );
 }
 
@@ -150,15 +145,11 @@ export function DetailList({
   const grid =
     columns === 1 ? '' : columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
   return (
-    <dl className={`grid gap-x-6 gap-y-4 ${grid}`}>
+    <dl className={cn('grid gap-x-6 gap-y-4', grid)}>
       {items.map((item) => (
         <div key={item.label}>
-          <dt className="text-xs font-medium text-gray-500 dark:text-gray-400">
-            {item.label}
-          </dt>
-          <dd className="mt-0.5 text-sm text-gray-800 dark:text-white/90">
-            {item.value ?? '-'}
-          </dd>
+          <dt className="text-muted-foreground text-xs font-medium">{item.label}</dt>
+          <dd className="mt-0.5 text-sm">{item.value ?? '-'}</dd>
         </div>
       ))}
     </dl>
@@ -167,8 +158,6 @@ export function DetailList({
 
 export function EmptyState({ message }: { message: string }) {
   return (
-    <div className="py-12 text-center text-sm text-gray-500 dark:text-gray-400">
-      {message}
-    </div>
+    <div className="text-muted-foreground py-12 text-center text-sm">{message}</div>
   );
 }
