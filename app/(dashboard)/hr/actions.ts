@@ -8,6 +8,7 @@ import { revalidatePath } from 'next/cache';
 import { eq } from 'drizzle-orm';
 import { authorize } from '@/lib/auth/permissions';
 import { errorLog, successLog } from '@/lib/activity-log';
+import { notifyStaff } from '@/lib/notifications/documents';
 import { db } from '@/lib/db/client';
 import { rolePermission, roles } from '@/lib/db/schema';
 import { ROUTES } from '@/lib/routes';
@@ -15,6 +16,7 @@ import { fileFrom, saveAvatar, saveUpload } from '@/lib/uploads';
 import {
   addStaffDocument,
   createStaff,
+  findStaff,
   deleteStaff,
   deleteStaffDocument,
   setStaffActive,
@@ -104,7 +106,20 @@ export async function storeStaff(
   if (fieldErrors) return { fieldErrors };
 
   try {
-    await createStaff(input, user.id);
+    const staffId = await createStaff(input, user.id);
+
+    // `sendNotification($staff, $staff->user->email, 'Staff Added', ...)`
+    const created = await findStaff(staffId);
+    if (created) {
+      await notifyStaff({
+        staffId: created.staff.id,
+        userId: created.user.id,
+        name: created.user.name,
+        email: created.user.email ?? null,
+        phone: created.staff.phone ?? null,
+      });
+    }
+
     await successLog(`Staff added: ${input.name}`, user.id);
   } catch (error) {
     await errorLog(String(error), user.id);

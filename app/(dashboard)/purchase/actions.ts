@@ -8,12 +8,14 @@ import { revalidatePath } from 'next/cache';
 import { authorize } from '@/lib/auth/permissions';
 import { errorLog, successLog } from '@/lib/activity-log';
 import { ROUTES, route } from '@/lib/routes';
+import { notifyPurchase } from '@/lib/notifications/documents';
 import { filesFrom, saveUpload } from '@/lib/uploads';
 import {
   addOpeningStock,
   approvePurchaseOrder,
   approvePurchaseReturn,
   createPurchaseOrder,
+  findPurchaseOrder,
   updatePurchaseOrder,
   deletePurchaseOrder,
   recordPurchasePayments,
@@ -149,6 +151,7 @@ export async function storePurchaseOrder(
       await recordPurchasePayments(orderId, paymentInputs, user.id);
     }
 
+    await notifyPurchaseEvent(orderId, 'created', user.name);
     await successLog(`Purchase order created: ${orderId}`, user.id);
   } catch (error) {
     await errorLog(String(error), user.id);
@@ -210,6 +213,7 @@ export async function savePurchaseOrder(
   try {
     const result = await updatePurchaseOrder(orderId, input, user.id);
     if (!result) return { error: 'Select Warehouse or Showroom' };
+    await notifyPurchaseEvent(orderId, 'updated', user.name);
     await successLog(`Purchase order updated: ${orderId}`, user.id);
   } catch (error) {
     await errorLog(String(error), user.id);
@@ -220,6 +224,27 @@ export async function savePurchaseOrder(
   redirect(route('purchase_order.show', { id: orderId }));
 }
 
+/** `sendNotification($order, ...)` - the purchase reminders the controller raised. */
+async function notifyPurchaseEvent(
+  orderId: number,
+  event: 'created' | 'updated' | 'approved',
+  actorName: string,
+): Promise<void> {
+  const record = await findPurchaseOrder(orderId);
+  if (!record) return;
+
+  await notifyPurchase(
+    {
+      id: record.order.id,
+      invoiceNo: record.order.invoiceNo,
+      payableAmount: record.order.payableAmount,
+      supplierId: record.order.supplierId,
+    },
+    event,
+    actorName,
+  );
+}
+
 // --- Approve --------------------------------------------------------------
 
 export async function approvePurchaseAction(formData: FormData): Promise<void> {
@@ -228,6 +253,7 @@ export async function approvePurchaseAction(formData: FormData): Promise<void> {
 
   try {
     await approvePurchaseOrder(orderId, user.id);
+    await notifyPurchaseEvent(orderId, 'approved', user.name);
     await successLog(`Purchase order approved: ${orderId}`, user.id);
   } catch (error) {
     await errorLog(String(error), user.id);

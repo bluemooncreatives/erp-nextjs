@@ -16,6 +16,7 @@
 /** Every Eloquent class name that appears in a `*able_type` column. */
 export const MorphType = {
   User: 'App\\User',
+  Staff: 'App\\Staff',
 
   Sale: 'Modules\\Sale\\Entities\\Sale',
   Payment: 'Modules\\Sale\\Entities\\Payment',

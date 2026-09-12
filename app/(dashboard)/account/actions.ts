@@ -12,6 +12,7 @@ import { authorize } from '@/lib/auth/permissions';
 import { getSession } from '@/lib/auth/session';
 import { errorLog, successLog } from '@/lib/activity-log';
 import { ROUTES } from '@/lib/routes';
+import { notifyVoucher } from '@/lib/notifications/documents';
 import { db } from '@/lib/db/client';
 import { chartAccounts } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
@@ -344,8 +345,9 @@ async function savePaymentVoucher(formData: FormData, editing: boolean): Promise
       chequeDate: str(formData, 'cheque_date'),
       createdBy: user.id,
     };
+    const voucherId = editing ? id : await createVoucher(input);
     if (editing) await updateVoucher(id, input);
-    else await createVoucher(input);
+    await notifyVoucherEvent(voucherId, editing ? 'updated' : 'created');
     await successLog(editing ? `Payment voucher updated: ${id}` : 'Voucher created', user.id);
   } catch (error) {
     await errorLog(String(error), user.id);
@@ -435,6 +437,20 @@ async function saveCompoundVoucher(formData: FormData, kind: 'journal' | 'contra
   redirect(kind === 'journal' ? ROUTES['journal.index'] : ROUTES['contra.index']);
 }
 
+/** `sendNotification($voucher, ...)` - the voucher reminders. */
+async function notifyVoucherEvent(
+  voucherId: number,
+  event: 'created' | 'updated' | 'deleted' | 'approved',
+): Promise<void> {
+  const voucher = await findVoucher(voucherId);
+  if (!voucher) return;
+
+  await notifyVoucher(
+    { id: voucher.id, txId: voucher.txId, amount: voucher.amount },
+    event,
+  );
+}
+
 /** `VoucherController@approval_status` */
 export async function setVoucherApprovalAction(formData: FormData): Promise<void> {
   const id = Number(formData.get('id'));
@@ -442,6 +458,7 @@ export async function setVoucherApprovalAction(formData: FormData): Promise<void
   const user = await authorize('set_voucher_approval');
 
   await setVoucherApproval(id, status, user.id);
+  if (status === 1) await notifyVoucherEvent(id, 'approved');
   await successLog(`Voucher ${id} approval set to ${status}`, user.id);
 
   revalidatePath(ROUTES['voucher_approval.index']);
@@ -458,6 +475,8 @@ export async function approveAllVouchersAction(): Promise<void> {
 export async function deleteVoucherAction(formData: FormData): Promise<void> {
   const id = Number(formData.get('id'));
   const user = await authorize('vouchers.destroy');
+  // The PHP notified before the row went away.
+  await notifyVoucherEvent(id, 'deleted');
   await deleteVoucher(id);
   await successLog(`Voucher deleted: ${id}`, user.id);
   revalidatePath(ROUTES['vouchers.index']);

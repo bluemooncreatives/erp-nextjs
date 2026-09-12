@@ -16,6 +16,7 @@ import {
   type ContactInput,
 } from '@/lib/contact/repository';
 import { generalSetting } from '@/lib/settings';
+import { notifyContact } from '@/lib/notifications/documents';
 import { actionFormData } from '@/lib/forms';
 
 export type ContactFormState = {
@@ -102,7 +103,17 @@ export async function storeContact(
 
   try {
     const input = await readInput(formData);
-    await createContact(input, user.id);
+    const contactId = await createContact(input, user.id);
+
+    // `sendNotification($contact, $contact->email, $contact->contact_type . 'Added', ...)`
+    await notifyContact({
+      id: contactId,
+      name: input.name,
+      contactType: input.contactType,
+      email: input.email ?? null,
+      mobile: input.mobile ?? null,
+    });
+
     await successLog(`Contact created: ${input.name}`, user.id);
   } catch (error) {
     await errorLog(String(error), user.id);

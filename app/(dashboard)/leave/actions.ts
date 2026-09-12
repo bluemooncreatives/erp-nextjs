@@ -7,6 +7,8 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { authorize, requireUser } from '@/lib/auth/permissions';
 import { errorLog, successLog } from '@/lib/activity-log';
+import { notifyPayroll } from '@/lib/notifications/documents';
+import { findStaff } from '@/lib/hr/staff';
 import { ROUTES } from '@/lib/routes';
 import { fileFrom, saveUpload } from '@/lib/uploads';
 import {
@@ -329,7 +331,7 @@ export async function storePayroll(
     .filter((l) => l.typeName && l.amount > 0);
 
   try {
-    await createPayroll(
+    const payrollId = await createPayroll(
       {
         staffId,
         roleId: num(formData, 'role_id', 1),
@@ -348,6 +350,21 @@ export async function storePayroll(
       },
       user.id,
     );
+
+    // `sendNotification($payroll, $payroll->staff->user->email, 'Salary Generate Reminder', ...)`
+    const staff = await findStaff(staffId);
+    if (staff) {
+      await notifyPayroll({
+        id: payrollId,
+        staffUserId: staff.user.id,
+        email: staff.user.email ?? null,
+        phone: staff.staff.phone ?? null,
+        netSalary: num(formData, 'basic_salary'),
+        month: String(formData.get('payroll_month') ?? ''),
+        year: String(formData.get('payroll_year') ?? ''),
+      });
+    }
+
     await successLog(`Payroll generated for staff ${staffId}`, user.id);
   } catch (error) {
     await errorLog(String(error), user.id);

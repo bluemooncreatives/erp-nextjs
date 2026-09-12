@@ -29,6 +29,7 @@ import {
 import { saveUpload, fileFrom } from '@/lib/uploads';
 import { findSale } from '@/lib/sale/queries';
 import { sendSaleMail } from '@/lib/mail';
+import { notifySale } from '@/lib/notifications/documents';
 import { isEnabled } from '@/lib/business-settings';
 import { config } from '@/lib/config';
 import { actionFormData } from '@/lib/forms';
@@ -189,6 +190,8 @@ export async function storeSale(
       await recordSalePayments(saleId, paymentInputs, user.id, true);
     }
 
+    await notifySaleEvent(saleId, 'created', user.name);
+
     // `if ($request->send_mail == 1) $this->send_mail_quotation($sale->id);`
     if (formData.get('send_mail')) {
       await mailSaleInvoice(saleId, user.id);
@@ -219,6 +222,28 @@ export async function storeSale(
   }
 
   redirect(route('sale.show', { id: saleId }));
+}
+
+/** `sendNotification($sale, ...)` - the sale reminders the controller raised. */
+async function notifySaleEvent(
+  saleId: number,
+  event: 'created' | 'updated' | 'destroyed' | 'approved',
+  actorName: string,
+): Promise<void> {
+  const record = await findSale(saleId);
+  if (!record) return;
+
+  await notifySale(
+    {
+      id: record.sale.id,
+      invoiceNo: record.sale.invoiceNo,
+      payableAmount: record.sale.payableAmount,
+      customerId: record.sale.customerId,
+      agentUserId: record.sale.agentUserId,
+    },
+    event,
+    actorName,
+  );
 }
 
 /**
@@ -267,6 +292,7 @@ export async function saveSale(
     if (result === INSUFFICIENT_STOCK) {
       return { error: 'Your stock is out' };
     }
+    await notifySaleEvent(saleId, 'updated', user.name);
     await successLog('Sale Updated Successfully without Payment', user.id);
   } catch (error) {
     await errorLog(String(error), user.id);
@@ -312,6 +338,7 @@ export async function approveSaleAction(formData: FormData): Promise<void> {
 
   try {
     await approveSale(saleId, user.id);
+    await notifySaleEvent(saleId, 'approved', user.name);
     await successLog(`Sale approved: ${saleId}`, user.id);
   } catch (error) {
     await errorLog(String(error), user.id);
@@ -376,6 +403,8 @@ export async function deleteSaleAction(formData: FormData): Promise<void> {
   const user = await authorize('sale.delete');
 
   try {
+    // The PHP read the sale and notified before deleting it.
+    await notifySaleEvent(saleId, 'destroyed', user.name);
     await deleteSale(saleId);
     await successLog(`Sale deleted: ${saleId}`, user.id);
   } catch (error) {
