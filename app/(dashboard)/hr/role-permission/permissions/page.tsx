@@ -13,6 +13,7 @@ import { permissions, rolePermission, roles } from '@/lib/db/schema';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card, EmptyState } from '@/components/erp/page';
 import { PermissionMatrix } from './permission-matrix';
+import { SelectControl } from '@/components/erp/select-control';
 
 export const metadata: Metadata = { title: 'Permission' };
 
@@ -57,18 +58,14 @@ export default async function PermissionsPage({
             method="get"
             className="flex items-center gap-2"
           >
-            <select
+            <SelectControl
               name="role_id"
-              defaultValue={roleId ?? ''}
-              className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
-            >
-              <option value="">Select a role</option>
-              {roleRows.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.name}
-                </option>
-              ))}
-            </select>
+              defaultValue={roleId ? String(roleId) : ''}
+              placeholder="Select a role"
+              aria-label="Role"
+              options={roleRows.map((r) => ({ value: String(r.id), label: r.name }))}
+              className="sm:w-56"
+            />
             <button
               type="submit"
               className="h-10 rounded-lg bg-primary px-4 text-sm font-medium text-white hover:bg-primary"

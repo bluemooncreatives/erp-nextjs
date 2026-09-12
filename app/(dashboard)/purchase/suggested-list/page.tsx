@@ -11,6 +11,7 @@ import { generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, SearchBar, Td, Tr } from '@/components/erp/table';
+import { SelectControl } from '@/components/erp/select-control';
 
 export const metadata: Metadata = { title: 'Stock Alert List' };
 
@@ -56,18 +57,14 @@ export default async function StockAlertPage({
             action={ROUTES['purchase.suggest']}
             placeholder="Filter by supplier"
           >
-            <select
+            <SelectControl
               name="supplier_id"
               defaultValue={sp.supplier_id ?? ''}
-              className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
-            >
-              <option value="">All suppliers</option>
-              {suppliers.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
+              placeholder="All suppliers"
+              aria-label="Supplier"
+              options={suppliers.map((s) => ({ value: String(s.id), label: s.name }))}
+              className="sm:w-60"
+            />
           </SearchBar>
         }
       >

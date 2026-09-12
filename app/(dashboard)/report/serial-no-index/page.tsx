@@ -10,6 +10,7 @@ import { ReportSummary } from '@/components/erp/report-summary';
 import { PackageCheck, ShoppingCart, Undo2, Barcode } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
+import { SelectControl } from '@/components/erp/select-control';
 
 export const metadata: Metadata = { title: 'Product Serial Report' };
 
@@ -60,23 +61,28 @@ export default async function SerialReportPage({
             method="get"
             className="flex flex-wrap items-center gap-2"
           >
-            <select
+            <SelectControl
               name="product_sku_id"
               defaultValue={sp.product_sku_id ?? ''}
-              className={control}
-            >
-              <option value="">All products</option>
-              {skus.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.productName} ({s.sku})
-                </option>
-              ))}
-            </select>
-            <select name="is_sold" defaultValue={sp.is_sold ?? ''} className={control}>
-              <option value="">Any status</option>
-              <option value="0">In stock</option>
-              <option value="1">Sold</option>
-            </select>
+              placeholder="All products"
+              aria-label="Product"
+              options={skus.map((s) => ({
+                value: String(s.id),
+                label: s.productName + ' (' + s.sku + ')',
+              }))}
+              className="sm:w-72"
+            />
+            <SelectControl
+              name="is_sold"
+              defaultValue={sp.is_sold ?? ''}
+              placeholder="Any status"
+              aria-label="Status"
+              options={[
+                { value: '0', label: 'In stock' },
+                { value: '1', label: 'Sold' },
+              ]}
+              className="sm:w-40"
+            />
             <button
               type="submit"
               className="h-10 rounded-lg bg-primary px-4 text-sm font-medium text-white hover:bg-primary"

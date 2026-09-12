@@ -13,6 +13,7 @@ import { today } from '@/lib/php-date';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader } from '@/components/erp/page';
 import { AttendanceSheet } from './attendance-sheet';
+import { SelectControl } from '@/components/erp/select-control';
 
 export const metadata: Metadata = { title: 'Attendance' };
 
@@ -54,18 +55,14 @@ export default async function AttendancePage({
             method="get"
             className="flex flex-wrap items-center gap-2"
           >
-            <select
+            <SelectControl
               name="role_id"
-              defaultValue={roleId ?? ''}
-              className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
-            >
-              <option value="">Select role</option>
-              {roleRows.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.name}
-                </option>
-              ))}
-            </select>
+              defaultValue={roleId ? String(roleId) : ''}
+              placeholder="Select role"
+              aria-label="Role"
+              options={roleRows.map((r) => ({ value: String(r.id), label: r.name }))}
+              className="sm:w-56"
+            />
             <input
               type="date"
               name="date"

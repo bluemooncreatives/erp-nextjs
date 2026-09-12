@@ -9,6 +9,7 @@ import { attendanceReport } from '@/lib/hr/leave';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card, EmptyState } from '@/components/erp/page';
 import { Badge } from '@/components/erp/badge';
+import { SelectControl } from '@/components/erp/select-control';
 
 export const metadata: Metadata = { title: 'Attendance Report' };
 
@@ -54,24 +55,27 @@ export default async function AttendanceReportPage({
             method="get"
             className="flex flex-wrap items-center gap-2"
           >
-            <select name="role_id" defaultValue={roleId ?? ''} className={control}>
-              <option value="">All roles</option>
-              {roleRows.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.name}
-                </option>
-              ))}
-            </select>
-            <select name="month" defaultValue={month} className={control}>
-              {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                <option key={m} value={m}>
-                  {new Date(Date.UTC(2000, m - 1, 1)).toLocaleString('en-US', {
-                    month: 'long',
-                    timeZone: 'UTC',
-                  })}
-                </option>
-              ))}
-            </select>
+            <SelectControl
+              name="role_id"
+              defaultValue={roleId ? String(roleId) : ''}
+              placeholder="All roles"
+              aria-label="Role"
+              options={roleRows.map((r) => ({ value: String(r.id), label: r.name }))}
+              className="sm:w-48"
+            />
+            <SelectControl
+              name="month"
+              defaultValue={String(month)}
+              aria-label="Month"
+              options={Array.from({ length: 12 }, (_, i) => i + 1).map((m) => ({
+                value: String(m),
+                label: new Date(Date.UTC(2000, m - 1, 1)).toLocaleString('en-US', {
+                  month: 'long',
+                  timeZone: 'UTC',
+                }),
+              }))}
+              className="sm:w-40"
+            />
             <input
               type="number"
               name="year"

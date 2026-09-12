@@ -12,6 +12,7 @@ import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, SearchBar, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
+import { SelectControl } from '@/components/erp/select-control';
 
 export const metadata: Metadata = { title: 'Product Movement' };
 
@@ -52,18 +53,17 @@ export default async function ProductMovementPage({
             action={ROUTES['product_movement.index']}
             placeholder="Filter by product"
           >
-            <select
+            <SelectControl
               name="product_sku_id"
               defaultValue={sp.product_sku_id ?? ''}
-              className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
-            >
-              <option value="">All products</option>
-              {skus.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.productName} ({s.sku})
-                </option>
-              ))}
-            </select>
+              placeholder="All products"
+              aria-label="Product"
+              options={skus.map((s) => ({
+                value: String(s.id),
+                label: s.productName + ' (' + s.sku + ')',
+              }))}
+              className="sm:w-72"
+            />
           </SearchBar>
         }
       >

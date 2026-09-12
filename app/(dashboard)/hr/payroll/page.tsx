@@ -14,6 +14,7 @@ import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
 import { deletePayrollAction, setPayrollStatusAction } from '../../leave/actions';
 import { GeneratePayrollPanel } from './generate-payroll-panel';
+import { SelectControl } from '@/components/erp/select-control';
 
 export const metadata: Metadata = { title: 'Payroll' };
 
@@ -83,18 +84,14 @@ export default async function PayrollPage({
               method="get"
               className="flex items-center gap-2"
             >
-              <select
+              <SelectControl
                 name="role_id"
                 defaultValue={sp.role_id ?? ''}
-                className={`${control} w-40`}
-              >
-                <option value="">All roles</option>
-                {roles.map((role) => (
-                  <option key={role.id} value={role.id}>
-                    {role.name}
-                  </option>
-                ))}
-              </select>
+                placeholder="All roles"
+                aria-label="Role"
+                options={roles.map((role) => ({ value: String(role.id), label: role.name }))}
+                className="w-40"
+              />
               <input
                 type="text"
                 name="month"

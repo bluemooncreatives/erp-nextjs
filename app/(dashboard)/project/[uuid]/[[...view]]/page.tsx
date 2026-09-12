@@ -29,6 +29,7 @@ import {
   changeProjectView,
 } from '../../actions';
 import { ProjectSettingsForm, ShareProjectForm } from '../../forms';
+import { SelectControl } from '@/components/erp/select-control';
 
 export const metadata: Metadata = { title: 'Project' };
 
@@ -301,17 +302,14 @@ export default async function ProjectShowPage({
             <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-border pt-5">
               <form action={changeProjectView} className="flex items-center gap-2">
                 <input type="hidden" name="project_id" value={project.id} />
-                <select
+                <SelectControl
                   name="view"
+                  size="sm"
                   defaultValue={project.defaultView}
-                  className="h-9 rounded-lg border border-border bg-transparent px-2 text-xs"
-                >
-                  {VIEWS.map((v) => (
-                    <option key={v} value={v}>
-                      {v}
-                    </option>
-                  ))}
-                </select>
+                  aria-label="Default view"
+                  options={VIEWS.map((v) => ({ value: v, label: v }))}
+                  className="w-32 capitalize"
+                />
                 <ActionButton variant="outline">Set default view</ActionButton>
               </form>
 
