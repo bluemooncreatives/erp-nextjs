@@ -10,6 +10,8 @@ import { PurchaseStock, listPurchaseOrders } from '@/lib/purchase/repository';
 import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { PackageOpen, Hourglass, Boxes, Wallet } from 'lucide-react';
 import { DataTable, Pagination, SearchBar, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
 
@@ -41,11 +43,27 @@ export default async function ReceivePurchasePage({
     })),
   );
 
+  // Every row here is outstanding, so the split that matters is part-received
+  // against not started, plus the value and quantity still to come in.
+  const partialCount = orderRows.filter((o) => o.addedToStock === PurchaseStock.Partial).length;
+  const notStartedCount = orderRows.length - partialCount;
+  const pageValue = orderRows.reduce((sum, o) => sum + Number(o.payableAmount ?? 0), 0);
+  const pageQuantity = orderRows.reduce((sum, o) => sum + Number(o.totalQuantity ?? 0), 0);
+
   return (
     <>
       <PageHeader
         title="Recieve Your Product"
         breadcrumb={[{ label: 'Inventory'}, { label:'Recieve Your Product' }]}
+      />
+
+      <ReportSummary
+        figures={[
+          { label: 'Not yet received', value: notStartedCount, detail: 'Nothing booked in', icon: Hourglass },
+          { label: 'Partly received', value: partialCount, detail: 'Some stock booked in', icon: PackageOpen },
+          { label: 'Units awaited', value: numberFormat(pageQuantity, 0), detail: 'On this page', icon: Boxes },
+          { label: 'Value on this page', value: `${symbol} ${numberFormat(pageValue)}`, detail: `${orderRows.length} of ${total} orders`, icon: Wallet },
+        ]}
       />
 
       <Card

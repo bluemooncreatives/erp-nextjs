@@ -7,6 +7,8 @@ import { listProductSkus } from '@/lib/product/products';
 import { generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Wrench, Tags, Coins, ListFilter } from 'lucide-react';
 import { DataTable, Pagination, SearchBar, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { deleteProductAction } from '../../product-actions';
@@ -34,6 +36,12 @@ export default async function ServiceListPage({
     can('add_product.delete'),
   ]);
 
+  // Services have no stock, so the useful shape of the catalogue is its price
+  // spread and how many categories it spans.
+  const rates = rows.map((r) => Number(r.sellingPrice ?? 0));
+  const averageRate = rates.length ? rates.reduce((sum, rate) => sum + rate, 0) / rates.length : 0;
+  const categoryCount = new Set(rows.map((r) => r.categoryName).filter(Boolean)).size;
+
   return (
     <>
       <PageHeader
@@ -47,6 +55,15 @@ export default async function ServiceListPage({
             Add Service
           </LinkButton>
         }
+      />
+
+      <ReportSummary
+        figures={[
+          { label: 'Services', value: total.toLocaleString('en-US'), detail: 'Across all pages', icon: Wrench },
+          { label: 'Showing now', value: rows.length, detail: 'Services on this page', icon: ListFilter },
+          { label: 'Average rate', value: `${symbol} ${numberFormat(averageRate)}`, detail: 'Hourly, on this page', icon: Coins },
+          { label: 'Categories', value: categoryCount, detail: 'Represented on this page', icon: Tags },
+        ]}
       />
 
       <Card

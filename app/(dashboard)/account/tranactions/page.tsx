@@ -8,6 +8,8 @@ import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { morphName } from '@/lib/db/morph';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { ArrowDownLeft, ArrowUpRight, Scale, ListOrdered } from 'lucide-react';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
 import { DateRangeFilter } from '../date-range-filter';
@@ -56,8 +58,17 @@ export default async function TransactionsPage({
         breadcrumb={[{ label: 'Accounts'}, { label:'Transactions' }]}
       />
 
+      <ReportSummary
+        figures={[
+          { label: 'Debit on this page', value: `${symbol} ${numberFormat(debitTotal)}`, detail: 'Dr postings', icon: ArrowDownLeft },
+          { label: 'Credit on this page', value: `${symbol} ${numberFormat(creditTotal)}`, detail: 'Cr postings', icon: ArrowUpRight },
+          { label: 'Difference', value: `${symbol} ${numberFormat(Math.abs(debitTotal - creditTotal))}`, detail: debitTotal === creditTotal ? 'Balanced' : 'Dr and Cr do not agree', icon: Scale },
+          { label: 'Postings', value: total.toLocaleString('en-US'), detail: `${txRows.length} on this page`, icon: ListOrdered },
+        ]}
+      />
+
       <Card
-        title={`Postings (${total}) - Dr ${symbol} ${numberFormat(debitTotal)} / Cr ${symbol} ${numberFormat(creditTotal)}`}
+        title={`Postings (${total})`}
         bodyClassName=""
         actions={
           <DateRangeFilter

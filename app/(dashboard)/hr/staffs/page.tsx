@@ -10,6 +10,8 @@ import { dateConvert } from '@/lib/settings';
 import { avatarUrl } from '@/lib/paths';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { UserCheck, UserX, Users } from 'lucide-react';
 import {
   DataTable,
   Pagination,
@@ -50,6 +52,9 @@ export default async function StaffListPage({
     })),
   );
 
+  const activeCount = staffRows.filter((r) => r.user.isActive === 1).length;
+  const inactiveCount = staffRows.length - activeCount;
+
   return (
     <>
       <PageHeader
@@ -73,6 +78,14 @@ export default async function StaffListPage({
             </div>
           ) : null
         }
+      />
+
+      <ReportSummary
+        figures={[
+          { label: 'Active', value: activeCount, detail: 'On this page', icon: UserCheck },
+          { label: 'Inactive', value: inactiveCount, detail: 'On this page', icon: UserX },
+          { label: 'Staff', value: total.toLocaleString('en-US'), detail: 'Across all pages', icon: Users },
+        ]}
       />
 
       <Card

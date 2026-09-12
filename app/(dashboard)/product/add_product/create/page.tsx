@@ -20,6 +20,8 @@ import { generalSetting, numberFormat } from '@/lib/settings';
 import { assetUrl } from '@/lib/paths';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary, type ReportFigure } from '@/components/erp/report-summary';
+import { Package, Layers, PackageX, ListFilter } from 'lucide-react';
 import { DataTable, Pagination, SearchBar, Td, Tr } from '@/components/erp/table';
 import {
   comboStatusAction,
@@ -78,6 +80,23 @@ export default async function ProductListPage({
     can('add_product.editCombo'),
     can('combo_product.destroy'),
   ]);
+
+  // Both tabs sit under one summary, so it counts the catalogue rather than
+  // whichever tab happens to be open. Out-of-stock is branch-specific, so it
+  // only appears when a branch is actually selected.
+  const catalogueFigures: ReportFigure[] = [
+    { label: 'Products', value: total.toLocaleString('en-US'), detail: 'Across all pages', icon: Package },
+    { label: 'Showing now', value: rows.length, detail: 'Products on this page', icon: ListFilter },
+    { label: 'Combo products', value: combos.length, detail: 'Matching the combo search', icon: Layers },
+  ];
+  if (session?.showroomId) {
+    catalogueFigures.push({
+      label: 'Out of stock here',
+      value: rows.filter((r) => (stock.get(r.id) ?? 0) <= 0).length,
+      detail: 'On this page, this branch',
+      icon: PackageX,
+    });
+  }
 
   const productsPanel = (
         <Card
@@ -318,6 +337,8 @@ export default async function ProductListPage({
           </div>
         }
       />
+
+      <ReportSummary figures={catalogueFigures} />
 
       <Tabs
         orientation="horizontal"
