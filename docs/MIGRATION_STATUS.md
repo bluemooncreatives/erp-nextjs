@@ -90,6 +90,16 @@ passes is in the git history; this document covers the state of the whole port.
 
 Both mail flows carry a link to the print view instead of the dompdf attachment the PHP sent.
 
+### Notifications
+
+Every `sendNotification()` call site the PHP controllers had is now raised from the matching
+action: sale create / update / approve / delete, purchase create / update / approve, voucher
+create / update / approve / delete, a new contact, a new staff member and generated payroll.
+Each still fans out over the three channels gated by their business settings (mail, SMS and
+the in-app `notifications` row), and the wording and subjects are the originals - including
+the sale-update SMS that says "A Purchase has been approved by ...", which is how the PHP
+read. Before this, only the events screen notified anything.
+
 ### Fixes found by running the app
 
 - **Reference screens returned 500.** `ReferenceCrud` took `extraFields` as a render function
@@ -110,6 +120,11 @@ Both mail flows carry a link to the print view instead of the dompdf attachment 
   rendered; `house_id` now filters as it does in the Blade.
 - Unused TailAdmin template components (ecommerce widgets, demo calendar) were removed; they
   were dead code and the calendar broke lint.
+- **Every form broke without JavaScript.** Next calls a `useActionState` action with the
+  FormData alone when a form is posted before hydration or with scripting off, and all 105 of
+  them read the second argument. They now normalise their arguments through `actionFormData`,
+  so the forms degrade the way the Blade forms did - and the action test suite below can post
+  them over plain HTTP.
 
 ## Validation
 
@@ -130,6 +145,7 @@ from `software_erp.sql`, plus the usual static checks.
 | Pages, as super admin | `npm run verify:http` | 202 routes, 0 server errors (177 rendered, 18 not-found for absent rows, 7 expected redirects) |
 | Pages, as staff with no permissions | `ROLE_ID=3 npm run verify:http` | 202 routes, 0 server errors (135 permission denials handled, 51 rendered) |
 | Pages, as staff holding every seeded permission | `ROLE_ID=3 npm run verify:http` | 202 routes, 0 server errors (120 rendered, 62 denied for permissions this dump does not seed) |
+| Server actions over HTTP | `npm run verify:actions` | 20 scenarios passed |
 
 The write scenarios assert the behaviour the PHP relied on: a receipt posts one Dr and one Cr
 leg; editing a voucher **replaces** its transactions and its cheque document instead of
@@ -162,9 +178,11 @@ The database used for this pass was a disposable MariaDB on port 3307 created fr
 - **No production data has been touched.** The validation ran against a copy of the schema with
   seeded rows, not against the live database, and the live database may hold data shapes this
   dump does not (legacy rows, other branches, partially migrated records).
-- **Server actions are only covered indirectly.** The HTTP sweep is GET-only; form submissions
-  are exercised through the repository layer instead. A browser pass over the main forms
-  (sale, purchase, vouchers, product) is still worth doing before cutover.
+- **A browser pass is still worth doing.** `verify:actions` posts 20 real forms - printer,
+  coupon, branch, contact, receipt voucher, CSV upload, sale (create, edit, approve), purchase,
+  stock transfer and adjustment, plus permission-denied and signed-out cases - and checks the
+  rows they wrote, but it drives them without JavaScript. The client-side behaviour of the
+  bigger forms (the product picker, totals, serial numbers) is not covered by it.
 - **Legacy PHP update packages** remain unimplemented: they extract PHP files and run Artisan.
   The system-update screen explains this rather than pretending to install.
 - **The Packing module referenced by the source is absent**, so `report/packing-report` has no

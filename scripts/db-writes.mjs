@@ -438,8 +438,12 @@ await scenario('sale payment is recorded against the invoice', async () => {
   }
   assert.ok(sale, 'need a sale');
 
+  // Anything beyond the outstanding balance is banked as `advance_amount`, so
+  // count both columns - otherwise a fully paid invoice looks unchanged.
   const paidBefore = await db
-    .select({ total: sql`coalesce(sum(${schema.payments.amount}), 0)` })
+    .select({
+      total: sql`coalesce(sum(${schema.payments.amount} + ${schema.payments.advanceAmount}), 0)`,
+    })
     .from(schema.payments)
     .where(
       and(
@@ -455,7 +459,9 @@ await scenario('sale payment is recorded against the invoice', async () => {
   );
 
   const paidAfter = await db
-    .select({ total: sql`coalesce(sum(${schema.payments.amount}), 0)` })
+    .select({
+      total: sql`coalesce(sum(${schema.payments.amount} + ${schema.payments.advanceAmount}), 0)`,
+    })
     .from(schema.payments)
     .where(
       and(
@@ -467,7 +473,7 @@ await scenario('sale payment is recorded against the invoice', async () => {
   assert.equal(
     Number(paidAfter[0].total) - Number(paidBefore[0].total),
     5,
-    'the payment is booked against the sale',
+    'the payment is booked against the sale, as amount or advance',
   );
 });
 
