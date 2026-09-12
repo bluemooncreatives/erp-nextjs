@@ -241,7 +241,7 @@ export async function balanceStatement(timePeriodId: number) {
 
 export type CashFlowRow = {
   id: number;
-  type: string;
+  type: string | null;
   amount: number;
   date: string | null;
   narration: string | null;
