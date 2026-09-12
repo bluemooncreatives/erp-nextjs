@@ -4,7 +4,7 @@
 // ---------------------------------------------------------------------------
 
 import 'server-only';
-import { and, desc, eq, like, ne, or, sql, type SQL } from 'drizzle-orm';
+import { and, desc, eq, inArray, like, ne, or, sql, type SQL } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import {
   comboProducts,
@@ -19,6 +19,7 @@ import {
   users,
   wareHouses,
   type SalesRow,
+  type ShippingsRow,
 } from '@/lib/db/schema';
 import { MorphType } from '@/lib/db/morph';
 
@@ -333,4 +334,23 @@ export async function customerDues(customerId: number, excludeSaleId: number) {
     payablePrice: Number(row?.payablePrice ?? 0),
     paidPrice: Number(paidRow?.paidPrice ?? 0),
   };
+}
+
+/** The latest shipping row of each of a set of sales - the delivery columns of
+ * `sale::conditional_sale.index`. */
+export async function latestShippingBySale(
+  saleIds: number[],
+): Promise<Map<number, ShippingsRow>> {
+  if (saleIds.length === 0) return new Map();
+
+  const rows = await db
+    .select()
+    .from(shippings)
+    .where(inArray(shippings.saleId, saleIds))
+    .orderBy(shippings.id);
+
+  // Ordered ascending, so the last write for a sale wins - `latest()` in PHP.
+  const map = new Map<number, ShippingsRow>();
+  for (const row of rows) if (row.saleId) map.set(row.saleId, row);
+  return map;
 }

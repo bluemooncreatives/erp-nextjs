@@ -70,10 +70,12 @@ export const NAVIGATION: NavItem[] = [
     label: 'Sale',
     icon: 'store',
     permission: 'sale',
-    match: ['/sale'],
+    match: ['/sale', '/conditional-sales'],
     children: [
       { kind: 'link', label: 'Sale', route: 'sale.index' },
       { kind: 'link', label: 'Sale Return', route: 'sale.return.index' },
+      // `sale::conditional_menu` listed this beside the sale screens.
+      { kind: 'link', label: 'Sale on Condition', route: 'conditional.sale.index' },
     ],
   },
 
