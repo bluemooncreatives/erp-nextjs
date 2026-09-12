@@ -125,12 +125,19 @@ await scenario('the dashboard renders and hydrates without a client error', asyn
   const title = await page.evaluate('document.title');
   assert.ok(title && title.length > 0, 'the page has a title');
 
-  // React has taken over when an event handler responds; the sidebar toggle is
-  // a client component on every page.
-  const hydrated = await page.evaluate(
-    "Boolean(document.querySelector('aside') || document.querySelector('nav'))",
+  // The design system's sidebar is a plain element carrying `data-slot`, not an
+  // <aside>, so the shell is checked by that marker plus the header's own
+  // sidebar trigger - the two parts every authenticated page renders.
+  const shell = await page.evaluate(
+    "Boolean(document.querySelector('[data-slot=\"sidebar\"]') && document.querySelector('[data-sidebar=\"trigger\"]'))",
   );
-  assert.ok(hydrated, 'the shell rendered');
+  assert.ok(shell, 'the shell rendered');
+
+  // React has taken over once its own fibers are attached to the DOM.
+  const hydrated = await page.evaluate(
+    "[...document.querySelectorAll('*')].some((node) => Object.getOwnPropertyNames(node).some((key) => key.startsWith('__react')))",
+  );
+  assert.ok(hydrated, 'the page hydrated');
 });
 
 await scenario('reference screen: Edit loads the row into the form', async () => {
