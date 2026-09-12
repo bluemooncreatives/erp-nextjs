@@ -68,7 +68,9 @@ export function buildJournalLegs(data: JournalInput): TransactionLeg[] {
     amount: data.mainAmount,
   });
 
-  return legs;
+  // ContraRepository uses array_push for the same entries: sub legs in input
+  // order, then the main leg. JournalRepository uses array_unshift instead.
+  return data.voucherType === VoucherType.Contra ? legs.reverse() : legs;
 }
 
 /** `JournalRepository::create($data)` */

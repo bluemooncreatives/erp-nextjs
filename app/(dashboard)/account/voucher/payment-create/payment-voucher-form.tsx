@@ -18,11 +18,24 @@ import {
 import { SubmitButton } from '@/components/erp/submit-button';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ROUTES } from '@/lib/routes';
-import { storeVoucher, type AccountFormState } from '../../actions';
+import { storeVoucher, updatePaymentVoucher, type AccountFormState } from '../../actions';
 
 const INITIAL: AccountFormState = {};
 
 type Line = { key: number; accountId: string; amount: number; narration: string };
+
+export type PaymentVoucherDefaults = {
+  id: number;
+  voucherType: string;
+  date: string;
+  creditAccountId: number;
+  lines: Omit<Line, 'key'>[];
+  narration?: string | null;
+  bankName?: string | null;
+  bankBranch?: string | null;
+  chequeNo?: string | null;
+  chequeDate?: string | null;
+};
 
 export function PaymentVoucherForm({
   payAccounts,
@@ -30,16 +43,18 @@ export function PaymentVoucherForm({
   currencySymbol,
   paymentType,
   heading,
+  defaults,
 }: {
   payAccounts: SelectOption[];
   allAccounts: SelectOption[];
   currencySymbol: string;
-  paymentType: 'voucher_payment' | 'voucher_recieve';
+  paymentType: 'voucher_payment';
   heading: string;
+  defaults?: PaymentVoucherDefaults;
 }) {
-  const [state, formAction] = useActionState(storeVoucher, INITIAL);
-  const [voucherType, setVoucherType] = useState('CV');
-  const [lines, setLines] = useState<Line[]>([
+  const [state, formAction] = useActionState(defaults ? updatePaymentVoucher : storeVoucher, INITIAL);
+  const [voucherType, setVoucherType] = useState(defaults?.voucherType ?? 'CV');
+  const [lines, setLines] = useState<Line[]>(defaults?.lines.map((line, key) => ({ ...line, key })) ?? [
     { key: 0, accountId: '', amount: 0, narration: '' },
   ]);
 
@@ -51,7 +66,7 @@ export function PaymentVoucherForm({
   return (
     <form action={formAction} className="space-y-6">
       <input type="hidden" name="payment_type" value={paymentType} />
-      <input type="hidden" name="is_approve" value="1" />
+      {defaults ? <input type="hidden" name="id" value={defaults.id} /> : null}
 
       <FormAlert variant="error" message={state.error} />
 
@@ -60,6 +75,7 @@ export function PaymentVoucherForm({
           <FormSelect
             label="Voucher Type"
             name="voucher_type"
+            error={state.fieldErrors?.voucher_type}
             value={voucherType}
             onChange={(e) => setVoucherType(e.target.value)}
             options={[
@@ -68,11 +84,12 @@ export function PaymentVoucherForm({
             ]}
           />
           <FormSelect
-            label={paymentType === 'voucher_payment' ? 'Paid from' : 'Received into'}
+            label="Paid from"
             name="credit_account_id"
             required
             placeholder="Select account"
             options={payAccounts}
+            defaultValue={defaults?.creditAccountId}
             error={state.fieldErrors?.credit_account_id}
           />
           <FormInput
@@ -80,21 +97,23 @@ export function PaymentVoucherForm({
             name="date"
             type="date"
             required
-            defaultValue={new Date().toISOString().slice(0, 10)}
+            defaultValue={defaults?.date ?? new Date().toISOString().slice(0, 10)}
+            error={state.fieldErrors?.date}
           />
         </div>
 
         {voucherType === 'BV' ? (
           <div className="mt-5 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-            <FormInput label="Bank Name" name="bank_name" />
-            <FormInput label="Bank Branch" name="bank_branch" />
-            <FormInput label="Cheque No" name="cheque_no" />
-            <FormInput label="Cheque Date" name="cheque_date" type="date" />
+            <FormInput label="Bank Name" name="bank_name" defaultValue={defaults?.bankName ?? ''} />
+            <FormInput label="Bank Branch" name="bank_branch" defaultValue={defaults?.bankBranch ?? ''} />
+            <FormInput label="Cheque No" name="cheque_no" defaultValue={defaults?.chequeNo ?? ''} />
+            <FormInput label="Cheque Date" name="cheque_date" type="date" defaultValue={defaults?.chequeDate ?? ''} />
           </div>
         ) : null}
       </Card>
 
       <Card title="Lines" bodyClassName="">
+        <FormAlert variant="error" message={state.fieldErrors?.debit_account_amount} />
         {state.fieldErrors?.debit_account_id ? (
           <p className="px-4 pt-4 text-xs text-error-500 sm:px-6">
             {state.fieldErrors.debit_account_id}
@@ -185,7 +204,7 @@ export function PaymentVoucherForm({
       </Card>
 
       <Card title="Narration">
-        <FormTextarea label="Narration" name="narration" />
+        <FormTextarea label="Narration" name="narration" defaultValue={defaults?.narration ?? ''} />
       </Card>
 
       <div className="flex items-center justify-end gap-3">
@@ -195,7 +214,7 @@ export function PaymentVoucherForm({
         >
           Cancel
         </Link>
-        <SubmitButton disabled={total <= 0}>Save Voucher</SubmitButton>
+        <SubmitButton disabled={total <= 0}>{defaults ? 'Update Voucher' : 'Save Voucher'}</SubmitButton>
       </div>
     </form>
   );

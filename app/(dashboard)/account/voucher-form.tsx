@@ -55,6 +55,7 @@ export function VoucherForm({
   defaults?: {
     id?: number;
     accountId?: number | null;
+    accountType?: 'debit' | 'credit';
     date?: string | null;
     narration?: string | null;
     lines?: Array<{ accountId: number; amount: number; narration: string | null }>;
@@ -81,6 +82,8 @@ export function VoucherForm({
   return (
     <form action={formAction} className="space-y-6">
       {defaults?.id ? <input type="hidden" name="id" value={defaults.id} /> : null}
+      <input type="hidden" name="main_amount" value={total} />
+      <input type="hidden" name="sub_amounts" value={total} />
 
       <FormAlert variant="error" message={state.error} />
 
@@ -122,7 +125,8 @@ export function VoucherForm({
             <FormSelect
               label="Main account side"
               name="account_type"
-              defaultValue="debit"
+              defaultValue={defaults?.accountType ?? 'debit'}
+              error={state.fieldErrors?.account_type}
               options={[
                 { value: 'debit', label: 'Debit' },
                 { value: 'credit', label: 'Credit' },
@@ -142,6 +146,7 @@ export function VoucherForm({
       </Card>
 
       <Card title="Lines" bodyClassName="">
+        <FormAlert variant="error" message={state.fieldErrors?.sub_amount ?? state.fieldErrors?.main_amount} />
         {state.fieldErrors?.sub_account_id ? (
           <p className="px-4 pt-4 text-xs text-error-500 sm:px-6">
             {state.fieldErrors.sub_account_id}

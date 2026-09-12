@@ -31,11 +31,15 @@ import {
   approveAllVouchers,
   createVoucher,
   deleteVoucher,
+  findVoucher,
+  updateVoucher,
   setVoucherApproval,
   VoucherType,
   type VoucherTypeCode,
 } from '@/lib/accounting/vouchers';
-import { createJournalVoucher } from '@/lib/accounting/journal';
+import { activeAccounts, createJournalVoucher, updateJournalVoucher as updateJournalEntry, type JournalInput } from '@/lib/accounting/journal';
+import { isEnabled } from '@/lib/business-settings';
+import { openAccountingPeriod } from '@/lib/accounting/periods';
 
 export type AccountFormState = {
   error?: string;
@@ -277,35 +281,59 @@ export async function deleteBankAccountAction(formData: FormData): Promise<void>
 
 // --- Vouchers --------------------------------------------------------------
 
-/** `VoucherController@store` - a payment or receipt voucher. */
+/** `VoucherController@store` - payment vouchers. Receipts have a separate action. */
 export async function storeVoucher(
   _prev: AccountFormState,
   formData: FormData,
 ): Promise<AccountFormState> {
-  const user = await authorize('vouchers.store');
+  return savePaymentVoucher(formData, false);
+}
 
-  const debitAccountId = numList(formData, 'debit_account_id');
-  const debitAmount = numList(formData, 'debit_account_amount');
+export async function updatePaymentVoucher(
+  _prev: AccountFormState,
+  formData: FormData,
+): Promise<AccountFormState> {
+  return savePaymentVoucher(formData, true);
+}
+
+async function savePaymentVoucher(formData: FormData, editing: boolean): Promise<AccountFormState> {
+  const user = await authorize(editing ? 'vouchers.edit' : 'vouchers.store');
+  const id = num(formData, 'id');
+  if (editing) {
+    const existing = Number.isSafeInteger(id) && id > 0 ? await findVoucher(id) : null;
+    if (!existing || existing.paymentType !== 'voucher_payment') return { error: 'Payment voucher not found.' };
+  }
+
+  const debitAccountId = formData.getAll('debit_account_id').map(Number);
+  const debitAmount = formData.getAll('debit_account_amount').map(Number);
   const debitNarration = strList(formData, 'debit_account_narration');
   const creditAccountId = num(formData, 'credit_account_id');
   const amount = debitAmount.reduce((a, b) => a + b, 0);
 
   const fieldErrors: Record<string, string> = {};
   if (!creditAccountId) fieldErrors.credit_account_id = 'Select the paying account.';
-  if (debitAccountId.length === 0) fieldErrors.debit_account_id = 'Add at least one line.';
-  if (amount <= 0) fieldErrors.debit_account_amount = 'Enter an amount.';
+  if (debitAccountId.length === 0 || debitAccountId.some((accountId) => !Number.isSafeInteger(accountId) || accountId <= 0)) fieldErrors.debit_account_id = 'Select an account for every line.';
+  if (debitAmount.length !== debitAccountId.length || debitAmount.some((value) => !Number.isFinite(value) || value < 0) || !Number.isFinite(amount) || amount <= 0) fieldErrors.debit_account_amount = 'Enter a valid amount for every line.';
+  const date = str(formData, 'date') ?? '';
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date))) fieldErrors.date = 'Enter a valid date.';
+  const rawType = str(formData, 'voucher_type');
+  if (rawType !== VoucherType.Cash && rawType !== VoucherType.Bank) fieldErrors.voucher_type = 'Select cash or bank voucher.';
+  if (!editing) {
+    const period = await openAccountingPeriod();
+    if (period?.startDate && date < period.startDate) fieldErrors.date = 'Payment Date should be in this accounting period';
+  }
   if (Object.keys(fieldErrors).length) return { fieldErrors };
 
   const voucherType = (str(formData, 'voucher_type') ?? VoucherType.Cash) as VoucherTypeCode;
 
   try {
-    await createVoucher({
+    const input = {
       voucherType,
       amount,
-      date: String(formData.get('date') ?? ''),
+      date,
       narration: str(formData, 'narration'),
-      paymentType: str(formData, 'payment_type') ?? 'voucher_payment',
-      isApprove: num(formData, 'is_approve', 1),
+      paymentType: 'voucher_payment',
+      isApprove: (await isEnabled('voucher_payment_approval')) ? 1 : 0,
       debitAccountId,
       debitAccountAmount: debitAmount,
       debitAccountNarration: debitNarration,
@@ -316,14 +344,17 @@ export async function storeVoucher(
       chequeNo: str(formData, 'cheque_no'),
       chequeDate: str(formData, 'cheque_date'),
       createdBy: user.id,
-    });
-    await successLog('Voucher created', user.id);
+    };
+    if (editing) await updateVoucher(id, input);
+    else await createVoucher(input);
+    await successLog(editing ? `Payment voucher updated: ${id}` : 'Voucher created', user.id);
   } catch (error) {
     await errorLog(String(error), user.id);
     return { error: 'Something Went Wrong' };
   }
 
   revalidatePath(ROUTES['vouchers.index']);
+  revalidatePath('/account/voucher', 'layout');
   redirect(ROUTES['vouchers.index']);
 }
 
@@ -332,86 +363,76 @@ export async function storeJournalVoucher(
   _prev: AccountFormState,
   formData: FormData,
 ): Promise<AccountFormState> {
-  const user = await authorize('journal.store');
+  return saveCompoundVoucher(formData, 'journal', false);
+}
 
-  const subAccountId = numList(formData, 'sub_account_id');
-  const subAmount = numList(formData, 'sub_amount');
+export async function updateJournalVoucherAction(_prev: AccountFormState, formData: FormData): Promise<AccountFormState> {
+  return saveCompoundVoucher(formData, 'journal', true);
+}
+
+export async function storeContraVoucher(_prev: AccountFormState, formData: FormData): Promise<AccountFormState> {
+  return saveCompoundVoucher(formData, 'contra', false);
+}
+
+export async function updateContraVoucherAction(_prev: AccountFormState, formData: FormData): Promise<AccountFormState> {
+  return saveCompoundVoucher(formData, 'contra', true);
+}
+
+async function saveCompoundVoucher(formData: FormData, kind: 'journal' | 'contra', editing: boolean): Promise<AccountFormState> {
+  const user = await authorize(`${kind}.${editing ? 'edit' : 'store'}`);
+  const paymentType = kind === 'journal' ? 'journal_voucher' : 'contra_voucher';
+  const id = num(formData, 'id');
+  if (editing) {
+    const existing = Number.isSafeInteger(id) && id > 0 ? await findVoucher(id) : null;
+    if (!existing || existing.paymentType !== paymentType) return { error: 'Voucher not found.' };
+  }
+
+  const subAccountId = formData.getAll('sub_account_id').map(Number);
+  const subAmount = formData.getAll('sub_amount').map(Number);
   const subNarration = strList(formData, 'sub_narration');
   const accountId = num(formData, 'account_id');
   const amount = subAmount.reduce((a, b) => a + b, 0);
+  const accountType = str(formData, 'account_type');
+  const date = str(formData, 'date') ?? '';
+  const mainAmount = Number(formData.get('main_amount'));
+  const allowedAccounts = (await activeAccounts()).filter((account) => kind === 'contra' || editing || account.isGroup === 0);
+  const allowedIds = new Set(allowedAccounts.map((account) => account.id));
 
   const fieldErrors: Record<string, string> = {};
-  if (!accountId) fieldErrors.account_id = 'Select the main account.';
-  if (subAccountId.length === 0) fieldErrors.sub_account_id = 'Add at least one line.';
-  if (amount <= 0) fieldErrors.sub_amount = 'Enter an amount.';
+  if (!allowedIds.has(accountId)) fieldErrors.account_id = 'Select the main account.';
+  if (!subAccountId.length || subAccountId.some((value) => !allowedIds.has(value))) fieldErrors.sub_account_id = 'Select an account for every line.';
+  if (subAccountId.length !== subAmount.length || subAmount.some((value) => !Number.isFinite(value) || value < 0) || !Number.isFinite(amount) || amount <= 0) fieldErrors.sub_amount = 'Enter a valid amount for every line.';
+  if (!Number.isFinite(mainAmount) || Math.abs(mainAmount - amount) > 0.000001) fieldErrors.main_amount = 'Debit and Credit amount was mismatched.';
+  if (accountType !== 'debit' && accountType !== 'credit') fieldErrors.account_type = 'Select debit or credit.';
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date))) fieldErrors.date = 'Enter a valid date.';
   if (Object.keys(fieldErrors).length) return { fieldErrors };
 
   try {
-    await createJournalVoucher({
+    const input: JournalInput = {
+      voucherType: kind === 'contra' ? VoucherType.Contra : VoucherType.Journal,
+      paymentType,
       amount,
-      date: String(formData.get('date') ?? ''),
-      accountType: (str(formData, 'account_type') ?? 'debit') as 'debit' | 'credit',
+      date,
+      accountType: accountType as 'debit' | 'credit',
       accountId,
       mainAmount: amount,
       narration: str(formData, 'narration'),
       subAccountId,
       subAmount,
       subNarration,
-      isApprove: num(formData, 'is_approve', 1),
+      isApprove: (await isEnabled(`${paymentType}_approval`)) ? 1 : 0,
       createdBy: user.id,
-    });
-    await successLog('Journal voucher created', user.id);
+    };
+    if (editing) await updateJournalEntry(id, input);
+    else await createJournalVoucher(input);
+    await successLog(`${kind} voucher ${editing ? 'updated' : 'created'}`, user.id);
   } catch (error) {
     await errorLog(String(error), user.id);
     return { error: 'Something Went Wrong' };
   }
 
-  revalidatePath(ROUTES['journal.index']);
-  redirect(ROUTES['journal.index']);
-}
-
-/** `ContraVoucherController@store` - moves money between two own accounts. */
-export async function storeContraVoucher(
-  _prev: AccountFormState,
-  formData: FormData,
-): Promise<AccountFormState> {
-  const user = await authorize('contra.store');
-
-  const fromAccountId = num(formData, 'from_account_id');
-  const toAccountId = num(formData, 'to_account_id');
-  const amount = num(formData, 'amount');
-
-  const fieldErrors: Record<string, string> = {};
-  if (!fromAccountId) fieldErrors.from_account_id = 'Select the source account.';
-  if (!toAccountId) fieldErrors.to_account_id = 'Select the destination account.';
-  if (fromAccountId === toAccountId) {
-    fieldErrors.to_account_id = 'The two accounts must differ.';
-  }
-  if (amount <= 0) fieldErrors.amount = 'Enter an amount.';
-  if (Object.keys(fieldErrors).length) return { fieldErrors };
-
-  try {
-    await createVoucher({
-      voucherType: VoucherType.Contra,
-      amount,
-      date: String(formData.get('date') ?? ''),
-      narration: str(formData, 'narration'),
-      paymentType: 'contra_voucher',
-      isApprove: num(formData, 'is_approve', 1),
-      // Money arrives in the destination (Dr) and leaves the source (Cr).
-      debitAccountId: toAccountId,
-      creditAccountId: fromAccountId,
-      isTransfer: 1,
-      createdBy: user.id,
-    });
-    await successLog('Contra voucher created', user.id);
-  } catch (error) {
-    await errorLog(String(error), user.id);
-    return { error: 'Something Went Wrong' };
-  }
-
-  revalidatePath(ROUTES['contra.index']);
-  redirect(ROUTES['contra.index']);
+  revalidatePath('/account/voucher', 'layout');
+  redirect(kind === 'journal' ? ROUTES['journal.index'] : ROUTES['contra.index']);
 }
 
 /** `VoucherController@approval_status` */
@@ -440,6 +461,8 @@ export async function deleteVoucherAction(formData: FormData): Promise<void> {
   await deleteVoucher(id);
   await successLog(`Voucher deleted: ${id}`, user.id);
   revalidatePath(ROUTES['vouchers.index']);
+  revalidatePath(ROUTES['voucher_recieve.index']);
+  revalidatePath(ROUTES['voucher_approval.index']);
 }
 
 // --- Chart of accounts -----------------------------------------------------
@@ -541,4 +564,3 @@ export async function deleteChartAccountAction(formData: FormData): Promise<void
   await successLog(`Chart account deleted: ${id}`, user.id);
   revalidatePath(ROUTES['char_accounts.index']);
 }
-

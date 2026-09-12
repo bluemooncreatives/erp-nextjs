@@ -361,7 +361,8 @@ export async function voucherTransactions(voucherId: number) {
         eq(transactions.voucherableId, voucherId),
         eq(transactions.voucherableType, MorphType.Voucher),
       ),
-    );
+    )
+    .orderBy(transactions.id);
 }
 
 /** `status_approval(['id' => .., 'status' => ..])` */

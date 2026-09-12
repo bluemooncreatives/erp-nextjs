@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { authorize, can } from '@/lib/auth/permissions';
 import { listVouchers } from '@/lib/accounting/reports';
 import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
-import { ROUTES } from '@/lib/routes';
+import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
@@ -29,9 +29,11 @@ export default async function PaymentVouchersPage({
     page: Number(sp.page ?? 1),
   });
 
-  const [canCreate, canDelete] = await Promise.all([
+  const [canCreate, canDelete, canEdit, canView] = await Promise.all([
     can('vouchers.store'),
     can('vouchers.destroy'),
+    can('vouchers.edit'),
+    can('vouchers.show'),
   ]);
 
   const voucherRows = await Promise.all(
@@ -72,7 +74,7 @@ export default async function PaymentVouchersPage({
           {voucherRows.map((voucher) => (
             <Tr key={voucher.id}>
               <Td className="font-medium text-gray-700 dark:text-gray-300">
-                {voucher.txId ?? voucher.id}
+                {canView ? <Link href={route('vouchers.show', { id: voucher.id })} className="text-brand-500">{voucher.txId ?? voucher.id}</Link> : voucher.txId ?? voucher.id}
               </Td>
               <Td>{voucher.dateLabel}</Td>
               <Td>{voucher.voucherType}</Td>
@@ -94,6 +96,7 @@ export default async function PaymentVouchersPage({
                 </Badge>
               </Td>
               <Td>
+                {canEdit ? <Link href={route('vouchers.edit', { id: voucher.id })} className="mr-3 text-brand-500">Edit</Link> : null}
                 {canDelete ? (
                   <form action={deleteVoucherAction}>
                     <input type="hidden" name="id" value={voucher.id} />
