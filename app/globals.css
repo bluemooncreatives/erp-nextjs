@@ -401,25 +401,36 @@
 
 :root {
   --background: oklch(1.0000 0 0);
+  --theme-default-background: oklch(1.0000 0 0);
   --foreground: oklch(0.2697 0 0);
+  --theme-default-foreground: oklch(0.2697 0 0);
   --card: oklch(1.0000 0 0);
+  --theme-default-card: oklch(1.0000 0 0);
   --card-foreground: oklch(0.2697 0 0);
+  --theme-default-card-foreground: oklch(0.2697 0 0);
   --popover: oklch(1.0000 0 0);
+  --theme-default-popover: oklch(1.0000 0 0);
   --popover-foreground: oklch(0.2697 0 0);
   --primary: oklch(0.5296 0.1863 258.1459);
+  --theme-default-primary: oklch(0.5296 0.1863 258.1459);
   --primary-foreground: oklch(1.0000 0 0);
   --secondary: oklch(0.9686 0.0035 247.8590);
   --secondary-foreground: oklch(0.2697 0 0);
   --muted: oklch(0.9696 0 0);
   --muted-foreground: oklch(0.5547 0 0);
+  --theme-default-muted-foreground: oklch(0.5547 0 0);
   --accent: oklch(0.9633 0.0154 255.0359);
   --accent-foreground: oklch(0.4430 0.1522 257.9241);
   --destructive: oklch(0.5409 0.2143 28.4788);
+  --theme-default-destructive: oklch(0.5409 0.2143 28.4788);
   --destructive-foreground: oklch(1.0000 0 0);
   --border: oklch(0.8610 0 0);
+  --theme-default-border: oklch(0.8610 0 0);
   --input: oklch(0.9234 0 0);
   --ring: oklch(0.5296 0.1863 258.1459);
+  --theme-default-ring: oklch(0.5296 0.1863 258.1459);
   --chart-1: oklch(0.5296 0.1863 258.1459);
+  --theme-default-chart-1: oklch(0.5296 0.1863 258.1459);
   --chart-2: oklch(0.6902 0.1481 162.3676);
   --chart-3: oklch(0.6683 0.1657 54.1917);
   --chart-4: oklch(0.5815 0.2477 311.2650);
@@ -430,11 +441,14 @@
   --sidebar: oklch(0.9848 0 0);
   --sidebar-foreground: oklch(0.3705 0 0);
   --sidebar-primary: oklch(0.5296 0.1863 258.1459);
+  --theme-default-sidebar-primary: oklch(0.5296 0.1863 258.1459);
   --sidebar-primary-foreground: oklch(1.0000 0 0);
   --sidebar-accent: oklch(0.9498 0.0109 255.0143);
   --sidebar-accent-foreground: oklch(0.4430 0.1522 257.9241);
   --sidebar-border: oklch(0.9234 0 0);
+  --theme-default-sidebar-border: oklch(0.9234 0 0);
   --sidebar-ring: oklch(0.5296 0.1863 258.1459);
+  --theme-default-sidebar-ring: oklch(0.5296 0.1863 258.1459);
   --font-sans: DM Sans, ui-sans-serif, sans-serif, system-ui;
   --font-serif: Georgia, "Times New Roman", serif;
   --font-mono: monospace;
@@ -459,8 +473,10 @@
 
   /* Semantic status colours */
   --success: oklch(0.6902 0.1481 162.3676);
+  --theme-default-success: oklch(0.6902 0.1481 162.3676);
   --success-foreground: oklch(1.0000 0 0);
   --warning: oklch(0.6683 0.1657 54.1917);
+  --theme-default-warning: oklch(0.6683 0.1657 54.1917);
   --warning-foreground: oklch(1.0000 0 0);
   --info: oklch(0.5296 0.1863 258.1459);
   --info-foreground: oklch(1.0000 0 0);
@@ -469,6 +485,7 @@
 
   /* Project aliases */
   --input-background: var(--background);
+  --theme-default-input-background: var(--background);
   --switch-background: var(--muted);
   --button-primary: var(--primary);
   --button-primary-hover: oklch(0.4800 0.1863 258.1459);
@@ -496,25 +513,36 @@
    * (258) instead of true chroma-0 gray.
    */
   --background: oklch(0.1900 0.0060 258);
+  --theme-default-background: oklch(0.1900 0.0060 258);
   --foreground: oklch(0.9600 0 0);
+  --theme-default-foreground: oklch(0.9600 0 0);
   --card: oklch(0.2300 0.0080 258);
+  --theme-default-card: oklch(0.2300 0.0080 258);
   --card-foreground: oklch(0.9600 0 0);
+  --theme-default-card-foreground: oklch(0.9600 0 0);
   --popover: oklch(0.2300 0.0080 258);
+  --theme-default-popover: oklch(0.2300 0.0080 258);
   --popover-foreground: oklch(0.9600 0 0);
   --primary: oklch(0.7000 0.1750 258.0000);
+  --theme-default-primary: oklch(0.7000 0.1750 258.0000);
   --primary-foreground: oklch(0.1500 0.0300 258.0000);
   --secondary: oklch(0.2800 0.0080 258);
   --secondary-foreground: oklch(0.9600 0 0);
   --muted: oklch(0.2600 0.0060 258);
   --muted-foreground: oklch(0.7100 0.0100 258);
+  --theme-default-muted-foreground: oklch(0.7100 0.0100 258);
   --accent: oklch(0.2900 0.0550 258);
   --accent-foreground: oklch(0.8700 0.0700 252.0000);
   --destructive: oklch(0.6200 0.2100 27.0000);
+  --theme-default-destructive: oklch(0.6200 0.2100 27.0000);
   --destructive-foreground: oklch(1.0000 0 0);
   --border: oklch(0.3200 0.0100 258);
+  --theme-default-border: oklch(0.3200 0.0100 258);
   --input: oklch(0.3200 0.0100 258);
   --ring: oklch(0.7000 0.1750 258.0000);
+  --theme-default-ring: oklch(0.7000 0.1750 258.0000);
   --chart-1: oklch(0.7000 0.1750 258.0000);
+  --theme-default-chart-1: oklch(0.7000 0.1750 258.0000);
   --chart-2: oklch(0.7750 0.1362 166.9055);
   --chart-3: oklch(0.8380 0.1371 82.1273);
   --chart-4: oklch(0.6863 0.1603 305.6668);
@@ -523,11 +551,14 @@
   --sidebar: oklch(0.1700 0.0060 258);
   --sidebar-foreground: oklch(0.9000 0 0);
   --sidebar-primary: oklch(0.7000 0.1750 258.0000);
+  --theme-default-sidebar-primary: oklch(0.7000 0.1750 258.0000);
   --sidebar-primary-foreground: oklch(0.1500 0.0300 258.0000);
   --sidebar-accent: oklch(0.2800 0.0080 258);
   --sidebar-accent-foreground: oklch(0.9600 0 0);
   --sidebar-border: oklch(0.3000 0.0100 258);
+  --theme-default-sidebar-border: oklch(0.3000 0.0100 258);
   --sidebar-ring: oklch(0.7000 0.1750 258.0000);
+  --theme-default-sidebar-ring: oklch(0.7000 0.1750 258.0000);
   --font-sans: DM Sans, ui-sans-serif, sans-serif, system-ui;
   --font-serif: Georgia, "Times New Roman", serif;
   --font-mono: monospace;
@@ -548,8 +579,10 @@
   --shadow-2xl: 0px 2px 6px 0px hsl(0 0% 0% / 0.38);
 
   --success: oklch(0.7750 0.1362 166.9055);
+  --theme-default-success: oklch(0.7750 0.1362 166.9055);
   --success-foreground: oklch(0.2074 0.0625 252.2461);
   --warning: oklch(0.7500 0.1500 70.0000);
+  --theme-default-warning: oklch(0.7500 0.1500 70.0000);
   --warning-foreground: oklch(0.2074 0.0625 252.2461);
   --info: oklch(0.7000 0.1750 258.0000);
   --info-foreground: oklch(0.1500 0.0300 258.0000);
@@ -557,6 +590,7 @@
   --neutral-foreground: oklch(0.2074 0.0625 252.2461);
 
   --input-background: oklch(1 0 0 / 6%);
+  --theme-default-input-background: oklch(1 0 0 / 6%);
   --switch-background: var(--muted);
   --button-primary: var(--primary);
   --button-primary-hover: oklch(0.7600 0.1650 258.0000);
@@ -588,28 +622,28 @@
 }
 
 .erp-theme {
-  --primary: var(--erp-base-color, var(--primary));
-  --ring: var(--erp-base-color, var(--ring));
-  --sidebar-primary: var(--erp-base-color, var(--sidebar-primary));
-  --sidebar-ring: var(--erp-base-color, var(--sidebar-ring));
-  --chart-1: var(--erp-base-color, var(--chart-1));
-  --border: var(--erp-border-color, var(--border));
-  --sidebar-border: var(--erp-border-color, var(--sidebar-border));
-  --muted-foreground: var(--erp-text-color, var(--muted-foreground));
-  --input-background: var(--erp-input--bg, var(--input-background));
-  --success: var(--erp-success, var(--success));
-  --warning: var(--erp-warning, var(--warning));
-  --destructive: var(--erp-danger, var(--destructive));
+  --primary: var(--erp-base-color, var(--theme-default-primary));
+  --ring: var(--erp-base-color, var(--theme-default-ring));
+  --sidebar-primary: var(--erp-base-color, var(--theme-default-sidebar-primary));
+  --sidebar-ring: var(--erp-base-color, var(--theme-default-sidebar-ring));
+  --chart-1: var(--erp-base-color, var(--theme-default-chart-1));
+  --border: var(--erp-border-color, var(--theme-default-border));
+  --sidebar-border: var(--erp-border-color, var(--theme-default-sidebar-border));
+  --muted-foreground: var(--erp-text-color, var(--theme-default-muted-foreground));
+  --input-background: var(--erp-input--bg, var(--theme-default-input-background));
+  --success: var(--erp-success, var(--theme-default-success));
+  --warning: var(--erp-warning, var(--theme-default-warning));
+  --destructive: var(--erp-danger, var(--theme-default-destructive));
 }
 
 /* Surface colours are swapped in light mode only: the saved palette's
    `bg_white` is white, which would blank out a dark theme. */
 html:not(.dark) .erp-theme {
-  --background: var(--erp-bg-white, var(--background));
-  --card: var(--erp-bg-white, var(--card));
-  --popover: var(--erp-bg-white, var(--popover));
-  --foreground: var(--erp-text-black, var(--foreground));
-  --card-foreground: var(--erp-text-black, var(--card-foreground));
+  --background: var(--erp-bg-white, var(--theme-default-background));
+  --card: var(--erp-bg-white, var(--theme-default-card));
+  --popover: var(--erp-bg-white, var(--theme-default-popover));
+  --foreground: var(--erp-text-black, var(--theme-default-foreground));
+  --card-foreground: var(--erp-text-black, var(--theme-default-card-foreground));
 }
 
 /* The scrollbar colour has its own slot in the palette. */
@@ -779,7 +813,7 @@ input[type='number']::-webkit-outer-spin-button {
 
   @keyframes heartbeat {
     0% {
-      box-shadow: 0 0 0 0 var(--heartbeat-color, var(--primary));
+      box-shadow: 0 0 0 0 var(--heartbeat-color, var(--theme-default-primary));
       transform: scale(1);
     }
     50% {

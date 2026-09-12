@@ -65,6 +65,7 @@ import {
   WeeklyOverviewCard,
   type StatAccent,
 } from '@/components/dashboard';
+import { NAV_ICONS } from '@/layout/nav-icons';
 import { PrimaryCell } from '@/components/common/cells';
 import { StatusBadge } from '@/components/common/status-badge';
 import { Button } from '@/components/ui/button';
@@ -275,16 +276,17 @@ export default async function DashboardPage() {
           ),
     )
     .map((item) => {
-      if (item.kind === 'link') return { label: item.label, href: navHref(item) };
+      if (item.kind === 'link') return { label: item.label, href: navHref(item), icon: 'grid' };
       const first = item.children.find(
         (child) => child.kind === 'link' && userCan(user, navPermission(child)),
       );
       return {
         label: item.label,
+        icon: item.icon,
         href: first && first.kind === 'link' ? navHref(first) : null,
       };
     })
-    .filter((item): item is { label: string; href: string } => Boolean(item.href));
+    .filter((item): item is { label: string; href: string; icon: string } => Boolean(item.href));
 
   return (
     <div className="space-y-6">
@@ -337,7 +339,7 @@ export default async function DashboardPage() {
                   accent={((index % 5) + 1) as StatAccent}
                   value={tile.value}
                   title={tile.title}
-                  detail={tile.detail}
+                  badge={tile.detail}
                 />
               ))}
             </div>
@@ -357,7 +359,7 @@ export default async function DashboardPage() {
               label: row.monthName,
               value: Number(row.totalSell),
             }))}
-            reportTitle="This year"
+            reportTitle="All time"
             reportCaption="Across every open invoice"
             rows={[
               {
@@ -442,7 +444,7 @@ export default async function DashboardPage() {
             format={compactFormat}
             data={months}
             performancePercent={ratio(netProfit, sale.net)}
-            performanceCaption={`margin on ${money(sale.net)} of sales this year`}
+            performanceCaption={`margin on ${money(sale.net)} of all-time receipts`}
             detailsHref={ROUTES['sale.index']}
           />
         ) : null}
@@ -478,7 +480,7 @@ export default async function DashboardPage() {
             }))}
             format={moneyFormat}
             viewAllHref={ROUTES['add_contact.index']}
-            summary={`${salesCount} approved sales this period.`}
+            summary={`${salesCount} approved sales to date.`}
           />
         ) : null}
 
@@ -507,7 +509,27 @@ export default async function DashboardPage() {
                 </p>
               </div>
             ) : (
-              <div className="minimal-scrollbar w-full overflow-x-auto border-t">
+              <>
+              <div className="divide-border divide-y border-t xl:hidden">
+                {dueRows.map((due) => (
+                  <div key={due.id} className="space-y-3 px-4 py-4 sm:px-6">
+                    <div className="flex items-center justify-between gap-3">
+                      <PrimaryCell title={due.partyName} subtitle={String(due.invoiceNo ?? due.id)} />
+                      <StatusBadge tone={due.status === 2 ? 'warning' : 'danger'}>
+                        {due.status === 2 ? 'Partial' : 'Unpaid'}
+                      </StatusBadge>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+                      <span className="text-muted-foreground">{due.dateLabel}</span>
+                      <span className="font-medium tabular-nums">{money(Number(due.payableAmount))}</span>
+                      <Button variant="soft" size="sm" asChild>
+                        <Link href={ROUTES['sale.show'].replace('{id}', String(due.id))}>Open invoice<ArrowRight /></Link>
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="minimal-scrollbar hidden w-full overflow-x-auto border-t xl:block">
                 <table className="table-unified w-full text-sm">
                   <caption className="sr-only">Invoices with an outstanding balance</caption>
                   <thead>
@@ -567,6 +589,7 @@ export default async function DashboardPage() {
                   </tbody>
                 </table>
               </div>
+              </>
             )}
           </UICard>
         ) : null}
@@ -637,21 +660,24 @@ export default async function DashboardPage() {
       <section className="space-y-3">
         <h2 className="text-base font-semibold">Workspace</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {modules.map((module) => (
+          {modules.map((module) => {
+            const Icon = NAV_ICONS[module.icon] ?? ArrowRight;
+            return (
             <Link
               key={module.href}
               href={module.href}
               className="group ring-foreground/10 bg-card hover:ring-primary/40 focus-visible:ring-primary flex items-start gap-3 rounded-xl p-4 shadow-xs ring-1 transition-colors focus:outline-none focus-visible:ring-2"
             >
               <span className="bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary rounded-md p-2 transition-colors">
-                <ArrowRight className="size-4" aria-hidden="true" />
+                <Icon className="size-4" aria-hidden="true" />
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-medium">{module.label}</span>
                 <span className="text-muted-foreground mt-0.5 block text-xs">Open</span>
               </span>
             </Link>
-          ))}
+          );
+          })}
         </div>
       </section>
     </div>
