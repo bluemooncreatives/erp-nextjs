@@ -10,7 +10,6 @@ import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
-import Badge from '@/components/ui/badge/Badge';
 import { deleteIncomeAction } from '../actions';
 
 export const metadata: Metadata = { title: 'Income Lists' };

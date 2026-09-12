@@ -34,11 +34,12 @@ export default async function StockTransferListPage({
     allBranches: user.role.type === 'system_user',
   });
 
-  const [canCreate, canSend, canReceive, canDelete] = await Promise.all([
+  const [canCreate, canSend, canReceive, canDelete, canShow] = await Promise.all([
     can('stock-transfer.store'),
     can('stock-transfer.sent'),
     can('stock-transfer.receive'),
     can('stock-transfer.delete'),
+    can('stock-transfer.show'),
   ]);
 
   const transferRows = await Promise.all(
@@ -95,6 +96,7 @@ export default async function StockTransferListPage({
               </Td>
               <Td>
                 <div className="flex items-center gap-2">
+                  {canShow && <Link className="text-brand-500 hover:underline" href={`/inventory/stock-transfer/${transfer.id}`}>Details</Link>}
                   {!transfer.sentAt && canSend ? (
                     <form action={sendTransferAction}>
                       <input type="hidden" name="id" value={transfer.id} />

@@ -20,8 +20,12 @@ export default async function BankHistoryPage({ params }: { params: Promise<{ id
       .from(transactions).leftJoin(vouchers, and(eq(vouchers.id, transactions.voucherableId), eq(transactions.voucherableType, MorphType.Voucher)))
       .where(eq(transactions.accountId, bank.chartAccountId)).orderBy(transactions.id),
   ]);
-  let balance = Number(opening?.amount ?? 0);
-  const running = rows.map((row) => { balance += row.type === 'Dr' ? Number(row.amount) : -Number(row.amount); return { ...row, balance }; });
+  const running: Array<(typeof rows)[number] & { balance: number }> = [];
+  for (const row of rows) {
+    const previous = running.at(-1)?.balance ?? Number(opening?.amount ?? 0);
+    running.push({ ...row, balance: previous + (row.type === 'Dr' ? Number(row.amount) : -Number(row.amount)) });
+  }
+  const balance = running.at(-1)?.balance ?? Number(opening?.amount ?? 0);
   const decorated = await Promise.all(running.map(async (row) => ({ ...row, dateLabel: await dateConvert(row.date), amountLabel: await singlePrice(row.amount), balanceLabel: await singlePrice(row.balance) })));
   return <><PageHeader title={`${bank.bankName} — Account History`} /><Card title={`Current Balance: ${await singlePrice(balance)}`} bodyClassName="">
     <DataTable columns={[{ label: 'Date' }, { label: 'Voucher' }, { label: 'Narration' }, { label: 'Debit' }, { label: 'Credit' }, { label: 'Balance' }]} isEmpty={false}>
