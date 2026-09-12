@@ -14,6 +14,8 @@ import { dateConvert, singlePrice } from '@/lib/settings';
 import { toDateString } from '@/lib/php-date';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card, EmptyState } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { ArrowDownLeft, ArrowUpRight, PlayCircle, Scale } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { FormAlert } from '@/components/erp/fields';
 
@@ -83,7 +85,16 @@ export default async function LedgerReportPage({
   );
 
 
-  const openingLabel = await singlePrice(opening);
+  // Opening and closing bracket the period; the Dr/Cr totals say how it got
+  // from one to the other. The table alone made you scroll to the last row to
+  // find the closing balance.
+  const closing = withBalances.length ? withBalances[withBalances.length - 1].balance : opening;
+  const [openingLabel, closingLabel, debitLabel, creditLabel] = await Promise.all([
+    singlePrice(opening),
+    singlePrice(closing),
+    singlePrice(rows.filter((r) => r.type === 'Dr').reduce((sum, r) => sum + Number(r.amount), 0)),
+    singlePrice(rows.filter((r) => r.type === 'Cr').reduce((sum, r) => sum + Number(r.amount), 0)),
+  ]);
 
   return (
     <>
@@ -141,6 +152,16 @@ export default async function LedgerReportPage({
           <EmptyState message="Select an account to build its ledger." />
         </Card>
       ) : (
+        <>
+        <ReportSummary
+          figures={[
+            { label: 'Opening balance', value: openingLabel, detail: 'Brought forward', icon: PlayCircle },
+            { label: 'Debits', value: debitLabel, detail: 'Dr in this period', icon: ArrowDownLeft },
+            { label: 'Credits', value: creditLabel, detail: 'Cr in this period', icon: ArrowUpRight },
+            { label: 'Closing balance', value: closingLabel, detail: `After ${rows.length} postings`, icon: Scale },
+          ]}
+        />
+
         <Card
           title={`${account.name}${account.code ? ` (${account.code})` : ''}`}
           bodyClassName=""
@@ -187,6 +208,7 @@ export default async function LedgerReportPage({
             ))}
           </DataTable>
         </Card>
+        </>
       )}
     </>
   );

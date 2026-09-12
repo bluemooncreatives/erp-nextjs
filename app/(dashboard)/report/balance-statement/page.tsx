@@ -9,6 +9,8 @@ import { AccountType } from '@/lib/accounting/accounts';
 import { dateConvert, singlePrice } from '@/lib/settings';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card, EmptyState } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Landmark, Scale, CircleAlert, Wallet } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { PeriodFilter } from '../period-filter';
 
@@ -51,9 +53,14 @@ export default async function BalanceStatementPage({
     decorate(liabilities),
   ]);
 
-  const [assetTotal, liabilityTotal] = await Promise.all([
-    singlePrice(assets.reduce((sum, r) => sum + r.history.amount, 0)),
-    singlePrice(liabilities.reduce((sum, r) => sum + r.history.amount, 0)),
+  // A balance statement is read for whether the two sides agree, so the
+  // difference gets a tile of its own rather than being left to the reader.
+  const assetSum = assets.reduce((sum, r) => sum + r.history.amount, 0);
+  const liabilitySum = liabilities.reduce((sum, r) => sum + r.history.amount, 0);
+  const [assetTotal, liabilityTotal, differenceLabel] = await Promise.all([
+    singlePrice(assetSum),
+    singlePrice(liabilitySum),
+    singlePrice(Math.abs(assetSum - liabilitySum)),
   ]);
 
   return (
@@ -75,7 +82,17 @@ export default async function BalanceStatementPage({
           <EmptyState message="No data Found - close an accounting period to build one." />
         </Card>
       ) : (
-        <div className="grid gap-5 lg:grid-cols-2">
+        <div className="space-y-5">
+          <ReportSummary
+            figures={[
+              { label: 'Total assets', value: assetTotal, detail: `${assets.length} accounts`, icon: Landmark },
+              { label: 'Liabilities & equity', value: liabilityTotal, detail: `${liabilities.length} accounts`, icon: Wallet },
+              { label: 'Difference', value: differenceLabel, detail: assetSum === liabilitySum ? 'The statement balances' : 'The two sides do not agree', icon: assetSum === liabilitySum ? Scale : CircleAlert },
+            ]}
+            className="mb-0"
+          />
+
+          <div className="grid gap-5 lg:grid-cols-2">
           <Card title={`Assets - ${assetTotal}`} bodyClassName="">
             <DataTable
               columns={[{ label: 'Account' }, { label: 'Amount' }]}
@@ -105,6 +122,7 @@ export default async function BalanceStatementPage({
               ))}
             </DataTable>
           </Card>
+          </div>
         </div>
       )}
     </>

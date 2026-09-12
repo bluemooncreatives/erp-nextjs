@@ -100,6 +100,7 @@ export function SaleForm({
   heading = 'New Sale',
   defaults,
   submitLabel,
+  quotationId,
 }: {
   options: SaleFormOptions;
   action: (prev: SaleFormState, formData: FormData) => Promise<SaleFormState>;
@@ -108,6 +109,12 @@ export function SaleForm({
   heading?: string;
   defaults?: SaleFormDefaults;
   submitLabel?: string;
+  /**
+   * Set when the form was opened from a quotation. `SaleRepository::create`
+   * marks that quotation converted once the sale is stored, which is how the
+   * PHP flow closed the loop - the conversion screen itself wrote nothing.
+   */
+  quotationId?: number;
 }) {
   const [state, formAction] = useActionState(action, INITIAL);
 
@@ -216,6 +223,9 @@ export function SaleForm({
       <FormAlert variant="error" message={state.error} />
 
       {defaults?.id ? <input type="hidden" name="id" value={defaults.id} /> : null}
+      {quotationId ? (
+        <input type="hidden" name="quotation_id" value={quotationId} />
+      ) : null}
 
       {/* Values the server action reads back. */}
       <input type="hidden" name="item_amount" value={totals.itemAmount.toFixed(2)} />

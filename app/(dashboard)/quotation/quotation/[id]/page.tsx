@@ -11,7 +11,6 @@ import { PageHeader, Card, DetailList } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
-import { convertQuotation } from '../../actions';
 
 export const metadata: Metadata = { title: 'Quotation' };
 
@@ -59,18 +58,13 @@ export default async function QuotationDetailPage({
             >
               Export
             </LinkButton>
+            {/* Opens the sale form pre-filled from this quotation, as
+                `QuotationController@convertToSale` did. */}
             {canConvert &&
             quotation.convertStatus !== QuotationConvertStatus.Converted ? (
-              <form action={convertQuotation}>
-                <input type="hidden" name="id" value={quotation.id} />
-                <ActionButton
-                  variant="primary"
-                  className="px-4 py-2.5 text-sm"
-                  confirm="Convert this quotation into a sale?"
-                >
-                  Convert to sale
-                </ActionButton>
-              </form>
+              <LinkButton href={route('quotation.convert', { id: quotation.id })}>
+                Convert to sale
+              </LinkButton>
             ) : null}
           </div>
         }

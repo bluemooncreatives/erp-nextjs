@@ -13,7 +13,7 @@ import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Pagination, SearchBar, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
-import { convertQuotation, deleteQuotationAction } from '../actions';
+import { deleteQuotationAction } from '../actions';
 
 export const metadata: Metadata = { title: 'Quotation' };
 
@@ -123,16 +123,13 @@ export default async function QuotationListPage({
               </Td>
               <Td>
                 <div className="flex items-center gap-2">
+                  {/* `quotation.convert` opens the sale form pre-filled from
+                      this quotation; the sale is written when that form is
+                      saved, which is also what marks the quotation converted. */}
                   {canConvert && q.convertStatus !== QuotationConvertStatus.Converted ? (
-                    <form action={convertQuotation}>
-                      <input type="hidden" name="id" value={q.id} />
-                      <ActionButton
-                        variant="primary"
-                        confirm="Convert this quotation into a sale?"
-                      >
-                        To sale
-                      </ActionButton>
-                    </form>
+                    <LinkButton href={route('quotation.convert', { id: q.id })}>
+                      To sale
+                    </LinkButton>
                   ) : null}
                   {canEdit && q.convertStatus !== QuotationConvertStatus.Converted ? (
                     <LinkButton

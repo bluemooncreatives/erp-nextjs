@@ -54,6 +54,7 @@ export default async function ConvertQuotationToSalePage({
       />
       <SaleForm
         action={storeSale}
+        quotationId={quotation.id}
         heading={`New sale from ${source}`}
         submitLabel="Save Sale"
         currencySymbol={currencySymbol}

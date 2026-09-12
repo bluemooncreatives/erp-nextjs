@@ -8,6 +8,8 @@ import { openAccountingPeriod } from '@/lib/accounting/periods';
 import { dateConvert, singlePrice } from '@/lib/settings';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card, EmptyState } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { TrendingUp, Coins, Receipt, Scale } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { PeriodFilter } from '../period-filter';
 
@@ -81,6 +83,18 @@ export default async function IncomeStatementPage({
         </Card>
       ) : (
         <div className="space-y-5">
+          {/* The four figures the statement exists to produce, before the
+              account-by-account breakdown that explains them. */}
+          <ReportSummary
+            figures={[
+              { label: 'Sales', value: salesLabel, detail: 'Over the selected period', icon: Coins },
+              { label: 'Gross profit', value: grossLabel, detail: `After ${cogsLabel} cost of goods`, icon: TrendingUp },
+              { label: 'Expenses', value: expenseTotal, detail: `Against ${incomeTotal} other income`, icon: Receipt },
+              { label: 'Net profit', value: netLabel, detail: 'Gross profit less expenses plus other income', icon: Scale },
+            ]}
+            className="mb-0"
+          />
+
           <Card title="Gross Profit" bodyClassName="">
             <DataTable columns={[{ label: '' }, { label: 'Amount' }]} isEmpty={false}>
               <Tr>

@@ -7,6 +7,8 @@ import { dateConvert, singlePrice } from '@/lib/settings';
 import { toDateString } from '@/lib/php-date';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card, EmptyState } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { ArrowDownLeft, ArrowUpRight, Scale, ListOrdered } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { FormAlert } from '@/components/erp/fields';
 import { DateRangeFilter } from '../../period-filter';
@@ -90,6 +92,18 @@ export default async function CashFlowPage({
         </Card>
       ) : (
         <div className="space-y-5">
+          {/* The net figure sat alone in a card below both tables, so the three
+              numbers that make it up were never in view together. */}
+          <ReportSummary
+            figures={[
+              { label: 'Receipts', value: receiveTotal, detail: 'Cash in over the range', icon: ArrowDownLeft },
+              { label: 'Payments', value: paymentTotal, detail: 'Cash out over the range', icon: ArrowUpRight },
+              { label: 'Net cash flow', value: netLabel, detail: 'Receipts less payments', icon: Scale },
+              { label: 'Movements', value: (receiveRows.length + paymentRows.length).toLocaleString('en-US'), detail: `${receiveRows.length} in, ${paymentRows.length} out`, icon: ListOrdered },
+            ]}
+            className="mb-0"
+          />
+
           <div className="grid gap-5 lg:grid-cols-2">
             <Card title={`Receipts - ${receiveTotal}`} bodyClassName="">
               <DataTable
@@ -140,11 +154,6 @@ export default async function CashFlowPage({
             </Card>
           </div>
 
-          <Card title="Net Cash Flow">
-            <p className="text-2xl font-semibold text-foreground">
-              {netLabel}
-            </p>
-          </Card>
         </div>
       )}
     </>
