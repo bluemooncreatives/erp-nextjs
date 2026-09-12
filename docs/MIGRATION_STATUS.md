@@ -86,6 +86,8 @@ passes is in the git history; this document covers the state of the whole port.
 - Purchase: the bank `account_no` / `account_owner` on a payment, which the PHP stored.
 - Product: the per-combination `variation_file` image and `price_of_other_currency`.
 - Payroll: the role filter on the staff list that `staff_search_for_payroll` applied.
+- Leave: applying on behalf of another user (system users only, as in the Blade) and the
+  first/second-half choice for a makeup day - the action already read both fields.
 - Sale and purchase history: the branch / warehouse (`house_id`) filter.
 
 Both mail flows carry a link to the print view instead of the dompdf attachment the PHP sent.
@@ -145,7 +147,7 @@ from `software_erp.sql`, plus the usual static checks.
 | Pages, as super admin | `npm run verify:http` | 202 routes, 0 server errors (177 rendered, 18 not-found for absent rows, 7 expected redirects) |
 | Pages, as staff with no permissions | `ROLE_ID=3 npm run verify:http` | 202 routes, 0 server errors (135 permission denials handled, 51 rendered) |
 | Pages, as staff holding every seeded permission | `ROLE_ID=3 npm run verify:http` | 202 routes, 0 server errors (120 rendered, 62 denied for permissions this dump does not seed) |
-| Server actions over HTTP | `npm run verify:actions` | 20 scenarios passed |
+| Server actions over HTTP | `npm run verify:actions` | 20 scenarios passed, including the in-app notification a contact raises |
 
 The write scenarios assert the behaviour the PHP relied on: a receipt posts one Dr and one Cr
 leg; editing a voucher **replaces** its transactions and its cheque document instead of
