@@ -11,6 +11,7 @@ import { saveThemeAction } from './actions';
 export function ThemeForm({ theme, colors }: { theme?: ThemesRow; colors: { id: number; name: string | null; value: string }[] }) {
   const [state, action] = useActionState(saveThemeAction, {});
   const [palette, setPalette] = useState(() => Object.fromEntries(colors.map((color) => [color.id, color.value])));
+  const updateColor = (id: number, value: string) => setPalette((current) => ({ ...current, [id]: value }));
   const brand = palette[colors.find((color) => color.name === 'base_color')?.id ?? -1] ?? '#415094';
   const [background, setBackground] = useState(theme?.backgroundType ?? 'color');
   return <form action={action} className="space-y-6">
@@ -45,7 +46,7 @@ export function ThemeForm({ theme, colors }: { theme?: ThemesRow; colors: { id: 
         </div>
       </div>
     </Card>
-    <Card title="Colors"><div className="grid gap-5 md:grid-cols-3">{colors.map((color) => <FormInput key={color.id} label={(color.name ?? '').replaceAll('_', ' ')} name={`color_${color.id}`} type="color" required value={palette[color.id]} onInput={(event) => { const value = event.currentTarget.value; setPalette((current) => ({ ...current, [color.id]: value })); }} />)}</div></Card>
+    <Card title="Colors"><div className="grid gap-5 md:grid-cols-3">{colors.map((color) => <FormInput key={color.id} label={(color.name ?? '').replaceAll('_', ' ')} name={`color_${color.id}`} type="color" required value={palette[color.id]} onChange={(event) => updateColor(color.id, event.currentTarget.value)} onInput={(event) => updateColor(color.id, event.currentTarget.value)} />)}</div></Card>
     <div className="flex justify-end gap-4"><Link href="/style/themes">Cancel</Link><SubmitButton>{theme ? 'Update Theme' : 'Create Theme'}</SubmitButton></div>
   </form>;
 }
