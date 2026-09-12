@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/components/ui/utils";
 
 import { CardOverflowMenu } from "./card-overflow-menu";
+import { formatValue as printValue, type ValueFormat } from "./format";
 
 export interface WeeklyOverviewPoint {
   day: string;
@@ -37,8 +38,8 @@ export interface WeeklyOverviewCardProps {
   title?: string;
   barLabel?: string;
   lineLabel?: string;
-  /** Formats the y-axis ticks and the tooltip figures. */
-  formatValue?: (value: number) => string;
+  /** How the y-axis ticks and tooltip figures are printed. */
+  format?: ValueFormat;
   className?: string;
 }
 
@@ -64,11 +65,13 @@ export function WeeklyOverviewCard({
   title = "Weekly overview",
   barLabel = "Invited",
   lineLabel = "Completed",
-  formatValue,
+  format,
   className,
 }: WeeklyOverviewCardProps) {
   const chartConfig = buildConfig(barLabel, lineLabel);
-  const formatTick = formatValue ?? formatYAxis;
+  const formatTick = format
+    ? (value: number) => printValue(value, { ...format, compact: true })
+    : formatYAxis;
   return (
     <Card className={cn("flex flex-col gap-6", className)}>
       <CardHeader className="flex flex-row items-center justify-between pb-0">
@@ -117,8 +120,8 @@ export function WeeklyOverviewCard({
                       <div className="flex items-center gap-2 font-semibold">
                         <span>{name === "invited" ? barLabel : lineLabel}</span>
                         <span>
-                          {formatValue
-                            ? formatValue(Number(value))
+                          {format
+                            ? printValue(Number(value), format)
                             : Number(value).toLocaleString()}
                         </span>
                       </div>

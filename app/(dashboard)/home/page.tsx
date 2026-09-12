@@ -93,10 +93,10 @@ export default async function DashboardPage() {
   const scope: DashboardScope = { showroomId: session?.showroomId ?? user.showroomId };
 
   const money = (value: number) => `${symbol} ${numberFormat(value)}`;
-  const compact = (value: number) =>
-    Math.abs(value) >= 1000
-      ? `${symbol} ${Math.round(value / 1000)}k`
-      : `${symbol} ${Math.round(value)}`;
+  // Client cards cannot take a formatter function across the server boundary,
+  // so they are told how to print instead.
+  const moneyFormat = { symbol, decimals: 2 };
+  const compactFormat = { symbol, compact: true };
 
   const firstName = user.name.split(' ')[0] || 'there';
 
@@ -351,7 +351,7 @@ export default async function DashboardPage() {
             trendTitle="Sales throughput"
             trendCaption="Invoiced per month, this year"
             seriesLabel="Sales"
-            formatValue={compact}
+            format={compactFormat}
             yAxisWidth={56}
             data={monthlySale.map((row) => ({
               label: row.monthName,
@@ -439,7 +439,7 @@ export default async function DashboardPage() {
             title="Sales vs purchases"
             barLabel="Sales"
             lineLabel="Purchases"
-            formatValue={compact}
+            format={compactFormat}
             data={months}
             performancePercent={ratio(netProfit, sale.net)}
             performanceCaption={`margin on ${money(sale.net)} of sales this year`}
@@ -476,7 +476,7 @@ export default async function DashboardPage() {
               total: customer.total,
               detail: `${customer.invoices} invoice${customer.invoices === 1 ? '' : 's'}`,
             }))}
-            formatValue={money}
+            format={moneyFormat}
             viewAllHref={ROUTES['add_contact.index']}
             summary={`${salesCount} approved sales this period.`}
           />

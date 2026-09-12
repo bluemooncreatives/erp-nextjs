@@ -18,6 +18,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { cn } from "@/components/ui/utils";
 
 import { CardOverflowMenu } from "./card-overflow-menu";
+import { formatValue as printValue, type ValueFormat } from "./format";
 
 export interface TopCustomer {
   id: number;
@@ -31,8 +32,8 @@ export interface TopCustomer {
 export interface TopCustomersCardProps {
   className?: string;
   customers: TopCustomer[];
-  /** Formats every figure on the card. */
-  formatValue: (value: number) => string;
+  /** How every figure on the card is printed. */
+  format: ValueFormat;
   /** Where "View all" goes. */
   viewAllHref: string;
   /** The closing line - invoice counts across the period. */
@@ -43,11 +44,12 @@ export interface TopCustomersCardProps {
 export function TopCustomersCard({
   className,
   customers,
-  formatValue,
+  format,
   viewAllHref,
   summary,
   title = "Top customers",
 }: TopCustomersCardProps) {
+  const formatValue = (value: number) => printValue(value, format);
   const ranked = [...customers].sort((a, b) => b.total - a.total);
   const top = ranked[0];
   const others = ranked.slice(1, 5);

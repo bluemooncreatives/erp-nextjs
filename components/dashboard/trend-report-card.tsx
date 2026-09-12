@@ -14,6 +14,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { CardOverflowMenu } from "./card-overflow-menu";
+import { formatValue as printValue, type ValueFormat } from "./format";
 import { YAxisTick, Y_AXIS_WIDTH } from "./chart-axis";
 import { cn } from "@/components/ui/utils";
 
@@ -42,8 +43,8 @@ export interface TrendReportCardProps {
   data: TrendPoint[];
   /** Series name shown in the tooltip. */
   seriesLabel: string;
-  /** Formats y-axis ticks and the tooltip value. */
-  formatValue?: (value: number) => string;
+  /** How the y-axis ticks and tooltip figures are printed. */
+  format?: ValueFormat;
   /** Y-axis floor: `"zero"` (default) starts at 0; `"data"` starts below the lowest point. */
   baseline?: "zero" | "data";
   /** Y-axis band width in px. Recharts defaults to 60; 44 fits a short tick like "84%" — raise it for longer ticks like "$120k". */
@@ -92,7 +93,7 @@ export function TrendReportCard({
   trendCaption,
   data,
   seriesLabel,
-  formatValue = (value) => String(value),
+  format,
   baseline = "zero",
   yAxisWidth = Y_AXIS_WIDTH,
   reportTitle,
@@ -104,6 +105,7 @@ export function TrendReportCard({
   className,
 }: TrendReportCardProps) {
   const fillId = `fill-${gradientId}`;
+  const formatValue = (value: number) => printValue(value, format);
 
   const chartConfig = {
     value: { label: seriesLabel, color: "var(--primary)" },
