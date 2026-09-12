@@ -71,7 +71,7 @@ function validate(formData: FormData): Record<string, string> | null {
  * `variation_value_id[]` that the PHP chunked by the number of selected
  * variants - reproduced here.
  */
-function readVariations(formData: FormData): ProductInput['variations'] {
+async function readVariations(formData: FormData): Promise<ProductInput['variations']> {
   const selectedVariants = numList(formData, 'selected_variant');
   const perRow = selectedVariants.length;
   if (perRow === 0) return [];
@@ -85,11 +85,20 @@ function readVariations(formData: FormData): ProductInput['variations'] {
   const alertQuantities = numList(formData, 'alert_quantities');
   const skuIds = numList(formData, 'product_sku_ids');
   const oldImages = strList(formData, 'old_image');
+  // `variation_file[]` - one optional image per combination, falling back to
+  // the stored path the way `$data['old_image'][$key]` did.
+  const variationFiles = formData.getAll('variation_file').filter(
+    (value): value is File => value instanceof File && value.size > 0,
+  );
 
   const rowCount = Math.floor(types.length / perRow);
   const out: NonNullable<ProductInput['variations']> = [];
 
   for (let i = 0; i < rowCount; i++) {
+    const uploaded = variationFiles[i]
+      ? await saveImage(variationFiles[i], 94, 94)
+      : null;
+
     out.push({
       productSkuId: skuIds[i] ?? null,
       sku: skus[i] ?? null,
@@ -99,7 +108,7 @@ function readVariations(formData: FormData): ProductInput['variations'] {
       sellingPrice: sellingPrices[i] ?? 0,
       minSellingPrice: minSellingPrices[i] ?? 0,
       alertQuantity: alertQuantities[i] ?? 0,
-      imageSource: oldImages[i] || null,
+      imageSource: uploaded ?? oldImages[i] ?? null,
     });
   }
   return out;
@@ -119,6 +128,7 @@ async function readProductInput(formData: FormData): Promise<ProductInput> {
       ? num(formData, 'sub_category_id')
       : null,
     origin: str(formData, 'origin'),
+    priceOfOtherCurrency: str(formData, 'price_of_other_currency'),
     description: str(formData, 'product_description'),
     imageSource: await saveImage(image, 94, 94),
     barcodeType: str(formData, 'barcode_type'),
@@ -133,7 +143,7 @@ async function readProductInput(formData: FormData): Promise<ProductInput> {
     tax: num(formData, 'tax'),
     taxType: str(formData, 'tax_type') ?? 'percent',
 
-    variations: readVariations(formData),
+    variations: await readVariations(formData),
   };
 }
 

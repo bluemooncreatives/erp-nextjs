@@ -52,6 +52,7 @@ export default async function EditProductPage({
           categoryId: found.product.categoryId,
           subCategoryId: found.product.subCategoryId,
           origin: found.product.origin,
+          priceOfOtherCurrency: found.product.priceOfOtherCurrency,
           description: found.product.description,
           barcodeType: found.product.barcodeType,
           manageStock: found.product.manageStock,

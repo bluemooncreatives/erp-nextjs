@@ -49,6 +49,7 @@ export type ProductFormDefaults = {
   categoryId?: number | null;
   subCategoryId?: number | null;
   origin?: string | null;
+  priceOfOtherCurrency?: string | null;
   description?: string | null;
   barcodeType?: string | null;
   manageStock?: number;
@@ -174,6 +175,11 @@ export function ProductForm({
           />
 
           <FormInput label="Origin" name="origin" defaultValue={defaults.origin ?? ''} />
+          <FormInput
+            label="Price of Other Currency"
+            name="price_of_other_currency"
+            defaultValue={defaults.priceOfOtherCurrency ?? '0'}
+          />
 
           <FormSelect
             label="Barcode Type"
@@ -423,6 +429,13 @@ function VariableSection({
                   type="number"
                   min="0"
                   defaultValue="0"
+                />
+                {/* `variation_file[]` - the per-combination image. */}
+                <FormInput
+                  label="Image"
+                  name="variation_file"
+                  type="file"
+                  accept="image/*"
                 />
 
                 <div className="flex items-end">

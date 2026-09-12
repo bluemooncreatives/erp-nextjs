@@ -386,6 +386,8 @@ export type ProductInput = {
   origin?: string | null;
   description?: string | null;
   imageSource?: string | null;
+  /** `products.price_of_other_currency` - the Blade's optional second price. */
+  priceOfOtherCurrency?: string | null;
   barcodeType?: string | null;
   manageStock?: number;
   alertQuantity?: string | null;
@@ -434,6 +436,7 @@ export async function createProduct(
       subCategoryId: data.subCategoryId ?? null,
       origin: data.origin ?? null,
       description: data.description ?? null,
+      priceOfOtherCurrency: data.priceOfOtherCurrency ?? null,
       imageSource: data.imageSource ?? null,
       barcodeType: data.barcodeType ?? null,
       manageStock: data.manageStock ?? 0,
@@ -549,6 +552,7 @@ export async function updateProduct(
       subCategoryId: data.subCategoryId ?? null,
       origin: data.origin ?? null,
       description: data.description ?? null,
+      priceOfOtherCurrency: data.priceOfOtherCurrency ?? null,
       barcodeType: data.barcodeType ?? null,
       manageStock: data.manageStock ?? 0,
       alertQuantity: data.alertQuantity ?? null,
