@@ -18,7 +18,11 @@ import {
 import { SubmitButton } from '@/components/erp/submit-button';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ROUTES } from '@/lib/routes';
-import { storeQuotation, type QuotationFormState } from '../../actions';
+import {
+  storeQuotation,
+  updateQuotationAction,
+  type QuotationFormState,
+} from '../../actions';
 
 const INITIAL: QuotationFormState = {};
 
@@ -39,6 +43,31 @@ type CartLine = {
   discount: number;
 };
 
+/** The quotation being edited, as `quotation::quotation.edit` pre-filled it. */
+export type QuotationFormDefaults = {
+  id: number;
+  customerId: string;
+  locationRef: string;
+  date: string;
+  validTillDate: string;
+  refNo: string;
+  shippingAddress: string;
+  notes: string;
+  discountType: string;
+  discountValue: number;
+  taxId: string;
+  shippingCharge: number;
+  otherCharge: number;
+  lines: Array<{
+    productId: number;
+    label: string;
+    price: number;
+    quantity: number;
+    tax: number;
+    discount: number;
+  }>;
+};
+
 export function QuotationForm({
   customers,
   locations,
@@ -46,6 +75,8 @@ export function QuotationForm({
   products,
   currencySymbol,
   defaultLocation,
+  defaults,
+  submitLabel,
 }: {
   customers: SelectOption[];
   locations: SelectOption[];
@@ -53,15 +84,30 @@ export function QuotationForm({
   products: QuotableProduct[];
   currencySymbol: string;
   defaultLocation?: string;
+  defaults?: QuotationFormDefaults;
+  submitLabel?: string;
 }) {
-  const [state, formAction] = useActionState(storeQuotation, INITIAL);
+  const [state, formAction] = useActionState(
+    defaults ? updateQuotationAction : storeQuotation,
+    INITIAL,
+  );
 
-  const [lines, setLines] = useState<CartLine[]>([]);
-  const [discountType, setDiscountType] = useState('1');
-  const [discountValue, setDiscountValue] = useState(0);
-  const [taxId, setTaxId] = useState('0');
-  const [shipping, setShipping] = useState(0);
-  const [other, setOther] = useState(0);
+  const [lines, setLines] = useState<CartLine[]>(
+    defaults?.lines.map((l) => ({
+      key: `p-${l.productId}`,
+      productId: l.productId,
+      label: l.label,
+      price: l.price,
+      quantity: l.quantity,
+      tax: l.tax,
+      discount: l.discount,
+    })) ?? [],
+  );
+  const [discountType, setDiscountType] = useState(defaults?.discountType ?? '1');
+  const [discountValue, setDiscountValue] = useState(defaults?.discountValue ?? 0);
+  const [taxId, setTaxId] = useState(defaults?.taxId ?? '0');
+  const [shipping, setShipping] = useState(defaults?.shippingCharge ?? 0);
+  const [other, setOther] = useState(defaults?.otherCharge ?? 0);
 
   const addLine = (value: string) => {
     const product = products.find((p) => String(p.id) === value);
@@ -137,6 +183,8 @@ export function QuotationForm({
       <input type="hidden" name="total_discount" value={discountValue} />
       <input type="hidden" name="total_amount" value={totals.payable.toFixed(2)} />
 
+      {defaults ? <input type="hidden" name="id" value={defaults.id} /> : null}
+
       <Card title="Quotation">
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
           <FormSelect
@@ -144,6 +192,7 @@ export function QuotationForm({
             name="customer_id"
             required
             placeholder="Select customer"
+            defaultValue={defaults?.customerId ?? ''}
             options={customers}
             error={state.fieldErrors?.customer_id}
           />
@@ -151,7 +200,7 @@ export function QuotationForm({
             label="Branch / Warehouse"
             name="showroom"
             placeholder="Select location"
-            defaultValue={defaultLocation ?? ''}
+            defaultValue={defaults?.locationRef ?? defaultLocation ?? ''}
             options={locations}
           />
           <FormInput
@@ -159,7 +208,7 @@ export function QuotationForm({
             name="date"
             type="date"
             required
-            defaultValue={new Date().toISOString().slice(0, 10)}
+            defaultValue={defaults?.date ?? new Date().toISOString().slice(0, 10)}
             error={state.fieldErrors?.date}
           />
           <FormInput
@@ -167,10 +216,15 @@ export function QuotationForm({
             name="valid_till_date"
             type="date"
             required
+            defaultValue={defaults?.validTillDate ?? ''}
             error={state.fieldErrors?.valid_till_date}
           />
-          <FormInput label="Reference No" name="ref_no" />
-          <FormInput label="Shipping Address" name="shipping_address" />
+          <FormInput label="Reference No" name="ref_no" defaultValue={defaults?.refNo ?? ''} />
+          <FormInput
+            label="Shipping Address"
+            name="shipping_address"
+            defaultValue={defaults?.shippingAddress ?? ''}
+          />
           <FormInput label="Documents" name="documents" type="file" multiple />
         </div>
       </Card>
@@ -314,7 +368,12 @@ export function QuotationForm({
               onChange={(e) => setOther(Number(e.target.value))}
             />
           </div>
-          <FormTextarea label="Notes" name="notes" wrapperClassName="mt-5" />
+          <FormTextarea
+            label="Notes"
+            name="notes"
+            wrapperClassName="mt-5"
+            defaultValue={defaults?.notes ?? ''}
+          />
         </Card>
 
         <Card title="Summary">
@@ -338,7 +397,9 @@ export function QuotationForm({
         >
           Cancel
         </Link>
-        <SubmitButton disabled={lines.length === 0}>Save Quotation</SubmitButton>
+        <SubmitButton disabled={lines.length === 0}>
+          {submitLabel ?? 'Save Quotation'}
+        </SubmitButton>
       </div>
     </form>
   );
