@@ -424,3 +424,12 @@ export async function roleOptions() {
   const rows = await db.select().from(roles).orderBy(roles.id);
   return rows.map((r) => ({ value: `${r.id}-${r.type}`, label: r.name, id: r.id }));
 }
+
+/** `Role::where('type', 'regular_user')->get()` - the payroll screen's roles. */
+export async function regularUserRoles() {
+  return db
+    .select({ id: roles.id, name: roles.name })
+    .from(roles)
+    .where(eq(roles.type, 'regular_user'))
+    .orderBy(roles.id);
+}

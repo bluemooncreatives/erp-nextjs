@@ -658,7 +658,7 @@ export async function deletePayroll(id: number): Promise<void> {
 }
 
 /** Staff who can be paid, for the payroll form. */
-export async function payableStaff() {
+export async function payableStaff(roleId?: number | null) {
   return db
     .select({
       id: staffs.id,
@@ -672,7 +672,8 @@ export async function payableStaff() {
     })
     .from(staffs)
     .innerJoin(users, eq(users.id, staffs.userId))
-    .where(eq(users.isActive, 1))
+    // `staff_search_for_payroll` narrowed the list to one role.
+    .where(roleId ? and(eq(users.isActive, 1), eq(users.roleId, roleId)) : eq(users.isActive, 1))
     .orderBy(users.name);
 }
 

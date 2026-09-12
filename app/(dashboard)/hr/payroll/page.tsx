@@ -3,6 +3,7 @@
 import type { Metadata } from 'next';
 import { authorize, can } from '@/lib/auth/permissions';
 import { listPayrolls, payableStaff } from '@/lib/hr/leave';
+import { regularUserRoles } from '@/lib/hr/staff';
 import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
@@ -17,7 +18,12 @@ export const metadata: Metadata = { title: 'Payroll' };
 export default async function PayrollPage({
   searchParams,
 }: {
-  searchParams: Promise<{ month?: string; year?: string; page?: string }>;
+  searchParams: Promise<{
+    month?: string;
+    year?: string;
+    page?: string;
+    role_id?: string;
+  }>;
 }) {
   await authorize('payroll.index');
   const sp = await searchParams;
@@ -36,7 +42,11 @@ export default async function PayrollPage({
     can('payroll_payment_store'),
   ]);
 
-  const staffOptions = canCreate ? await payableStaff() : [];
+  const roleId = sp.role_id ? Number(sp.role_id) : null;
+  const [staffOptions, roles] = await Promise.all([
+    canCreate ? payableStaff(roleId) : Promise.resolve([]),
+    canCreate ? regularUserRoles() : Promise.resolve([]),
+  ]);
 
   const payrollRows = await Promise.all(
     rows.map(async (r) => ({
@@ -62,6 +72,18 @@ export default async function PayrollPage({
               method="get"
               className="flex items-center gap-2"
             >
+              <select
+                name="role_id"
+                defaultValue={sp.role_id ?? ''}
+                className={`${control} w-40`}
+              >
+                <option value="">All roles</option>
+                {roles.map((role) => (
+                  <option key={role.id} value={role.id}>
+                    {role.name}
+                  </option>
+                ))}
+              </select>
               <input
                 type="text"
                 name="month"
