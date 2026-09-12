@@ -13,11 +13,10 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useActionState, useEffect, useState } from 'react';
 import { Card } from './page';
-import { DataTable, Pagination, Td, Tr, StatusBadge } from './table';
+import { DataTable, Pagination, SearchBar, Td, Tr, StatusBadge } from './table';
 import { FormAlert, FormInput, FormSelect, FormTextarea } from './fields';
-import { SubmitButton } from './submit-button';
+import { SubmitButton, ActionButton } from './submit-button';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 
 export type ReferenceRow = {
   id: number;
@@ -222,7 +221,7 @@ export function ReferenceCrud({
                   defaultValue={String(editing?.status ?? 1)}
                   options={[
                     { value: 1, label: 'Active' },
-                    { value: 0, label: 'DeActive' },
+                    { value: 0, label: 'Inactive' },
                   ]}
                   error={state.fieldErrors?.status}
                 />
@@ -250,17 +249,7 @@ export function ReferenceCrud({
           title={title}
           bodyClassName=""
           actions={
-            <form method="get" action={baseUrl} className="flex items-center gap-2">
-              <Input
-                type="search"
-                name="search"
-                defaultValue={search ?? ''}
-                placeholder={`Search ${title.toLowerCase()}...`}
-                aria-label={`Search ${title.toLowerCase()}`}
-                className="w-44 sm:w-56"
-              />
-              <Button type="submit">Search</Button>
-            </form>
+            <SearchBar action={baseUrl} defaultValue={search} placeholder={`Search ${title.toLowerCase()}...`} />
           }
         >
           <DataTable
@@ -344,19 +333,5 @@ export function ReferenceCrud({
 }
 
 function DeleteButton({ name, singular }: { name: string; singular: string }) {
-  return (
-    <Button
-      type="submit"
-      variant="ghost"
-      size="xs"
-      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-      onClick={(event) => {
-        if (!window.confirm(`Delete ${singular.toLowerCase()} "${name}"?`)) {
-          event.preventDefault();
-        }
-      }}
-    >
-      Delete
-    </Button>
-  );
+  return <ActionButton confirm={`Delete ${singular.toLowerCase()} "${name}"?`}>Delete</ActionButton>;
 }

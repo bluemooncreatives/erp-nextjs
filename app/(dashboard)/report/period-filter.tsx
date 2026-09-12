@@ -1,7 +1,8 @@
 // The accounting-period select the statement reports filtered by
 // (`?interval=`), and the date-range pair the cash flow / daily reports used.
 
-import type { SelectOption } from '@/components/erp/fields';
+import { FormInput, FormSelect, type SelectOption } from '@/components/erp/fields';
+import { Button } from '@/components/ui/button';
 
 export function PeriodFilter({
   action,
@@ -13,24 +14,9 @@ export function PeriodFilter({
   value?: string;
 }) {
   return (
-    <form action={action} method="get" className="flex flex-wrap items-center gap-2">
-      <select
-        name="interval"
-        defaultValue={value ?? ''}
-        className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      <button
-        type="submit"
-        className="h-10 rounded-lg bg-primary px-4 text-sm font-medium text-white transition hover:bg-primary"
-      >
-        Show
-      </button>
+    <form action={action} method="get" className="flex flex-wrap items-end gap-3">
+      <FormSelect name="interval" label="Accounting period" defaultValue={value ?? ''} options={options} wrapperClassName="min-w-48 flex-1" />
+      <Button type="submit" variant="soft">Show</Button>
     </form>
   );
 }
@@ -51,30 +37,27 @@ export function DateRangeFilter({
   extra?: Record<string, string | number | undefined>;
 }) {
   return (
-    <form action={action} method="get" className="flex flex-wrap items-center gap-2">
+    <form action={action} method="get" className="flex flex-wrap items-end gap-3">
       {Object.entries(extra ?? {}).map(([key, value]) =>
         value == null || value === '' ? null : (
           <input key={key} type="hidden" name={key} value={String(value)} />
         ),
       )}
-      <input
+      <FormInput
         type="date"
         name={fromName}
+        label="From date"
         defaultValue={from ?? ''}
-        className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
+        wrapperClassName="min-w-36 flex-1"
       />
-      <input
+      <FormInput
         type="date"
         name={toName}
+        label="To date"
         defaultValue={to ?? ''}
-        className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
+        wrapperClassName="min-w-36 flex-1"
       />
-      <button
-        type="submit"
-        className="h-10 rounded-lg bg-primary px-4 text-sm font-medium text-white transition hover:bg-primary"
-      >
-        Search
-      </button>
+      <Button type="submit" variant="soft">Search</Button>
     </form>
   );
 }
@@ -89,19 +72,15 @@ export function SingleDateFilter({
   name?: string;
 }) {
   return (
-    <form action={action} method="get" className="flex flex-wrap items-center gap-2">
-      <input
+    <form action={action} method="get" className="flex flex-wrap items-end gap-3">
+      <FormInput
         type="date"
         name={name}
+        label="Date"
         defaultValue={date ?? ''}
-        className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
+        wrapperClassName="min-w-36 flex-1"
       />
-      <button
-        type="submit"
-        className="h-10 rounded-lg bg-primary px-4 text-sm font-medium text-white transition hover:bg-primary"
-      >
-        Search
-      </button>
+      <Button type="submit" variant="soft">Search</Button>
     </form>
   );
 }

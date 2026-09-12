@@ -1,3 +1,4 @@
+import { SettingsSection } from '@/components/common/settings-section';
 // Settings - port of Modules/Setting `setting::index` and its page components.
 
 import type { Metadata } from 'next';
@@ -162,7 +163,7 @@ export default async function SettingsPage() {
       id: 'general',
       label: 'General',
       content: (
-        <Card title="General">
+        <Card><SettingsSection title="General" description="Brand identity, language, currency and regional defaults for your workspace.">
           <GeneralSettingsForm
             setting={{
               siteTitle: setting.siteTitle ?? '',
@@ -190,7 +191,7 @@ export default async function SettingsPage() {
               label: t.timeZone ?? String(t.id),
             }))}
           />
-        </Card>
+        </SettingsSection></Card>
       ),
     });
   }
@@ -200,7 +201,7 @@ export default async function SettingsPage() {
       id: 'company',
       label: 'Company Information',
       content: (
-        <Card title="Company Information">
+        <Card><SettingsSection title="Company Information" description="Business details used on your documents and correspondence.">
           <CompanyInformationForm
             setting={{
               companyName: setting.companyName ?? '',
@@ -213,7 +214,7 @@ export default async function SettingsPage() {
               companyInfo: setting.companyInfo ?? '',
             }}
           />
-        </Card>
+        </SettingsSection></Card>
       ),
     });
   }
@@ -223,7 +224,7 @@ export default async function SettingsPage() {
       id: 'invoice',
       label: 'Invoice Settings',
       content: (
-        <Card title="Invoice Settings">
+        <Card><SettingsSection title="Invoice Settings" description="Choose what appears on customer invoices.">
           <InvoiceSettingsForm
             setting={{
               remarksTitle: setting.remarksTitle ?? '',
@@ -231,7 +232,7 @@ export default async function SettingsPage() {
               termsConditions: setting.termsConditions ?? '',
             }}
           />
-        </Card>
+        </SettingsSection></Card>
       ),
     });
   }
@@ -242,17 +243,17 @@ export default async function SettingsPage() {
       label: 'SMTP',
       content: (
         <div className="space-y-5">
-          <Card title="SMTP Settings">
+          <Card><SettingsSection title="SMTP Settings" description="Configure the email service used for outgoing messages.">
             <SmtpSettingsForm
               mailProtocol={setting.mailProtocol ?? 'smtp'}
               mailSignature={setting.mailSignature ?? ''}
               env={env}
             />
-          </Card>
+          </SettingsSection></Card>
           {canTestMail ? (
-            <Card title="Send Test Mail">
+            <Card><SettingsSection title="Send Test Mail" description="Verify delivery using the saved email settings.">
               <TestMailForm />
-            </Card>
+            </SettingsSection></Card>
           ) : null}
         </div>
       ),
@@ -265,7 +266,7 @@ export default async function SettingsPage() {
       label: 'SMS',
       content: (
         <div className="space-y-5">
-          <Card title="SMS Settings">
+          <Card><SettingsSection title="SMS Settings" description="Configure the SMS service used for outgoing messages.">
             <SmsSettingsForm
               gateways={smsGatewayRows.map((g) => ({ id: g.id, name: g.name }))}
               activeGatewayId={String(
@@ -273,11 +274,11 @@ export default async function SettingsPage() {
               )}
               env={env}
             />
-          </Card>
+          </SettingsSection></Card>
           {canTestSms ? (
-            <Card title="Send Test SMS">
+            <Card><SettingsSection title="Send Test SMS" description="Verify delivery using the saved SMS settings.">
               <TestSmsForm />
-            </Card>
+            </SettingsSection></Card>
           ) : null}
         </div>
       ),
@@ -301,9 +302,9 @@ export default async function SettingsPage() {
               />
             </Card>
           ))}
-          <Card title="Email Footer">
+          <Card><SettingsSection title="Email Footer" description="The signature appended to outgoing emails.">
             <MailFooterForm mailFooter={setting.mailFooter ?? ''} />
-          </Card>
+          </SettingsSection></Card>
         </div>
       ),
     });

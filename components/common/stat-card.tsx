@@ -115,7 +115,7 @@ export function StatCard({
       */}
       {Icon ? (
         <span
-          className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary self-center"
+          className="flex size-14 shrink-0 max-sm:hidden items-center justify-center rounded-lg bg-primary/10 text-primary self-center"
           aria-hidden="true"
         >
           <Icon className="size-6" strokeWidth={1.75} />

@@ -45,7 +45,7 @@ export function Card({
   actions,
   children,
   className = '',
-  bodyClassName = 'flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6',
+  bodyClassName = 'px-4 py-4 sm:px-6',
   noBodyBorder = false,
 }: {
   title?: ReactNode;
@@ -71,8 +71,10 @@ export function Card({
             noBodyBorder ? '' : 'border-b [.border-b]:pb-4',
           )}
         >
-          {title ? <CardTitle className="text-lg font-semibold">{title}</CardTitle> : null}
-          {desc ? <CardDescription>{desc}</CardDescription> : null}
+          <div className="min-w-0 space-y-1">
+            {title ? <CardTitle className="text-lg font-semibold">{title}</CardTitle> : null}
+            {desc ? <CardDescription>{desc}</CardDescription> : null}
+          </div>
           {actions ? (
             <CardAction className="flex flex-wrap gap-2">{actions}</CardAction>
           ) : null}

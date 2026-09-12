@@ -631,11 +631,17 @@
 .erp-theme {
   --primary: var(--erp-base-color, var(--theme-default-primary));
   --ring: var(--erp-base-color, var(--theme-default-ring));
-  --sidebar-primary: var(--erp-base-color, var(--theme-default-sidebar-primary));
+  /* Sidebar branding is derived from the selected palette in both modes. */
+  --sidebar: color-mix(in oklab, var(--primary) 5%, var(--theme-default-background));
+  --sidebar-foreground: var(--theme-default-foreground);
+  --sidebar-accent: color-mix(in oklab, var(--primary) 12%, var(--sidebar));
+  --sidebar-accent-foreground: color-mix(in oklab, var(--primary) 65%, var(--theme-default-foreground));
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
   --sidebar-ring: var(--erp-base-color, var(--theme-default-sidebar-ring));
   --chart-1: var(--erp-base-color, var(--theme-default-chart-1));
   --border: var(--erp-border-color, var(--theme-default-border));
-  --sidebar-border: var(--erp-border-color, var(--theme-default-sidebar-border));
+  --sidebar-border: color-mix(in oklab, var(--primary) 16%, var(--sidebar));
   --muted-foreground: var(--erp-text-color, var(--theme-default-muted-foreground));
   --input-background: var(--erp-input--bg, var(--theme-default-input-background));
   --success: var(--erp-success, var(--theme-default-success));
