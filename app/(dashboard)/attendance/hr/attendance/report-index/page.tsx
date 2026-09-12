@@ -2,11 +2,12 @@
 // One row per user, one column per day of the chosen month.
 
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { authorize } from '@/lib/auth/permissions';
 import { db } from '@/lib/db/client';
 import { roles } from '@/lib/db/schema';
 import { attendanceReport } from '@/lib/hr/leave';
-import { ROUTES } from '@/lib/routes';
+import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card, EmptyState } from '@/components/erp/page';
 import { Badge } from '@/components/erp/badge';
 import { SelectControl } from '@/components/erp/select-control';
@@ -94,7 +95,25 @@ export default async function AttendanceReportPage({
         }
       />
 
-      <Card title={`Report - ${month}/${year}`} bodyClassName="">
+      <Card
+        title={`Report - ${month}/${year}`}
+        bodyClassName=""
+        actions={
+          report.length > 0 ? (
+            <Link
+              href={route('attendance_report_print', {
+                role_id: roleId ?? 0,
+                month,
+                year,
+              })}
+              target="_blank"
+              className="text-xs font-medium text-primary hover:text-primary"
+            >
+              Print view
+            </Link>
+          ) : null
+        }
+      >
         {report.length === 0 ? (
           <EmptyState message="No attendance recorded for this period." />
         ) : (

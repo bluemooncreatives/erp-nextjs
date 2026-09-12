@@ -15,6 +15,7 @@ import { db } from '@/lib/db/client';
 import {
   applyLeaves,
   attendances,
+  departments,
   holidays,
   leaveDefines,
   leaveTypes,
@@ -547,10 +548,16 @@ export async function findPayroll(id: number) {
       payroll: payrolls,
       staffName: users.name,
       employeeId: staffs.employeeId,
+      departmentName: departments.name,
+      // `userName($payrollDetails->created_by)` on the payslip.
+      preparedByName: sql<string | null>`(
+        select u.name from users u where u.id = ${payrolls.createdBy}
+      )`,
     })
     .from(payrolls)
     .leftJoin(staffs, eq(staffs.id, payrolls.staffId))
     .leftJoin(users, eq(users.id, staffs.userId))
+    .leftJoin(departments, eq(departments.id, staffs.departmentId))
     .where(eq(payrolls.id, id))
     .limit(1);
   if (!row) return null;

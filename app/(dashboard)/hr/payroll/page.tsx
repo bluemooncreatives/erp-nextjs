@@ -1,11 +1,12 @@
 // Payroll - port of PayrollController@index.
 
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { authorize, can } from '@/lib/auth/permissions';
 import { listPayrolls, payableStaff } from '@/lib/hr/leave';
 import { regularUserRoles } from '@/lib/hr/staff';
 import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
-import { ROUTES } from '@/lib/routes';
+import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { ReportSummary } from '@/components/erp/report-summary';
 import { Hourglass, CircleCheck, Wallet, Users } from 'lucide-react';
@@ -187,6 +188,13 @@ export default async function PayrollPage({
               </Td>
               <Td>
                 <div className="flex items-center gap-2">
+                  <Link
+                    href={route('payroll.pdf', { id: row.payroll.id })}
+                    target="_blank"
+                    className="text-xs font-medium text-primary hover:text-primary"
+                  >
+                    Payslip
+                  </Link>
                   {canEdit && row.payroll.payrollStatus !== 'Paid' ? (
                     <form action={setPayrollStatusAction}>
                       <input type="hidden" name="id" value={row.payroll.id} />
