@@ -4,11 +4,12 @@ import vm from 'node:vm';
 import test from 'node:test';
 import ts from 'typescript';
 import { inflateRawSync } from 'node:zlib';
+import crypto from 'node:crypto';
 
 function load(file, modules = {}) {
   const exports = {};
   const code = ts.transpileModule(readFileSync(file, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
-  vm.runInNewContext(code, { exports, Buffer, console, require: (name) => { if (name === 'node:zlib') return { inflateRawSync }; assert.ok(name in modules, name); return modules[name]; } });
+  vm.runInNewContext(code, { exports, Buffer, console, URL, URLSearchParams, Date, require: (name) => { if (name === 'node:zlib') return { inflateRawSync }; assert.ok(name in modules, name); return modules[name]; } });
   return exports;
 }
 

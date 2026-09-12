@@ -14,6 +14,7 @@
 // ---------------------------------------------------------------------------
 
 import { redirect } from 'next/navigation';
+import { createHash } from 'node:crypto';
 import { and, eq, or } from 'drizzle-orm';
 import { headers } from 'next/headers';
 import { db } from '@/lib/db/client';
@@ -23,9 +24,11 @@ import { createSession, destroySession, getSession } from '@/lib/auth/session';
 import { generalSetting } from '@/lib/settings';
 import { loginLog, logoutLog } from '@/lib/activity-log';
 import { ROUTES } from '@/lib/routes';
+import { config } from '@/lib/config';
 
 export type AuthFormState = {
   error?: string;
+  success?: string;
   fieldErrors?: Record<string, string>;
 };
 
@@ -205,7 +208,7 @@ export async function register(
   }
 
   // RegisterController created the account against the Staff role (3).
-  await db.insert(users).values({
+  const [inserted] = await db.insert(users).values({
     name,
     email,
     password: await hashPassword(password),
@@ -216,7 +219,10 @@ export async function register(
     updatedAt: new Date(),
   });
 
-  redirect('/login?registered=1');
+  // `User implements MustVerifyEmail` - the registered event sent the link.
+  await sendVerificationLink(Number(inserted.insertId), email);
+
+  redirect('/email/verify?sent=1');
 }
 
 // --- Password reset --------------------------------------------------------
@@ -348,4 +354,45 @@ export async function switchShowroom(showroomId: number): Promise<void> {
   if (!exists) return;
 
   await createSession({ ...session, showroomId });
+}
+
+// --- Email verification ----------------------------------------------------
+
+/**
+ * `VerifyEmail::verificationUrl()` - a temporary signed link to
+ * `verification.verify` carrying the user id and `sha1(email)`.
+ */
+export async function sendVerificationLink(userId: number, email: string): Promise<void> {
+  const { temporarySignedUrl } = await import('@/lib/auth/signed-url');
+  const { sendVerifyEmailMail } = await import('@/lib/mail');
+  const hash = createHash('sha1').update(email).digest('hex');
+
+  const url = temporarySignedUrl(
+    config.app.url,
+    `/email/verify/${userId}/${hash}`,
+    60,
+  );
+
+  await sendVerifyEmailMail(email, url);
+}
+
+/** `VerificationController@resend` */
+export async function resendVerificationEmail(
+  _prev: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  const email = String(formData.get('email') ?? '').trim();
+  if (!email) return { fieldErrors: { email: 'The email field is required.' } };
+
+  const [user] = await db
+    .select({ id: users.id, verifiedAt: users.emailVerifiedAt })
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
+
+  // Laravel answered the same either way; only a real, unverified account
+  // actually receives a link.
+  if (user && !user.verifiedAt) await sendVerificationLink(user.id, email);
+
+  return { success: 'A fresh verification link has been sent to your email address.' };
 }

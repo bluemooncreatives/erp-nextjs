@@ -32,8 +32,12 @@ export async function proxy(request: NextRequest) {
   const token = request.cookies.get(SESSION_COOKIE)?.value;
   const session = await decodeSession(token);
 
+  // `verification.verify` sat behind `auth` in Laravel: a signed-in user must
+  // be able to open the link they were mailed.
+  const isVerificationLink = /^\/email\/verify\/\d+\/[0-9a-f]+$/.test(pathname);
+
   // `RedirectIfAuthenticated` - signed-in users never see the login screen.
-  if (session && isGuestPath(pathname)) {
+  if (session && isGuestPath(pathname) && !isVerificationLink) {
     return NextResponse.redirect(new URL('/home', request.url));
   }
 
