@@ -23,7 +23,7 @@ export default async function AdjustmentDetails({ params }: { params: Promise<{ 
   const people = userIds.length ? await db.select({ id: users.id, name: users.name }).from(users).where(inArray(users.id, userIds)) : [];
   const name = (userId: number | null) => people.find((person) => person.id === userId)?.name ?? '-';
   const rows = await Promise.all(items.map(async (item) => ({
-    ...item, variant: await variantNameForSku(item.productSkuId),
+    ...item, variant: item.productSkuId == null ? null : await variantNameForSku(item.productSkuId),
     priceLabel: await singlePrice(item.unitPrice), subtotalLabel: await singlePrice(item.subtotal),
   })));
   // The Blade labels were shifted, and recovery_amount was read from the last
@@ -37,7 +37,12 @@ export default async function AdjustmentDetails({ params }: { params: Promise<{ 
   return <>
     <PageHeader title="Stock Adjustment Details" breadcrumb={[{ label: 'Stock Adjustment', href: '/inventory/stock-adjustment/lists' }, { label: String(id) }]} />
     <PrintButton />
-    <div className="space-y-6">
+    <style>{`@media print {
+      body * { visibility: hidden; }
+      #adjustment-print, #adjustment-print * { visibility: visible; }
+      #adjustment-print { position: absolute; left: 0; top: 0; width: 100%; color: black; background: white; }
+    }`}</style>
+    <div id="adjustment-print" className="space-y-6">
       <Card title={`Adjustment ${adjustment.refNo ?? id}`}>
         <dl className="grid gap-4 text-sm text-gray-700 dark:text-gray-300 sm:grid-cols-2">{fields.map(([label, value]) => <div key={label}><dt className="font-semibold">{label}</dt><dd>{value}</dd></div>)}</dl>
       </Card>
