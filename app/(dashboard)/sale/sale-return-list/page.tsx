@@ -9,6 +9,8 @@ import { listSales, SaleReturnStatus } from '@/lib/sale/queries';
 import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Hourglass, CircleCheck, Wallet, Undo2 } from 'lucide-react';
 import { DataTable, Pagination, SearchBar, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
@@ -41,11 +43,24 @@ export default async function SaleReturnListPage({
     rows.map(async (sale) => ({ ...sale, dateLabel: await dateConvert(sale.date) })),
   );
 
+  const acceptedCount = returnRows.filter((s) => s.returnStatus === SaleReturnStatus.Accepted).length;
+  const pendingCount = returnRows.length - acceptedCount;
+  const pageValue = returnRows.reduce((sum, s) => sum + Number(s.payableAmount ?? 0), 0);
+
   return (
     <>
       <PageHeader
         title="Sale Return"
         breadcrumb={[{ label: 'Sale' }, { label: 'Sale Return' }]}
+      />
+
+      <ReportSummary
+        figures={[
+          { label: 'Pending approval', value: pendingCount, detail: 'On this page', icon: Hourglass },
+          { label: 'Accepted', value: acceptedCount, detail: 'On this page', icon: CircleCheck },
+          { label: 'Value on this page', value: `${symbol} ${numberFormat(pageValue)}`, detail: `${returnRows.length} of ${total} returns`, icon: Wallet },
+          { label: 'Sale returns', value: total.toLocaleString('en-US'), detail: 'Across all pages', icon: Undo2 },
+        ]}
       />
 
       <Card

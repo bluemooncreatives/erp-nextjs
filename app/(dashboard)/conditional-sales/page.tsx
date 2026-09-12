@@ -15,6 +15,8 @@ import {
 import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Hourglass, CircleCheck, Truck, Wallet } from 'lucide-react';
 import { DataTable, Pagination, SearchBar, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
@@ -60,11 +62,27 @@ export default async function ConditionalSalePage({
     })),
   );
 
+  // A conditional sale is only closed once it is approved *and* the goods are
+  // acknowledged as received, so both queues get a counter.
+  const approvedCount = saleRows.filter((s) => s.isApproved === 1).length;
+  const pendingCount = saleRows.length - approvedCount;
+  const awaitingReceipt = saleRows.filter((s) => s.hasShipping && !s.receivedBy).length;
+  const pageValue = saleRows.reduce((sum, s) => sum + Number(s.payableAmount ?? 0), 0);
+
   return (
     <>
       <PageHeader
         title="Sale on Condition"
         breadcrumb={[{ label: 'Sale' }, { label: 'Sale on Condition' }]}
+      />
+
+      <ReportSummary
+        figures={[
+          { label: 'Pending approval', value: pendingCount, detail: 'On this page', icon: Hourglass },
+          { label: 'Approved', value: approvedCount, detail: 'On this page', icon: CircleCheck },
+          { label: 'Awaiting receipt', value: awaitingReceipt, detail: 'Shipped, not acknowledged', icon: Truck },
+          { label: 'Value on this page', value: `${symbol} ${numberFormat(pageValue)}`, detail: `${saleRows.length} of ${total} sales`, icon: Wallet },
+        ]}
       />
 
       <Card

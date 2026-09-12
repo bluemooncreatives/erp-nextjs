@@ -8,6 +8,8 @@ import { PurchaseReturnStatus, listPurchaseOrders } from '@/lib/purchase/reposit
 import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Hourglass, CircleCheck, Wallet, Undo2 } from 'lucide-react';
 import { DataTable, Pagination, SearchBar, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
@@ -43,11 +45,24 @@ export default async function PurchaseReturnListPage({
     })),
   );
 
+  const approvedCount = returnRows.filter((o) => o.returnStatus === PurchaseReturnStatus.Approved).length;
+  const pendingCount = returnRows.length - approvedCount;
+  const pageValue = returnRows.reduce((sum, o) => sum + Number(o.payableAmount ?? 0), 0);
+
   return (
     <>
       <PageHeader
         title="Purchase Return"
         breadcrumb={[{ label: 'Purchase' }, { label: 'Purchase Return' }]}
+      />
+
+      <ReportSummary
+        figures={[
+          { label: 'Pending approval', value: pendingCount, detail: 'On this page', icon: Hourglass },
+          { label: 'Approved', value: approvedCount, detail: 'On this page', icon: CircleCheck },
+          { label: 'Value on this page', value: `${symbol} ${numberFormat(pageValue)}`, detail: `${returnRows.length} of ${total} returns`, icon: Wallet },
+          { label: 'Purchase returns', value: total.toLocaleString('en-US'), detail: 'Across all pages', icon: Undo2 },
+        ]}
       />
 
       <Card

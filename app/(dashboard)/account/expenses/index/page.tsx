@@ -12,6 +12,8 @@ import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Files, Wallet, CircleCheck, Hourglass } from 'lucide-react';
 import { deleteExpenseAction } from '../../actions';
 
 export const metadata: Metadata = { title: 'Expense Lists' };
@@ -48,6 +50,12 @@ export default async function ExpenseListPage({
     })),
   );
 
+  // Counters lead with the state that needs action, then the money, then the
+  // raw total - the figures an approver actually scans this list for.
+  const pageValue = expenseRows.reduce((sum, row) => sum + Number(row.voucher?.amount ?? 0), 0);
+  const approvedCount = expenseRows.filter((row) => row.voucher?.isApprove === 1).length;
+  const pendingCount = expenseRows.length - approvedCount;
+
   return (
     <>
       <PageHeader
@@ -63,6 +71,15 @@ export default async function ExpenseListPage({
             </LinkButton>
           ) : null
         }
+      />
+
+      <ReportSummary
+        figures={[
+          { label: 'Pending approval', value: pendingCount, detail: 'On this page', icon: Hourglass },
+          { label: 'Approved', value: approvedCount, detail: 'On this page', icon: CircleCheck },
+          { label: 'Value on this page', value: `${symbol} ${numberFormat(pageValue)}`, detail: `${expenseRows.length} of ${total} records`, icon: Wallet },
+          { label: 'Matching records', value: total.toLocaleString('en-US'), detail: 'Across all pages', icon: Files },
+        ]}
       />
 
       <Card title={`Expenses (${total})`} bodyClassName="">

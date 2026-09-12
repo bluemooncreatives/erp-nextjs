@@ -63,7 +63,12 @@ type CartLine = {
 
 /** The sale being edited, as `sale::sale.edit` pre-filled its form. */
 export type SaleFormDefaults = {
-  id: number;
+  /**
+   * The row being edited. Omitted when the form is seeded from another
+   * document - a clone, or a quotation being converted - because those post a
+   * new record and must not carry the source's id.
+   */
+  id?: number;
   customerRef: string;
   locationRef: string;
   date: string;
@@ -210,7 +215,7 @@ export function SaleForm({
     <form action={formAction} className="space-y-6">
       <FormAlert variant="error" message={state.error} />
 
-      {defaults ? <input type="hidden" name="id" value={defaults.id} /> : null}
+      {defaults?.id ? <input type="hidden" name="id" value={defaults.id} /> : null}
 
       {/* Values the server action reads back. */}
       <input type="hidden" name="item_amount" value={totals.itemAmount.toFixed(2)} />

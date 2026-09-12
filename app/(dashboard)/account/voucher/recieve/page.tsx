@@ -9,6 +9,8 @@ import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Files, Wallet, CircleCheck, CircleX, Hourglass } from 'lucide-react';
 import { deleteVoucherAction } from '../../actions';
 
 export const metadata: Metadata = { title: 'Receipt Vouchers' };
@@ -24,9 +26,25 @@ export default async function ReceiptVouchersPage({ searchParams }: { searchPara
   const decorated = await Promise.all(rows.map(async (voucher) => ({
     ...voucher, dateLabel: await dateConvert(voucher.date), amountLabel: await singlePrice(voucher.amount),
   })));
+  // Amounts are formatted through the configured currency settings, so the
+  // page total goes through the same async formatter the rows do.
+  const approvedCount = decorated.filter((voucher) => voucher.isApprove === 1).length;
+  const cancelledCount = decorated.filter((voucher) => voucher.isApprove === 2).length;
+  const pendingCount = decorated.length - approvedCount - cancelledCount;
+  const pageValueLabel = await singlePrice(decorated.reduce((sum, voucher) => sum + Number(voucher.amount ?? 0), 0));
+
   return <>
     <PageHeader title="Receipt Vouchers" breadcrumb={[{ label: 'Accounts'}, { label:'Receipt Vouchers' }]}
       actions={canCreate ? <LinkButton href={ROUTES['voucher_recieve.create']} >Add Receipt</LinkButton> : null} />
+    <ReportSummary
+      figures={[
+        { label: 'Pending approval', value: pendingCount, detail: 'On this page', icon: Hourglass },
+        { label: 'Approved', value: approvedCount, detail: 'On this page', icon: CircleCheck },
+        { label: 'Cancelled', value: cancelledCount, detail: 'On this page', icon: CircleX },
+        { label: 'Value on this page', value: pageValueLabel, detail: `${decorated.length} of ${total} receipts`, icon: Wallet },
+        { label: 'Receipts', value: total.toLocaleString('en-US'), detail: 'Across all pages', icon: Files },
+      ]}
+    />
     <Card title={`Receipts (${total})`} bodyClassName="">
       <DataTable columns={[{ label: 'Voucher' }, { label: 'Date' }, { label: 'Type' }, { label: 'Accounts'}, { label:'Amount'}, { label:'Approval'}, { label:'Actions' }]} isEmpty={!rows.length} empty="No receipt vouchers found.">
         {decorated.map((voucher) => <Tr key={voucher.id}>

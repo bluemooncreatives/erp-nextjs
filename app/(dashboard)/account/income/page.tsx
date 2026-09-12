@@ -9,6 +9,8 @@ import { listIncomes } from '@/lib/accounting/expenses';
 import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Files, Wallet, ListFilter } from 'lucide-react';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { deleteIncomeAction } from '../actions';
@@ -42,6 +44,9 @@ export default async function IncomeListPage({
     rows.map(async (r) => ({ ...r, dateLabel: await dateConvert(r.voucher?.date) })),
   );
 
+  // No approval state on income, so the honest summary is volume and value.
+  const pageValue = incomeRows.reduce((sum, row) => sum + Number(row.voucher?.amount ?? 0), 0);
+
   return (
     <>
       <PageHeader
@@ -57,6 +62,14 @@ export default async function IncomeListPage({
             </LinkButton>
           ) : null
         }
+      />
+
+      <ReportSummary
+        figures={[
+          { label: 'Value on this page', value: `${symbol} ${numberFormat(pageValue)}`, icon: Wallet, detail: 'Sum of the rows below' },
+          { label: 'Income records', value: total.toLocaleString('en-US'), detail: 'Across all pages', icon: Files },
+          { label: 'Showing now', value: incomeRows.length, detail: 'Records on this page', icon: ListFilter },
+        ]}
       />
 
       <Card title={`Income (${total})`} bodyClassName="">

@@ -14,6 +14,8 @@ import {
 import { dateConvert } from '@/lib/settings';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Hourglass, CircleCheck, CircleX, CalendarDays } from 'lucide-react';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
@@ -51,11 +53,26 @@ export default async function ApplyLeavePage({
     })),
   );
 
+  // The form on the left is about one person's balance; the counters answer the
+  // approver's question - what is still sitting in the queue.
+  const pendingCount = leaveRows.filter((r) => r.leave.status === LeaveStatus.Pending).length;
+  const approvedCount = leaveRows.filter((r) => r.leave.status === LeaveStatus.Approved).length;
+  const rejectedCount = leaveRows.filter((r) => r.leave.status === LeaveStatus.Rejected).length;
+
   return (
     <>
       <PageHeader
         title="Apply Leave"
         breadcrumb={[{ label: 'Leave' }, { label: 'Apply Leave' }]}
+      />
+
+      <ReportSummary
+        figures={[
+          { label: 'Pending', value: pendingCount, detail: 'Awaiting a decision', icon: Hourglass },
+          { label: 'Approved', value: approvedCount, detail: 'On this page', icon: CircleCheck },
+          { label: 'Rejected', value: rejectedCount, detail: 'On this page', icon: CircleX },
+          { label: 'Applications', value: total.toLocaleString('en-US'), detail: 'Across all pages', icon: CalendarDays },
+        ]}
       />
 
       <div className="grid grid-cols-12 gap-4 md:gap-6">

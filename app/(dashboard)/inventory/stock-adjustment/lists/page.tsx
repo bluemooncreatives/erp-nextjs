@@ -9,6 +9,8 @@ import { listStockAdjustments } from '@/lib/inventory/transfers';
 import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Hourglass, CircleCheck, Wallet, SlidersHorizontal } from 'lucide-react';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
@@ -45,6 +47,10 @@ export default async function StockAdjustmentListPage({
     rows.map(async (a) => ({ ...a, dateLabel: await dateConvert(a.date) })),
   );
 
+  const appliedCount = adjustmentRows.filter((a) => a.status === 1).length;
+  const pendingCount = adjustmentRows.length - appliedCount;
+  const recoveryTotal = adjustmentRows.reduce((sum, a) => sum + Number(a.recoveryAmount ?? 0), 0);
+
   return (
     <>
       <PageHeader
@@ -60,6 +66,15 @@ export default async function StockAdjustmentListPage({
             </LinkButton>
           ) : null
         }
+      />
+
+      <ReportSummary
+        figures={[
+          { label: 'Pending', value: pendingCount, detail: 'Not yet applied to stock', icon: Hourglass },
+          { label: 'Applied', value: appliedCount, detail: 'On this page', icon: CircleCheck },
+          { label: 'Recovery on this page', value: `${symbol} ${numberFormat(recoveryTotal)}`, icon: Wallet },
+          { label: 'Adjustments', value: total.toLocaleString('en-US'), detail: 'Across all pages', icon: SlidersHorizontal },
+        ]}
       />
 
       <Card title={`Adjustments (${total})`} bodyClassName="">

@@ -7,6 +7,8 @@ import { regularUserRoles } from '@/lib/hr/staff';
 import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Hourglass, CircleCheck, Wallet, Users } from 'lucide-react';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
@@ -59,6 +61,15 @@ export default async function PayrollPage({
 
   const control =
     'h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground   ';
+
+  // Payroll is read for "what still has to be paid, and how much", so the
+  // unpaid queue and its net value lead.
+  const paidCount = payrollRows.filter((r) => r.payroll.payrollStatus === 'Paid').length;
+  const unpaidCount = payrollRows.length - paidCount;
+  const netTotal = payrollRows.reduce((sum, r) => sum + Number(r.payroll.netSalary ?? 0), 0);
+  const unpaidTotal = payrollRows
+    .filter((r) => r.payroll.payrollStatus !== 'Paid')
+    .reduce((sum, r) => sum + Number(r.payroll.netSalary ?? 0), 0);
 
   return (
     <>
@@ -127,6 +138,15 @@ export default async function PayrollPage({
           />
         </div>
       ) : null}
+
+      <ReportSummary
+        figures={[
+          { label: 'Awaiting payment', value: unpaidCount, detail: `${symbol} ${numberFormat(unpaidTotal)} outstanding`, icon: Hourglass },
+          { label: 'Paid', value: paidCount, detail: 'On this page', icon: CircleCheck },
+          { label: 'Net on this page', value: `${symbol} ${numberFormat(netTotal)}`, detail: `${payrollRows.length} of ${total} payrolls`, icon: Wallet },
+          { label: 'Payrolls', value: total.toLocaleString('en-US'), detail: 'Across all pages', icon: Users },
+        ]}
+      />
 
       <Card title={`Payrolls (${total})`} bodyClassName="">
         <DataTable

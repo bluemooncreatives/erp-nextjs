@@ -9,6 +9,8 @@ import { listStockTransfers } from '@/lib/inventory/transfers';
 import { dateConvert } from '@/lib/settings';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Hourglass, Send, Truck, ArrowLeftRight } from 'lucide-react';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
@@ -55,6 +57,12 @@ export default async function StockTransferListPage({
     })),
   );
 
+  // A transfer moves through approve -> dispatch -> receive, so each counter is
+  // one of those queues rather than a single undifferentiated total.
+  const pendingApproval = transferRows.filter((t) => t.status !== 1).length;
+  const awaitingDispatch = transferRows.filter((t) => t.status === 1 && !t.sentAt).length;
+  const inTransit = transferRows.filter((t) => t.sentAt && !t.receivedAt).length;
+
   return (
     <>
       <PageHeader
@@ -70,6 +78,15 @@ export default async function StockTransferListPage({
             </LinkButton>
           ) : null
         }
+      />
+
+      <ReportSummary
+        figures={[
+          { label: 'Pending approval', value: pendingApproval, detail: 'On this page', icon: Hourglass },
+          { label: 'Awaiting dispatch', value: awaitingDispatch, detail: 'Approved, not yet sent', icon: Send },
+          { label: 'In transit', value: inTransit, detail: 'Sent, not yet received', icon: Truck },
+          { label: 'Transfers', value: total.toLocaleString('en-US'), detail: 'Across all pages', icon: ArrowLeftRight },
+        ]}
       />
 
       <Card title={`Transfers (${total})`} bodyClassName="">

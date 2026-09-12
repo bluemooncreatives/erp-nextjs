@@ -8,6 +8,8 @@ import { listVouchers } from '@/lib/accounting/reports';
 import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Files, Wallet, CircleCheck, CircleX, Hourglass } from 'lucide-react';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
@@ -41,6 +43,12 @@ export default async function PaymentVouchersPage({
     rows.map(async (v) => ({ ...v, dateLabel: await dateConvert(v.date) })),
   );
 
+  // An approver scans this list for what is still waiting, so pending leads.
+  const pageValue = voucherRows.reduce((sum, v) => sum + Number(v.amount ?? 0), 0);
+  const approvedCount = voucherRows.filter((v) => v.isApprove === 1).length;
+  const cancelledCount = voucherRows.filter((v) => v.isApprove === 2).length;
+  const pendingCount = voucherRows.length - approvedCount - cancelledCount;
+
   return (
     <>
       <PageHeader
@@ -56,6 +64,16 @@ export default async function PaymentVouchersPage({
             </LinkButton>
           ) : null
         }
+      />
+
+      <ReportSummary
+        figures={[
+          { label: 'Pending approval', value: pendingCount, detail: 'On this page', icon: Hourglass },
+          { label: 'Approved', value: approvedCount, detail: 'On this page', icon: CircleCheck },
+          { label: 'Cancelled', value: cancelledCount, detail: 'On this page', icon: CircleX },
+          { label: 'Value on this page', value: `${symbol} ${numberFormat(pageValue)}`, detail: `${voucherRows.length} of ${total} records`, icon: Wallet },
+          { label: 'Payment vouchers', value: total.toLocaleString('en-US'), detail: 'Across all pages', icon: Files },
+        ]}
       />
 
       <Card title={`Vouchers (${total})`} bodyClassName="">

@@ -8,6 +8,8 @@ import { listVouchers } from '@/lib/accounting/reports';
 import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Files, Wallet, CircleCheck, Hourglass } from 'lucide-react';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
 
@@ -35,6 +37,11 @@ export default async function JournalVouchersPage({
     rows.map(async (v) => ({ ...v, dateLabel: await dateConvert(v.date) })),
   );
 
+  // An approver scans this list for what is still waiting, so pending leads.
+  const pageValue = voucherRows.reduce((sum, v) => sum + Number(v.amount ?? 0), 0);
+  const approvedCount = voucherRows.filter((v) => v.isApprove === 1).length;
+  const pendingCount = voucherRows.length - approvedCount;
+
   return (
     <>
       <PageHeader
@@ -50,6 +57,15 @@ export default async function JournalVouchersPage({
             </LinkButton>
           ) : null
         }
+      />
+
+      <ReportSummary
+        figures={[
+          { label: 'Pending approval', value: pendingCount, detail: 'On this page', icon: Hourglass },
+          { label: 'Approved', value: approvedCount, detail: 'On this page', icon: CircleCheck },
+          { label: 'Value on this page', value: `${symbol} ${numberFormat(pageValue)}`, detail: `${voucherRows.length} of ${total} records`, icon: Wallet },
+          { label: 'Journal vouchers', value: total.toLocaleString('en-US'), detail: 'Across all pages', icon: Files },
+        ]}
       />
 
       <Card title={`Journal vouchers (${total})`} bodyClassName="">

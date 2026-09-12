@@ -7,6 +7,8 @@ import { stockList } from '@/lib/inventory/transfers';
 import { generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Boxes, Wallet, TriangleAlert, Layers } from 'lucide-react';
 import { DataTable, Pagination, SearchBar, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
 
@@ -35,6 +37,11 @@ export default async function StockReportPage({
     (sum, r) => sum + r.stock * Number(r.purchasePrice),
     0,
   );
+  // The figure worth acting on is what has fallen to its reorder point, which
+  // the old title-line summary never surfaced at all.
+  const belowAlert = rows.filter(
+    (r) => r.alertQuantity != null && r.stock <= Number(r.alertQuantity),
+  ).length;
 
   return (
     <>
@@ -43,8 +50,17 @@ export default async function StockReportPage({
         breadcrumb={[{ label: 'Inventory'}, { label:'Stock List' }]}
       />
 
+      <ReportSummary
+        figures={[
+          { label: 'At or below alert level', value: belowAlert, detail: 'Rows on this page', icon: TriangleAlert },
+          { label: 'Stock value on this page', value: `${symbol} ${numberFormat(stockValueTotal)}`, detail: 'At purchase price', icon: Wallet },
+          { label: 'Units on this page', value: numberFormat(stockTotal, 0), detail: `${rows.length} of ${total} rows`, icon: Boxes },
+          { label: 'Stock rows', value: total.toLocaleString('en-US'), detail: 'Across all pages', icon: Layers },
+        ]}
+      />
+
       <Card
-        title={`Stock (${total} rows, ${numberFormat(stockTotal, 0)} units, ${symbol} ${numberFormat(stockValueTotal)})`}
+        title={`Stock (${total})`}
         bodyClassName=""
         actions={
           <SearchBar

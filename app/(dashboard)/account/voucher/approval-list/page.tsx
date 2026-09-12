@@ -7,6 +7,8 @@ import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { morphName } from '@/lib/db/morph';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Hourglass, Wallet, Layers } from 'lucide-react';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { ActionButton, SubmitButton } from '@/components/erp/submit-button';
 import { approveAllVouchersAction, setVoucherApprovalAction } from '../../actions';
@@ -37,6 +39,11 @@ export default async function VoucherApprovalPage({
     rows.map(async (v) => ({ ...v, dateLabel: await dateConvert(v.date) })),
   );
 
+  // Every row here is by definition awaiting approval, so the useful figures
+  // are how much is held up and how many kinds of voucher it spans.
+  const pageValue = voucherRows.reduce((sum, v) => sum + Number(v.amount ?? 0), 0);
+  const typeCount = new Set(voucherRows.map((v) => v.voucherType)).size;
+
   return (
     <>
       <PageHeader
@@ -49,6 +56,14 @@ export default async function VoucherApprovalPage({
             </form>
           ) : null
         }
+      />
+
+      <ReportSummary
+        figures={[
+          { label: 'Awaiting approval', value: total.toLocaleString('en-US'), detail: 'Across all pages', icon: Hourglass },
+          { label: 'Value on this page', value: `${symbol} ${numberFormat(pageValue)}`, detail: `${voucherRows.length} of ${total} vouchers`, icon: Wallet },
+          { label: 'Voucher types', value: typeCount, detail: 'Represented on this page', icon: Layers },
+        ]}
       />
 
       <Card title={`Pending vouchers (${total})`} bodyClassName="">
