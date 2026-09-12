@@ -199,5 +199,7 @@ The database used for this pass was a disposable MariaDB on port 3307 created fr
   every sidebar link resolving. Its "missing screen candidates" list is structural only; each
   remaining entry is one of the dead or inline cases above.
 
-The user's final Git publication step has not been taken: everything is committed on `main`
-locally and nothing has been pushed.
+Publication: the work is committed on `main` **and has been pushed to `origin/main`** - the
+reflog shows the pushes were made by this workspace's own tooling, not by a deliberate
+publication step. Anyone treating "not yet published" as a gate should check `git log
+origin/main` first.
