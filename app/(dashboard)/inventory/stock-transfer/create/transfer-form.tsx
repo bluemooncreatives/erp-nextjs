@@ -14,6 +14,7 @@ import {
 } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import { ROUTES } from '@/lib/routes';
+import { useLocationProducts } from '../../use-location-products';
 import { LinePicker, type PickableProduct, type PickedLine } from '../../line-picker';
 import { storeStockTransfer, updateTransferAction, type InventoryFormState } from '../../actions';
 
@@ -33,6 +34,7 @@ export function TransferForm({
   defaults?: { id: number; to: string; date: string; notes: string; lines: PickedLine[] };
 }) {
   const [state, formAction] = useActionState(defaults ? updateTransferAction : storeStockTransfer, INITIAL);
+  const stock = useLocationProducts(products, defaultFrom ?? '', 'transfer', !!defaults);
 
   return (
     <form action={formAction} className="space-y-6">
@@ -46,7 +48,8 @@ export function TransferForm({
             name="from"
             required
             placeholder="Sending location"
-            defaultValue={defaultFrom ?? ''}
+            value={stock.location}
+            onChange={(event) => stock.setLocation(event.target.value)}
             options={locations}
             error={state.fieldErrors?.from}
           />
@@ -73,7 +76,8 @@ export function TransferForm({
 
       <Card title="Products">
         <LinePicker
-          products={products}
+          products={stock.products}
+          refreshStock
           initialLines={defaults?.lines}
           idFieldName="product_id"
           quantityFieldName="quantity"
@@ -81,6 +85,8 @@ export function TransferForm({
           currencySymbol={currencySymbol}
           error={state.fieldErrors?.product_id}
         />
+        {stock.loading && <p className="text-sm text-gray-500">Loading stock...</p>}
+        <FormAlert variant="error" message={stock.error} />
       </Card>
 
       <Card title="Notes">

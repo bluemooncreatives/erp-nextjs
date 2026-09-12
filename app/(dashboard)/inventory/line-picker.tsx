@@ -33,6 +33,7 @@ export function LinePicker({
   showPrice = true,
   error,
   initialLines = [],
+  refreshStock = false,
 }: {
   products: PickableProduct[];
   /** Form field names, matching what the server action reads. */
@@ -43,6 +44,7 @@ export function LinePicker({
   showPrice?: boolean;
   error?: string;
   initialLines?: PickedLine[];
+  refreshStock?: boolean;
 }) {
   const [lines, setLines] = useState<PickedLine[]>(initialLines);
 
@@ -103,7 +105,9 @@ export function LinePicker({
       {error ? <p className="mb-3 text-xs text-error-500">{error}</p> : null}
 
       <DataTable columns={columns} isEmpty={lines.length === 0} empty="No products added yet.">
-        {lines.map((line) => (
+        {lines.map((storedLine) => {
+          const line = refreshStock ? { ...storedLine, stock: products.find((p) => p.id === storedLine.productId)?.stock ?? 0 } : storedLine;
+          return (
           <Tr key={line.productId}>
             <Td className="font-medium text-gray-700 dark:text-gray-300">
               {line.label}
@@ -163,7 +167,7 @@ export function LinePicker({
               </button>
             </Td>
           </Tr>
-        ))}
+        ); })}
       </DataTable>
     </>
   );

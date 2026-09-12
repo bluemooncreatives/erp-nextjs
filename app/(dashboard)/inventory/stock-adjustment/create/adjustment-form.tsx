@@ -14,6 +14,7 @@ import {
 } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import { ROUTES } from '@/lib/routes';
+import { useLocationProducts } from '../../use-location-products';
 import { LinePicker, type PickableProduct, type PickedLine } from '../../line-picker';
 import { storeStockAdjustment, updateAdjustmentAction, type InventoryFormState } from '../../actions';
 
@@ -33,6 +34,7 @@ export function AdjustmentForm({
   defaults?: { id: number; refNo: string; date: string; recoveryAmount: number; reason: string; lines: PickedLine[] };
 }) {
   const [state, formAction] = useActionState(defaults ? updateAdjustmentAction : storeStockAdjustment, INITIAL);
+  const stock = useLocationProducts(products, defaultLocation ?? '', 'adjustment', !!defaults);
 
   return (
     <form action={formAction} className="space-y-6">
@@ -46,7 +48,8 @@ export function AdjustmentForm({
             name="warehouse_id"
             required
             placeholder="Select location"
-            defaultValue={defaultLocation ?? ''}
+            value={stock.location}
+            onChange={(event) => stock.setLocation(event.target.value)}
             options={locations}
             error={state.fieldErrors?.warehouse_id}
           />
@@ -77,14 +80,17 @@ export function AdjustmentForm({
         desc="The quantities entered here are written OFF the location's stock when the adjustment is approved."
       >
         <LinePicker
-          products={products}
+          products={stock.products}
           initialLines={defaults?.lines}
           idFieldName="product_id"
           quantityFieldName="product_quantity"
           currencySymbol={currencySymbol}
           showPrice={false}
+          refreshStock
           error={state.fieldErrors?.product_id}
         />
+        {stock.loading && <p className="text-sm text-gray-500">Loading stock...</p>}
+        <FormAlert variant="error" message={stock.error} />
       </Card>
 
       <Card title="Reason">

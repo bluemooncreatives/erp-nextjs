@@ -10,6 +10,8 @@ import { errorLog, successLog } from '@/lib/activity-log';
 import { ROUTES } from '@/lib/routes';
 import { filesFrom, saveUpload } from '@/lib/uploads';
 import { transferInput } from '@/lib/inventory/transfer-input';
+import { productsWithStock } from '@/lib/product/products';
+import { parseLocation } from '@/lib/inventory/stock';
 import { adjustmentInput } from '@/lib/inventory/adjustment-input';
 import {
   INSUFFICIENT_STOCK,
@@ -30,6 +32,13 @@ export type InventoryFormState = {
   success?: string;
   fieldErrors?: Record<string, string>;
 };
+
+export async function inventoryLocationProducts(ref: string, kind: 'transfer' | 'adjustment', editing: boolean) {
+  await authorize(kind === 'transfer' ? (editing ? 'stock-transfer.edit' : 'stock-transfer.store') : (editing ? 'stock_adjustment.edit' : 'stock_adjustment.store'));
+  if (!/^(warehouse|showroom)-[1-9]\d*$/.test(ref)) return [];
+  const location = parseLocation(ref)!;
+  return (await productsWithStock(location.id, location.type)).map((p) => ({ id: p.id, label: `${p.productName ?? ''} (${p.sku ?? p.id})`, price: Number(p.purchasePrice), stock: Number(p.stock) || 0 }));
+}
 
 // --- Transfers -------------------------------------------------------------
 

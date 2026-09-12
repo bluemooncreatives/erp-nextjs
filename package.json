@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test tests/receipt-vouchers.test.mjs tests/account-vouchers.test.mjs tests/settings-and-leave.test.mjs"
+    "test": "node --test tests/receipt-vouchers.test.mjs tests/account-vouchers.test.mjs tests/settings-and-leave.test.mjs tests/inventory.test.mjs"
   },
   "dependencies": {
     "@fullcalendar/core": "6.1.19",
