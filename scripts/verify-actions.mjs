@@ -557,6 +557,237 @@ await scenario('stock adjustment: the form writes lines and leaves stock alone',
   );
 });
 
+await scenario('stock transfer: created, approved and received moves stock once', async () => {
+  const store = action('storeStockTransfer');
+  const approve = action('changeTransferStatusAction');
+  const receive = action('receiveTransferAction');
+
+  const source = await one(
+    'select * from stock_reports where cast(stock as decimal(20,2)) >= 3 limit 1',
+  );
+  const branches = await rows('select * from show_rooms order by id limit 5');
+  if (!source || branches.length < 2) return;
+
+  const fromRef = source.houseable_type.endsWith('WareHouse')
+    ? `warehouse-${source.houseable_id}`
+    : `showroom-${source.houseable_id}`;
+  const target = branches.find((b) => b.id !== source.houseable_id) ?? branches[0];
+  const stockAt = async (id, type, sku) =>
+    Number(
+      (
+        await one(
+          'select stock from stock_reports where houseable_id = ? and houseable_type = ? and product_sku_id = ?',
+          [id, type, sku],
+        )
+      )?.stock ?? 0,
+    );
+
+  const senderBefore = await stockAt(
+    source.houseable_id,
+    source.houseable_type,
+    source.product_sku_id,
+  );
+  const receiverBefore = await stockAt(target.id, MORPH.showRoom, source.product_sku_id);
+
+  const created = await submit(store, {
+    from: fromRef,
+    to: `showroom-${target.id}`,
+    date: new Date().toISOString().slice(0, 10),
+    notes: `verify-actions ${stamp}`,
+    product_id: source.product_sku_id,
+    product_price: '10',
+    quantity: '2',
+  });
+  assert.ok(created.status < 400, `create returned ${created.status}`);
+
+  const transfer = await one('select * from stock_transfers order by id desc limit 1');
+  assert.ok(transfer, 'the transfer was written');
+
+  // Creating and approving must not move stock; only receiving does.
+  await submit(approve, { id: transfer.id });
+  assert.equal(
+    await stockAt(source.houseable_id, source.houseable_type, source.product_sku_id),
+    senderBefore,
+    'approval alone does not move stock',
+  );
+
+  await submit(receive, { id: transfer.id });
+  assert.equal(
+    await stockAt(source.houseable_id, source.houseable_type, source.product_sku_id),
+    senderBefore - 2,
+    'the sender lost the transferred quantity',
+  );
+  assert.equal(
+    await stockAt(target.id, MORPH.showRoom, source.product_sku_id),
+    receiverBefore + 2,
+    'the receiver gained it',
+  );
+
+  // A second receipt is a no-op.
+  await submit(receive, { id: transfer.id });
+  assert.equal(
+    await stockAt(source.houseable_id, source.houseable_type, source.product_sku_id),
+    senderBefore - 2,
+    'receiving twice does not move stock twice',
+  );
+});
+
+await scenario('stock adjustment: approval applies it once', async () => {
+  const store = action('storeStockAdjustment');
+  const approve = action('approveAdjustmentAction');
+
+  const source = await one(
+    'select * from stock_reports where cast(stock as decimal(20,2)) >= 2 limit 1',
+  );
+  if (!source) return;
+
+  const locationRef = source.houseable_type.endsWith('WareHouse')
+    ? `warehouse-${source.houseable_id}`
+    : `showroom-${source.houseable_id}`;
+
+  const stockOf = async () =>
+    Number(
+      (await one('select stock from stock_reports where id = ?', [source.id]))?.stock ?? 0,
+    );
+  const before = await stockOf();
+
+  await submit(store, {
+    warehouse_id: locationRef,
+    date: new Date().toISOString().slice(0, 10),
+    ref_no: `VERIFY-ADJ2-${stamp}`,
+    recovery_amount: '0',
+    product_id: source.product_sku_id,
+    product_quantity: '1',
+  });
+
+  const adjustment = await one('select * from stock_adjustments where ref_no = ?', [
+    `VERIFY-ADJ2-${stamp}`,
+  ]);
+  assert.ok(adjustment, 'the adjustment was written');
+
+  await submit(approve, { id: adjustment.id });
+  const afterFirst = await stockOf();
+  assert.equal(afterFirst, before - 1, 'approval removed the adjusted quantity');
+
+  await submit(approve, { id: adjustment.id });
+  assert.equal(await stockOf(), afterFirst, 'approving twice does not deduct twice');
+});
+
+await scenario('sale approval: deducts stock and posts the ledger once', async () => {
+  const store = action('storeSale');
+  const approve = action('approveSaleAction');
+
+  const source = await one(
+    'select * from stock_reports where cast(stock as decimal(20,2)) >= 2 limit 1',
+  );
+  const customer = await one("select * from contacts where contact_type = 'Customer' limit 1");
+  if (!source || !customer) return;
+
+  const locationRef = source.houseable_type.endsWith('WareHouse')
+    ? `warehouse-${source.houseable_id}`
+    : `showroom-${source.houseable_id}`;
+
+  const stockOf = async () =>
+    Number(
+      (await one('select stock from stock_reports where id = ?', [source.id]))?.stock ?? 0,
+    );
+  const stockBefore = await stockOf();
+
+  await submit(store, {
+    customer_id: `customer-${customer.id}`,
+    warehouse_id: locationRef,
+    date: new Date().toISOString().slice(0, 10),
+    ref_no: `VERIFY-APPROVE-${stamp}`,
+    items: source.product_sku_id,
+    item_price: '120',
+    item_quantity: '1',
+    product_tax: '0',
+    item_discount: '0',
+    item_amount: '120',
+    total_quantity: '1',
+    total_tax: '0-0',
+    shipping_charge: '0',
+    other_charge: '0',
+    total_discount_amount: '0',
+    discount_type: '2',
+    total_discount: '0',
+    total_amount: '120',
+  });
+
+  const sale = await one('select * from sales where ref_no = ?', [`VERIFY-APPROVE-${stamp}`]);
+  assert.ok(sale, 'the sale was written');
+
+  if (sale.is_approved === 1) return; // the branch auto-approves; nothing to test twice
+
+  assert.equal(await stockOf(), stockBefore, 'an unapproved sale holds stock');
+
+  await submit(approve, { id: sale.id });
+  const afterApproval = await stockOf();
+  assert.equal(afterApproval, stockBefore - 1, 'approval deducted the sold quantity');
+
+  const approved = await one('select * from sales where id = ?', [sale.id]);
+  assert.equal(approved.is_approved, 1, 'the sale is marked approved');
+
+  await submit(approve, { id: sale.id });
+  assert.equal(await stockOf(), afterApproval, 'approving twice does not deduct twice');
+});
+
+await scenario('sale edit: the update replaces lines instead of adding them', async () => {
+  const save = action('saveSale');
+
+  const sale = await one(
+    "select * from sales where ref_no like 'VERIFY-SALE-%' order by id desc limit 1",
+  );
+  if (!sale) return;
+
+  const items = await rows(
+    'select * from product_item_details where itemable_id = ? and itemable_type = ?',
+    [sale.id, MORPH.sale],
+  );
+  if (items.length !== 1) return;
+
+  const locationRef = sale.saleable_type.endsWith('WareHouse')
+    ? `warehouse-${sale.saleable_id}`
+    : `showroom-${sale.saleable_id}`;
+
+  const response = await submit(
+    save,
+    {
+      id: sale.id,
+      customer_id: `customer-${sale.customer_id}`,
+      warehouse_id: locationRef,
+      date: new Date().toISOString().slice(0, 10),
+      ref_no: sale.ref_no,
+      items: items[0].product_sku_id,
+      item_price: '150',
+      item_quantity: '2',
+      product_tax: '0',
+      item_discount: '0',
+      item_amount: '300',
+      total_quantity: '2',
+      total_tax: '0-0',
+      shipping_charge: '0',
+      other_charge: '0',
+      total_discount_amount: '0',
+      discount_type: '2',
+      total_discount: '0',
+      total_amount: '300',
+    },
+    { url: `/sale/sale/${sale.id}/edit` },
+  );
+  assert.ok(response.status < 400, `update returned ${response.status}`);
+
+  const after = await rows(
+    'select * from product_item_details where itemable_id = ? and itemable_type = ?',
+    [sale.id, MORPH.sale],
+  );
+  assert.equal(after.length, 1, 'the edit replaced the line rather than appending');
+  assert.equal(Number(after[0].quantity), 2, 'the new quantity was stored');
+
+  const updated = await one('select * from sales where id = ?', [sale.id]);
+  assert.equal(Number(updated.payable_amount), 300, 'the total was updated');
+});
+
 const failed = results.filter((r) => !r.ok);
 console.log(
   `ran ${results.length} action scenarios: ${results.length - failed.length} ok, ${failed.length} failed`,
