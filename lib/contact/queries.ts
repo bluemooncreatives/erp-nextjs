@@ -21,6 +21,8 @@ import {
   productItemDetails,
   purchaseOrders,
   sales,
+  transactions,
+  vouchers,
   type ContactsRow,
 } from '@/lib/db/schema';
 import { MorphType } from '@/lib/db/morph';
@@ -272,4 +274,79 @@ export async function contactLastInvoice(contactId: number) {
     .orderBy(desc(sales.id))
     .limit(1);
   return row ?? null;
+}
+
+/**
+ * `contact::contact.debit_transaction_list_table` - the contact's own ledger.
+ *
+ * The Blade walked the approved transactions of the contact's chart account in
+ * insertion order, starting the running balance at `opening_balance` and adding
+ * on Dr / subtracting on Cr regardless of the account type.
+ */
+export async function contactStatement(contact: ContactsRow) {
+  const [account] = await db
+    .select({ id: chartAccounts.id })
+    .from(chartAccounts)
+    .where(
+      and(
+        eq(chartAccounts.contactableType, MorphType.ContactModel),
+        eq(chartAccounts.contactableId, contact.id),
+      ),
+    )
+    .limit(1);
+
+  const opening = toNumber(contact.openingBalance);
+  if (!account) return { rows: [], opening, closing: opening };
+
+  const rows = await db
+    .select({
+      id: transactions.id,
+      type: transactions.type,
+      amount: transactions.amount,
+      date: vouchers.date,
+      narration: vouchers.narration,
+      referableId: vouchers.referableId,
+      referableType: vouchers.referableType,
+      invoiceNo: sales.invoiceNo,
+    })
+    .from(transactions)
+    .innerJoin(
+      vouchers,
+      and(
+        eq(vouchers.id, transactions.voucherableId),
+        eq(transactions.voucherableType, MorphType.Voucher),
+      ),
+    )
+    .leftJoin(
+      sales,
+      and(eq(sales.id, vouchers.referableId), eq(vouchers.referableType, MorphType.Sale)),
+    )
+    .where(and(eq(transactions.accountId, account.id), eq(vouchers.isApprove, 1)))
+    .orderBy(transactions.id);
+
+  let balance = opening;
+  const withBalance = rows.map((row) => {
+    balance += row.type === 'Dr' ? Number(row.amount) : -Number(row.amount);
+    return { ...row, amount: Number(row.amount), balance };
+  });
+
+  return { rows: withBalance, opening, closing: balance };
+}
+
+/** The customer's returned invoices - `$customer->sales->where('return_status', 1)`. */
+export async function customerReturns(contactId: number) {
+  return db
+    .select()
+    .from(sales)
+    .where(and(eq(sales.customerId, contactId), eq(sales.returnStatus, 1)))
+    .orderBy(desc(sales.id));
+}
+
+/** The supplier's returned purchase orders. */
+export async function supplierReturns(contactId: number) {
+  return db
+    .select()
+    .from(purchaseOrders)
+    .where(and(eq(purchaseOrders.supplierId, contactId), eq(purchaseOrders.returnStatus, 1)))
+    .orderBy(desc(purchaseOrders.id));
 }
