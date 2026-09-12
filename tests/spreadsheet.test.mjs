@@ -30,7 +30,10 @@ test('records are keyed by the header row and blank rows are skipped', () => {
 test('the shipped sample workbooks read back with their real headers', () => {
   const brands = sheet.parseXlsx(readFileSync('public/uploads/brands.xlsx'));
   assert.deepEqual(plain(brands[0].slice(0, 2)), ['name', 'description']);
-  assert.ok(brands.length > 1);
+
+  const contacts = sheet.parseXlsx(readFileSync('public/uploads/contact_csv.xlsx'));
+  assert.deepEqual(plain(contacts[0].slice(0, 2)), ['name', 'contact_type']);
+  assert.equal(sheet.rowsToRecords(contacts)[0].contact_type, 'Supplier');
 
   const products = sheet.parseXlsx(readFileSync('public/uploads/products.xlsx'));
   assert.ok(products[0].length >= 16, `expected 16 product columns, got ${products[0].length}`);
