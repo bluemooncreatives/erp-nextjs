@@ -23,6 +23,7 @@ import { PageHeader, Card } from '@/components/erp/page';
 import { ReportSummary, type ReportFigure } from '@/components/erp/report-summary';
 import { Package, Layers, PackageX, ListFilter } from 'lucide-react';
 import { DataTable, Pagination, SearchBar, Td, Tr } from '@/components/erp/table';
+import { DataToolbar } from '@/components/erp/data-toolbar';
 import {
   comboStatusAction,
   deleteComboAction,
@@ -98,43 +99,48 @@ export default async function ProductListPage({
     });
   }
 
+  const isFiltered = Boolean(sp.search || sp.brand_id || sp.category_id);
+
   const productsPanel = (
-        <Card
-          title={`Products (${total})`}
-          bodyClassName=""
-          actions={
-            <SearchBar
-              action={ROUTES['add_product.create']}
-              defaultValue={sp.search}
-              placeholder="Search name or SKU..."
-            >
-              <select
-                name="brand_id"
-                defaultValue={sp.brand_id ?? ''}
-                className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
-              >
-                <option value="">All brands</option>
-                {options.brands.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.name}
-                  </option>
-                ))}
-              </select>
-              <select
-                name="category_id"
-                defaultValue={sp.category_id ?? ''}
-                className="h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground"
-              >
-                <option value="">All categories</option>
-                {options.categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </SearchBar>
-          }
-        >
+        <Card title="Products" bodyClassName="">
+          {/* Search and both filters in one bar, with a chip per active filter -
+              the brand/category selects used to be bare `<select>`s, whose open
+              list the browser draws itself and no stylesheet can reach. */}
+          <DataToolbar
+            search={{ value: sp.search, placeholder: 'Search name or SKU...' }}
+            filters={[
+              {
+                id: 'brand_id',
+                label: 'Brand',
+                value: sp.brand_id ?? 'all',
+                options: [
+                  { label: 'All brands', value: 'all' },
+                  ...options.brands.map((brand) => ({
+                    label: brand.name,
+                    value: String(brand.id),
+                  })),
+                ],
+              },
+              {
+                id: 'category_id',
+                label: 'Category',
+                value: sp.category_id ?? 'all',
+                options: [
+                  { label: 'All categories', value: 'all' },
+                  ...options.categories.map((category) => ({
+                    label: category.name,
+                    value: String(category.id),
+                  })),
+                ],
+              },
+            ]}
+            resultLabel={
+              isFiltered
+                ? `${rows.length} shown of ${total.toLocaleString('en-US')} matching`
+                : `${total.toLocaleString('en-US')} products`
+            }
+          />
+
           <DataTable
             columns={[
               { label: 'Product' },

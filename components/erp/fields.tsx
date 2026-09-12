@@ -19,6 +19,7 @@ import React, { type ReactNode } from 'react';
 import { AlertCircle, CheckCircle2, Info, TriangleAlert } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/components/ui/utils';
 import { SelectControl, type SelectOption } from './select-control';
 
 export type { SelectOption };
