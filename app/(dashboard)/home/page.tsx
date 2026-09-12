@@ -123,9 +123,10 @@ export default async function DashboardPage() {
   const showStockAlerts = userCan(user, 'stock_alert_list');
   const showTodos = userCan(user, 'to_do_list');
 
-  const [monthlySale, monthlyPurchase] = showSaleStats
-    ? await Promise.all([monthlySales(scope), monthlyPurchases(scope)])
-    : [[], []];
+  const [monthlySale, monthlyPurchase] =
+    showSaleStats || showProfitStats
+      ? await Promise.all([monthlySales(scope), monthlyPurchases(scope)])
+      : [[], []];
 
   const branchStock = showBranchStock ? await stockByBranch() : [];
   const dues = showDueList ? await saleDueList(scope, 5) : [];
@@ -435,7 +436,7 @@ export default async function DashboardPage() {
           ]}
         />
 
-        {showSaleStats ? (
+        {showProfitStats ? (
           <WeeklyOverviewCard
             className="max-sm:col-span-full md:max-lg:col-span-full"
             title="Sales vs purchases"

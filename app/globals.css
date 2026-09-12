@@ -813,7 +813,7 @@ input[type='number']::-webkit-outer-spin-button {
 
   @keyframes heartbeat {
     0% {
-      box-shadow: 0 0 0 0 var(--heartbeat-color, var(--theme-default-primary));
+      box-shadow: 0 0 0 0 var(--heartbeat-color, var(--primary));
       transform: scale(1);
     }
     50% {
