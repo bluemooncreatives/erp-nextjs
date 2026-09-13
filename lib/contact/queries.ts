@@ -279,6 +279,17 @@ export async function contactLastInvoice(contactId: number) {
   return row ?? null;
 }
 
+/** The supplier-side equivalent of `contactLastInvoice`, for the purchase form's supplier lookup. */
+export async function contactLastPurchase(contactId: number) {
+  const [row] = await db
+    .select()
+    .from(purchaseOrders)
+    .where(eq(purchaseOrders.supplierId, contactId))
+    .orderBy(desc(purchaseOrders.id))
+    .limit(1);
+  return row ?? null;
+}
+
 /**
  * `contact::contact.debit_transaction_list_table` - the contact's own ledger.
  *

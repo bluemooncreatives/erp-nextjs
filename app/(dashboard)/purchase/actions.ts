@@ -26,12 +26,45 @@ import {
   type PurchasePaymentInput,
 } from '@/lib/purchase/repository';
 import { actionFormData } from '@/lib/forms';
+import { findContact, contactAccounts, contactLastPurchase } from '@/lib/contact/queries';
 
 export type PurchaseFormState = {
   error?: string;
   success?: string;
   fieldErrors?: Record<string, string>;
 };
+
+export type SupplierLookup = {
+  due: number;
+  lastOrderNo: string | null;
+  lastOrderUrl: string | null;
+};
+
+/**
+ * Port of `PurchaseOrderController@purchaseDetails` / `orderDetails` - the
+ * Blade fired this over AJAX when a supplier was picked, to show their
+ * outstanding due and a link to the last purchase order. Consolidated into
+ * one lookup `PurchaseForm` calls on selection change.
+ */
+export async function supplierLookup(supplierId: string): Promise<SupplierLookup | null> {
+  await authorize('purchase_order.create');
+  const id = Number(supplierId);
+  if (!Number.isFinite(id) || id <= 0) return null;
+
+  const contact = await findContact(id);
+  if (!contact) return null;
+
+  const [accounts, lastOrder] = await Promise.all([
+    contactAccounts(contact),
+    contactLastPurchase(id),
+  ]);
+
+  return {
+    due: accounts.due,
+    lastOrderNo: lastOrder?.invoiceNo ?? null,
+    lastOrderUrl: lastOrder ? route('purchase_order.show', { id: lastOrder.id }) : null,
+  };
+}
 
 function num(formData: FormData, key: string, fallback = 0): number {
   const raw = formData.get(key);

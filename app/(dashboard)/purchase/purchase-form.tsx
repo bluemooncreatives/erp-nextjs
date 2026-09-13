@@ -6,7 +6,7 @@ import { LinkButton } from '@/components/common/link-button';
 // Same cart model as the sale form, with the purchase-specific fields
 // (LC number, CNF agent, supplier, per-line selling price to apply on approval).
 
-import { useActionState, useMemo, useState } from 'react';
+import { useActionState, useMemo, useState, useTransition } from 'react';
 import { Card } from '@/components/erp/page';
 import {
   FormAlert,
@@ -18,7 +18,7 @@ import {
 import { SubmitButton } from '@/components/erp/submit-button';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ROUTES } from '@/lib/routes';
-import type { PurchaseFormState } from './actions';
+import { supplierLookup, type SupplierLookup, type PurchaseFormState } from './actions';
 import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: PurchaseFormState = {};
@@ -118,6 +118,12 @@ export function PurchaseForm({
   const [other, setOther] = useState(defaults?.otherCharge ?? 0);
   const [paymentMethod, setPaymentMethod] = useState('');
   const [paymentAmount, setPaymentAmount] = useState(0);
+  const [supplierInfo, setSupplierInfo] = useState<SupplierLookup | null>(null);
+  const [, startSupplierLookup] = useTransition();
+  const lookupSupplier = (id: string) => {
+    if (!id) { setSupplierInfo(null); return; }
+    startSupplierLookup(async () => setSupplierInfo(await supplierLookup(id)));
+  };
 
   const addLine = (value: string) => {
     const product = options.products.find((p) => String(p.id) === value);
@@ -193,15 +199,33 @@ export function PurchaseForm({
 
       <Card title="Purchase Order">
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-          <FormSelect
-            label="Supplier"
-            name="supplier_id"
-            required
-            placeholder="Select supplier"
-            defaultValue={defaults?.supplierId ?? ''}
-            options={options.suppliers}
-            error={state.fieldErrors?.supplier_id}
-          />
+          <div>
+            <FormSelect
+              label="Supplier"
+              name="supplier_id"
+              required
+              placeholder="Select supplier"
+              defaultValue={defaults?.supplierId ?? ''}
+              options={options.suppliers}
+              error={state.fieldErrors?.supplier_id}
+              onChange={(e) => lookupSupplier(e.target.value)}
+            />
+            {supplierInfo ? (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Due: {money(supplierInfo.due)}
+                {supplierInfo.lastOrderNo ? (
+                  <>
+                    {' — Last order: '}
+                    {supplierInfo.lastOrderUrl ? (
+                      <a href={supplierInfo.lastOrderUrl} className="underline" target="_blank" rel="noreferrer">
+                        {supplierInfo.lastOrderNo}
+                      </a>
+                    ) : supplierInfo.lastOrderNo}
+                  </>
+                ) : null}
+              </p>
+            ) : null}
+          </div>
           <FormSelect
             label="Branch / Warehouse"
             name="showroom"

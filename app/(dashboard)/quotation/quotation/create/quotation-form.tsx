@@ -34,9 +34,16 @@ export type QuotableProduct = {
   tax: number;
 };
 
+export type QuotableCombo = {
+  id: number;
+  label: string;
+  sellingPrice: number;
+};
+
 type CartLine = {
   key: string;
   productId: number;
+  isCombo: boolean;
   label: string;
   price: number;
   quantity: number;
@@ -66,6 +73,7 @@ export type QuotationFormDefaults = {
   otherCharge: number;
   lines: Array<{
     productId: number;
+    isCombo?: boolean;
     label: string;
     price: number;
     quantity: number;
@@ -79,6 +87,7 @@ export function QuotationForm({
   locations,
   taxes,
   products,
+  combos = [],
   currencySymbol,
   defaultLocation,
   defaults,
@@ -88,6 +97,7 @@ export function QuotationForm({
   locations: SelectOption[];
   taxes: Array<{ id: number; name: string; rate: number }>;
   products: QuotableProduct[];
+  combos?: QuotableCombo[];
   currencySymbol: string;
   defaultLocation?: string;
   defaults?: QuotationFormDefaults;
@@ -102,8 +112,9 @@ export function QuotationForm({
 
   const [lines, setLines] = useState<CartLine[]>(
     defaults?.lines.map((l) => ({
-      key: `p-${l.productId}`,
+      key: `${l.isCombo ? 'c' : 'p'}-${l.productId}`,
       productId: l.productId,
+      isCombo: Boolean(l.isCombo),
       label: l.label,
       price: l.price,
       quantity: l.quantity,
@@ -122,22 +133,27 @@ export function QuotationForm({
   const [other, setOther] = useState(defaults?.otherCharge ?? 0);
 
   const addLine = (value: string) => {
-    const product = products.find((p) => String(p.id) === value);
-    if (!product) return;
+    const [kind, rawId] = value.split(':');
+    const isCombo = kind === 'combo';
+    const id = Number(rawId);
+    const source = isCombo ? combos : products;
+    const found = source.find((p) => p.id === id);
+    if (!found) return;
     setLines((prev) => {
-      const existing = prev.find((l) => l.productId === product.id);
+      const existing = prev.find((l) => l.productId === found.id && l.isCombo === isCombo);
       if (existing) {
         return prev.map((l) => (l === existing ? { ...l, quantity: l.quantity + 1 } : l));
       }
       return [
         ...prev,
         {
-          key: `p-${product.id}`,
-          productId: product.id,
-          label: product.label,
-          price: product.sellingPrice,
+          key: `${isCombo ? 'c' : 'p'}-${found.id}`,
+          productId: found.id,
+          isCombo,
+          label: found.label,
+          price: found.sellingPrice,
           quantity: 1,
-          tax: product.tax,
+          tax: isCombo ? 0 : (found as QuotableProduct).tax,
           discount: 0,
         },
       ];
@@ -249,10 +265,16 @@ export function QuotationForm({
             value=""
             onChange={(e) => addLine(e.target.value)}
             placeholder="Search and select a product"
-            options={products.map((p) => ({
-              value: p.id,
-              label: `${p.label} - ${money(p.sellingPrice)}`,
-            }))}
+            options={[
+              ...products.map((p) => ({
+                value: `sku:${p.id}`,
+                label: `${p.label} - ${money(p.sellingPrice)}`,
+              })),
+              ...combos.map((c) => ({
+                value: `combo:${c.id}`,
+                label: `${c.label} (combo) - ${money(c.sellingPrice)}`,
+              })),
+            ]}
           />
         </div>
 
@@ -281,18 +303,22 @@ export function QuotationForm({
               <Tr key={line.key}>
                 <Td className="font-medium text-foreground">
                   {line.label}
-                  <input type="hidden" name="items" value={line.productId} />
+                  <input
+                    type="hidden"
+                    name={line.isCombo ? 'combo_product_id' : 'items'}
+                    value={line.productId}
+                  />
                 </Td>
                 <Td>
                   <NumberCell
-                    name="item_price"
+                    name={line.isCombo ? 'combo_product_price' : 'item_price'}
                     value={line.price}
                     onChange={(v) => patch(line.key, { price: v })}
                   />
                 </Td>
                 <Td>
                   <NumberCell
-                    name="item_quantity"
+                    name={line.isCombo ? 'combo_product_quantity' : 'item_quantity'}
                     value={line.quantity}
                     min={1}
                     step="1"
@@ -300,18 +326,22 @@ export function QuotationForm({
                   />
                 </Td>
                 <Td>
-                  <NumberCell
-                    name="product_tax"
-                    value={line.tax}
-                    onChange={(v) => patch(line.key, { tax: v })}
-                  />
+                  {line.isCombo ? '-' : (
+                    <NumberCell
+                      name="product_tax"
+                      value={line.tax}
+                      onChange={(v) => patch(line.key, { tax: v })}
+                    />
+                  )}
                 </Td>
                 <Td>
-                  <NumberCell
-                    name="item_discount"
-                    value={line.discount}
-                    onChange={(v) => patch(line.key, { discount: v })}
-                  />
+                  {line.isCombo ? '-' : (
+                    <NumberCell
+                      name="item_discount"
+                      value={line.discount}
+                      onChange={(v) => patch(line.key, { discount: v })}
+                    />
+                  )}
                 </Td>
                 <Td className="font-medium">{money(subTotal)}</Td>
                 <Td>

@@ -46,6 +46,8 @@ export type HeaderUser = {
   roleName: string;
   email: string | null;
   avatar: string;
+  /** Set only when `company_information_update` is granted, as the Blade's profile dropdown gated it. */
+  companyInfoHref?: string;
 };
 
 export default function AppHeader({
@@ -125,6 +127,7 @@ export default function AppHeader({
             roleName={user.roleName}
             email={user.email}
             avatar={user.avatar}
+            companyInfoHref={user.companyInfoHref}
           />
         </div>
       </div>

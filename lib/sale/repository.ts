@@ -30,7 +30,6 @@ import {
   quotations,
   sales,
   shippings,
-  stockReports,
 } from '@/lib/db/schema';
 import { MorphType } from '@/lib/db/morph';
 import {

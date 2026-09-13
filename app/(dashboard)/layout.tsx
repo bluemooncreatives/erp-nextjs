@@ -118,6 +118,9 @@ export default async function DashboardLayout({
         roleName: user.role.name,
         email: user.email,
         avatar: avatarUrl(user.avatar ?? user.photo, user.name),
+        companyInfoHref: userCan(user, 'company_information_update')
+          ? ROUTES['company_info']
+          : undefined,
       }}
       quickAdd={quickAdd}
       branches={branches}

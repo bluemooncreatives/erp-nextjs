@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 import { authorize } from '@/lib/auth/permissions';
 import { getSession } from '@/lib/auth/session';
 import { db } from '@/lib/db/client';
-import { taxes } from '@/lib/db/schema';
+import { taxes, comboProducts } from '@/lib/db/schema';
 import { customerOptions } from '@/lib/contact/queries';
 import { productsForPurchase } from '@/lib/product/products';
 import { locationOptions } from '@/lib/setup/repositories';
@@ -21,11 +21,12 @@ export default async function CreateQuotationPage() {
   const setting = await generalSetting();
   const showroomId = session?.showroomId ?? user.showroomId ?? null;
 
-  const [customers, locations, taxRows, skus] = await Promise.all([
+  const [customers, locations, taxRows, skus, combos] = await Promise.all([
     customerOptions(true),
     locationOptions(),
     db.select().from(taxes).where(eq(taxes.status, 1)),
     productsForPurchase(),
+    db.select().from(comboProducts).where(eq(comboProducts.status, 1)),
   ]);
 
   return (
@@ -48,6 +49,11 @@ export default async function CreateQuotationPage() {
           label: `${p.productName ?? ''} (${p.sku ?? p.id})`,
           sellingPrice: Number(p.sellingPrice),
           tax: Number(p.tax),
+        }))}
+        combos={combos.map((c) => ({
+          id: c.id,
+          label: `${c.name ?? 'Combo'}`,
+          sellingPrice: Number(c.price),
         }))}
       />
     </>

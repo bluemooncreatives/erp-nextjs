@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation';
 import { eq } from 'drizzle-orm';
 import { authorize } from '@/lib/auth/permissions';
 import { db } from '@/lib/db/client';
-import { taxes } from '@/lib/db/schema';
+import { taxes, comboProducts } from '@/lib/db/schema';
 import { customerOptions } from '@/lib/contact/queries';
 import { findQuotation } from '@/lib/quotation/repository';
 import { productsForPurchase } from '@/lib/product/products';
@@ -33,11 +33,12 @@ export default async function EditQuotationPage({
   const { quotation, items } = record;
   const setting = await generalSetting();
 
-  const [customers, locations, taxRows, skus] = await Promise.all([
+  const [customers, locations, taxRows, skus, combos] = await Promise.all([
     customerOptions(true),
     locationOptions(),
     db.select().from(taxes).where(eq(taxes.status, 1)),
     productsForPurchase(),
+    db.select().from(comboProducts).where(eq(comboProducts.status, 1)),
   ]);
 
   const isWarehouse = quotation.quotationableType === MorphType.WareHouse;
@@ -66,6 +67,11 @@ export default async function EditQuotationPage({
           sellingPrice: Number(p.sellingPrice),
           tax: Number(p.tax),
         }))}
+        combos={combos.map((c) => ({
+          id: c.id,
+          label: `${c.name ?? 'Combo'}`,
+          sellingPrice: Number(c.price),
+        }))}
         defaults={{
           id: quotation.id,
           customerId: quotation.customerId ? String(quotation.customerId) : '',
@@ -83,14 +89,21 @@ export default async function EditQuotationPage({
           taxId: '0',
           shippingCharge: Number(quotation.shippingCharge ?? 0),
           otherCharge: Number(quotation.otherCharge ?? 0),
-          lines: items.map((item) => ({
-            productId: item.productSkuId,
-            label: item.name ?? String(item.productSkuId),
-            price: Number(item.price),
-            quantity: item.quantity,
-            tax: Number(item.tax ?? 0),
-            discount: Number(item.discount ?? 0),
-          })),
+          lines: items.map((item) => {
+            const isCombo = item.productableType === MorphType.ComboProduct;
+            // A combo line's own product reference is `productableId`, not
+            // `productSkuId` (which the combo item detail row leaves unset).
+            const productId = isCombo ? (item.productableId ?? 0) : item.productSkuId;
+            return {
+              productId,
+              isCombo,
+              label: item.name ?? String(productId),
+              price: Number(item.price),
+              quantity: item.quantity,
+              tax: Number(item.tax ?? 0),
+              discount: Number(item.discount ?? 0),
+            };
+          }),
         }}
       />
     </>

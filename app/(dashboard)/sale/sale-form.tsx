@@ -15,9 +15,10 @@ import { LinkButton } from '@/components/common/link-button';
 //                   + shipping + other charges
 // ---------------------------------------------------------------------------
 
-import { useActionState, useMemo, useState } from 'react';
+import { useActionState, useMemo, useState, useTransition } from 'react';
 import { nanoid } from 'nanoid';
 import { Card } from '@/components/erp/page';
+import { customerLookup, type CustomerLookup } from './actions';
 import {
   FormAlert,
   FormInput,
@@ -157,6 +158,12 @@ export function SaleForm({
   const [paymentMethod, setPaymentMethod] = useState(pos ? 'quick cash' : '');
   const [paymentAmount, setPaymentAmount] = useState(0);
   const [accountId, setAccountId] = useState('');
+  const [customerInfo, setCustomerInfo] = useState<CustomerLookup | null>(null);
+  const [, startCustomerLookup] = useTransition();
+  const lookupCustomer = (ref: string) => {
+    if (!ref) { setCustomerInfo(null); return; }
+    startCustomerLookup(async () => setCustomerInfo(await customerLookup(ref)));
+  };
   const [extraPayments, setExtraPayments] = useState<{ key: number; method: string; amount: number; account: string }[]>([]);
   const totalPaid = paymentAmount + extraPayments.reduce((sum, p) => sum + p.amount, 0);
 
@@ -261,15 +268,33 @@ export function SaleForm({
 
       <Card title={heading}>
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-          <FormSelect
-            label="Customer"
-            name="customer_id"
-            required
-            placeholder="Select customer"
-            defaultValue={defaults?.customerRef ?? ''}
-            options={options.customers}
-            error={state.fieldErrors?.customer_id}
-          />
+          <div>
+            <FormSelect
+              label="Customer"
+              name="customer_id"
+              required
+              placeholder="Select customer"
+              defaultValue={defaults?.customerRef ?? ''}
+              options={options.customers}
+              error={state.fieldErrors?.customer_id}
+              onChange={(e) => lookupCustomer(e.target.value)}
+            />
+            {customerInfo ? (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Due: {money(customerInfo.due)}
+                {customerInfo.lastInvoiceNo ? (
+                  <>
+                    {' — Last invoice: '}
+                    {customerInfo.lastInvoiceUrl ? (
+                      <a href={customerInfo.lastInvoiceUrl} className="underline" target="_blank" rel="noreferrer">
+                        {customerInfo.lastInvoiceNo}
+                      </a>
+                    ) : customerInfo.lastInvoiceNo}
+                  </>
+                ) : null}
+              </p>
+            ) : null}
+          </div>
           <FormSelect
             label="Branch / Warehouse"
             name="warehouse_id"

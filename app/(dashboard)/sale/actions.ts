@@ -29,12 +29,47 @@ import { isEnabled } from '@/lib/business-settings';
 import { config } from '@/lib/config';
 import { actionFormData } from '@/lib/forms';
 import { readSaleInput, readPayments, validate, str, numList } from '@/lib/sale/input';
+import { findContact, contactAccounts, contactLastInvoice } from '@/lib/contact/queries';
 
 export type SaleFormState = {
   error?: string;
   success?: string;
   fieldErrors?: Record<string, string>;
 };
+
+export type CustomerLookup = {
+  due: number;
+  lastInvoiceNo: string | null;
+  lastInvoiceUrl: string | null;
+};
+
+/**
+ * Port of `SaleController@customerDetails` / `orderDetails` - the Blade fired
+ * this over AJAX when a customer was picked on the sale/POS form, to show
+ * their outstanding due and a link to their last invoice. The port had wired
+ * neither the query (`customerDues()`, already written) nor any UI to call
+ * it; this is the consolidated version both `SaleForm` and the POS screen use.
+ */
+export async function customerLookup(customerRef: string): Promise<CustomerLookup | null> {
+  await authorize('sale.store');
+  const [kind, rawId] = String(customerRef).split('-');
+  const id = Number(rawId);
+  if (kind !== 'customer' || !Number.isFinite(id)) return null;
+
+  const contact = await findContact(id);
+  if (!contact) return null;
+
+  const [accounts, lastSale] = await Promise.all([
+    contactAccounts(contact),
+    contactLastInvoice(id),
+  ]);
+
+  return {
+    due: accounts.due,
+    lastInvoiceNo: lastSale?.invoiceNo ?? null,
+    lastInvoiceUrl: lastSale ? route('sale.show', { id: lastSale.id }) : null,
+  };
+}
 
 // --- Create ---------------------------------------------------------------
 

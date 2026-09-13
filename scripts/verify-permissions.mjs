@@ -39,8 +39,10 @@ for (const file of [...walk(path.join(root, 'app')), ...walk(path.join(root, 'li
 }
 
 // The navigation table names its permissions as data rather than in a call.
+// `requires` is the outer `@if(permissionCheck(...))` a group/leaf is also
+// wrapped in, on top of its own `permission` - just as real a guard.
 const navigation = readFileSync(path.join(root, 'lib/navigation.ts'), 'utf8');
-for (const match of navigation.matchAll(/(?:route|permission):\s*'([^']+)'/g)) {
+for (const match of navigation.matchAll(/(?:route|permission|requires):\s*'([^']+)'/g)) {
   const name = match[1];
   if (!used.has(name)) used.set(name, []);
   used.get(name).push('lib/navigation.ts');
@@ -77,6 +79,7 @@ const NON_ROUTE_PERMISSIONS = new Set([
   'quotation',
   'report',
   'sale',
+  'style.index',
   'general_settings.index',
   'invoice_settings.index',
   'email_template.index',

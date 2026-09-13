@@ -6,7 +6,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
-import { ChevronDown, KeyRound, LogOut, UserRound } from 'lucide-react';
+import { Building2, ChevronDown, KeyRound, LogOut, UserRound } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -24,11 +24,13 @@ export default function UserDropdown({
   roleName,
   email,
   avatar,
+  companyInfoHref,
 }: {
   name: string;
   roleName: string;
   email: string | null;
   avatar: string;
+  companyInfoHref?: string;
 }) {
   const initials = name
     .split(/\s+/)
@@ -73,6 +75,14 @@ export default function UserDropdown({
             Change password
           </Link>
         </DropdownMenuItem>
+        {companyInfoHref ? (
+          <DropdownMenuItem asChild>
+            <Link href={companyInfoHref}>
+              <Building2 />
+              Company info
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
 
         <DropdownMenuSeparator />
 
