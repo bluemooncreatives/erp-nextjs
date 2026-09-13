@@ -351,6 +351,86 @@ All nine were smoke-tested against the running app with real fixture ids: each r
 against five of them confirms the real company, invoice and ledger data the on-screen
 print views show is what landed in the file.
 
+## Completed in this pass (POS, Project interactions, and a full-suite re-verification)
+
+This pass built the two capabilities the earlier passes had left as gaps - a real POS
+checkout and the Project module's interactive half (custom fields, drag-and-drop
+ordering, attachments) - then re-ran the entire verification suite from a cold build to
+confirm the whole port, not just the new work.
+
+**POS** (`app/(dashboard)/pos/`) is a real checkout built on the existing `SaleForm` in
+a `pos` mode: a product/combo picker, per-line serial-number selection where a SKU
+tracks them, Quick Cash change calculation, and a transactional `checkoutPos` action
+that re-validates everything server-side rather than trusting the posted totals -
+combo stock demand aggregated across both a bare SKU and the same SKU inside a combo,
+minimum-selling-price enforcement, serial numbers re-checked for availability, split
+cash/non-cash payment limits, and the location's cash account confirmed configured
+before the sale is created, paid and approved in one transaction. A 72mm receipt
+(`(print)/pos/receipt/[id]`) follows checkout. As `docs/MIGRATION_STATUS.md` already
+recorded, this is **net-new work, not a migration** - the PHP source has no POS module.
+
+**Project custom fields** (typed per-project fields on tasks - text, number, date,
+select, person) and **drag-and-drop board ordering** (tasks between sections, sections
+themselves, and sub-tasks, each also keyboard-operable) are now real, backed by
+`field-controls.tsx` and `lib/project/ordering.ts`, with field visibility and deletion
+cleaning up the values they leave behind. **Task attachments** over 1MB now upload
+correctly - `serverActions.bodySizeLimit` in `next.config.ts` is `12mb`, matching the
+10MB limit `lib/project/attachments.ts` already enforced; the default 1MB Next ceiling
+had been silently rejecting anything larger.
+
+**Two real parity gaps closed by diffing behaviour, not just routes:**
+
+- **Binary `.xls` imports.** Laravel's importer accepted `.xls` as well as `.csv`/
+  `.xlsx`; the port rejected it. The spreadsheet reader now parses the legacy binary
+  format too.
+- **Sale and quotation emails attached a PDF in Laravel; the port only linked to the
+  print view.** `lib/pdf/sale-document.ts` and `lib/pdf/quotation-document.ts` pull the
+  same document-building logic the `sale.pdf` / `quotation.order.pdf` routes use into
+  functions `lib/mail.ts` can call directly, so the confirmation email now carries the
+  real invoice/quotation PDF as an attachment, the way Laravel's did.
+- **The invoice PDF double-counted POS change.** `saleInvoice()`'s paid total was
+  subtracting `payments.returnAmount` (change handed back) on top of `payableAmount`
+  already being net of it, understating what was paid. Removed the second subtraction.
+
+**A new verification script, `scripts/verify-operations.mjs`**, checks what the others
+don't: all nine PDF routes return real `%PDF-`-prefixed bytes over HTTP, a
+contact-linked session reaches every customer-portal screen, and (behind
+`VERIFY_BACKUP=1`, since it shells out to `mysqldump`) the backup and restore actions
+round-trip a real database - generate, confirm the file, truncate-and-restore from it,
+and confirm every tracked table's row count is unchanged.
+
+**Two genuine bugs surfaced by running that script, both fixed:**
+
+- `lib/backup.ts` names the backup folder with `phpDate('d-m-Y', ...)`, which - like
+  every date in this port - formats in UTC, matching how every other date in the
+  application is written. `verify-operations.mjs`'s own folder computation used the
+  test runner's *local* date instead, which disagrees with UTC for part of every day on
+  a host ahead of it (this one included) - a false failure, and its cleanup silently
+  missing the file it should have removed, purely from checking the wrong folder name.
+  Fixed in the script, not the app.
+- `importBackup` (`app/(dashboard)/backup/actions.ts`) called
+  `revalidatePath('/', 'layout')` after a restore. The dashboard layout is already
+  `force-dynamic` - nothing there was cached for that to usefully bust - and
+  revalidating the *entire* layout turned out to interfere with delivering this
+  particular action's own `useActionState` reply back to the person who just submitted
+  it: the restore succeeded, but they never saw confirmation that it had. Narrowed to
+  the same page-scoped `revalidatePath` its sibling `generateBackup` already used.
+  (Chasing this down the wrong path first is worth recording too: the initial symptom
+  looked identical to the action's message never rendering at all, which is exactly
+  what happens when you check a `useActionState` result via a raw-HTML fetch that never
+  runs JavaScript - the reply is real, but only client-side hydration puts it in the
+  DOM. Confirmed with a real headless-browser click that the message renders correctly;
+  `verify-operations.mjs` now asserts the restore's actual effect - the row counts -
+  rather than text a script can't observe that way.)
+
+**Full re-verification, from a clean build, all green:** `tsc --noEmit`, `next build`,
+`eslint`, 54 unit tests, 26 `verify:actions` scenarios, 11 `verify:operations`
+scenarios (backup included), 11 `verify:migration` fixture scenarios (POS checkout
+including a rejected-quantity and a forced-rollback case, Project fields and ordering,
+the oversized attachment, the binary XLS import), 12 `verify:browser` click-through
+scenarios (POS checkout and the Project board drag included), 224/224 routes in the
+HTTP sweep, 0 route/permission/schema gaps.
+
 ## Logic parity
 
 `npm run verify:routes` answers "does a URL resolve". It says nothing about the

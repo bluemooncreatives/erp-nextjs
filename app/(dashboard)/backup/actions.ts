@@ -61,6 +61,12 @@ export async function importBackup(
   }
 
   await successLog(result.message, user.id);
-  revalidatePath('/', 'layout');
+  // Every screen already reads live: the dashboard layout is `force-dynamic`,
+  // so nothing here was cached for a revalidation to bust. `revalidatePath('/',
+  // 'layout')` was tried for that reason, but revalidating the *whole* layout
+  // clobbers this action's own `useActionState` reply before it reaches the
+  // response - the restore succeeds, but the person who just ran it never sees
+  // that it did. Scoped to this page, like `generateBackup`, it does not.
+  revalidatePath(ROUTES['backup.index']);
   return { success: result.message };
 }

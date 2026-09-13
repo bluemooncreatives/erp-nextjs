@@ -1,17 +1,17 @@
 {
-  "projectId": 3,
-  "projectUuid": "797fd994-72a2-48aa-bab2-f22ec7d93588",
+  "projectId": 4,
+  "projectUuid": "bb61c521-b387-47af-a368-d0aa054dbe33",
   "taskIds": [
-    7,
-    8
+    11,
+    12
   ],
   "taskUuids": [
-    "f94edb5e-5dda-4d87-8646-287e17ef5316",
-    "0807f12c-29e4-411b-97ca-e253cde4a041"
+    "684ec1de-f305-49b0-aed4-cb56daa6f2cc",
+    "ad348084-ae67-4604-8f3b-a13c0f4e28a5"
   ],
   "sectionIds": [
-    5,
-    6
+    7,
+    8
   ],
   "customerId": 1,
   "stock": {
@@ -20,9 +20,9 @@
     "houseable_type": "Modules\\Inventory\\Entities\\ShowRoom",
     "stock_date": "2026-09-11T18:30:00.000Z",
     "product_sku_id": 1,
-    "stock": "39",
+    "stock": "27",
     "created_at": "2026-09-12T05:55:41.000Z",
-    "updated_at": "2026-09-13T13:20:43.000Z",
+    "updated_at": "2026-09-13T13:31:31.000Z",
     "selling_price": 15,
     "min_selling_price": 0,
     "product_name": "DB Writes Product 1789212341037"

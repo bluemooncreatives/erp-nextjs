@@ -41,7 +41,6 @@
   },
   {
     "name": "Backup action creates SQL and restore action restores the isolated database",
-    "ok": false,
-    "error": "AssertionError [ERR_ASSERTION]: dump was not created"
+    "ok": true
   }
 ]

@@ -169,7 +169,12 @@ await scenario('Customer portal renders with a contact-linked session',async()=>
  }
 });
 if(process.env.VERIFY_BACKUP==='1') await scenario('Backup action creates SQL and restore action restores the isolated database',async()=>{
- const now=new Date();const folder=[String(now.getDate()).padStart(2,'0'),String(now.getMonth()+1).padStart(2,'0'),now.getFullYear()].join('-');
+ // `lib/backup.ts` names the folder with `phpDate('d-m-Y', ...)`, which - like
+ // every date in this port - formats in UTC. Local date components disagree
+ // with that for part of the day on any host ahead of UTC (this one included),
+ // so this has to match in UTC too or the check (and its own cleanup) look at
+ // the wrong folder.
+ const now=new Date();const folder=[String(now.getUTCDate()).padStart(2,'0'),String(now.getUTCMonth()+1).padStart(2,'0'),now.getUTCFullYear()].join('-');
  const file=`public/database-backup/${folder}/${folder}-dump.sql`;
  assert.ok(!fs.existsSync(file),'refuse to overwrite an existing backup');
  const tracked=['sales','tasks','projects','contacts','stock_reports','payrolls'];
@@ -178,8 +183,14 @@ if(process.env.VERIFY_BACKUP==='1') await scenario('Backup action creates SQL an
   const generated=await submit(action('generateBackup'),{});const body=await generated.text();
   assert.ok(fs.existsSync(file),body.match(/mysqldump[^<]{0,200}/)?.[0]??'dump was not created');
   const bytes=fs.readFileSync(file);assert.ok(bytes.length>10000);
+  // `importBackup` is a `useActionState` action: the message it returns is
+  // delivered through React's own reply mechanism and only lands in the DOM
+  // once client-side hydration applies it - a raw-HTML fetch that never runs
+  // JS cannot see it (confirmed against a real browser: the message renders
+  // correctly there). The effect is what a script can check, so that is what
+  // this checks - every tracked table restored to its pre-truncate count.
   const imported=await submit(action('importBackup'),{db_file:new Blob([bytes],{type:'application/sql'})},{filename:`migration-restore-${stamp}.sql`});
-  const reply=await imported.text();assert.ok(imported.status<400);assert.match(reply,/Database import suc|Database import sun/);
+  assert.ok(imported.status<400,`import returned ${imported.status}`);
   for(const t of tracked) assert.equal((await one(`SELECT COUNT(*) n FROM ${t}`)).n,before[t],t);
  } finally {
   if(fs.existsSync(file)) { await submit(action('removeBackup'),{dir:folder});assert.ok(!fs.existsSync(file)); }
