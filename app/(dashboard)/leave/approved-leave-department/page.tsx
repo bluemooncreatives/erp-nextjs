@@ -25,6 +25,8 @@ import { Button } from '@/components/ui/button';
 import { LinkButton } from '@/components/common/link-button';
 import { Filter, X } from 'lucide-react';
 import { Badge } from '@/components/erp/badge';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Building2, CalendarCheck, CalendarClock, Users } from 'lucide-react';
 import { ActionButton } from '@/components/erp/submit-button';
 import { deleteLeaveApplicationAction } from '../actions';
 
@@ -116,7 +118,28 @@ export default async function DepartmentWiseLeavePage({
       </Card>
 
       {userId ? (
-        <Card title={`Leave (${rows.length})`} bodyClassName="" className="mt-5">
+        <>
+        <ReportSummary
+          className="mt-5"
+          figures={[
+            { label: 'Departments', value: departments.length, detail: 'Available to filter by', icon: Building2 },
+            {
+              label: 'Staff in department',
+              value: staffResult.rows.length,
+              detail: 'Active members',
+              icon: Users,
+            },
+            { label: 'Leave applications', value: rows.length, detail: 'For this person', icon: CalendarClock },
+            {
+              label: 'Approved',
+              value: rows.filter((row) => row.leave.status === 1).length,
+              detail: 'Signed off',
+              icon: CalendarCheck,
+            },
+          ]}
+        />
+
+        <Card title="Leave" bodyClassName="" className="mt-5">
           <DataTable
             columns={[
               { label: 'ID' },
@@ -161,6 +184,7 @@ export default async function DepartmentWiseLeavePage({
             })}
           </DataTable>
         </Card>
+        </>
       ) : null}
     </>
   );

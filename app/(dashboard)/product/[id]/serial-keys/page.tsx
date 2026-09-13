@@ -14,6 +14,8 @@ import { route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { CircleCheck, KeyRound, PackageCheck } from 'lucide-react';
 
 export const metadata: Metadata = { title: 'Serial Key' };
 
@@ -43,13 +45,23 @@ export default async function SerialKeysPage({
 
   const title = `${sku.productName ?? sku.sku ?? skuId} - Serial Key`;
 
+  const soldCount = rows.filter((item) => item.isSold !== 0).length;
+
   return (
     <>
       <PageHeader
         title={title}
         breadcrumb={[{ label: 'Product' }, { label: 'Serial Key' }]}
       />
-      <Card title={`Serial numbers (${rows.length})`} bodyClassName="">
+      <ReportSummary
+        figures={[
+          { label: 'Serial numbers', value: rows.length, detail: 'Recorded for this item', icon: KeyRound },
+          { label: 'In stock', value: rows.length - soldCount, detail: 'Not yet sold', icon: PackageCheck },
+          { label: 'Sold', value: soldCount, detail: 'Issued against an invoice', icon: CircleCheck },
+        ]}
+      />
+
+      <Card title="Serial numbers" bodyClassName="">
         <DataTable
           columns={[
             { label: 'Sl' },

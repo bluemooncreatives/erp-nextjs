@@ -8,6 +8,8 @@ import { costOfGoodsHistory } from '@/lib/purchase/repository';
 import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Boxes, History, Package, TrendingUp } from 'lucide-react';
 
 export const metadata: Metadata = { title: 'Product Costing' };
 
@@ -29,6 +31,14 @@ export default async function CostOfGoodsPage() {
     })),
   );
 
+  const skuCount = new Set(rows.map((r) => r.history.productSkuId)).size;
+  const receivedUnits = rows.reduce((sum, r) => sum + Number(r.history.newlyStock ?? 0), 0);
+  // How many recalculations actually moved the cost upward - the direction
+  // that erodes margin, and the reason anyone opens this screen.
+  const costRose = rows.filter(
+    (r) => Number(r.history.newCostOfGoodsSold ?? 0) > Number(r.history.previousCostOfGoodsSold ?? 0),
+  ).length;
+
   return (
     <>
       <PageHeader
@@ -36,8 +46,17 @@ export default async function CostOfGoodsPage() {
         breadcrumb={[{ label: 'Inventory'}, { label:'Product Costing' }]}
       />
 
+      <ReportSummary
+        figures={[
+          { label: 'Recalculations', value: historyRows.length, detail: 'Recorded on receipt', icon: History },
+          { label: 'Products', value: skuCount, detail: 'With a costing history', icon: Package },
+          { label: 'Units received', value: receivedUnits, detail: 'Across every recalculation', icon: Boxes },
+          { label: 'Cost increases', value: costRose, detail: 'Where unit cost rose', icon: TrendingUp },
+        ]}
+      />
+
       <Card
-        title={`Cost of goods history (${historyRows.length})`}
+        title="Cost of goods history"
         desc="Each row is a weighted-average recalculation made when stock was received."
         bodyClassName=""
       >

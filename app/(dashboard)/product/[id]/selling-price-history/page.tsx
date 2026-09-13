@@ -16,6 +16,8 @@ import { generalSetting, numberFormat } from '@/lib/settings';
 import { route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { History, Tag, TrendingDown, TrendingUp } from 'lucide-react';
 
 export const metadata: Metadata = { title: 'Selling Price History' };
 
@@ -51,13 +53,38 @@ export default async function SellingPriceHistoryPage({
     { label: 'Updated Sell Price' },
   ];
 
+  // Rows come back newest first, so row 0 carries the price in force today.
+  const currentPrice = rows[0]?.newSellingPrice;
+  const rises = rows.filter(
+    (item) => Number(item.newSellingPrice ?? 0) > Number(item.oldPrice ?? 0),
+  ).length;
+
   return (
     <>
       <PageHeader
         title="Selling Price History"
         breadcrumb={[{ label: 'Product' }, { label: 'Selling Price History' }]}
       />
-      <Card title={`${sku.productName ?? sku.sku ?? skuId} (${rows.length})`} bodyClassName="">
+      <ReportSummary
+        figures={[
+          { label: 'Price changes', value: rows.length, detail: 'Recorded for this item', icon: History },
+          {
+            label: 'Current price',
+            value: rows.length ? price(currentPrice) : '-',
+            detail: 'Most recent selling price',
+            icon: Tag,
+          },
+          { label: 'Increases', value: rises, detail: 'Changes that raised the price', icon: TrendingUp },
+          {
+            label: 'Reductions',
+            value: rows.length - rises,
+            detail: 'Changes that lowered or held it',
+            icon: TrendingDown,
+          },
+        ]}
+      />
+
+      <Card title={sku.productName ?? sku.sku ?? String(skuId)} bodyClassName="">
         <DataTable
           columns={columns}
           isEmpty={rows.length === 0}

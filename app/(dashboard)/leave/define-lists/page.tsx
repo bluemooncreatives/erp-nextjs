@@ -11,6 +11,8 @@ import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
 import { removeLeaveDefine } from '../actions';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { CalendarCheck, Repeat, Shield, Tags } from 'lucide-react';
 import { LeaveDefineForm } from './leave-define-form';
 
 export const metadata: Metadata = { title: 'Leave Define' };
@@ -29,11 +31,24 @@ export default async function LeaveDefinePage() {
     can('leave_define.delete'),
   ]);
 
+  const carryForwardCount = rows.filter((row) => row.define.balanceForward === 1).length;
+  const rolesDefined = new Set(rows.map((row) => row.roleName).filter(Boolean)).size;
+  const totalDays = rows.reduce((sum, row) => sum + Number(row.define.totalDays ?? 0), 0);
+
   return (
     <>
       <PageHeader
         title="Leave Define"
         breadcrumb={[{ label: 'Leave' }, { label: 'Leave Define' }]}
+      />
+
+      <ReportSummary
+        figures={[
+          { label: 'Definitions', value: rows.length, detail: 'Role and leave type pairs', icon: Tags },
+          { label: 'Roles covered', value: rolesDefined, detail: `Of ${roleRows.length} roles`, icon: Shield },
+          { label: 'Days granted', value: totalDays, detail: 'Added across every definition', icon: CalendarCheck },
+          { label: 'Carry forward', value: carryForwardCount, detail: 'Definitions that roll over', icon: Repeat },
+        ]}
       />
 
       <div className="grid grid-cols-12 gap-4 md:gap-6">
@@ -47,7 +62,7 @@ export default async function LeaveDefinePage() {
         ) : null}
 
         <div className={canCreate ? 'col-span-12 xl:col-span-8':'col-span-12'}>
-          <Card title={`Definitions (${rows.length})`} bodyClassName="">
+          <Card title="All definitions" bodyClassName="">
             <DataTable
               columns={[
                 { label: 'Role' },

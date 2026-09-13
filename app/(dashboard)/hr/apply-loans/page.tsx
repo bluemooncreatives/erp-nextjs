@@ -12,6 +12,8 @@ import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { BadgeCheck, Clock, HandCoins, Wallet } from 'lucide-react';
 import { destroyLoan } from './actions';
 
 export const metadata: Metadata = { title: 'Apply For Loan' };
@@ -29,6 +31,19 @@ export default async function ApplyLoansPage() {
     })),
   );
 
+  const approvedCount = loans.filter((row) => row.loan.approval === LoanApproval.Approved).length;
+  const pendingCount = loans.filter((row) => row.loan.approval === LoanApproval.Pending).length;
+  const borrowedLabel = await singlePrice(
+    loans.reduce((sum, row) => sum + Number(row.loan.amount ?? 0), 0),
+  );
+  // What is still owed, not what was borrowed - the figure a borrower checks.
+  const outstandingLabel = await singlePrice(
+    loans.reduce(
+      (sum, row) => sum + (Number(row.loan.amount ?? 0) - Number(row.loan.paidLoanAmount ?? 0)),
+      0,
+    ),
+  );
+
   return (
     <>
       <PageHeader
@@ -44,7 +59,16 @@ export default async function ApplyLoansPage() {
         }
       />
 
-      <Card title={`Loans (${rows.length})`} bodyClassName="">
+      <ReportSummary
+        figures={[
+          { label: 'Applications', value: rows.length, detail: 'You have submitted', icon: HandCoins },
+          { label: 'Approved', value: approvedCount, detail: 'Granted to you', icon: BadgeCheck },
+          { label: 'Pending', value: pendingCount, detail: 'Awaiting a decision', icon: Clock },
+          { label: 'Still owed', value: outstandingLabel, detail: `Of ${borrowedLabel} borrowed`, icon: Wallet },
+        ]}
+      />
+
+      <Card title="Your loans" bodyClassName="">
         <DataTable
           columns={[
             { label: 'ID' },

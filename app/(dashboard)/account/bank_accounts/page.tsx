@@ -12,6 +12,8 @@ import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { deleteBankAccountAction } from '../actions';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Building2, Landmark, TrendingDown, Wallet } from 'lucide-react';
 import { BankAccountForm } from './bank-account-form';
 
 export const metadata: Metadata = { title: 'Bank Accounts' };
@@ -31,6 +33,15 @@ export default async function BankAccountsPage() {
     can('bank.account.history'),
   ]);
 
+  const accountBalanceOf = (row: (typeof rows)[number]) =>
+    balanceById.get(row.account.chartAccountId) ?? 0;
+
+  const heldTotal = rows.reduce((sum, row) => sum + accountBalanceOf(row), 0);
+  // An overdrawn account is worth surfacing above the table rather than
+  // leaving it to be spotted by scanning the balance column.
+  const overdrawnCount = rows.filter((row) => accountBalanceOf(row) < 0).length;
+  const bankCount = new Set(rows.map((row) => row.account.bankName).filter(Boolean)).size;
+
   return (
     <>
       <PageHeader
@@ -46,6 +57,20 @@ export default async function BankAccountsPage() {
         }
       />
 
+      <ReportSummary
+        figures={[
+          { label: 'Accounts', value: rows.length, detail: 'Linked to the ledger', icon: Landmark },
+          { label: 'Banks', value: bankCount, detail: 'Distinct institutions', icon: Building2 },
+          {
+            label: 'Total held',
+            value: `${symbol} ${numberFormat(heldTotal)}`,
+            detail: 'Across every account',
+            icon: Wallet,
+          },
+          { label: 'Overdrawn', value: overdrawnCount, detail: 'Accounts below zero', icon: TrendingDown },
+        ]}
+      />
+
       <div className="grid grid-cols-12 gap-4 md:gap-6">
         {canCreate ? (
           <div className="col-span-12 xl:col-span-4">
@@ -54,7 +79,7 @@ export default async function BankAccountsPage() {
         ) : null}
 
         <div className={canCreate ? 'col-span-12 xl:col-span-8':'col-span-12'}>
-          <Card title={`Bank Accounts (${rows.length})`} bodyClassName="">
+          <Card title="All bank accounts" bodyClassName="">
             <DataTable
               columns={[
                 { label: 'Bank' },

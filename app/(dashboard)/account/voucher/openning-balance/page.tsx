@@ -13,6 +13,8 @@ import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { CalendarRange, DoorClosed, DoorOpen } from 'lucide-react';
 import { closeStatement } from './actions';
 
 export const metadata: Metadata = { title: 'Opening Balance' };
@@ -34,6 +36,8 @@ export default async function OpeningBalanceIndexPage() {
     })),
   );
 
+  const closedCount = periods.filter((period) => period.isClosed === 1).length;
+
   return (
     <>
       <PageHeader
@@ -49,7 +53,20 @@ export default async function OpeningBalanceIndexPage() {
         }
       />
 
-      <Card title={`Accounting periods (${rows.length})`} bodyClassName="">
+      <ReportSummary
+        figures={[
+          { label: 'Periods', value: rows.length, detail: 'Recorded in total', icon: CalendarRange },
+          {
+            label: 'Open',
+            value: rows.length - closedCount,
+            detail: 'Still accepting postings',
+            icon: DoorOpen,
+          },
+          { label: 'Closed', value: closedCount, detail: 'Balances carried forward', icon: DoorClosed },
+        ]}
+      />
+
+      <Card title="Accounting periods" bodyClassName="">
         <DataTable
           columns={[
             { label: 'ID' },
@@ -90,7 +107,8 @@ export default async function OpeningBalanceIndexPage() {
                         type="date"
                         name="date"
                         defaultValue={today()}
-                        className="h-8 rounded-lg border border-border bg-transparent px-2 text-xs"
+                        aria-label="Closing date"
+                        className="border-input bg-input-background dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-8 rounded-md border px-2 text-xs outline-none focus-visible:ring-[3px]"
                       />
                       <ActionButton
                         variant="primary"

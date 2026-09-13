@@ -10,6 +10,8 @@ import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
 import { removeHoliday } from '../../leave/actions';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { CalendarDays, CalendarRange, Sun } from 'lucide-react';
 import { HolidayForm } from './holiday-form';
 
 export const metadata: Metadata = { title: 'Holiday Setup' };
@@ -41,11 +43,30 @@ export default async function HolidaysPage({
     }),
   );
 
+  // A range holiday covers more than one day, so a count of rows is not a
+  // count of days off - both figures are worth showing.
+  const rangeCount = holidayRows.filter((row) => row.type === 1).length;
+  const yearCount = new Set(holidayRows.map((row) => row.year).filter(Boolean)).size;
+
   return (
     <>
       <PageHeader
         title="Holiday Setup"
         breadcrumb={[{ label: 'Leave' }, { label: 'Holiday Setup' }]}
+      />
+
+      <ReportSummary
+        figures={[
+          {
+            label: 'Holidays',
+            value: holidayRows.length,
+            detail: year ? `Configured for ${year}` : 'Configured in total',
+            icon: CalendarDays,
+          },
+          { label: 'Single days', value: holidayRows.length - rangeCount, detail: 'One date each', icon: Sun },
+          { label: 'Ranges', value: rangeCount, detail: 'Spanning several days', icon: CalendarRange },
+          { label: 'Years covered', value: yearCount, detail: 'With at least one holiday', icon: CalendarDays },
+        ]}
       />
 
       <div className="grid grid-cols-12 gap-4 md:gap-6">
@@ -56,7 +77,7 @@ export default async function HolidaysPage({
         ) : null}
 
         <div className={canCreate ? 'col-span-12 xl:col-span-8':'col-span-12'}>
-          <Card title={`Holidays (${holidayRows.length})`} bodyClassName="">
+          <Card title="All holidays" bodyClassName="">
             <DataTable
               columns={[
                 { label: 'Name' },

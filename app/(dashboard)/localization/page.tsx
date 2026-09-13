@@ -7,7 +7,10 @@ import { authorize, can } from '@/lib/auth/permissions';
 import { listLanguages, findLanguage } from '@/lib/setting/repository';
 import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
-import { DataTable, Td, Tr, SearchBar } from '@/components/erp/table';
+import { DataTable, Td, Tr } from '@/components/erp/table';
+import { DataToolbar } from '@/components/erp/data-toolbar';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Check, Languages, MoveLeft } from 'lucide-react';
 import { ToggleSwitch } from '@/components/erp/toggle';
 import { ActionButton } from '@/components/erp/submit-button';
 import { toggleLanguageStatus, toggleLanguageRtl, deleteLanguage } from './actions';
@@ -34,6 +37,9 @@ export default async function LocalizationPage({
     can('language.translate_view'),
   ]);
 
+  const activeCount = rows.filter((language) => language.status === 1).length;
+  const rtlCount = rows.filter((language) => language.rtl === 1).length;
+
   return (
     <>
       <PageHeader
@@ -41,18 +47,25 @@ export default async function LocalizationPage({
         breadcrumb={[{ label: 'Settings'}, { label:'Languages' }]}
       />
 
+      <ReportSummary
+        figures={[
+          { label: 'Languages', value: rows.length, detail: 'Matching this search', icon: Languages },
+          { label: 'Active', value: activeCount, detail: 'Offered to users', icon: Check },
+          { label: 'Right to left', value: rtlCount, detail: 'Rendered RTL', icon: MoveLeft },
+        ]}
+      />
+
       <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
-        <Card
-          title={`Languages (${rows.length})`}
-          bodyClassName=""
-          actions={
-            <SearchBar
-              action={ROUTES['languages.index']}
-              name="search_keyword"
-              defaultValue={sp.search_keyword}
-            />
-          }
-        >
+        <Card title="All languages" bodyClassName="">
+          <DataToolbar
+            search={{
+              name: 'search_keyword',
+              value: sp.search_keyword,
+              placeholder: 'Search language or code',
+            }}
+            resultLabel={rows.length + ' languages'}
+          />
+
           <DataTable
             columns={[
               { label: 'ID' },

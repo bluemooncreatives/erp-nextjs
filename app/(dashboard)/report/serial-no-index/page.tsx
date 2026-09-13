@@ -30,9 +30,6 @@ export default async function SerialReportPage({
     productsForPurchase(),
   ]);
 
-  const control =
-    'h-10 rounded-lg border border-border bg-transparent px-3 text-sm text-foreground   ';
-
   const soldCount = rows.filter((r) => r.serial.isSold === 1).length;
   const returnedCount = rows.filter((r) => r.serial.isReturned === 1).length;
 

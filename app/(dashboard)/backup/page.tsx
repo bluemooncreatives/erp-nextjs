@@ -9,6 +9,8 @@ import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { removeBackup } from './actions';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Archive, CalendarClock, DatabaseBackup } from 'lucide-react';
 import { ImportBackupForm, GenerateBackupForm } from './forms';
 
 export const metadata: Metadata = { title: 'Database Backup' };
@@ -23,11 +25,33 @@ export default async function BackupPage() {
     can('backup.import'),
   ]);
 
+  // Backups are listed newest first, so the first row is the most recent one -
+  // the figure an administrator is actually checking when they open this.
+  const latest = backups[0];
+
   return (
     <>
       <PageHeader
         title="Database Backup"
         breadcrumb={[{ label: 'Settings'}, { label:'Database Backup' }]}
+      />
+
+      <ReportSummary
+        figures={[
+          { label: 'Backups', value: backups.length, detail: 'Stored on this server', icon: DatabaseBackup },
+          {
+            label: 'Most recent',
+            value: latest ? latest.folder : 'None',
+            detail: latest ? 'Latest snapshot taken' : 'No backup has been taken',
+            icon: CalendarClock,
+          },
+          {
+            label: 'Restore points',
+            value: backups.length,
+            detail: 'Available to import',
+            icon: Archive,
+          },
+        ]}
       />
 
       <div className="grid gap-5 lg:grid-cols-[320px_1fr]">
@@ -40,7 +64,7 @@ export default async function BackupPage() {
         )}
 
         <Card
-          title={`Database Backup List (${backups.length})`}
+          title="Database Backup List"
           bodyClassName=""
           actions={canCreate ? <GenerateBackupForm /> : null}
         >

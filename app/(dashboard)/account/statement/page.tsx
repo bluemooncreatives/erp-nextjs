@@ -8,6 +8,8 @@ import { dateConvert, generalSetting, numberFormat } from '@/lib/settings';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card, DetailList, EmptyState } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { ArrowDownLeft, ArrowUpRight, Receipt, Scale } from 'lucide-react';
 import { DateRangeFilter } from '../date-range-filter';
 
 export const metadata: Metadata = { title: 'Statement' };
@@ -35,12 +37,47 @@ export default async function StatementPage({
       )
     : [];
 
+  // Debit and credit totals for the period, so the closing balance has the
+  // two movements behind it sitting next to it rather than only in the table.
+  const debitTotal = rows
+    .filter((row) => row.type === 'Dr')
+    .reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
+  const creditTotal = rows
+    .filter((row) => row.type === 'Cr')
+    .reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
+
   return (
     <>
       <PageHeader
         title="Statement"
         breadcrumb={[{ label: 'Accounts' }, { label: 'Statement' }]}
       />
+
+      {statement?.account ? (
+        <ReportSummary
+          figures={[
+            { label: 'Postings', value: rows.length, detail: 'In this period', icon: Receipt },
+            {
+              label: 'Debits',
+              value: `${symbol} ${numberFormat(debitTotal)}`,
+              detail: 'Total debited',
+              icon: ArrowUpRight,
+            },
+            {
+              label: 'Credits',
+              value: `${symbol} ${numberFormat(creditTotal)}`,
+              detail: 'Total credited',
+              icon: ArrowDownLeft,
+            },
+            {
+              label: 'Closing balance',
+              value: `${symbol} ${numberFormat(statement.closingBalance)}`,
+              detail: 'At the end of the period',
+              icon: Scale,
+            },
+          ]}
+        />
+      ) : null}
 
       <Card
         title={statement?.account ? statement.account.name : 'Select an account'}

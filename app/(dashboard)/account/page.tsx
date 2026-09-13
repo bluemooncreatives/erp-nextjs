@@ -12,6 +12,8 @@ import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
 import { deleteChartAccountAction } from './actions';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { FolderTree, ListTree, Power, Wallet } from 'lucide-react';
 import { ChartAccountForm } from './chart-account-form';
 
 export const metadata: Metadata = { title: 'Chart Of Accounts' };
@@ -44,11 +46,33 @@ export default async function ChartOfAccountsPage() {
     .filter((b) => b.isGroup === 1)
     .map((b) => ({ value: b.id, label: `${b.name}${b.code ? ` (${b.code})` : ''}` }));
 
+  const groupCount = flat.filter((entry) => entry.node.isGroup === 1).length;
+  const inactiveCount = flat.filter((entry) => entry.node.status !== 1).length;
+  // Group rows carry their children's totals, so summing every row would
+  // count the same money twice - only the leaves are added up here.
+  const ledgerTotal = flat
+    .filter((entry) => entry.node.isGroup === 0)
+    .reduce((sum, entry) => sum + (balanceById.get(entry.node.id) ?? 0), 0);
+
   return (
     <>
       <PageHeader
         title="Chart Of Accounts"
         breadcrumb={[{ label: 'Accounts'}, { label:'Chart Of Accounts' }]}
+      />
+
+      <ReportSummary
+        figures={[
+          { label: 'Accounts', value: flat.length, detail: 'Groups and ledgers', icon: ListTree },
+          { label: 'Groups', value: groupCount, detail: 'Headings with children', icon: FolderTree },
+          {
+            label: 'Ledger balance',
+            value: `${symbol} ${numberFormat(ledgerTotal)}`,
+            detail: 'Summed across posting accounts',
+            icon: Wallet,
+          },
+          { label: 'Inactive', value: inactiveCount, detail: 'Switched off', icon: Power },
+        ]}
       />
 
       <div className="grid grid-cols-12 gap-4 md:gap-6">
@@ -59,7 +83,7 @@ export default async function ChartOfAccountsPage() {
         ) : null}
 
         <div className={canCreate || canEdit ? 'col-span-12 xl:col-span-8':'col-span-12'}>
-          <Card title={`Accounts (${flat.length})`} bodyClassName="">
+          <Card title="All accounts" bodyClassName="">
             <DataTable
               columns={[
                 { label: 'Account' },

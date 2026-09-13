@@ -11,6 +11,8 @@ import { DataTable, Td, Tr } from '@/components/erp/table';
 import { FormCheckbox, FormActions } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { Bell, BellRing, CheckCheck } from 'lucide-react';
 import { markSelectedRead, markAllRead } from '../notification-actions';
 
 export const metadata: Metadata = { title: 'Notifications' };
@@ -18,6 +20,8 @@ export const metadata: Metadata = { title: 'Notifications' };
 export default async function NotificationListPage() {
   await requireUser();
   const notifications = await notificationList();
+
+  const unseenCount = notifications.filter((notification) => !notification.readAt).length;
 
   return (
     <>
@@ -33,7 +37,20 @@ export default async function NotificationListPage() {
         }
       />
 
-      <Card title={`Notifications (${notifications.length})`} bodyClassName="">
+      <ReportSummary
+        figures={[
+          { label: 'Notifications', value: notifications.length, detail: 'In your inbox', icon: Bell },
+          { label: 'Unseen', value: unseenCount, detail: 'Waiting on you', icon: BellRing },
+          {
+            label: 'Seen',
+            value: notifications.length - unseenCount,
+            detail: 'Already read',
+            icon: CheckCheck,
+          },
+        ]}
+      />
+
+      <Card title="All notifications" bodyClassName="">
         <form action={markSelectedRead}>
           <DataTable
             columns={[

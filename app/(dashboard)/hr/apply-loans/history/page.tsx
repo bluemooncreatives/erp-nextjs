@@ -10,6 +10,8 @@ import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { HandCoins, Users, Wallet } from 'lucide-react';
 
 export const metadata: Metadata = { title: 'Loan History' };
 
@@ -41,6 +43,13 @@ export default async function LoanHistoryPage({
     })),
   );
 
+  // Once a member of staff is chosen the figures are about them; before that
+  // they are about the group of borrowers as a whole.
+  const [borrowedLabel, repaidLabel] = await Promise.all([
+    singlePrice(loans.reduce((sum, row) => sum + Number(row.loan.amount ?? 0), 0)),
+    singlePrice(loans.reduce((sum, row) => sum + Number(row.loan.paidLoanAmount ?? 0), 0)),
+  ]);
+
   return (
     <>
       <PageHeader
@@ -48,8 +57,32 @@ export default async function LoanHistoryPage({
         breadcrumb={[{ label: 'HR' }, { label: 'Loan History' }]}
       />
 
+      <ReportSummary
+        figures={[
+          { label: 'Borrowers', value: users.length, detail: 'Staff who have taken a loan', icon: Users },
+          {
+            label: selected ? 'Their loans' : 'Loans shown',
+            value: detail.length,
+            detail: selected ? `Taken by ${selected.name}` : 'Pick someone to see theirs',
+            icon: HandCoins,
+          },
+          {
+            label: 'Borrowed',
+            value: selected ? borrowedLabel : '-',
+            detail: selected ? 'Total advanced' : 'Select a borrower',
+            icon: Wallet,
+          },
+          {
+            label: 'Repaid',
+            value: selected ? repaidLabel : '-',
+            detail: selected ? 'Paid back so far' : 'Select a borrower',
+            icon: Wallet,
+          },
+        ]}
+      />
+
       <div className="space-y-5">
-        <Card title={`Staff with loans (${users.length})`} bodyClassName="">
+        <Card title="Staff with loans" bodyClassName="">
           <DataTable
             columns={[
               { label: 'ID' },

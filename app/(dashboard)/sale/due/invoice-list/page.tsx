@@ -22,7 +22,8 @@ import { DataTable, Td, Tr } from '@/components/erp/table';
 import { FormSelect } from '@/components/erp/fields';
 import { Button } from '@/components/ui/button';
 import { LinkButton } from '@/components/common/link-button';
-import { Filter, X } from 'lucide-react';
+import { Banknote, FileText, Filter, Wallet, X } from 'lucide-react';
+import { ReportSummary } from '@/components/erp/report-summary';
 
 export const metadata: Metadata = { title: 'Due Invoice List' };
 
@@ -52,6 +53,9 @@ export default async function DueInvoiceListPage({
       dueAmount: Number(sale.payableAmount) - sale.paidAmount,
     })),
   );
+
+  const invoicedTotal = rows.reduce((sum, row) => sum + Number(row.payableAmount ?? 0), 0);
+  const paidTotal = rows.reduce((sum, row) => sum + Number(row.paidAmount ?? 0), 0);
 
   const canShow = await can('sale.show');
   const action = ROUTES['due.invoice.list'];
@@ -91,7 +95,26 @@ export default async function DueInvoiceListPage({
 
       <div className="mt-5">
         {partyId ? (
-          <Card title={`Unpaid invoices (${rows.length})`} bodyClassName="">
+          <>
+          <ReportSummary
+            figures={[
+              { label: 'Unpaid invoices', value: rows.length, detail: 'For this party', icon: FileText },
+              {
+                label: 'Invoiced',
+                value: `${symbol} ${numberFormat(invoicedTotal)}`,
+                detail: 'Total billed',
+                icon: Banknote,
+              },
+              {
+                label: 'Still owing',
+                value: `${symbol} ${numberFormat(invoicedTotal - paidTotal)}`,
+                detail: `${symbol} ${numberFormat(paidTotal)} already paid`,
+                icon: Wallet,
+              },
+            ]}
+          />
+
+          <Card title="Unpaid invoices" bodyClassName="">
             <DataTable
               columns={[
                 { label: 'Invoice' },
@@ -127,6 +150,7 @@ export default async function DueInvoiceListPage({
               ))}
             </DataTable>
           </Card>
+          </>
         ) : (
           <EmptyState message="Select a customer to list their unpaid invoices." />
         )}

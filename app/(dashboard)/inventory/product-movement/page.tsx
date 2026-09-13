@@ -8,11 +8,12 @@ import { productMovement } from '@/lib/inventory/transfers';
 import { productsForPurchase } from '@/lib/product/products';
 import { dateConvert } from '@/lib/settings';
 import { morphName } from '@/lib/db/morph';
-import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
-import { DataTable, SearchBar, Td, Tr } from '@/components/erp/table';
+import { DataTable, Td, Tr } from '@/components/erp/table';
+import { DataToolbar } from '@/components/erp/data-toolbar';
+import { ReportSummary } from '@/components/erp/report-summary';
+import { ArrowDownToLine, ArrowUpFromLine, Clock, Repeat } from 'lucide-react';
 import { Badge } from '@/components/erp/badge';
-import { SelectControl } from '@/components/erp/select-control';
 
 export const metadata: Metadata = { title: 'Product Movement' };
 
@@ -38,6 +39,16 @@ export default async function ProductMovementPage({
     rows.map(async (row) => ({ ...row, dateLabel: await dateConvert(row.date) })),
   );
 
+  // `in_out` carries the signed quantity, so receipts and issues separate
+  // cleanly without needing the movement type.
+  const movedIn = rows
+    .filter((row) => Number(row.inOut ?? 0) > 0)
+    .reduce((sum, row) => sum + Number(row.inOut ?? 0), 0);
+  const movedOut = rows
+    .filter((row) => Number(row.inOut ?? 0) < 0)
+    .reduce((sum, row) => sum + Math.abs(Number(row.inOut ?? 0)), 0);
+  const pendingCount = rows.filter((row) => row.status !== 1).length;
+
   return (
     <>
       <PageHeader
@@ -45,28 +56,35 @@ export default async function ProductMovementPage({
         breadcrumb={[{ label: 'Inventory'}, { label:'Product Movement' }]}
       />
 
-      <Card
-        title={`Movements (${movementRows.length})`}
-        bodyClassName=""
-        actions={
-          <SearchBar
-            action={ROUTES['product_movement.index']}
-            placeholder="Filter by product"
-          >
-            <SelectControl
-              name="product_sku_id"
-              defaultValue={sp.product_sku_id ?? ''}
-              placeholder="All products"
-              aria-label="Product"
-              options={skus.map((s) => ({
-                value: String(s.id),
-                label: s.productName + ' (' + s.sku + ')',
-              }))}
-              className="sm:w-72"
-            />
-          </SearchBar>
-        }
-      >
+      <ReportSummary
+        figures={[
+          { label: 'Movements', value: movementRows.length, detail: 'Matching this filter', icon: Repeat },
+          { label: 'Units in', value: movedIn, detail: 'Received into stock', icon: ArrowDownToLine },
+          { label: 'Units out', value: movedOut, detail: 'Issued from stock', icon: ArrowUpFromLine },
+          { label: 'Pending', value: pendingCount, detail: 'Not yet applied to stock', icon: Clock },
+        ]}
+      />
+
+      <Card title="Movements" bodyClassName="">
+        <DataToolbar
+          filters={[
+            {
+              id: 'product_sku_id',
+              label: 'Product',
+              value: sp.product_sku_id ?? 'all',
+              className: 'sm:w-72',
+              options: [
+                { label: 'All products', value: 'all' },
+                ...skus.map((s) => ({
+                  value: String(s.id),
+                  label: s.productName + ' (' + s.sku + ')',
+                })),
+              ],
+            },
+          ]}
+          resultLabel={movementRows.length + ' movements'}
+        />
+
         <DataTable
           columns={[
             { label: 'Date' },
