@@ -124,7 +124,7 @@ async function submit(target, fields, options = {}) {
 
 /** The polymorphic class names, bound as parameters - MySQL unescapes
  * backslashes inside string literals, so these cannot be inlined. */
-const MORPH = {
+const _MORPH = {
   sale: 'Modules\\Sale\\Entities\\Sale',
   purchaseOrder: 'Modules\\Purchase\\Entities\\PurchaseOrder',
   voucher: 'Modules\\Account\\Entities\\Voucher',

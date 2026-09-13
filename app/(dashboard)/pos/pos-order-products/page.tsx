@@ -6,7 +6,7 @@ import { authorize } from '@/lib/auth/permissions';
 import { getSession } from '@/lib/auth/session';
 import { db } from '@/lib/db/client';
 import { comboProducts, taxes, partNumbers, productSku } from '@/lib/db/schema';
-import { customerOptions } from '@/lib/contact/queries';
+import { customerOptions, WALK_IN_CUSTOMER_ID } from '@/lib/contact/queries';
 import { productsWithStock } from '@/lib/product/products';
 import { locationOptions } from '@/lib/setup/repositories';
 import { paymentAccountOptions } from '@/lib/dashboard/queries';
@@ -73,6 +73,13 @@ export default async function PosPage({ searchParams }: { searchParams: Promise<
     })),
   ];
 
+  // The walk-in customer is pre-selected so the cashier can check out without
+  // picking a party on every anonymous transaction. Falls back to the first
+  // active customer if the seeded walk-in (id=1) is not in this install.
+  const walkInCustomerRef = customers.some((c) => c.id === WALK_IN_CUSTOMER_ID)
+    ? `customer-${WALK_IN_CUSTOMER_ID}`
+    : (customers[0] ? `customer-${customers[0].id}` : '');
+
   return (
     <>
       <PageHeader
@@ -95,6 +102,19 @@ export default async function PosPage({ searchParams }: { searchParams: Promise<
         submitLabel="Complete checkout"
         currencySymbol={setting.currencySymbol ?? '$'}
         defaultLocation={locationRef}
+        defaults={{
+          customerRef: walkInCustomerRef,
+          locationRef,
+          date: new Date().toISOString().slice(0, 10),
+          refNo: '',
+          notes: '',
+          discountType: '1',
+          discountValue: 0,
+          taxId: '0',
+          shippingCharge: 0,
+          otherCharge: 0,
+          lines: [],
+        }}
         options={{
           customers: customers.map((c) => ({
             value: `customer-${c.id}`,

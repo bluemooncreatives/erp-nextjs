@@ -551,10 +551,32 @@ export function SaleForm({
             </div>
           </dl>
 
-          {pos ? <div className="mt-4 flex flex-wrap gap-2">
-            <button type="button" className="rounded border px-3 py-2" onClick={() => setPaymentAmount(totals.payable)}>Exact amount</button>
-            {[100, 500, 1000, 2000].map((amount) => <button key={amount} type="button" className="rounded border px-3 py-2" onClick={() => setPaymentAmount((n) => n + amount)}>+{amount}</button>)}
-          </div> : null}
+          {pos ? (
+            <div className="mt-4">
+              <p className="mb-2 text-xs font-medium text-muted-foreground">Quick tender</p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
+                  onClick={() => setPaymentAmount(totals.payable)}
+                >
+                  Exact {money(totals.payable)}
+                </button>
+                {[1, 5, 10, 20, 50, 100, 500, 1000].map((bill) =>
+                  bill > totals.payable ? (
+                    <button
+                      key={bill}
+                      type="button"
+                      className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted"
+                      onClick={() => setPaymentAmount(bill)}
+                    >
+                      {currencySymbol}{bill}
+                    </button>
+                  ) : null
+                )}
+              </div>
+            </div>
+          ) : null}
           <div className="mt-6 grid gap-5 sm:grid-cols-2">
             <FormSelect
               label="Payment Method"
@@ -596,10 +618,53 @@ export function SaleForm({
               </>
             ) : null}
 
-            {totalPaid > 0 ? (
+            {pos ? (
+              // POS-mode payment summary: always visible, colour-coded.
+              <div className="sm:col-span-2 mt-1">
+                {(() => {
+                  const diff = totalPaid - totals.payable;
+                  const isQuickCash = paymentMethod === 'quick cash';
+                  const isChange = isQuickCash && diff > 0;
+                  const isUnderpaid = totalPaid > 0 && diff < -0.009;
+                  const isExact = totalPaid > 0 && Math.abs(diff) <= 0.009;
+                  return (
+                    <div
+                      className={`rounded-lg p-3 text-center text-sm font-semibold transition-colors ${
+                        isChange
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                          : isUnderpaid
+                          ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                          : isExact
+                          ? 'bg-muted text-muted-foreground'
+                          : 'bg-muted/40 text-muted-foreground'
+                      }`}
+                    >
+                      {isChange ? (
+                        <>
+                          <span className="block text-xs font-normal">Change due</span>
+                          <span className="text-xl">{money(diff)}</span>
+                        </>
+                      ) : isUnderpaid ? (
+                        <>
+                          <span className="block text-xs font-normal">Still to collect</span>
+                          <span className="text-xl">{money(-diff)}</span>
+                        </>
+                      ) : isExact ? (
+                        <span>Paid in full ✓</span>
+                      ) : (
+                        <>
+                          <span className="block text-xs font-normal">Balance due</span>
+                          <span className="text-xl">{money(totals.payable)}</span>
+                        </>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            ) : totalPaid > 0 ? (
               <p className="sm:col-span-2 text-sm text-muted-foreground">
-                {pos && paymentMethod === 'quick cash' && totalPaid > totals.payable ? 'Change: ' : 'Due after payment: '}
-                <strong>{money(pos && paymentMethod === 'quick cash' ? Math.abs(totals.payable - totalPaid) : Math.max(0, totals.payable - totalPaid))}</strong>
+                Due after payment:{' '}
+                <strong>{money(Math.max(0, totals.payable - totalPaid))}</strong>
               </p>
             ) : null}
           </div>
