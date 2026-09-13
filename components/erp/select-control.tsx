@@ -14,9 +14,11 @@
 // the current value under the same `name`, so `FormData` sees exactly what the
 // native control used to submit.
 //
-// The one thing lost is submitting with JavaScript off - the hidden input is
-// populated by React. Every screen using this already relies on client state
-// for its totals, so nothing regresses in practice.
+// The hidden input is populated by React, so with JavaScript off it would post
+// whatever it was rendered with and the listbox could not change it. The report
+// and list filters are plain GET forms that did work without JavaScript, so a
+// `<noscript>` carries a real `<select>` under the same name. A browser that
+// runs scripts never parses that content, so only one control is ever live.
 // ---------------------------------------------------------------------------
 
 import { useId, useState, type ReactNode } from 'react';
@@ -109,6 +111,38 @@ export function SelectControl({
     <>
       {name ? <input type="hidden" name={name} value={current} /> : null}
 
+      {/*
+        Not rendered as DOM when scripting is enabled, so it never competes
+        with the hidden input above; without scripting it is the only control
+        carrying `name`, and the form posts exactly what the native select did.
+      */}
+      {name ? (
+        <noscript>
+          <select
+            name={name}
+            defaultValue={current}
+            disabled={disabled}
+            required={required}
+            aria-label={ariaLabel ?? placeholder}
+            className={cn(
+              'border-input bg-input-background h-9 w-full rounded-md border px-3 text-sm',
+              className,
+            )}
+          >
+            {showEmptyRow ? <option value="">{placeholder}</option> : null}
+            {options.map((option) => (
+              <option
+                key={String(option.value)}
+                value={String(option.value)}
+                disabled={option.disabled}
+              >
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </noscript>
+      ) : null}
+
       <Select
         value={toItem(current)}
         onValueChange={handleChange}
@@ -141,6 +175,11 @@ export function SelectControl({
               key={String(option.value)}
               value={toItem(String(option.value))}
               disabled={option.disabled}
+              // Radix keeps an item's value in context, so nothing in the DOM
+              // says which row is which. The posted value is put back on the
+              // element so a row can be identified by what it would submit -
+              // which is what the browser checks look for.
+              data-value={String(option.value)}
             >
               {option.label}
             </SelectItem>

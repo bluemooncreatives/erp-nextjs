@@ -107,6 +107,52 @@ const setValue = (selector, value) => `
   })()
 `;
 
+/**
+ * Choose an option from the product's Select.
+ *
+ * It is a Radix listbox, not a `<select>`: the value lives in React state and
+ * is mirrored into a hidden input, so assigning to that input changes nothing.
+ * Driving it the way a person does - open the trigger, click a row - is also
+ * the only way to test what actually ships.
+ *
+ * `match` is the body of a function taking the option element, so callers can
+ * pick by label or by the value the row carries.
+ */
+async function pickOption(page, name, match, { timeout = 10000 } = {}) {
+  await page.waitUntil(`document.querySelector('#' + ${JSON.stringify(name)})`, { timeout });
+
+  await page.evaluate(`
+    (() => {
+      const trigger = document.querySelector('#' + ${JSON.stringify(name)});
+      if (!trigger) throw new Error('no select trigger named ' + ${JSON.stringify(name)});
+      trigger.click();
+    })()
+  `);
+
+  await page.waitUntil(`document.querySelectorAll('[role="option"]').length > 0`, { timeout });
+
+  const chosen = await page.evaluate(`
+    (() => {
+      const options = [...document.querySelectorAll('[role="option"]')];
+      const match = (option) => { ${match} };
+      const found = options.find(match);
+      if (!found) {
+        throw new Error(
+          'no option matched in ' + ${JSON.stringify(name)} + '; saw: ' +
+            options.map((o) => o.textContent.trim()).slice(0, 8).join(' | '),
+        );
+      }
+      const label = found.textContent.trim();
+      found.click();
+      return label;
+    })()
+  `);
+
+  // The listbox closes and the hidden input catches up on the next commit.
+  await sleep(250);
+  return chosen;
+}
+
 const clickText = (text, tag = 'button') => `
   (() => {
     const el = [...document.querySelectorAll(${JSON.stringify(tag)})]
@@ -201,43 +247,39 @@ await scenario('sale form: the picker adds a line and the totals follow', async 
     : `showroom-${stock.houseable_id}`;
 
   await page.goto(`${base}/sale/sale/create`);
-  await page.waitUntil(`document.querySelector('select[name="customer_id"]')`);
 
   // Pick a real customer and the branch that actually holds the stock.
-  await page.evaluate(`
-    (() => {
-      const select = document.querySelector('select[name="customer_id"]');
-      const option = [...select.options].find((o) => o.value.startsWith('customer-'));
-      if (!option) throw new Error('no customer options');
-      const setter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set;
-      setter.call(select, option.value);
-      select.dispatchEvent(new Event('change', { bubbles: true }));
-      return option.value;
-    })()
-  `);
+  await pickOption(page, 'customer_id', "return option.textContent.trim().length > 0;");
 
-  await page.evaluate(setValue('select[name="warehouse_id"]', locationRef));
+  await pickOption(
+    page,
+    'warehouse_id',
+    `return option.dataset.value === ${JSON.stringify(locationRef)}
+      || option.getAttribute('data-value') === ${JSON.stringify(locationRef)};`,
+  );
   await sleep(600); // the picker reloads for the chosen location
 
-  // The picker's values are `sku:<id>`; choose the SKU that has the stock.
-  const picked = await page.evaluate(`
-    (() => {
-      const select = document.querySelector('select[name="_picker"]');
-      if (!select) throw new Error('no product picker');
-      const wanted = 'sku:' + ${JSON.stringify(String(stock.sku_id))};
-      const option = [...select.options].find((o) => o.value === wanted);
-      if (!option) {
-        throw new Error(
-          'the stocked SKU is not in the picker for this location: ' + wanted,
-        );
-      }
-      const setter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set;
-      setter.call(select, option.value);
-      select.dispatchEvent(new Event('change', { bubbles: true }));
-      return option.value;
-    })()
-  `);
-  assert.ok(picked.startsWith('sku:'), 'a stocked product was picked');
+  const wantedSku = `sku:${stock.sku_id}`;
+  await pickOption(
+    page,
+    '_picker',
+    `return option.dataset.value === ${JSON.stringify(wantedSku)}
+      || option.getAttribute('data-value') === ${JSON.stringify(wantedSku)};`,
+  );
+
+  // The picker is a controlled field that clears itself once the line is added,
+  // so what proves the pick landed is the row, not the picker's own value.
+  await page.waitUntil(`document.querySelectorAll('input[name="item_quantity"]').length > 0`);
+
+  // A non-combo line posts its SKU id as `items`.
+  const lineSku = await page.evaluate(
+    `document.querySelector('input[type="hidden"][name="items"]')?.value ?? ''`,
+  );
+  assert.equal(
+    lineSku,
+    String(stock.sku_id),
+    'the line that was added is the SKU that has the stock',
+  );
 
   await page.waitUntil(`document.querySelectorAll('input[name="item_quantity"]').length > 0`);
 
@@ -309,7 +351,7 @@ await scenario('sale form: the picker adds a line and the totals follow', async 
 
 await scenario('product form: the type selector swaps the fields it should', async () => {
   await page.goto(`${base}/product/add_product`);
-  await page.waitUntil(`document.querySelector('select[name="product_type"]')`);
+  await page.waitUntil(`document.querySelector('#product_type')`);
 
   // Single shows the SKU and price fields.
   const single = await page.evaluate(
@@ -317,14 +359,12 @@ await scenario('product form: the type selector swaps the fields it should', asy
   );
   assert.ok(single, 'the single-product fields are shown by default');
 
-  await page.interactUntil(
-    setValue('select[name="product_type"]', 'Combo'),
-    `document.querySelector('select[name="selected_product_id"]')`,
-  );
+  await pickOption(page, 'product_type', "return option.dataset.value === 'Combo';");
+  await page.waitUntil(`document.querySelector('#selected_product_id')`);
 
   const combo = await page.evaluate(`
     ({
-      picker: Boolean(document.querySelector('select[name="selected_product_id"]')),
+      picker: Boolean(document.querySelector('#selected_product_id')),
       comboPrice: Boolean(document.querySelector('input[name="combo_selling_price"]')),
       sku: Boolean(document.querySelector('input[name="product_sku"]')),
     })
@@ -333,13 +373,11 @@ await scenario('product form: the type selector swaps the fields it should', asy
   assert.ok(combo.comboPrice, 'the combo price field appeared');
   assert.equal(combo.sku, false, 'the single-product SKU field is hidden');
 
-  await page.interactUntil(
-    setValue('select[name="product_type"]', 'Variable'),
-    `document.body.textContent.includes('Variant')`,
-  );
+  await pickOption(page, 'product_type', "return option.dataset.value === 'Variable';");
+  await page.waitUntil(`document.body.textContent.includes('Variant')`);
 
   const variable = await page.evaluate(
-    "Boolean(document.body.textContent.includes('Variant') || document.querySelector('select[name=\\\"selected_variant\\\"]'))",
+    "Boolean(document.body.textContent.includes('Variant') || document.querySelector('#selected_variant'))",
   );
   assert.ok(variable, 'the variable-product section appeared');
 });

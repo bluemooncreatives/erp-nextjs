@@ -525,6 +525,97 @@ const adjustmentId = await transfers.createStockAdjustment(
 );
 log(`stock adjustment: ${adjustmentId}`);
 
+// --- HR: a leave type, an application and a payroll ------------------------
+//
+// The leave and payroll screens - including the application PDF and the
+// payslip - have nothing to show without these, so the sweeps could not tell a
+// working page from a broken one.
+
+const hr = require('@/lib/hr/leave');
+
+let leaveType = (await db.select().from(schema.leaveTypes).limit(1))[0];
+if (!leaveType) {
+  await hr.leaveTypeRepository.create({ name: 'Annual Leave', status: 1 }, 1);
+  leaveType = (await db.select().from(schema.leaveTypes).limit(1))[0];
+  log(`leave type: ${leaveType.id}`);
+}
+
+const [seedStaff] = await db.select().from(schema.staffs).limit(1);
+
+if (seedStaff) {
+  const existingDefine = await db
+    .select()
+    .from(schema.leaveDefines)
+    .where(eq(schema.leaveDefines.leaveTypeId, leaveType.id))
+    .limit(1);
+
+  if (existingDefine.length === 0) {
+    const [staffUser] = await db
+      .select()
+      .from(schema.users)
+      .where(eq(schema.users.id, seedStaff.userId))
+      .limit(1);
+
+    await hr.saveLeaveDefine(
+      {
+        roleId: staffUser?.roleId ?? 1,
+        leaveTypeId: leaveType.id,
+        totalDays: 20,
+        year: new Date().getUTCFullYear(),
+      },
+      1,
+    );
+    log(`leave define: ${leaveType.id} -> 20 days`);
+  }
+
+  const [existingLeave] = await db.select().from(schema.applyLeaves).limit(1);
+  if (!existingLeave) {
+    const leaveId = await hr.createLeaveApplication(
+      {
+        userId: seedStaff.userId,
+        leaveTypeId: leaveType.id,
+        reason: 'Seeded leave application',
+        applyDate: today,
+        startDate: today,
+        endDate: today,
+        day: 1,
+      },
+      1,
+    );
+    await hr.setLeaveApproval(leaveId, 1, 1);
+    log(`leave application: ${leaveId} (approved)`);
+  }
+
+  const [existingPayroll] = await db.select().from(schema.payrolls).limit(1);
+  if (!existingPayroll) {
+    const [staffUser] = await db
+      .select()
+      .from(schema.users)
+      .where(eq(schema.users.id, seedStaff.userId))
+      .limit(1);
+
+    const now = new Date();
+    const payrollId = await hr.createPayroll(
+      {
+        staffId: seedStaff.id,
+        roleId: staffUser?.roleId ?? 1,
+        basicSalary: 30000,
+        tax: 500,
+        payrollMonth: String(now.getUTCMonth() + 1),
+        payrollYear: String(now.getUTCFullYear()),
+        paymentMode: 'cash',
+        paymentDate: today,
+        lines: [
+          { typeName: 'House Rent', amount: 5000, earnDedcType: hr.PayrollLineKind.Earning },
+          { typeName: 'Provident Fund', amount: 1200, earnDedcType: hr.PayrollLineKind.Deduction },
+        ],
+      },
+      1,
+    );
+    log(`payroll: ${payrollId}`);
+  }
+}
+
 const balance = await accounts.accountBalance(postable[0]);
 log(`balance of ${postable[0].name}: ${balance}`);
 
