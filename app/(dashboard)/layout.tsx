@@ -12,7 +12,8 @@ import { db } from '@/lib/db/client';
 import { languages, notifications, showRooms } from '@/lib/db/schema';
 import { requireUser, userCan, userCanAny } from '@/lib/auth/permissions';
 import { generalSetting } from '@/lib/settings';
-import { avatarUrl , uploadedAssetUrl } from '@/lib/paths';
+import { avatarUrl } from '@/lib/paths';
+import { uploadedAssetUrl } from '@/lib/paths.server';
 import { getSession } from '@/lib/auth/session';
 import { ROUTES } from '@/lib/routes';
 import {

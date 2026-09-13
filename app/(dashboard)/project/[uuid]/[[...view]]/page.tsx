@@ -41,6 +41,8 @@ import { SectionName } from './section-name';
 import { CommentBody } from './comment-body';
 import { ProjectPreferences } from './project-preferences';
 import { TaskBoard } from './task-board';
+import { projectAttachments } from '@/lib/project/attachments';
+import { assetUrl } from '@/lib/paths';
 
 export const metadata: Metadata = { title: 'Project' };
 
@@ -66,6 +68,13 @@ export default async function ProjectShowPage({
 
   const board = await projectBoard(project.id);
   const preference = await projectPreference(project.id, user.id);
+
+  // The Files view lists what is attached across the project's tasks; the
+  // attaching itself belongs to a task, as it did in the Vue board.
+  const attachments = (await projectAttachments(project.id)).map((file) => ({
+    ...file,
+    when: toDateTimeString(file.createdAt) ?? '',
+  }));
 
   const tasksBySection = new Map<number | null, typeof board.tasks>();
   for (const row of board.tasks) {
@@ -187,11 +196,40 @@ export default async function ProjectShowPage({
           ) : null}
 
           {active === 'files' ? (
-            <Card title="Files">
-              <p className="text-sm text-muted-foreground">
-                Files are attached to individual tasks - open a task to see and add
-                attachments.
-              </p>
+            <Card title={`Files (${attachments.length})`} bodyClassName="">
+              <DataTable
+                columns={[{ label: 'File' }, { label: 'Task' }, { label: 'Added' }]}
+                isEmpty={attachments.length === 0}
+                empty="Nothing has been attached to this project's tasks yet."
+              >
+                {attachments.map((file) => (
+                  <Tr key={file.id}>
+                    <Td className="font-medium">
+                      <a
+                        href={assetUrl(file.filename) ?? '#'}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-primary hover:text-primary"
+                      >
+                        {file.userFilename ?? 'File'}
+                      </a>
+                    </Td>
+                    <Td>
+                      {file.task?.uuid ? (
+                        <Link
+                          href={route('task.show', { uuid: file.task.uuid })}
+                          className="text-primary hover:text-primary"
+                        >
+                          {file.task.name}
+                        </Link>
+                      ) : (
+                        '-'
+                      )}
+                    </Td>
+                    <Td>{file.when}</Td>
+                  </Tr>
+                ))}
+              </DataTable>
             </Card>
           ) : null}
 

@@ -7,7 +7,7 @@ import React from 'react';
 import { BrandLogo } from '@/components/common/BrandLogo';
 import { ThemeToggleButton } from '@/components/common/ThemeToggleButton';
 import { generalSetting } from '@/lib/settings';
-import { uploadedAssetUrl } from '@/lib/paths';
+import { uploadedAssetUrl } from '@/lib/paths.server';
 import { themeColors, themeList } from '@/lib/setting/themes';
 import { themeStyle } from '@/lib/setting/theme-style';
 

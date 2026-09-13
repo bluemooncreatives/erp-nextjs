@@ -4,7 +4,7 @@ import { SettingsSection } from '@/components/common/settings-section';
 import type { Metadata } from 'next';
 import { authorize, can } from '@/lib/auth/permissions';
 import { generalSetting } from '@/lib/settings';
-import { uploadedAssetUrl } from '@/lib/paths';
+import { uploadedAssetUrl } from '@/lib/paths.server';
 import { envValue } from '@/lib/env-file';
 import {
   activationSettings,
