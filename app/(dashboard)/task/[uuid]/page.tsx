@@ -30,6 +30,9 @@ import {
   taskAttachments,
 } from '@/lib/project/attachments';
 import { TaskAttachments } from './attachments';
+import { OrderControls } from '../../project/order-controls';
+import { CustomFields } from '../../project/custom-fields';
+import { requireProjectAccess } from '@/lib/project/fields';
 
 export const metadata: Metadata = { title: 'Task' };
 
@@ -46,6 +49,7 @@ export default async function TaskShowPage({
 
   const { task, subTasks, comments, tags, likes } = record;
   const project = task.projectId ? await findProject(task.projectId) : null;
+  if (project) await requireProjectAccess(project.id);
   const files = await taskAttachments(task.id);
 
   return (
@@ -125,7 +129,7 @@ export default async function TaskShowPage({
               isEmpty={subTasks.length === 0}
               empty="No sub-tasks."
             >
-              {subTasks.map((sub) => (
+              {subTasks.map((sub, index) => (
                 <Tr key={sub.id}>
                   <Td className="font-medium text-foreground">
                     <Link
@@ -139,6 +143,7 @@ export default async function TaskShowPage({
                     <Badge color={sub.completed === 1 ? 'success' : 'warning'} size="sm">
                       {sub.completed === 1 ? 'Complete':'Open'}
                     </Badge>
+                    {project ? <OrderControls projectId={project.id} kind="subtask" id={sub.id} target={task.id} position={index} count={subTasks.length} /> : null}
                   </Td>
                 </Tr>
               ))}
@@ -266,6 +271,7 @@ export default async function TaskShowPage({
           </form>
         </Card>
 
+        {project ? <CustomFields projectId={project.id} taskId={task.id} /> : null}
         <TaskAttachments
           taskId={task.id}
           files={files.map((file) => ({

@@ -6,6 +6,7 @@
 import { revalidatePath } from 'next/cache';
 import { addTaskAttachment, deleteTaskAttachment } from '@/lib/project/attachments';
 import { fileFrom } from '@/lib/uploads';
+import { moveProjectItem } from '@/lib/project/ordering';
 import { redirect } from 'next/navigation';
 import { requireUser } from '@/lib/auth/permissions';
 import { errorLog, successLog } from '@/lib/activity-log';
@@ -25,7 +26,6 @@ import {
   deleteSection,
   createTask,
   findTask,
-  moveTask,
   renameTask,
   setTaskComplete,
   deleteTask,
@@ -444,7 +444,7 @@ export async function moveTaskToSection(formData: FormData): Promise<void> {
   const sectionId = raw === '' ? null : Number(raw);
   if (!taskId) return;
 
-  await moveTask(taskId, sectionId, Number(formData.get('order') ?? 0));
+  await moveProjectItem(Number(formData.get('project_id')), 'task', taskId, sectionId, Number(formData.get('order') ?? 0));
 
   const project = await findProject(Number(formData.get('project_id')));
   if (project?.uuid) revalidatePath(projectPath(project.uuid));

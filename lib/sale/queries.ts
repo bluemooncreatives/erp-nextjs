@@ -99,7 +99,7 @@ export async function listSales(
       showroomName: showRooms.name,
       warehouseName: wareHouses.name,
       paidAmount: sql<number>`(
-        select coalesce(sum(p.amount - p.return_amount), 0)
+        select coalesce(sum(p.amount), 0)
         from payments p
         where p.payable_id = ${sales.id}
           and p.payable_type = ${MorphType.Sale}
@@ -322,7 +322,7 @@ export async function dueInvoiceList(party: { id: number; asAgent: boolean }) {
       showroomName: showRooms.name,
       warehouseName: wareHouses.name,
       paidAmount: sql<number>`(
-        select coalesce(sum(p.amount - p.return_amount), 0)
+        select coalesce(sum(p.amount), 0)
         from payments p
         where p.payable_id = ${sales.id}
           and p.payable_type = ${MorphType.Sale}

@@ -18,6 +18,8 @@
 // ---------------------------------------------------------------------------
 
 export const ROUTES = {
+  "pos.receipt": '/pos/receipt/{id}',
+  "pos.index": '/pos/pos-order-products',
   "account.balance.index": '/account-balance',
   "activity_log": '/useractivitylog/',
   "activity_log.login": '/useractivitylog/user-login',

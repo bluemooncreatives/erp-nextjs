@@ -1,3 +1,5 @@
+'use client';
+
 // The board view - `project::project.board`.
 //
 // The Vue board was columns of draggable cards. This is columns of cards that
@@ -17,6 +19,9 @@ import { EmptyState } from '@/components/erp/page';
 import { route } from '@/lib/routes';
 import { moveTaskToSection, storeTask, toggleTaskComplete } from '../../actions';
 import { SectionName } from './section-name';
+import { useState, useTransition } from 'react';
+import { reorderProjectItem } from '../../order-actions';
+import { OrderControls } from '../../order-controls';
 
 export type BoardTask = {
   id: number;
@@ -24,6 +29,7 @@ export type BoardTask = {
   name: string | null;
   completed: number;
   createdByName: string | null;
+  fields?: { name: string; value: string }[];
 };
 
 export type BoardColumn = {
@@ -40,10 +46,24 @@ export function TaskBoard({
   projectId: number;
   columns: BoardColumn[];
 }) {
-  return (
-    <div className="minimal-scrollbar flex gap-4 overflow-x-auto pb-2">
-      {columns.map((column) => (
-        <div key={column.id ?? 'none'} className="w-80 shrink-0">
+  const [error, setError] = useState('');
+  const [pending, start] = useTransition();
+  const drop = (event: React.DragEvent, target: number | null, position: number) => {
+    event.preventDefault(); event.stopPropagation();
+    const id = Number(event.dataTransfer.getData('text/plain'));
+    if (!columns.some((c) => c.tasks.some((t) => t.id === id))) return;
+    start(async () => {
+      const data = new FormData();
+      Object.entries({ project_id: projectId, kind: 'task', id, target: target ?? '', position }).forEach(([k, v]) => data.set(k, String(v)));
+      const result = await reorderProjectItem(data); setError(result.error ?? '');
+    });
+  };
+  return (<>
+    {error ? <p role="alert" className="text-destructive">{error}</p> : null}
+    <div aria-busy={pending} className="minimal-scrollbar flex gap-4 overflow-x-auto pb-2">
+      {columns.map((column, columnIndex) => (
+        <div key={column.id ?? 'none'} className="w-80 shrink-0" onDragOver={(e) => e.preventDefault()} onDrop={(e) => drop(e, column.id, column.tasks.length)}>
+          {column.id !== null ? <OrderControls projectId={projectId} kind="section" id={column.id} position={columnIndex} count={columns.filter((c) => c.id !== null).length} /> : null}
           <Card
             title={
               <SectionName
@@ -59,9 +79,13 @@ export function TaskBoard({
               {column.tasks.length === 0 ? (
                 <EmptyState message="Nothing here yet." />
               ) : (
-                column.tasks.map((task) => (
+                column.tasks.map((task, index) => (
                   <article
                     key={task.id}
+                    draggable={!pending}
+                    onDragStart={(event) => { event.dataTransfer.setData('text/plain', String(task.id)); event.dataTransfer.effectAllowed = 'move'; }}
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={(event) => drop(event, column.id, index)}
                     className="border-border bg-card rounded-xl border p-3 shadow-sm"
                   >
                     <div className="flex items-start justify-between gap-2">
@@ -83,7 +107,9 @@ export function TaskBoard({
                       {task.createdByName ?? '-'}
                     </p>
 
+                    {task.fields?.filter((f) => f.value).map((f) => <p key={f.name} className="mt-1 text-xs"><span className="text-muted-foreground">{f.name}: </span>{f.value}</p>)}
                     <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <OrderControls projectId={projectId} kind="task" id={task.id} target={column.id} position={index} count={column.tasks.length} />
                       <form action={toggleTaskComplete}>
                         <input type="hidden" name="task_id" value={task.id} />
                         <input type="hidden" name="project_id" value={projectId} />
@@ -142,6 +168,6 @@ export function TaskBoard({
           </Card>
         </div>
       ))}
-    </div>
+    </div></>
   );
 }

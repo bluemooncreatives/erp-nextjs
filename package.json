@@ -17,7 +17,7 @@
     "verify:locales": "node scripts/verify-locales.mjs",
     "verify:browser": "node scripts/verify-browser.mjs",
     "verify:http": "node scripts/http-smoke.mjs",
-    "test": "node --test tests/receipt-vouchers.test.mjs tests/account-vouchers.test.mjs tests/settings-and-leave.test.mjs tests/inventory.test.mjs tests/spreadsheet.test.mjs tests/signed-url.test.mjs"
+    "test": "node --test tests/receipt-vouchers.test.mjs tests/account-vouchers.test.mjs tests/settings-and-leave.test.mjs tests/inventory.test.mjs tests/spreadsheet.test.mjs tests/signed-url.test.mjs tests/pos.test.mjs"
   },
   "dependencies": {
     "@fullcalendar/core": "6.1.19",

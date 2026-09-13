@@ -62,8 +62,12 @@ import { ProductType } from '@/lib/product/constants';
 
 type Tx = MySql2Database<typeof schema>;
 
+function withConnection<T>(connection: Tx | undefined, fn: (tx: Tx) => Promise<T>): Promise<T> {
+  return connection ? fn(connection) : runInTransaction(fn);
+}
+
 /** The PHP returned `1` from create()/update() to signal "not enough stock". */
-export const INSUFFICIENT_STOCK = 1 as const;
+export const INSUFFICIENT_STOCK = -1 as const;
 
 export type SaleLineInput = {
   /** A ProductSku id, or a ComboProduct id when `isCombo`. */
@@ -165,6 +169,7 @@ async function isServiceSku(productSkuId: number, conn: Tx = db): Promise<boolea
 export async function createSale(
   data: SaleInput,
   userId: number,
+  connection?: Tx,
 ): Promise<number | typeof INSUFFICIENT_STOCK> {
   const location = parseLocation(data.locationRef);
   if (!location) return INSUFFICIENT_STOCK;
@@ -172,7 +177,7 @@ export async function createSale(
   const { customerId, agentUserId } = parseCustomerRef(data.customerRef);
   const tax = parseTotalTax(data.totalTax);
 
-  return runInTransaction(async (tx) => {
+  return withConnection(connection, async (tx) => {
     const [inserted] = await tx.insert(sales).values({
       customerId,
       agentUserId,
@@ -677,11 +682,12 @@ export async function recordSalePayments(
   paymentInputs: PaymentInput[],
   userId: number,
   initialPayment = false,
+  connection?: Tx,
 ): Promise<void> {
-  const [sale] = await db.select().from(sales).where(eq(sales.id, saleId)).limit(1);
+  const [sale] = await (connection ?? db).select().from(sales).where(eq(sales.id, saleId)).limit(1);
   if (!sale) return;
 
-  const [paidRow] = await db
+  const [paidRow] = await (connection ?? db)
     .select({ paid: sql<number>`coalesce(sum(${payments.amount}), 0)` })
     .from(payments)
     .where(and(eq(payments.payableId, saleId), eq(payments.payableType, MorphType.Sale)));
@@ -692,10 +698,10 @@ export async function recordSalePayments(
   let dueAmount = payable - paidBefore;
   let paidNow = 0;
 
-  const autoApprove = (await voucherAutoApproved(VoucherApproval.Sale)) ? 1 : 0;
+  const autoApprove = (await voucherAutoApproved(sale.type === SaleKind.Pos ? VoucherApproval.Pos : VoucherApproval.Sale)) ? 1 : 0;
   const customerAccount = await saleContactAccountId(sale);
 
-  await runInTransaction(async (tx) => {
+  await withConnection(connection, async (tx) => {
     for (const payment of paymentInputs) {
       paidNow += payment.amount;
 
@@ -836,9 +842,9 @@ async function locationCashAccountId(
  *   3. a receipt voucher for each payment already taken
  * and finally applies any credit balance to the customer's open invoices.
  */
-export async function approveSale(saleId: number, userId: number): Promise<void> {
-  const [sale] = await db.select().from(sales).where(eq(sales.id, saleId)).limit(1);
-  if (!sale || !sale.saleableId) return;
+export async function approveSale(saleId: number, userId: number, connection?: Tx): Promise<void> {
+  const [sale] = await (connection ?? db).select().from(sales).where(eq(sales.id, saleId)).limit(1);
+  if (!sale || !sale.saleableId || sale.isApproved !== 0) return;
 
   const location: StockLocation = {
     id: sale.saleableId,
@@ -851,7 +857,7 @@ export async function approveSale(saleId: number, userId: number): Promise<void>
   const customerAccount = await saleContactAccountId(sale);
   if (!customerAccount) return;
 
-  const autoApprove = (await voucherAutoApproved(VoucherApproval.Sale)) ? 1 : 0;
+  const autoApprove = (await voucherAutoApproved(sale.type === SaleKind.Pos ? VoucherApproval.Pos : VoucherApproval.Sale)) ? 1 : 0;
 
   // Account ids used by the journals.
   const [
@@ -870,7 +876,7 @@ export async function approveSale(saleId: number, userId: number): Promise<void>
 
   const saleTaxAccount = sale.taxId ? await taxAccountId(sale.taxId) : null;
 
-  await runInTransaction(async (tx) => {
+  await withConnection(connection, async (tx) => {
     // Mark the sale's serial numbers sold.
     const serials = await tx
       .select({ partNumberId: productItemDetailsPartNumbers.partNumberId })
@@ -1062,7 +1068,7 @@ export async function approveSale(saleId: number, userId: number): Promise<void>
   });
 
   // A customer in credit has the surplus applied to their open invoices.
-  await settleCreditBalance(sale, customerAccount, saleId);
+  if (sale.type !== SaleKind.Pos) await settleCreditBalance(sale, customerAccount, saleId);
 }
 
 /**

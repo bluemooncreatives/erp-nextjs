@@ -38,7 +38,7 @@ export default async function SaleDetailPage({
   const money = (v: number | string) => `${symbol} ${numberFormat(v)}`;
 
   const paidAmount = payments.reduce(
-    (sum, p) => sum + Number(p.amount) - Number(p.returnAmount),
+    (sum, p) => sum + Number(p.amount),
     0,
   );
   const dueAmount = Number(sale.payableAmount) - paidAmount;
@@ -62,6 +62,7 @@ export default async function SaleDetailPage({
         ]}
         actions={
           <div className="flex items-center gap-2">
+            {sale.type === 2 ? <LinkButton href={ROUTES['pos.index']} variant="outline">Next checkout</LinkButton> : null}
             <LinkButton
               href={route('sale.print_view', { id: sale.id })}
               variant="outline"

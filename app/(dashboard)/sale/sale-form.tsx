@@ -40,6 +40,8 @@ export type SellableProduct = {
   tax: number;
   stock: number;
   isCombo?: boolean;
+  serialNumbers?: { id: number; label: string }[];
+  barcode?: string | null;
 };
 
 export type SaleFormOptions = {
@@ -102,6 +104,7 @@ export function SaleForm({
   defaults,
   submitLabel,
   quotationId,
+  pos = false,
 }: {
   options: SaleFormOptions;
   action: (prev: SaleFormState, formData: FormData) => Promise<SaleFormState>;
@@ -116,6 +119,7 @@ export function SaleForm({
    * PHP flow closed the loop - the conversion screen itself wrote nothing.
    */
   quotationId?: number;
+  pos?: boolean;
 }) {
   const [state, formAction] = useActionState(action, INITIAL);
 
@@ -137,18 +141,21 @@ export function SaleForm({
     })) ?? [],
   );
   const [picked, setPicked] = useState('');
+  const [search, setSearch] = useState('');
   const [discountType, setDiscountType] = useState(defaults?.discountType ?? '1');
   const [discountValue, setDiscountValue] = useState(defaults?.discountValue ?? 0);
   const [taxId, setTaxId] = useState(defaults?.taxId ?? '0');
   const [shipping, setShipping] = useState(defaults?.shippingCharge ?? 0);
   const [other, setOther] = useState(defaults?.otherCharge ?? 0);
-  const [paymentMethod, setPaymentMethod] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState(pos ? 'quick cash' : '');
   const [paymentAmount, setPaymentAmount] = useState(0);
   const [accountId, setAccountId] = useState('');
+  const [extraPayments, setExtraPayments] = useState<{ key: number; method: string; amount: number; account: string }[]>([]);
+  const totalPaid = paymentAmount + extraPayments.reduce((sum, p) => sum + p.amount, 0);
 
   const addLine = (value: string) => {
     if (!value) return;
-    const product = options.products.find((p) => String(p.id) === value.split(':')[1]);
+    const product = options.products.find((p) => String(p.id) === value.split(':')[1] && Boolean(p.isCombo) === (value.split(':')[0] === 'combo'));
     if (!product) return;
 
     setLines((prev) => {
@@ -283,6 +290,25 @@ export function SaleForm({
       </Card>
 
       <Card title="Products" desc="Pick a product to add it to the invoice.">
+        {pos ? <div className="mb-5 space-y-3">
+          <FormInput label="Search or scan SKU" name="_search" value={search}
+            onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => {
+              if (e.key !== 'Enter') return;
+              e.preventDefault();
+              const term = search.trim().toLowerCase();
+              const found = options.products.find((p) => p.barcode?.toLowerCase() === term || p.label.toLowerCase().endsWith(`(${term})`)) ?? options.products.find((p) => p.label.toLowerCase().includes(term));
+              if (found && search.trim()) { addLine(`${found.isCombo ? 'combo' : 'sku'}:${found.id}`); setSearch(''); }
+            }} />
+          <div className="grid max-h-72 grid-cols-2 gap-2 overflow-auto md:grid-cols-4">
+            {options.products.filter((p) => p.label.toLowerCase().includes(search.toLowerCase())).map((p) =>
+              <button key={`${p.isCombo ? 'combo' : 'sku'}:${p.id}`} type="button"
+                className="rounded-lg border border-border p-3 text-start hover:bg-muted"
+                onClick={() => addLine(`${p.isCombo ? 'combo' : 'sku'}:${p.id}`)}>
+                <span className="block text-sm font-medium">{p.label}</span>
+                <span className="text-xs text-muted-foreground">{money(p.sellingPrice)}</span>
+              </button>)}
+          </div>
+        </div> : null}
         <div className="mb-4 max-w-md">
           <FormSelect
             label="Add product"
@@ -323,6 +349,9 @@ export function SaleForm({
               <Tr key={line.key}>
                 <Td className="font-medium text-foreground">
                   {line.label}
+                  {pos && !line.isCombo && options.products.find((p) => p.id === line.productId && !p.isCombo)?.serialNumbers?.length ? <div className="mt-2 max-h-24 overflow-auto">
+                    {options.products.find((p) => p.id === line.productId && !p.isCombo)?.serialNumbers?.map((serial) => <label key={serial.id} className="block text-xs"><input type="checkbox" name={`serial_no_${line.productId}`} value={serial.id} /> {serial.label}</label>)}
+                  </div> : null}
                   <input
                     type="hidden"
                     name={line.isCombo ? 'combo_product_id' : 'items'}
@@ -489,6 +518,10 @@ export function SaleForm({
             </div>
           </dl>
 
+          {pos ? <div className="mt-4 flex flex-wrap gap-2">
+            <button type="button" className="rounded border px-3 py-2" onClick={() => setPaymentAmount(totals.payable)}>Exact amount</button>
+            {[100, 500, 1000, 2000].map((amount) => <button key={amount} type="button" className="rounded border px-3 py-2" onClick={() => setPaymentAmount((n) => n + amount)}>+{amount}</button>)}
+          </div> : null}
           <div className="mt-6 grid gap-5 sm:grid-cols-2">
             <FormSelect
               label="Payment Method"
@@ -514,6 +547,7 @@ export function SaleForm({
               onChange={(e) => setPaymentAmount(Number(e.target.value))}
             />
 
+            {(!paymentMethod || paymentMethod === 'cash' || paymentMethod === 'quick cash') ? <><input type="hidden" name="account_id" value="" /><input type="hidden" name="bank_name" value="" /><input type="hidden" name="branch" value="" /></> : null}
             {paymentMethod && paymentMethod !== 'cash' && paymentMethod !== 'quick cash' ? (
               <>
                 <FormSelect
@@ -529,13 +563,23 @@ export function SaleForm({
               </>
             ) : null}
 
-            {paymentAmount > 0 ? (
+            {totalPaid > 0 ? (
               <p className="sm:col-span-2 text-sm text-muted-foreground">
-                Due after payment:{' '}
-                <strong>{money(Math.max(0, totals.payable - paymentAmount))}</strong>
+                {pos && paymentMethod === 'quick cash' && totalPaid > totals.payable ? 'Change: ' : 'Due after payment: '}
+                <strong>{money(pos && paymentMethod === 'quick cash' ? Math.abs(totals.payable - totalPaid) : Math.max(0, totals.payable - totalPaid))}</strong>
               </p>
             ) : null}
           </div>
+          {pos ? <div className="mt-4 space-y-3">
+            {extraPayments.map((payment) => <div key={payment.key} className="grid gap-2 rounded border border-border p-3 sm:grid-cols-3">
+              <select name="payment_method" aria-label="Additional payment method" className="rounded border bg-background p-2" value={payment.method} onChange={(e) => setExtraPayments((rows) => rows.map((r) => r.key === payment.key ? { ...r, method: e.target.value } : r))}>{['cash', 'bank', 'card', 'cheque'].map((m) => <option key={m}>{m}</option>)}</select>
+              <input name="payment_amount" aria-label="Additional payment amount" type="number" min="0" step="0.01" className="rounded border bg-background p-2" value={payment.amount} onChange={(e) => setExtraPayments((rows) => rows.map((r) => r.key === payment.key ? { ...r, amount: Number(e.target.value) } : r))} />
+              <select name="account_id" aria-label="Additional payment account" className="rounded border bg-background p-2" value={payment.account} onChange={(e) => setExtraPayments((rows) => rows.map((r) => r.key === payment.key ? { ...r, account: e.target.value } : r))}><option value="">Select account</option>{options.paymentAccounts.map((a) => <option key={a.value} value={a.value}>{a.label}</option>)}</select>
+              <input type="hidden" name="bank_name" value="" /><input type="hidden" name="branch" value="" />
+              <button type="button" onClick={() => setExtraPayments((rows) => rows.filter((r) => r.key !== payment.key))}>Remove payment</button>
+            </div>)}
+            <button type="button" className="rounded border px-3 py-2 text-sm" onClick={() => setExtraPayments((rows) => [...rows, { key: Date.now(), method: 'cash', amount: 0, account: '' }])}>Add payment</button>
+          </div> : null}
         </Card>
       </div>
 
@@ -551,7 +595,7 @@ export function SaleForm({
         >
           <Phrase>Cancel</Phrase>
         </LinkButton>
-        <button
+        {!pos ? <button
           type="submit"
           disabled={lines.length === 0}
           onClick={() => {
@@ -561,8 +605,8 @@ export function SaleForm({
           className="rounded-lg px-5 py-3 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted disabled:opacity-50"
         >
           Save &amp; Preview
-        </button>
-        <button
+        </button> : null}
+        {!pos ? <button
           type="submit"
           disabled={lines.length === 0}
           onClick={() => {
@@ -572,7 +616,7 @@ export function SaleForm({
           className="rounded-lg px-5 py-3 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted disabled:opacity-50"
         >
           Save &amp; Send Mail
-        </button>
+        </button> : null}
         <SubmitButton
           disabled={lines.length === 0}
           onClick={() => {

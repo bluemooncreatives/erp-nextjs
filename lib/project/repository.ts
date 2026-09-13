@@ -286,7 +286,7 @@ export async function projectBoard(projectId: number) {
       })
       .from(tasks)
       .leftJoin(users, eq(users.id, tasks.createdBy))
-      .where(eq(tasks.projectId, projectId))
+      .where(and(eq(tasks.projectId, projectId), isNull(tasks.parentId)))
       .orderBy(asc(tasks.order)),
     projectMembers(projectId),
     projectCommentThread(projectId),

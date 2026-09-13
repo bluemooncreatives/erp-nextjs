@@ -43,6 +43,8 @@ import { ProjectPreferences } from './project-preferences';
 import { TaskBoard } from './task-board';
 import { projectAttachments } from '@/lib/project/attachments';
 import { assetUrl } from '@/lib/paths';
+import { CustomFields } from '../../custom-fields';
+import { projectFields, projectFieldValues, requireProjectAccess } from '@/lib/project/fields';
 
 export const metadata: Metadata = { title: 'Project' };
 
@@ -50,14 +52,17 @@ const VIEWS = ['list', 'board', 'files', 'conversation'] as const;
 
 export default async function ProjectShowPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ uuid: string; view?: string[] }>;
+  searchParams: Promise<{ sort?: string; completed?: string }>;
 }) {
   const user = await requireUser();
   const { uuid, view } = await params;
 
   const project = await findProjectByUuid(uuid);
   if (!project) notFound();
+  await requireProjectAccess(project.id);
 
   // `$blade = $view ?: $model->default_view`, restricted to the known views.
   const requested = view?.[0];
@@ -67,6 +72,29 @@ export default async function ProjectShowPage({
       : project.defaultView || 'list';
 
   const board = await projectBoard(project.id);
+  const filter = await searchParams;
+  const definitions = (await projectFields(project.id)).filter((r) => r.link.visibility === 1);
+  const values = await projectFieldValues(project.id);
+  const fieldValue = (taskId: number, fieldId: number) => {
+    const definition = definitions.find((r) => r.field.id === fieldId);
+    const value = values.find((r) => r.value.taskId === taskId && r.value.fieldId === fieldId)?.value;
+    if (!definition || !value) return '';
+    const type = definition.field.type;
+    if (type === 'number') return value.number ?? '';
+    if (type === 'date') return value.date?.toISOString().slice(0, 10) ?? '';
+    if (type === 'dropdown') return definition.options.find((o) => o.id === value.optionId)?.option ?? '';
+    if (type === 'user_id') return board.members.find((m) => m.id === value.userId)?.name ?? '';
+    return value.text ?? '';
+  };
+  if (filter.completed === '0' || filter.completed === '1') board.tasks = board.tasks.filter((r) => r.task.completed === Number(filter.completed));
+  if (filter.sort === 'name') board.tasks.sort((a, b) => (a.task.name ?? '').localeCompare(b.task.name ?? ''));
+  else if (definitions.some((r) => r.field.id === Number(filter.sort))) {
+    const fieldId = Number(filter.sort);
+    board.tasks.sort((a, b) => {
+      const av = fieldValue(a.task.id, fieldId), bv = fieldValue(b.task.id, fieldId);
+      return typeof av === 'number' && typeof bv === 'number' ? av - bv : String(av).localeCompare(String(bv), undefined, { numeric: true });
+    });
+  }
   const preference = await projectPreference(project.id, user.id);
 
   // The Files view lists what is attached across the project's tasks; the
@@ -136,6 +164,12 @@ export default async function ProjectShowPage({
         }
       />
 
+      <details className="mb-5 rounded-lg border border-border p-4"><summary className="cursor-pointer font-medium">Manage custom fields</summary><CustomFields projectId={project.id} /></details>
+      <form method="get" className="mb-5 flex flex-wrap items-end gap-3">
+        <label className="text-sm">Sort tasks<select name="sort" defaultValue={filter.sort ?? ''} className="ms-2 rounded border border-border bg-background p-2"><option value="">Manual order</option><option value="name">Alphabetical</option>{definitions.map((r) => <option key={r.field.id} value={r.field.id}>{r.field.name}</option>)}</select></label>
+        <label className="text-sm">Status<select name="completed" defaultValue={filter.completed ?? ''} className="ms-2 rounded border border-border bg-background p-2"><option value="">All</option><option value="0">Open</option><option value="1">Complete</option></select></label>
+        <SubmitButton size="sm">Apply</SubmitButton>
+      </form>
       <div className="grid gap-5 lg:grid-cols-[1fr_360px]">
         <div className="space-y-5">
           {active === 'conversation' ? (
@@ -246,6 +280,7 @@ export default async function ProjectShowPage({
                   name: row.task.name,
                   completed: row.task.completed,
                   createdByName: row.createdByName,
+                  fields: definitions.map((r) => ({ name: r.field.name ?? 'Field', value: String(fieldValue(row.task.id, r.field.id)) })),
                 })),
               }))}
             />
@@ -285,6 +320,7 @@ export default async function ProjectShowPage({
                         { label: 'Task' },
                         { label: 'Created by' },
                         { label: 'Status' },
+                        ...definitions.map((r) => ({ label: r.field.name ?? 'Field' })),
                         { label: 'Action' },
                       ]}
                       isEmpty={rows.length === 0}
@@ -309,6 +345,7 @@ export default async function ProjectShowPage({
                               {row.task.completed === 1 ? 'Complete':'Open'}
                             </Badge>
                           </Td>
+                          {definitions.map((r) => <Td key={r.field.id}>{String(fieldValue(row.task.id, r.field.id)) || '-'}</Td>)}
                           <Td>
                             <div className="flex items-center gap-2">
                               <form action={toggleTaskComplete}>
