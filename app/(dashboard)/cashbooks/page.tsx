@@ -165,25 +165,25 @@ export default async function CashbookPage({
           <DataTable columns={[{ label: '' }, { label: '' }]} isEmpty={false}>
             <Tr>
               <Td>Opening Balance</Td>
-              <Td className="text-right">{openingLabel}</Td>
+              <Td className="text-end">{openingLabel}</Td>
             </Tr>
             <Tr>
               <Td>Today Total Income</Td>
-              <Td className="text-right">{creditLabel}</Td>
+              <Td className="text-end">{creditLabel}</Td>
             </Tr>
             <Tr>
               <Td>Today Total Expense</Td>
-              <Td className="text-right">{debitLabel}</Td>
+              <Td className="text-end">{debitLabel}</Td>
             </Tr>
             <Tr>
               <Td>Today Balance / Cash in Hand</Td>
-              <Td className="text-right">{inHandLabel}</Td>
+              <Td className="text-end">{inHandLabel}</Td>
             </Tr>
             <Tr>
               <Td className="font-medium text-foreground">
                 Today Closing Balance
               </Td>
-              <Td className="text-right font-medium text-foreground">
+              <Td className="text-end font-medium text-foreground">
                 {closingLabel}
               </Td>
             </Tr>

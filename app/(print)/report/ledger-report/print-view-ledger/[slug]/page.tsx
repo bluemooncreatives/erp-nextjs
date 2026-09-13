@@ -95,7 +95,7 @@ export default async function LedgerPrintViewPage({
             <Td />
             <Td />
             <Td />
-            <Td className="text-right">{money(opening)}</Td>
+            <Td className="text-end">{money(opening)}</Td>
           </Tr>
           {rows.map((row) => (
             <Tr key={row.id}>
@@ -104,7 +104,7 @@ export default async function LedgerPrintViewPage({
               <Td>{row.voucherNarration ?? row.narration ?? ''}</Td>
               <Td>{row.type === 'Dr' ? money(row.amount) : ''}</Td>
               <Td>{row.type === 'Cr' ? money(row.amount) : ''}</Td>
-              <Td className="text-right">{money(row.balance)}</Td>
+              <Td className="text-end">{money(row.balance)}</Td>
             </Tr>
           ))}
           <Tr>
@@ -113,7 +113,7 @@ export default async function LedgerPrintViewPage({
             <Td />
             <Td className="font-semibold">{money(totalDebit)}</Td>
             <Td className="font-semibold">{money(totalCredit)}</Td>
-            <Td className="text-right font-semibold">{money(closing)}</Td>
+            <Td className="text-end font-semibold">{money(closing)}</Td>
           </Tr>
         </DataTable>
       )}

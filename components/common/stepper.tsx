@@ -106,7 +106,7 @@ export function Stepper({
                 key={step.key}
                 className={cn(
                   "flex-1",
-                  index === 0 ? "text-left" : index === steps.length - 1 ? "text-right" : "text-center",
+                  index === 0 ? "text-start" : index === steps.length - 1 ? "text-end" : "text-center",
                   active ? "text-foreground" : "text-muted-foreground",
                 )}
               >

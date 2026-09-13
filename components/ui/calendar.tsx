@@ -55,8 +55,8 @@ function Calendar({
           "hover:bg-accent hover:text-foreground",
           "size-8 p-0 font-normal aria-selected:opacity-100",
         ),
-        range_start: "day-range-start rounded-l-md",
-        range_end: "day-range-end rounded-r-md",
+        range_start: "day-range-start rounded-s-md",
+        range_end: "day-range-end rounded-e-md",
         range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
         selected:
           "[&>button]:bg-primary [&>button]:text-primary-foreground [&>button]:hover:bg-primary [&>button]:hover:text-primary-foreground",

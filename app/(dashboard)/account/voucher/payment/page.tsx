@@ -115,7 +115,7 @@ export default async function PaymentVouchersPage({
                 </Badge>
               </Td>
               <Td>
-                {canEdit ? <Link href={route('vouchers.edit', { id: voucher.id })} className="mr-3 text-primary">Edit</Link> : null}
+                {canEdit ? <Link href={route('vouchers.edit', { id: voucher.id })} className="me-3 text-primary">Edit</Link> : null}
                 {canDelete ? (
                   <form action={deleteVoucherAction}>
                     <input type="hidden" name="id" value={voucher.id} />

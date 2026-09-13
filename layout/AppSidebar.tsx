@@ -195,7 +195,10 @@ function NavGroup({
           >
             {Icon ? <Icon /> : null}
             <span className="truncate">{item.label}</span>
-            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+            {/* Points into the group it opens, so it has to mirror under `dir="rtl"`.
+                Opening rotates to 90deg in either direction, which replaces the
+                180 rather than composing with it. */}
+            <ChevronRight className="ms-auto transition-transform duration-200 rtl:rotate-180 group-data-[state=open]/collapsible:rotate-90 rtl:group-data-[state=open]/collapsible:rotate-90" />
           </SidebarMenuButton>
         </CollapsibleTrigger>
 

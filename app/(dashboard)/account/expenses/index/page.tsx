@@ -114,7 +114,7 @@ export default async function ExpenseListPage({
                 </Badge>
               </Td>
               <Td>
-                {canEdit ? <Link className="mr-3 text-primary" href={`/account/expenses/${row.expense.id}/edit`}>Edit</Link> : null}
+                {canEdit ? <Link className="me-3 text-primary" href={`/account/expenses/${row.expense.id}/edit`}>Edit</Link> : null}
                 {canDelete ? (
                   <form action={deleteExpenseAction}>
                     <input type="hidden" name="id" value={row.expense.id} />

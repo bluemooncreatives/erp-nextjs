@@ -119,7 +119,7 @@ export default async function ChartOfAccountsPage() {
                     </Badge>
                   </Td>
                   <Td>
-                    {canEdit ? <Link className="mr-3 text-primary" href={`/account/chart-account/${node.id}/edit`}>Edit</Link> : null}
+                    {canEdit ? <Link className="me-3 text-primary" href={`/account/chart-account/${node.id}/edit`}>Edit</Link> : null}
                     {canDelete && node.isGroup === 0 ? (
                       <form action={deleteChartAccountAction}>
                         <input type="hidden" name="id" value={node.id} />

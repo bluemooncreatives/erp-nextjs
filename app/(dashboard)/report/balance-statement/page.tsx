@@ -102,7 +102,7 @@ export default async function BalanceStatementPage({
               {assetRows.map((row) => (
                 <Tr key={row.history.id}>
                   <Td>{`${row.accountName ?? '-'}${row.accountCode ? ` (${row.accountCode})` : ''}`}</Td>
-                  <Td className="text-right">{row.amountLabel}</Td>
+                  <Td className="text-end">{row.amountLabel}</Td>
                 </Tr>
               ))}
             </DataTable>
@@ -117,7 +117,7 @@ export default async function BalanceStatementPage({
               {liabilityRows.map((row) => (
                 <Tr key={row.history.id}>
                   <Td>{`${row.accountName ?? '-'}${row.accountCode ? ` (${row.accountCode})` : ''}`}</Td>
-                  <Td className="text-right">{row.amountLabel}</Td>
+                  <Td className="text-end">{row.amountLabel}</Td>
                 </Tr>
               ))}
             </DataTable>

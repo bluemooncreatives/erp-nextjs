@@ -138,7 +138,7 @@ export default async function ProjectShowPage({
                       <p className="text-sm font-medium text-foreground">
                         {row.authorName ?? 'Unknown'}
                         {row.comment.pinTop === 1 ? (
-                          <span className="ml-2">
+                          <span className="ms-2">
                             <Badge color="info" size="sm">
                               Pinned
                             </Badge>

@@ -86,17 +86,17 @@ export default async function PayslipPage({
         >
           <Tr>
             <Td>Basic Salary</Td>
-            <Td className="text-right">{money(payroll.basicSalary)}</Td>
+            <Td className="text-end">{money(payroll.basicSalary)}</Td>
           </Tr>
           {earnings.map((line) => (
             <Tr key={line.id}>
               <Td>{line.typeName ?? '-'}</Td>
-              <Td className="text-right">{money(line.amount)}</Td>
+              <Td className="text-end">{money(line.amount)}</Td>
             </Tr>
           ))}
           <Tr>
             <Td className="font-semibold">Total Earning</Td>
-            <Td className="text-right font-semibold">{money(payroll.totalEarning)}</Td>
+            <Td className="text-end font-semibold">{money(payroll.totalEarning)}</Td>
           </Tr>
         </DataTable>
 
@@ -107,30 +107,30 @@ export default async function PayslipPage({
           {deductions.length === 0 ? (
             <Tr>
               <Td>No deductions</Td>
-              <Td className="text-right">{money(0)}</Td>
+              <Td className="text-end">{money(0)}</Td>
             </Tr>
           ) : (
             deductions.map((line) => (
               <Tr key={line.id}>
                 <Td>{line.typeName ?? '-'}</Td>
-                <Td className="text-right">{money(line.amount)}</Td>
+                <Td className="text-end">{money(line.amount)}</Td>
               </Tr>
             ))
           )}
           <Tr>
             <Td className="font-semibold">Total Deduction</Td>
-            <Td className="text-right font-semibold">{money(payroll.totalDeduction)}</Td>
+            <Td className="text-end font-semibold">{money(payroll.totalDeduction)}</Td>
           </Tr>
         </DataTable>
       </div>
 
-      <dl className="mt-8 grid grid-cols-[auto_1fr] justify-end gap-x-6 gap-y-1 text-sm sm:ml-auto sm:w-72">
+      <dl className="mt-8 grid grid-cols-[auto_1fr] justify-end gap-x-6 gap-y-1 text-sm sm:ms-auto sm:w-72">
         <dt className="font-semibold">Gross Salary</dt>
-        <dd className="text-right">{money(payroll.grossSalary)}</dd>
+        <dd className="text-end">{money(payroll.grossSalary)}</dd>
         <dt className="font-semibold">Tax</dt>
-        <dd className="text-right">{money(payroll.tax)}</dd>
+        <dd className="text-end">{money(payroll.tax)}</dd>
         <dt className="text-base font-semibold">Net Salary</dt>
-        <dd className="text-right text-base font-semibold">{money(payroll.netSalary)}</dd>
+        <dd className="text-end text-base font-semibold">{money(payroll.netSalary)}</dd>
       </dl>
     </>
   );

@@ -109,7 +109,7 @@ export default function SignInForm({
               type={showPassword ? 'text' : 'password'}
               placeholder="Enter your password"
               autoComplete="current-password"
-              className="pr-10"
+              className="pe-10"
               aria-invalid={Boolean(state.fieldErrors?.password)}
               aria-describedby={
                 state.fieldErrors?.password ? 'login-password-error' : undefined

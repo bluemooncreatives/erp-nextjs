@@ -50,7 +50,7 @@ export default async function AdjustmentDetails({ params }: { params: Promise<{ 
         <DataTable columns={['Product', 'SKU', 'Unit price','Quantity','Subtotal'].map((label) => ({ label }))} isEmpty={!rows.length}>
           {rows.map((item) => <Tr key={item.id}><Td>{item.productName ?? '-'}{item.variant && <div className="text-xs">{item.variant}</div>}</Td><Td>{item.sku ?? '-'}</Td><Td>{item.priceLabel}</Td><Td>{item.qty}</Td><Td>{item.subtotalLabel}</Td></Tr>)}
         </DataTable>
-        <div className="space-y-2 p-6 text-right text-sm text-foreground">
+        <div className="space-y-2 p-6 text-end text-sm text-foreground">
           <p>Total products: {items.reduce((sum, item) => sum + item.qty, 0)}</p>
           <p>Total: {await singlePrice(items.reduce((sum, item) => sum + item.subtotal, 0))}</p>
           <p>Total recovery: {await singlePrice(adjustment.recoveryAmount)}</p>

@@ -106,8 +106,8 @@ export default async function BankAccountsPage() {
                     )}`}
                   </Td>
                   <Td>
-                    {canEdit ? <Link className="mr-3 text-primary" href={`/account/bank_accounts/${row.account.id}/edit`}>Edit</Link> : null}
-                    {canHistory ? <Link className="mr-3 text-primary" href={`/account/bank_accounts/history/${row.account.id}`}>History</Link> : null}
+                    {canEdit ? <Link className="me-3 text-primary" href={`/account/bank_accounts/${row.account.id}/edit`}>Edit</Link> : null}
+                    {canHistory ? <Link className="me-3 text-primary" href={`/account/bank_accounts/history/${row.account.id}`}>History</Link> : null}
                     {canDelete ? (
                       <form action={deleteBankAccountAction}>
                         <input type="hidden" name="id" value={row.account.id} />

@@ -39,7 +39,7 @@ export function ToggleSwitch({
         }}
       />
       <span className="bg-switch-background peer-checked:bg-primary peer-focus-visible:ring-ring/50 block h-5 w-9 rounded-full border border-transparent transition-colors peer-focus-visible:ring-[3px]" />
-      <span className="bg-background pointer-events-none absolute top-0.5 left-0.5 size-4 rounded-full shadow-sm ring-1 ring-black/5 transition-transform peer-checked:translate-x-4" />
+      <span className="bg-background pointer-events-none absolute top-0.5 start-0.5 size-4 rounded-full shadow-sm ring-1 ring-black/5 transition-transform peer-checked:translate-x-4 rtl:peer-checked:-translate-x-4" />
       {label ? <span className="text-sm">{label}</span> : null}
     </label>
   );

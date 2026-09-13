@@ -39,7 +39,7 @@ export function PrintHeader({ company }: { company: PrintCompany }) {
           <p className="text-lg font-semibold text-gray-900">{company.name}</p>
         )}
       </div>
-      <div className="text-right text-sm text-gray-700">
+      <div className="text-end text-sm text-gray-700">
         <p className="font-semibold text-gray-900">{company.name}</p>
         <p>{company.phone}</p>
         <p>{company.email}</p>
@@ -79,7 +79,7 @@ function MetaList({
   align?: 'left' | 'right';
 }) {
   return (
-    <dl className={`space-y-1 text-sm ${align === 'right' ? 'text-right' : ''}`}>
+    <dl className={`space-y-1 text-sm ${align === 'right' ? 'text-end' : ''}`}>
       {items.map((item) => (
         <div key={item.label} className="flex gap-2" style={{ justifyContent: align === 'right' ? 'flex-end' : 'flex-start' }}>
           <dt className="text-gray-500">{item.label}</dt>
@@ -102,31 +102,31 @@ export function PrintLines({
   return (
     <table className="w-full border-collapse text-sm">
       <thead>
-        <tr className="border-y border-gray-300 text-left text-gray-600">
-          <th className="py-2 pr-2">#</th>
-          <th className="py-2 pr-2">Product</th>
-          {showPrice ? <th className="py-2 pr-2">{currencyHeading ?? 'Price'}</th> : null}
-          <th className="py-2 pr-2">Qty</th>
-          {showPrice ? <th className="py-2 pr-2">Tax</th> : null}
-          {showPrice ? <th className="py-2 pr-2">Discount</th> : null}
-          {showPrice ? <th className="py-2 text-right">Subtotal</th> : null}
+        <tr className="border-y border-gray-300 text-start text-gray-600">
+          <th className="py-2 pe-2">#</th>
+          <th className="py-2 pe-2">Product</th>
+          {showPrice ? <th className="py-2 pe-2">{currencyHeading ?? 'Price'}</th> : null}
+          <th className="py-2 pe-2">Qty</th>
+          {showPrice ? <th className="py-2 pe-2">Tax</th> : null}
+          {showPrice ? <th className="py-2 pe-2">Discount</th> : null}
+          {showPrice ? <th className="py-2 text-end">Subtotal</th> : null}
         </tr>
       </thead>
       <tbody>
         {lines.map((line, index) => (
           <tr key={`${line.name}-${index}`} className="border-b border-gray-200 align-top">
-            <td className="py-2 pr-2">{index + 1}</td>
-            <td className="py-2 pr-2 text-gray-900">
+            <td className="py-2 pe-2">{index + 1}</td>
+            <td className="py-2 pe-2 text-gray-900">
               {line.name}
               {line.detail ? (
                 <span className="block text-xs text-gray-500">{line.detail}</span>
               ) : null}
             </td>
-            {showPrice ? <td className="py-2 pr-2">{line.price}</td> : null}
-            <td className="py-2 pr-2">{line.quantity}</td>
-            {showPrice ? <td className="py-2 pr-2">{line.tax}</td> : null}
-            {showPrice ? <td className="py-2 pr-2">{line.discount}</td> : null}
-            {showPrice ? <td className="py-2 text-right">{line.subTotal}</td> : null}
+            {showPrice ? <td className="py-2 pe-2">{line.price}</td> : null}
+            <td className="py-2 pe-2">{line.quantity}</td>
+            {showPrice ? <td className="py-2 pe-2">{line.tax}</td> : null}
+            {showPrice ? <td className="py-2 pe-2">{line.discount}</td> : null}
+            {showPrice ? <td className="py-2 text-end">{line.subTotal}</td> : null}
           </tr>
         ))}
         {lines.length === 0 ? (

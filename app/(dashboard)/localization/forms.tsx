@@ -93,7 +93,7 @@ export function TranslateForm({
 
       {/* Filtered-out rows stay mounted so every phrase is still posted back,
           which is what `key_value_store` rewrote the whole file from. */}
-      <div className="max-h-[32rem] space-y-3 overflow-y-auto pr-1">
+      <div className="max-h-[32rem] space-y-3 overflow-y-auto pe-1">
         {pairs.map((pair) => (
           <div
             key={pair.key}

@@ -49,9 +49,9 @@ export type TableSort = {
 };
 
 const ALIGN_CLASS = {
-  left: 'text-left',
+  left: 'text-start',
   center: 'text-center',
-  right: 'text-right',
+  right: 'text-end',
 } as const;
 
 export function DataTable({
@@ -445,8 +445,8 @@ export function SearchBar({
       <label className="min-w-0 flex-1 space-y-2 sm:min-w-64">
         <span className="block text-xs font-medium">Search</span>
         <span className="relative block">
-          <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" aria-hidden="true" />
-          <Input type="search" name={name} defaultValue={defaultValue} placeholder={placeholder} className="pl-9" />
+          <Search className="text-muted-foreground pointer-events-none absolute top-1/2 start-3 size-4 -translate-y-1/2" aria-hidden="true" />
+          <Input type="search" name={name} defaultValue={defaultValue} placeholder={placeholder} className="ps-9" />
         </span>
       </label>
       <Button type="submit" variant="soft">Search</Button>

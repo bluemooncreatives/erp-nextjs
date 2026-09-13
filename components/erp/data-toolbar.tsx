@@ -144,7 +144,7 @@ export function DataToolbar({
         })}
 
         {actions ? (
-          <div className="ml-auto flex flex-wrap items-center gap-2">{actions}</div>
+          <div className="ms-auto flex flex-wrap items-center gap-2">{actions}</div>
         ) : null}
       </div>
 
@@ -162,7 +162,7 @@ export function DataToolbar({
               <button
                 type="button"
                 onClick={() => apply({ [searchName]: undefined })}
-                className="hover:bg-primary/20 focus-visible:ring-primary -mr-0.5 rounded-full p-0.5 focus:outline-none focus-visible:ring-2"
+                className="hover:bg-primary/20 focus-visible:ring-primary -me-0.5 rounded-full p-0.5 focus:outline-none focus-visible:ring-2"
                 aria-label="Clear search filter"
               >
                 <X className="size-3" aria-hidden="true" />
@@ -180,7 +180,7 @@ export function DataToolbar({
                 <button
                   type="button"
                   onClick={() => apply({ [filter.id]: undefined })}
-                  className="hover:bg-primary/20 focus-visible:ring-primary -mr-0.5 rounded-full p-0.5 focus:outline-none focus-visible:ring-2"
+                  className="hover:bg-primary/20 focus-visible:ring-primary -me-0.5 rounded-full p-0.5 focus:outline-none focus-visible:ring-2"
                   aria-label={`Clear ${filter.label} filter`}
                 >
                   <X className="size-3" aria-hidden="true" />
@@ -245,7 +245,7 @@ function ToolbarSearch({
       </Label>
       <div className="relative">
         <Search
-          className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
+          className="text-muted-foreground pointer-events-none absolute top-1/2 start-3 size-4 -translate-y-1/2"
           aria-hidden="true"
         />
         <Input
@@ -260,7 +260,7 @@ function ToolbarSearch({
           onBlur={() => {
             isEditing.current = false;
           }}
-          className="pl-9 [&::-webkit-search-cancel-button]:appearance-none"
+          className="ps-9 [&::-webkit-search-cancel-button]:appearance-none"
         />
         {draft ? (
           <button
@@ -270,7 +270,7 @@ function ToolbarSearch({
               setDraft('');
               onCommit('');
             }}
-            className="text-muted-foreground hover:text-foreground focus-visible:ring-primary absolute top-1/2 right-2 -translate-y-1/2 rounded-sm p-1 focus:outline-none focus-visible:ring-2"
+            className="text-muted-foreground hover:text-foreground focus-visible:ring-primary absolute top-1/2 end-2 -translate-y-1/2 rounded-sm p-1 focus:outline-none focus-visible:ring-2"
             aria-label="Clear search"
           >
             <X className="size-3.5" aria-hidden="true" />

@@ -53,7 +53,7 @@ export function HighlightStatCard({
         {caption ? <Badge className="bg-primary/10 text-primary">{caption}</Badge> : null}
       </CardHeader>
 
-      <CardContent className="relative flex items-center gap-2 pr-16">
+      <CardContent className="relative flex items-center gap-2 pe-16">
         {loading ? (
           <>
             <Skeleton className="h-8 w-24" />

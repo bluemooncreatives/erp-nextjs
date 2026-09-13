@@ -54,7 +54,7 @@ const token = await new SignJWT({
   roleType: user?.type ?? 'system_user',
   showroomId: showroom?.id ?? 1,
   staffId: null,
-  locale: 'en',
+  locale: process.env.LOCALE ?? 'en',
 })
   .setProtectedHeader({ alg: 'HS256' })
   .setIssuedAt()

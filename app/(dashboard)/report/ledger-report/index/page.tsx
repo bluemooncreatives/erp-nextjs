@@ -150,7 +150,7 @@ export default async function LedgerReportPage({
               <Td />
               <Td />
               <Td />
-              <Td className="text-right">{openingLabel}</Td>
+              <Td className="text-end">{openingLabel}</Td>
             </Tr>
 
             {decorated.map((row) => (
@@ -160,7 +160,7 @@ export default async function LedgerReportPage({
                 <Td>{row.narration ?? row.voucherNarration ?? '-'}</Td>
                 <Td>{row.debitLabel}</Td>
                 <Td>{row.creditLabel}</Td>
-                <Td className="text-right">{row.balanceLabel}</Td>
+                <Td className="text-end">{row.balanceLabel}</Td>
               </Tr>
             ))}
           </DataTable>

@@ -114,7 +114,7 @@ export default async function StaffReportPrintPage({
           <Td />
           <Td />
           <Td />
-          <Td className="text-right">{money(opening)}</Td>
+          <Td className="text-end">{money(opening)}</Td>
         </Tr>
         {rows.map((row) => (
           <Tr key={row.id}>
@@ -122,7 +122,7 @@ export default async function StaffReportPrintPage({
             <Td>{row.voucherNarration ?? row.narration ?? ''}</Td>
             <Td>{row.type === 'Dr' ? money(Number(row.amount)) : ''}</Td>
             <Td>{row.type === 'Cr' ? money(Number(row.amount)) : ''}</Td>
-            <Td className="text-right">{money(row.balance)}</Td>
+            <Td className="text-end">{money(row.balance)}</Td>
           </Tr>
         ))}
         {transactions.length > 0 ? (
@@ -131,7 +131,7 @@ export default async function StaffReportPrintPage({
             <Td />
             <Td />
             <Td />
-            <Td className="text-right">{money(closing)}</Td>
+            <Td className="text-end">{money(closing)}</Td>
           </Tr>
         ) : null}
       </DataTable>

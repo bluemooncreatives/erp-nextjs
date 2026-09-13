@@ -122,7 +122,7 @@ export default async function ShowroomIncomeExpensePage({
               </Td>
               <Td>{row.narration ?? '-'}</Td>
               <Td>{row.type}</Td>
-              <Td className="text-right">{row.amountLabel}</Td>
+              <Td className="text-end">{row.amountLabel}</Td>
             </Tr>
           ))}
         </DataTable>

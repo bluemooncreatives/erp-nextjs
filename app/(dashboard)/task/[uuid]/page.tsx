@@ -177,7 +177,7 @@ export default async function TaskShowPage({
                     <p className="text-sm font-medium text-foreground">
                       {row.authorName ?? 'Unknown'}
                       {row.comment.event ? (
-                        <span className="ml-2 text-xs font-normal text-muted-foreground">
+                        <span className="ms-2 text-xs font-normal text-muted-foreground">
                           {row.comment.event.replace(/_/g, '')}
                         </span>
                       ) : null}

@@ -77,7 +77,7 @@ export default async function DailyIncomeExpensePage({
             {incomeRows.map((row) => (
               <Tr key={row.id}>
                 <Td>{`${row.name}${row.code ? ` (${row.code})` : ''}`}</Td>
-                <Td className="text-right">{row.amountLabel}</Td>
+                <Td className="text-end">{row.amountLabel}</Td>
               </Tr>
             ))}
           </DataTable>
@@ -92,7 +92,7 @@ export default async function DailyIncomeExpensePage({
             {expenseRows.map((row) => (
               <Tr key={row.id}>
                 <Td>{`${row.name}${row.code ? ` (${row.code})` : ''}`}</Td>
-                <Td className="text-right">{row.amountLabel}</Td>
+                <Td className="text-end">{row.amountLabel}</Td>
               </Tr>
             ))}
           </DataTable>

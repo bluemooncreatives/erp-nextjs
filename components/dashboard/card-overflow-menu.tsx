@@ -58,7 +58,7 @@ export function CardOverflowMenu({
       <DropdownMenuContent align="end">
         <DropdownMenuGroup>
           <DropdownMenuItem onSelect={onRefresh ?? (() => router.refresh())}>
-            <RefreshCw className="mr-2 size-4" />
+            <RefreshCw className="me-2 size-4" />
             Refresh
           </DropdownMenuItem>
           {viewAllHref ? (

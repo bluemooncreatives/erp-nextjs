@@ -99,15 +99,15 @@ export default async function IncomeStatementPage({
             <DataTable columns={[{ label: '' }, { label: 'Amount' }]} isEmpty={false}>
               <Tr>
                 <Td>Sales</Td>
-                <Td className="text-right">{salesLabel}</Td>
+                <Td className="text-end">{salesLabel}</Td>
               </Tr>
               <Tr>
                 <Td>Cost of Goods Sold</Td>
-                <Td className="text-right">{cogsLabel}</Td>
+                <Td className="text-end">{cogsLabel}</Td>
               </Tr>
               <Tr>
                 <Td className="font-medium text-foreground">Gross Profit</Td>
-                <Td className="text-right font-medium text-foreground">
+                <Td className="text-end font-medium text-foreground">
                   {grossLabel}
                 </Td>
               </Tr>
@@ -124,7 +124,7 @@ export default async function IncomeStatementPage({
                 {incomeRows.map((row) => (
                   <Tr key={row.id}>
                     <Td>{`${row.name}${row.code ? ` (${row.code})` : ''}`}</Td>
-                    <Td className="text-right">{row.label}</Td>
+                    <Td className="text-end">{row.label}</Td>
                   </Tr>
                 ))}
               </DataTable>
@@ -139,7 +139,7 @@ export default async function IncomeStatementPage({
                 {expenseRows.map((row) => (
                   <Tr key={row.id}>
                     <Td>{`${row.name}${row.code ? ` (${row.code})` : ''}`}</Td>
-                    <Td className="text-right">{row.label}</Td>
+                    <Td className="text-end">{row.label}</Td>
                   </Tr>
                 ))}
               </DataTable>

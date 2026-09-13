@@ -74,7 +74,7 @@ export default async function ContactTransactionPage() {
             <Td />
             <Td />
             <Td />
-            <Td className="text-right">{openingLabel}</Td>
+            <Td className="text-end">{openingLabel}</Td>
           </Tr>
 
           {rows.map((row) => (
@@ -84,7 +84,7 @@ export default async function ContactTransactionPage() {
               <Td>{row.narration ?? ''}</Td>
               <Td>{row.debitLabel}</Td>
               <Td>{row.creditLabel}</Td>
-              <Td className="text-right">{row.balanceLabel}</Td>
+              <Td className="text-end">{row.balanceLabel}</Td>
             </Tr>
           ))}
         </DataTable>

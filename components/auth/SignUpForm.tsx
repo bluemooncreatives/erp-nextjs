@@ -62,7 +62,7 @@ export default function SignUpForm({ companyName }: { companyName: string }) {
               type={showPassword ? 'text' : 'password'}
               placeholder="At least 8 characters"
               autoComplete="new-password"
-              className="pr-10"
+              className="pe-10"
               aria-invalid={Boolean(state.fieldErrors?.password)}
             />
             <button

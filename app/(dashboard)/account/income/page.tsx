@@ -97,7 +97,7 @@ export default async function IncomeListPage({
               <Td className="max-w-xs truncate">{row.voucher?.narration ?? '-'}</Td>
               <Td>{`${symbol} ${numberFormat(row.voucher?.amount ?? 0)}`}</Td>
               <Td>
-                {canEdit ? <Link className="mr-3 text-primary" href={`/account/income/${row.income.id}/edit`}>Edit</Link> : null}
+                {canEdit ? <Link className="me-3 text-primary" href={`/account/income/${row.income.id}/edit`}>Edit</Link> : null}
                 {canDelete ? (
                   <form action={deleteIncomeAction}>
                     <input type="hidden" name="id" value={row.income.id} />

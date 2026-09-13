@@ -173,7 +173,7 @@ function MenuSearch() {
     <div className="relative hidden md:block">
       <Search
         aria-hidden="true"
-        className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
+        className="text-muted-foreground pointer-events-none absolute top-1/2 start-3 size-4 -translate-y-1/2"
       />
       <Input
         ref={inputRef}
@@ -184,15 +184,15 @@ function MenuSearch() {
         onBlur={() => setTimeout(() => setOpen(false), 150)}
         placeholder="Search or type command..."
         aria-label="Search menu"
-        className="h-9 w-64 pr-14 pl-9 lg:w-80"
+        className="h-9 w-64 pe-14 ps-9 lg:w-80"
       />
-      <kbd className="text-muted-foreground bg-muted pointer-events-none absolute top-1/2 right-2 hidden -translate-y-1/2 items-center gap-0.5 rounded border px-1.5 py-0.5 font-mono text-[10px] lg:inline-flex">
+      <kbd className="text-muted-foreground bg-muted pointer-events-none absolute top-1/2 end-2 hidden -translate-y-1/2 items-center gap-0.5 rounded border px-1.5 py-0.5 font-mono text-[10px] lg:inline-flex">
         <span>⌘</span>
         <span>K</span>
       </kbd>
 
       {open && visible.length > 0 ? (
-        <div className="bg-popover text-popover-foreground absolute right-0 left-0 z-50 mt-1 overflow-hidden rounded-md border shadow-md">
+        <div className="bg-popover text-popover-foreground absolute inset-x-0 z-50 mt-1 overflow-hidden rounded-md border shadow-md">
           <ul className="minimal-scrollbar max-h-80 overflow-y-auto py-1">
             {visible.map((result) => (
               <li key={`${result.route}-${result.name}`}>

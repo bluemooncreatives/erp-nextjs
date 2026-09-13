@@ -134,8 +134,8 @@ TimelineTag.displayName = 'TimelineTag'
 const timelineContentVariants = cva('text-card-foreground row-start-2 row-end-2 pb-8', {
   variants: {
     side: {
-      right: 'col-start-3 col-end-4 mr-auto text-left',
-      left: 'col-start-1 col-end-2 ml-auto text-right'
+      right: 'col-start-3 col-end-4 me-auto text-start',
+      left: 'col-start-1 col-end-2 ms-auto text-end'
     }
   },
   defaultVariants: {
@@ -155,8 +155,8 @@ TimelineContent.displayName = 'TimelineContent'
 const timelineHeadingVariants = cva('row-start-1 row-end-1 line-clamp-1 max-w-full truncate', {
   variants: {
     side: {
-      right: 'col-start-3 col-end-4 mr-auto text-left',
-      left: 'col-start-1 col-end-2 ml-auto text-right'
+      right: 'col-start-3 col-end-4 me-auto text-start',
+      left: 'col-start-1 col-end-2 ms-auto text-end'
     },
     variant: {
       primary: 'text-primary text-base font-medium',

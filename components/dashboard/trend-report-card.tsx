@@ -119,7 +119,7 @@ export function TrendReportCard({
 
   return (
     <Card className={cn("grid gap-0 py-0 lg:grid-cols-3", className)}>
-      <Card className="rounded-none shadow-none ring-0 max-lg:border-b lg:col-span-2 lg:border-r">
+      <Card className="rounded-none shadow-none ring-0 max-lg:border-b lg:col-span-2 lg:border-e">
         <CardHeader className="flex justify-between">
           <div className="flex flex-col gap-1">
             <span className="text-lg font-semibold">{trendTitle}</span>

@@ -41,7 +41,7 @@ export default async function TransferDetails({ params }: { params: Promise<{ id
         <DataTable columns={['Product', 'SKU', 'Unit price','Quantity','Returned quantity','Subtotal'].map((label) => ({ label }))} isEmpty={!rows.length}>
           {rows.map((item) => <Tr key={item.id}><Td>{item.productName ?? '-'}{item.variant && <div className="text-xs">{item.variant}</div>}</Td><Td>{item.sku ?? '-'}</Td><Td>{item.priceLabel}</Td><Td>{item.quantity}</Td><Td>{item.returnQuantity}</Td><Td>{item.subtotalLabel}</Td></Tr>)}
         </DataTable>
-        <div className="space-y-2 p-6 text-right text-sm text-foreground"><p>Total products: {items.reduce((sum, item) => sum + item.quantity, 0)}</p><p>Total: {await singlePrice(items.reduce((sum, item) => sum + item.subTotal, 0))}</p></div>
+        <div className="space-y-2 p-6 text-end text-sm text-foreground"><p>Total products: {items.reduce((sum, item) => sum + item.quantity, 0)}</p><p>Total: {await singlePrice(items.reduce((sum, item) => sum + item.subTotal, 0))}</p></div>
       </Card>
       <Card title="Notes"><p className="whitespace-pre-wrap text-sm text-foreground">{transfer.notes ?? '-'}</p></Card>
       {documents.length > 0 && <Card title="Documents"><ul className="space-y-2">{documents.map((document, index) => <li key={`${document}-${index}`}><a className="text-sm text-primary underline" href={assetUrl(document) ?? '#'} download>Document {index + 1}</a></li>)}</ul></Card>}

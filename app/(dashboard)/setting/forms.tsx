@@ -207,7 +207,7 @@ function ImageField({
         type="file"
         name={name}
         accept="image/jpeg,image/png,image/jpg"
-        className="mx-auto block w-full text-xs text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-xs file:font-medium file:text-white"
+        className="mx-auto block w-full text-xs text-muted-foreground file:me-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-xs file:font-medium file:text-white"
       />
       <RemoveImageButton type={removeType} />
     </div>
@@ -648,7 +648,7 @@ export function GuestBackgroundForm({
             type="file"
             name="login_bg"
             accept="image/*"
-            className="mx-auto block w-full text-xs text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-xs file:font-medium file:text-white"
+            className="mx-auto block w-full text-xs text-muted-foreground file:me-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-xs file:font-medium file:text-white"
           />
         </div>
         <div className="rounded-2xl border border-border p-5 text-center">
@@ -663,7 +663,7 @@ export function GuestBackgroundForm({
             type="file"
             name="error_page_bg"
             accept="image/*"
-            className="mx-auto block w-full text-xs text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-xs file:font-medium file:text-white"
+            className="mx-auto block w-full text-xs text-muted-foreground file:me-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-xs file:font-medium file:text-white"
           />
         </div>
       </div>

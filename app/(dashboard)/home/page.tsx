@@ -531,16 +531,16 @@ export default async function DashboardPage() {
                   <caption className="sr-only">Invoices with an outstanding balance</caption>
                   <thead>
                     <tr>
-                      <th scope="col" className="h-14 pl-4 text-left sm:pl-6">
+                      <th scope="col" className="h-14 ps-4 text-start sm:ps-6">
                         Customer
                       </th>
-                      <th scope="col" className="h-14 text-left">
+                      <th scope="col" className="h-14 text-start">
                         Invoice
                       </th>
-                      <th scope="col" className="h-14 text-left">
+                      <th scope="col" className="h-14 text-start">
                         Date
                       </th>
-                      <th scope="col" className="h-14 text-right">
+                      <th scope="col" className="h-14 text-end">
                         Payable
                       </th>
                       <th scope="col" className="h-14 text-center">
@@ -548,7 +548,7 @@ export default async function DashboardPage() {
                       </th>
                       <th
                         scope="col"
-                        className="h-14 w-[1%] pr-4 text-right whitespace-nowrap sm:pr-6"
+                        className="h-14 w-[1%] pe-4 text-end whitespace-nowrap sm:pe-6"
                       >
                         Actions
                       </th>
@@ -557,14 +557,14 @@ export default async function DashboardPage() {
                   <tbody>
                     {dueRows.map((due) => (
                       <tr key={due.id}>
-                        <td className="pl-4 sm:pl-6">
+                        <td className="ps-4 sm:ps-6">
                           <PrimaryCell title={due.partyName} />
                         </td>
                         <td className="text-muted-foreground">
                           {due.invoiceNo ?? due.id}
                         </td>
                         <td className="text-muted-foreground">{due.dateLabel}</td>
-                        <td className="text-right font-medium tabular-nums">
+                        <td className="text-end font-medium tabular-nums">
                           {money(Number(due.payableAmount))}
                         </td>
                         <td className="text-center">
@@ -572,7 +572,7 @@ export default async function DashboardPage() {
                             {due.status === 2 ? 'Partial' : 'Unpaid'}
                           </StatusBadge>
                         </td>
-                        <td className="pr-4 text-right sm:pr-6">
+                        <td className="pe-4 text-end sm:pe-6">
                           <DashboardLink variant="ghost" size="sm" href={ROUTES['sale.show'].replace('{id}', String(due.id))}>
                               Open
                             </DashboardLink>
@@ -600,17 +600,17 @@ export default async function DashboardPage() {
                 <table className="table-unified w-full">
                   <thead>
                     <tr>
-                      <th className="text-left">SKU</th>
-                      <th className="text-right">In stock</th>
-                      <th className="text-right">Alert at</th>
+                      <th className="text-start">SKU</th>
+                      <th className="text-end">In stock</th>
+                      <th className="text-end">Alert at</th>
                     </tr>
                   </thead>
                   <tbody>
                     {alerts.map((alert) => (
                       <tr key={alert.id}>
                         <td className="font-medium">{alert.sku ?? alert.productSkuId}</td>
-                        <td className="text-right tabular-nums">{alert.stock}</td>
-                        <td className="text-muted-foreground text-right tabular-nums">
+                        <td className="text-end tabular-nums">{alert.stock}</td>
+                        <td className="text-muted-foreground text-end tabular-nums">
                           {alert.alertQuantity ?? '-'}
                         </td>
                       </tr>

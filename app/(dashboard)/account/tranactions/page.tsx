@@ -112,7 +112,7 @@ export default async function TransactionsPage({
               <Td>
                 {row.accountName}
                 {row.accountCode ? (
-                  <span className="ml-1 text-xs text-muted-foreground">
+                  <span className="ms-1 text-xs text-muted-foreground">
                     ({row.accountCode})
                   </span>
                 ) : null}

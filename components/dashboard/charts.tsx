@@ -58,7 +58,7 @@ export function SalesChart({
 
   return (
     <ChartPanel title={title}>
-      <div className="-ml-5 min-w-[650px] xl:min-w-full pl-2">
+      <div className="-ms-5 min-w-[650px] xl:min-w-full ps-2">
         <ReactApexChart
           options={options}
           series={[{ name: seriesName, data }]}
@@ -107,7 +107,7 @@ export function ProfitChart({
 
   return (
     <ChartPanel title={title}>
-      <div className="-ml-5 min-w-[650px] xl:min-w-full pl-2">
+      <div className="-ms-5 min-w-[650px] xl:min-w-full ps-2">
         <ReactApexChart
           options={options}
           series={[

@@ -123,7 +123,7 @@ export default async function CashFlowPage({
                     <Td>{row.txId ?? '-'}</Td>
                     <Td>{row.accountName ?? '-'}</Td>
                     <Td>{row.narration ?? '-'}</Td>
-                    <Td className="text-right">{row.amountLabel}</Td>
+                    <Td className="text-end">{row.amountLabel}</Td>
                   </Tr>
                 ))}
               </DataTable>
@@ -147,7 +147,7 @@ export default async function CashFlowPage({
                     <Td>{row.txId ?? '-'}</Td>
                     <Td>{row.accountName ?? '-'}</Td>
                     <Td>{row.narration ?? '-'}</Td>
-                    <Td className="text-right">{row.amountLabel}</Td>
+                    <Td className="text-end">{row.amountLabel}</Td>
                   </Tr>
                 ))}
               </DataTable>
