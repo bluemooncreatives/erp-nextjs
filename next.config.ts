@@ -13,6 +13,8 @@ const nextConfig: NextConfig = {
   // which answered with abort(401)/abort(403) in the Laravel stack.
   experimental: {
     authInterrupts: true,
+    // Task attachments allow 10 MB; leave room for multipart form headers.
+    serverActions: { bodySizeLimit: '12mb' },
   },
 
   // The TailAdmin UI imports its icon set as React components from .svg files.

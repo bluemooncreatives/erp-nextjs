@@ -222,6 +222,42 @@ await scenario('Project refuses a task move to a section outside its project',as
  await submit(reorder,{project_id:projectId,kind:'task',id:taskIds[0],target:999999999,position:0},{url:projectUrl});
  assert.equal((await one('SELECT section_id FROM tasks WHERE id=?',[taskIds[0]])).section_id,before.section_id);
 });
+
+await scenario('Project text, number, date and person fields preserve typed values',async()=>{
+ for (const [type,value,column] of [['text','Specification','text'],['number','12.5','number'],['date','2026-10-10','date'],['user_id',String(admin.id),'user_id']]) {
+  const name=`Typed ${type} ${stamp}`;
+  await submit(fieldAction,{project_id:projectId,operation:'save',name,type},{url:projectUrl});
+  const field=await one('SELECT id FROM fields WHERE name=?',[name]);assert.ok(field,name);
+  await submit(fieldAction,{project_id:projectId,task_id:taskIds[0],field_id:field.id,operation:'value',value},{url:`/task/${taskUuids[0]}`});
+  const stored=await one('SELECT * FROM field_task WHERE field_id=? AND task_id=?',[field.id,taskIds[0]]);
+  assert.ok(stored,`${type} value created`);
+  if (type==='date') assert.equal(new Date(stored.date).toISOString().slice(0,10),value);
+  else assert.equal(String(stored[column]),value);
+ }
+});
+await scenario('Project sub-task order persists independently of board cards',async()=>{
+ const childIds=[];
+ for(const name of ['Child one','Child two']) { const [result]=await connection.query('INSERT INTO tasks (project_id,section_id,parent_id,uuid,name) VALUES (?,?,?,?,?)',[projectId,sectionIds[1],taskIds[0],crypto.randomUUID(),name]);childIds.push(result.insertId); }
+ await submit(reorder,{project_id:projectId,kind:'subtask',id:childIds[1],target:taskIds[0],position:0},{url:`/task/${taskUuids[0]}`});
+ assert.equal((await one('SELECT id FROM tasks WHERE parent_id=? ORDER BY `order` LIMIT 1',[taskIds[0]])).id,childIds[1]);
+ const response=await fetch(base+projectUrl,{headers:{cookie:`${cookieName}=${adminToken}`}});
+ assert.doesNotMatch(await response.text(),/Child one/,'subtasks are not duplicate top-level cards');
+});
+await scenario('Project attachment larger than 1 MB uploads and deletes through server actions',async()=>{
+ const upload=action('uploadTaskAttachment'), remove=action('removeTaskAttachment');
+ const file=new Blob(['%PDF-1.4\n',new Uint8Array(1200*1024)],{type:'application/pdf'});
+ const response=await submit(upload,{task_id:taskIds[0],file},{url:`/task/${taskUuids[0]}`,filename:`large-${stamp}.pdf`});
+ assert.ok(response.status<400,`upload returned ${response.status}`);
+ const row=await one('SELECT * FROM uploads WHERE module_id=? AND user_filename=?',[taskIds[0],`large-${stamp}.pdf`]);assert.ok(row,'upload row exists');
+ await submit(remove,{upload_id:row.id},{url:`/task/${taskUuids[0]}`});
+ assert.equal(await one('SELECT id FROM uploads WHERE id=?',[row.id]),undefined);
+});
+await scenario('Binary XLS imports through the existing brand upload action',async()=>{
+ const target=action('uploadBrandCsv');
+ const response=await submit(target,{file:new Blob([fs.readFileSync('tests/fixtures/legacy-import.xls')],{type:'application/vnd.ms-excel'})},{filename:'brands.xls'});
+ assert.ok(response.status<400,`XLS upload returned ${response.status}`);
+ assert.ok(await one('SELECT id FROM brands WHERE name=?',['Caf\u00e9']),'brand imported from binary workbook');
+});
 fs.writeFileSync('artifacts/migration-fixture.json',JSON.stringify({projectId,projectUuid,taskIds,taskUuids,sectionIds,customerId:customer.id,stock,price},null,2));
 fs.writeFileSync('artifacts/migration-results.json',JSON.stringify(results,null,2));
 await connection.end();

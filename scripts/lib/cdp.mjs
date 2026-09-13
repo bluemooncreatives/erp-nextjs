@@ -97,7 +97,8 @@ async function connect(url) {
   socket.addEventListener('message', (event) => {
     const payload = JSON.parse(event.data);
     if (payload.id && pending.has(payload.id)) {
-      const { resolve, reject } = pending.get(payload.id);
+      const { resolve, reject, timer } = pending.get(payload.id);
+      clearTimeout(timer);
       pending.delete(payload.id);
       if (payload.error) reject(new Error(payload.error.message));
       else resolve(payload.result);
@@ -106,12 +107,21 @@ async function connect(url) {
     for (const listener of listeners) listener(payload);
   });
 
+  socket.addEventListener('close', () => {
+    for (const { reject, timer } of pending.values()) { clearTimeout(timer); reject(new Error('Browser protocol connection closed.')); }
+    pending.clear();
+  });
+
   function send(method, params = {}, sessionId) {
     const id = nextId++;
     const message = { id, method, params };
     if (sessionId) message.sessionId = sessionId;
-    socket.send(JSON.stringify(message));
-    return new Promise((resolve, reject) => pending.set(id, { resolve, reject }));
+    if (process.env.CDP_DEBUG) console.error('CDP', method);
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => { pending.delete(id); reject(new Error(`Browser did not answer ${method}`)); }, Number(process.env.CDP_TIMEOUT ?? 30000));
+      pending.set(id, { resolve, reject, timer });
+      socket.send(JSON.stringify(message));
+    });
   }
 
   /**

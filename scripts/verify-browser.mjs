@@ -86,7 +86,9 @@ async function scenario(name, run) {
   try {
     await run();
     results.push({ name, ok: true });
+    console.log('ok', name);
   } catch (error) {
+    console.log('FAIL', name, String(error?.message ?? error).split('\n')[0]);
     results.push({ name, ok: false, error: String(error?.message ?? error).split('\n')[0] });
   }
 }
@@ -595,7 +597,7 @@ if (process.env.DB_DATABASE?.startsWith('erp_migration_') && existsSync('artifac
     const name = `Browser score ${stamp}`;
     const newField = `Array.from(document.forms).find(f => f.querySelector('input[name="field_id"]')?.value === '' && f.querySelector('input[name="project_id"]'))`;
     await page.evaluate(`(() => {const f=${newField}; const el=f.querySelector('input[name="name"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(el,${JSON.stringify(name)}); el.dispatchEvent(new Event('input',{bubbles:true})); })()`);
-    await pickOption(page,'type',"return option.textContent.trim() === 'number';");
+    await pickOption(page,'field-new-type',"return option.textContent.trim() === 'number';");
     await page.evaluate(`(${newField}).querySelector('button[value="save"]').click()`);
     await page.waitUntil(`Array.from(document.forms).some(f=>f.querySelector('input[name="field_id"]')?.value && f.querySelector('input[name="name"]')?.value===${JSON.stringify(name)})`,{timeout:30000});
     const field = await one('select id from fields where name=?',[name]); assert.ok(field,'field saved by form');

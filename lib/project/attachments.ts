@@ -16,6 +16,7 @@ import 'server-only';
 import { and, desc, eq, inArray } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { tasks, uploads } from '@/lib/db/schema';
+import { requireProjectAccess } from './fields';
 import { saveUpload, deleteStoredFile } from '@/lib/uploads';
 
 export const TASK_MODULE = 'task';
@@ -123,6 +124,9 @@ export async function addTaskAttachment(
   file: File,
   userId: number,
 ): Promise<AttachmentError> {
+  const [task] = await db.select({ projectId: tasks.projectId }).from(tasks).where(eq(tasks.id, taskId)).limit(1);
+  if (!task?.projectId) return { ok: false, message: 'Task not found.' };
+  await requireProjectAccess(task.projectId);
   const extension = extensionOf(file.name);
   if (!ALLOWED_EXTENSIONS.includes(extension)) {
     return { ok: false, message: `Files of type .${extension || '?'} are not allowed.` };
@@ -168,6 +172,9 @@ export async function deleteTaskAttachment(id: number): Promise<number | null> {
     .where(and(eq(uploads.id, id), eq(uploads.module, TASK_MODULE)))
     .limit(1);
   if (!row) return null;
+  const [task] = row.taskId ? await db.select({ projectId: tasks.projectId }).from(tasks).where(eq(tasks.id, row.taskId)).limit(1) : [];
+  if (!task?.projectId) return null;
+  await requireProjectAccess(task.projectId);
 
   await db.delete(uploads).where(eq(uploads.id, id));
   await deleteStoredFile(row.filename);

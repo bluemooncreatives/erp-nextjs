@@ -1,4 +1,5 @@
 import 'server-only';
+import { forbidden, notFound } from 'next/navigation';
 import { and, asc, eq } from 'drizzle-orm';
 import { db, transaction } from '@/lib/db/client';
 import { fields, fieldOptions, fieldProject, fieldTask, projects, projectUser, teamUser, taskComments, tasks } from '@/lib/db/schema';
@@ -9,7 +10,8 @@ export async function requireProjectAccess(projectId: number) {
   const [project] = await db.select().from(projects).where(eq(projects.id, projectId)).limit(1);
   const [member] = await db.select().from(projectUser).where(and(eq(projectUser.projectId, projectId), eq(projectUser.userId, user.id))).limit(1);
   const [teamMember] = project?.teamId ? await db.select().from(teamUser).where(and(eq(teamUser.teamId, project.teamId), eq(teamUser.userId, user.id))).limit(1) : [];
-  if (!project || (!user.isSystemUser && project.userId !== user.id && !member && !teamMember)) throw new Error('Project access denied.');
+  if (!project) notFound();
+  if (!user.isSystemUser && project.userId !== user.id && !member && !teamMember) forbidden();
   return { user, project };
 }
 
@@ -30,7 +32,8 @@ export async function saveField(projectId: number, data: FormData) {
   const name = String(data.get('name') ?? '').trim();
   const type = String(data.get('type') ?? 'text');
   if (!name || name.length > 191 || !['text', 'number', 'date', 'dropdown', 'user_id'].includes(type)) throw new Error('Enter a field name and valid type.');
-  const current = (await projectFields(projectId)).find((r) => r.field.id === id);
+  const existingFields = await projectFields(projectId);
+  const current = existingFields.find((r) => r.field.id === id);
   if (id && (!current || current.field.default === 1)) throw new Error('This field cannot be edited.');
   if (current && current.field.type !== type) throw new Error('Existing field types cannot be changed.');
   const format = String(data.get('format') ?? current?.field.format ?? 'unformat');
@@ -47,7 +50,7 @@ export async function saveField(projectId: number, data: FormData) {
     else {
       const [insert] = await tx.insert(fields).values({ ...values, userId: user.id, createdAt: new Date() });
       fieldId = Number(insert.insertId);
-      await tx.insert(fieldProject).values({ projectId, fieldId, visibility: 1 });
+      await tx.insert(fieldProject).values({ projectId, fieldId, visibility: 1, order: existingFields.length });
       const existingTasks = await tx.select({ id: tasks.id }).from(tasks).where(eq(tasks.projectId, projectId));
       if (existingTasks.length) await tx.insert(fieldTask).values(existingTasks.map((task) => ({ taskId: task.id, fieldId })));
     }

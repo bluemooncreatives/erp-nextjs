@@ -7,7 +7,7 @@
 // Routes are discovered from the app directory, so new pages are covered
 // automatically; dynamic segments are filled from the database.
 
-import { readdirSync, statSync } from 'node:fs';
+import { readdirSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { SignJWT } from 'jose';
 import mysql from 'mysql2/promise';
@@ -171,7 +171,7 @@ function routesUnder(directory, prefix = '') {
       // Route groups `(x)` and private folders `_x` do not appear in the URL.
       const segment = entry.startsWith('(') || entry.startsWith('_') ? '' : `/${entry}`;
       found.push(...routesUnder(full, prefix + segment));
-    } else if (entry === 'page.tsx') {
+    } else if (entry === 'page.tsx' || (entry === 'route.ts' && full.includes(`${path.sep}(print)${path.sep}`))) {
       found.push(prefix === '' ? '/' : prefix);
     }
   }
@@ -181,8 +181,8 @@ function routesUnder(directory, prefix = '') {
 const discovered = routesUnder(path.join(root, 'app'));
 
 const routes = discovered
-  // Optional catch-alls and the login screen are not useful here.
-  .filter((route) => !route.includes('[[') && route !== '/login')
+  .filter((route) => route !== '/login')
+  .flatMap((route) => route.includes('[[...view]]') ? ['', 'board', 'files', 'conversation'].map((view) => route.replace('[[...view]]', view).replace(/\/$/, '')) : [route])
   .map((route) =>
     route
       .replace(/\[uuid\]/g, route.startsWith('/task/') ? ids.task ?? '' : ids.project ?? '')
@@ -196,6 +196,7 @@ const routes = discovered
 // --- Fetch -----------------------------------------------------------------
 
 const failures = [];
+const responses = [];
 const byStatus = new Map();
 let ok = 0;
 
@@ -207,6 +208,7 @@ for (const route of routes) {
       redirect: 'manual',
     });
 
+    responses.push({ route, status: response.status });
     // 2xx renders, 3xx redirects (permission or notFound) and 404 for a row
     // that does not exist are all acceptable; 5xx is not.
     if (response.status >= 500) {
@@ -234,5 +236,6 @@ for (const failure of failures) {
   console.log(`  FAIL ${failure.route} -> ${failure.status}: ${failure.detail}`);
 }
 
+writeFileSync('artifacts/http-migration-results.json', JSON.stringify({ routes: responses, failures }, null, 2));
 await connection.end();
 process.exit(failures.length ? 1 : 0);

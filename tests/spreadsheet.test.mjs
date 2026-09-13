@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import test from 'node:test';
 import ts from 'typescript';
+import * as XLSX from 'xlsx';
 import { inflateRawSync } from 'node:zlib';
 
 function load(file, modules = {}) {
@@ -12,7 +13,7 @@ function load(file, modules = {}) {
   return exports;
 }
 
-const sheet = load('lib/import/spreadsheet.ts', { 'server-only': {} });
+const sheet = load('lib/import/spreadsheet.ts', { 'server-only': {}, xlsx: XLSX });
 
 // The module runs in its own vm realm, so compare plain values, not identities.
 const plain = (value) => JSON.parse(JSON.stringify(value));
@@ -41,4 +42,20 @@ test('the shipped sample workbooks read back with their real headers', () => {
 
 test('toCsv quotes only what needs quoting', () => {
   assert.equal(sheet.toCsv([['id', 'name'], [1, 'a,b'], [2, 'q"x']]), 'id,name\n1,"a,b"\n2,"q""x"');
+});
+
+
+test('binary XLS preserves headers, Unicode and formatted account numbers', async () => {
+  const bytes = readFileSync('tests/fixtures/legacy-import.xls');
+  const rows = sheet.parseXls(bytes);
+  assert.deepEqual(plain(rows[0]), ['name', 'description', 'account_no', 'amount']);
+  assert.deepEqual(plain(rows[1]), ['Caf\u00e9', 'Legacy workbook', '00123', '12.50']);
+  assert.equal(sheet.rowsToRecords(rows)[0].account_no, '00123');
+  const file = new File([bytes], 'import.XLS');
+  assert.deepEqual(plain(await sheet.readSpreadsheet(file)), plain(rows));
+});
+
+test('binary XLS rejects renamed text and truncated workbooks', () => {
+  assert.throws(() => sheet.parseXls(Buffer.from('name,description\nhello,world')), /not a readable binary Excel/);
+  assert.throws(() => sheet.parseXls(Buffer.from('d0cf11e0a1b11ae1', 'hex')), /damaged|encrypted/);
 });
