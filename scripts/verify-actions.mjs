@@ -9,7 +9,8 @@
 //
 // It WRITES. Point it at a scratch database, never at production.
 
-import { readFileSync } from 'node:fs';
+import fs, { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { createRequire } from 'node:module';
 import assert from 'node:assert/strict';
 import { SignJWT } from 'jose';
@@ -66,6 +67,31 @@ const connection = await mysql.createConnection({
   password: process.env.DB_PASSWORD ?? '',
   database: process.env.DB_DATABASE ?? 'software_erp',
 });
+
+/** The same session, in a chosen locale - for the translation check. */
+async function cookieFor(locale) {
+  const [[user]] = await connection.query(
+    `select u.id, u.role_id, r.type from users u
+       left join roles r on r.id = u.role_id
+      order by u.role_id asc limit 1`,
+  );
+  const [[showroom]] = await connection.query('select id from show_rooms limit 1');
+
+  const token = await new SignJWT({
+    uid: user.id,
+    roleId: user.role_id,
+    roleType: user.type ?? 'system_user',
+    showroomId: showroom?.id ?? 1,
+    staffId: null,
+    locale,
+  })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('2h')
+    .sign(new TextEncoder().encode(secret));
+
+  return `${cookieName}=${token}`;
+}
 
 async function sessionFor(roleId) {
   const [[user]] = await connection.query(
@@ -921,6 +947,47 @@ await scenario('holiday setup: a year can be added and deleted', async () => {
     undefined,
     'deleting the year removed it',
   );
+});
+
+await scenario('localization: a saved phrase reaches the interface', async () => {
+  const save = action('saveLanguagePhrases');
+
+  // Amharic is active in this database and has no pack on disk, so it exercises
+  // the path a translator actually takes: a language with nothing written yet.
+  const language = await one("select id, code from languages where code = 'am'");
+  if (!language) return;
+
+  const folder = path.join(process.cwd(), 'lang', language.code);
+  const file = path.join(folder, 'common.json');
+  const existed = fs.existsSync(file);
+  const before = existed ? fs.readFileSync(file, 'utf8') : null;
+
+  const phrase = `Verify ${stamp}`;
+
+  try {
+    const response = await submit(save, {
+      id: String(language.id),
+      translatable_file_name: 'common',
+      'key[Dashboard]': phrase,
+    });
+    assert.ok(response.status < 400, `save returned ${response.status}`);
+
+    assert.ok(fs.existsSync(file), 'the locale group file was written');
+    const written = JSON.parse(fs.readFileSync(file, 'utf8'));
+    assert.equal(written.Dashboard, phrase, 'the phrase was stored under its key');
+
+    // And the page serves it - the half that was missing before, when the
+    // editor wrote files nothing ever read.
+    const page = await fetch(`${base}/home`, {
+      headers: { cookie: await cookieFor(language.code) },
+      redirect: 'manual',
+    });
+    const html = await page.text();
+    assert.ok(html.includes(phrase), 'the saved phrase renders in the sidebar');
+  } finally {
+    if (before === null) fs.rmSync(folder, { recursive: true, force: true });
+    else fs.writeFileSync(file, before, 'utf8');
+  }
 });
 
 const failed = results.filter((r) => !r.ok);
