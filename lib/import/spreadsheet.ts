@@ -4,16 +4,16 @@
 // The PHP stack used `Importer::make('Excel')`, which accepted .csv, .xls and
 // .xlsx and handed the controller a collection of rows: the first row holds the
 // column names, every later row a record. This module produces the same shape
-// from the uploaded file without pulling in a spreadsheet dependency:
+// from the uploaded file:
 //
 //   * .csv is parsed here (quoted fields, escaped quotes, CRLF)
 //   * .xlsx is a zip of XML parts, unpacked with zlib and read directly
-//   * .xls (the old binary BIFF format) is not supported and is reported as
-//     such rather than being silently dropped.
+//   * .xls (binary BIFF) is read by the vendored SheetJS parser.
 // ---------------------------------------------------------------------------
 
 import 'server-only';
 import { inflateRawSync } from 'node:zlib';
+import { read, utils } from 'xlsx';
 
 export type SheetRows = string[][];
 
@@ -223,6 +223,21 @@ export function parseXlsx(buffer: Buffer): SheetRows {
   return parseSheet(files.get(sheetName)!.toString('utf8'), strings);
 }
 
+/** Binary Excel support, including BIFF8 compound documents and older BIFF streams. */
+export function parseXls(buffer: Buffer): SheetRows {
+  const compound = buffer.length >= 8 && buffer.subarray(0, 8).equals(Buffer.from('d0cf11e0a1b11ae1', 'hex'));
+  const biff = buffer.length >= 4 && [0x0009, 0x0209, 0x0409, 0x0809].includes(buffer.readUInt16LE(0));
+  if (!compound && !biff) throw new UnsupportedSpreadsheetError('The file is not a readable binary Excel workbook.');
+  try {
+    const workbook = read(buffer, { type: 'buffer', cellDates: false, cellFormula: false });
+    const first = workbook.SheetNames[0];
+    if (!first) throw new Error('No worksheet');
+    return utils.sheet_to_json<string[]>(workbook.Sheets[first], { header: 1, defval: '', raw: false, blankrows: false });
+  } catch {
+    throw new UnsupportedSpreadsheetError('The Excel workbook is damaged, encrypted, or has no readable worksheet.');
+  }
+}
+
 /**
  * Reads an uploaded file into rows. Returns an empty array when no file was
  * chosen, matching `if (!empty($data['file']))` in the repositories.
@@ -234,11 +249,7 @@ export async function readSpreadsheet(file: File | null): Promise<SheetRows> {
   const buffer = Buffer.from(await file.arrayBuffer());
 
   if (name.endsWith('.xlsx')) return parseXlsx(buffer);
-  if (name.endsWith('.xls')) {
-    throw new UnsupportedSpreadsheetError(
-      'Binary .xls files are not supported - save the sheet as .xlsx or .csv and upload again.',
-    );
-  }
+  if (name.endsWith('.xls')) return parseXls(buffer);
   return parseCsv(buffer.toString('utf8'));
 }
 

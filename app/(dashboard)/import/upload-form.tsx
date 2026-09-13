@@ -53,7 +53,7 @@ export function CsvUploadForm({
           type="file"
           accept=".xlsx, .xls, .csv"
           required
-          hint="CSV or XLSX, up to 2 MB. Binary .xls files must be saved as .xlsx first."
+          hint="CSV, XLS or XLSX, up to 2 MB."
         />
 
         <div>
