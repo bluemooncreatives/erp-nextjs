@@ -305,6 +305,52 @@ repays a loan and asserts the loan comes back `paid = 1`.
 With this, the payroll module is at full logic parity: generation, payment, the ledger
 postings on both sides, and the loan linkage between them.
 
+## Completed in this pass (real PDF files)
+
+The nine PDF-named routes - `sale.pdf`, `sale.challan_pdf`, `purchase.order.pdf`,
+`quotation.order.pdf`, `payroll.pdf`, `attendance_report_print`, `staffs.report_print`,
+`leadger_report.print_view` and `leave.application.download` - rendered the same
+print-styled HTML page the on-screen "Print" button opens, relying on the browser's own
+"Save as PDF" to produce a file. That is a reasonable stand-in for a person looking at
+the screen, but it is not what those routes meant in Laravel: a route that hands back an
+actual `.pdf` file, fit for an API client, an email attachment, or a script pulling one
+from disk. They now do, via `pdfmake` - a small, pure-JS layout engine with no headless
+browser or native binary dependency, chosen over a Puppeteer/Chromium round trip.
+
+Each is a `route.ts` where a `page.tsx` was (a page and a route handler cannot share one
+URL), rebuilding the same data the on-screen print view already fetched into a
+`pdfmake` document instead of JSX. The four invoice-shaped documents (sale, challan,
+purchase order, quotation) share one builder, `lib/pdf/invoice.ts`, because their source
+pages all rendered the same `PrintHeader` / `PrintMeta` / `PrintLines` / `PrintTotals` /
+`PrintFooter` shape already; the other five (payslip, staff statement, ledger, leave
+application, and the landscape attendance grid) build their own layouts in
+`lib/pdf/build.ts` and their route files, since each PHP view had its own.
+
+Two things a `route.ts` does not inherit from `page.tsx`: the print route group's shared
+`layout.tsx` (which is what enforced `requireUser()` on every one of these screens) does
+not wrap a route handler at all, so each now calls it directly rather than relying on the
+layout that used to. And `pdfmake` ships no fonts for server-side use - its bundled `vfs`
+is browser-only - so the four Roboto weights it does bundle are vendored into
+`lib/pdf/fonts/` rather than read out of `node_modules`, which is not guaranteed to
+survive a production prune. There is no true Bold face in that set; Medium stands in, per
+pdfmake's own recommendation.
+
+One integration bug cost the most time here and is worth recording: pdfmake's
+`resolveUrls()` step walks every registered font looking for a remote URL to fetch
+*before* a font is ever read from disk, and it treats **any** `typeof value === 'object'`
+font entry as a URL descriptor - which a Buffer also satisfies. Registering fonts as
+Buffers therefore does not fail to load the font; it fails later, deep in URL resolution,
+with an error that names an unrelated font style ("Font 'Roboto' in style 'bold' is not
+defined") and gives no reason to suspect the font data itself. Fonts are registered as
+plain file paths instead, with a `setLocalAccessPolicy()` restricting reads to
+`lib/pdf/fonts/`, and `setUrlAccessPolicy(() => false)` refusing the network fetch this
+port never wants a PDF-generation request making.
+
+All nine were smoke-tested against the running app with real fixture ids: each returns
+`200`, `Content-Type: application/pdf`, and bytes starting `%PDF-`, and `pdftotext`
+against five of them confirms the real company, invoice and ledger data the on-screen
+print views show is what landed in the file.
+
 ## Logic parity
 
 `npm run verify:routes` answers "does a URL resolve". It says nothing about the
@@ -343,10 +389,6 @@ genuinely missing, both now ported (see below).
   `HomeController@fileDownload` let a crafted path walk out of `public/`, and
   `LeaveController@departmentWiseSearch` calls a repository method that does not exist,
   so submitting that form 500s in Laravel.
-- **PDF routes render a print sheet.** dompdf has no equivalent here, so `sale.pdf`,
-  `purchase.order.pdf`, `quotation.order.pdf`, `payroll.pdf`, `attendance_report_print`,
-  `staffs.report_print`, `leadger_report.print_view` and
-  `leave.application.download` open the browser's print dialog on the same document.
 - **`verify:browser` does not click through every interactive screen** - hundreds of
   pages, most of them plain forms already covered by `verify:actions`' no-JS post. What
   it misses is exercised by the HTTP sweep, which loads a screen but does not operate it.
