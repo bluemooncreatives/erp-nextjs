@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/components/ui/utils";
+import { Phrase } from '@/context/TranslationContext';
 
 /** One confirm dialog for every destructive action — the confirm button says
  *  what will happen ("Delete agent"), never "OK". `confirmPhrase` gates the irreversible cases with type-to-confirm. */
@@ -64,7 +65,7 @@ export function ConfirmDialog({
         {confirmPhrase ? (
           <div className="space-y-2">
             <Label htmlFor="confirm-phrase">
-              Type <span className="font-mono font-medium text-foreground">{confirmPhrase}</span> to
+              <Phrase>Type</Phrase> <span className="font-mono font-medium text-foreground">{confirmPhrase}</span> to
               confirm
             </Label>
             <Input

@@ -12,6 +12,7 @@ import { ReportSummary } from '@/components/erp/report-summary';
 import { Files, Wallet, CircleCheck, Hourglass } from 'lucide-react';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Journal Vouchers' };
 
@@ -100,7 +101,7 @@ export default async function JournalVouchersPage({
                   {voucher.isApprove === 1 ? 'Approved':'Pending'}
                 </Badge>
               </Td>
-              <Td>{canEdit ? <Link className="text-primary" href={route('journal.edit', { id: voucher.id })}>Edit</Link> : '-'}</Td>
+              <Td>{canEdit ? <Link className="text-primary" href={route('journal.edit', { id: voucher.id })}><Phrase>Edit</Phrase></Link> : '-'}</Td>
             </Tr>
           ))}
         </DataTable>

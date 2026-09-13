@@ -9,6 +9,7 @@ import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
 import { setLeaveApprovalAction } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export async function LeaveApprovalList({
   status,
@@ -87,7 +88,7 @@ export async function LeaveApprovalList({
                   <form action={setLeaveApprovalAction}>
                     <input type="hidden" name="id" value={row.leave.id} />
                     <input type="hidden" name="status" value={LeaveStatus.Approved} />
-                    <ActionButton variant="primary">Approve</ActionButton>
+                    <ActionButton variant="primary"><Phrase>Approve</Phrase></ActionButton>
                   </form>
                   <form action={setLeaveApprovalAction}>
                     <input type="hidden" name="id" value={row.leave.id} />

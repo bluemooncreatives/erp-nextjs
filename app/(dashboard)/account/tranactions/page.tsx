@@ -13,6 +13,7 @@ import { ArrowDownLeft, ArrowUpRight, Scale, ListOrdered } from 'lucide-react';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
 import { DateRangeFilter } from '../date-range-filter';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Transactions' };
 
@@ -105,7 +106,7 @@ export default async function TransactionsPage({
                 </span>
                 {row.isApprove !== 1 ? (
                   <Badge size="sm" color="warning">
-                    Pending
+                    <Phrase>Pending</Phrase>
                   </Badge>
                 ) : null}
               </Td>

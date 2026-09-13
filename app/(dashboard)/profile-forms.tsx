@@ -6,6 +6,7 @@ import { useActionState } from 'react';
 import { FormAlert, FormInput, FormActions } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import { changePassword, updateProfile, type ProfileFormState } from './profile-actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const EMPTY: ProfileFormState = {};
 
@@ -39,7 +40,7 @@ export function ChangePasswordForm() {
       />
 
       <FormActions>
-        <SubmitButton>Save</SubmitButton>
+        <SubmitButton><Phrase>Save</Phrase></SubmitButton>
       </FormActions>
     </form>
   );
@@ -93,7 +94,7 @@ export function EditProfileForm({
         />
         <div>
           <label className="mb-1.5 block text-sm font-medium text-foreground">
-            Avatar
+            <Phrase>Avatar</Phrase>
           </label>
           <input
             type="file"
@@ -168,7 +169,7 @@ export function EditProfileForm({
       </div>
 
       <FormActions>
-        <SubmitButton>Save</SubmitButton>
+        <SubmitButton><Phrase>Save</Phrase></SubmitButton>
       </FormActions>
     </form>
   );

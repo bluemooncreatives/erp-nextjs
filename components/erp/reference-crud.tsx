@@ -17,6 +17,7 @@ import { DataTable, Pagination, SearchBar, Td, Tr, StatusBadge } from './table';
 import { FormAlert, FormInput, FormSelect, FormTextarea } from './fields';
 import { SubmitButton, ActionButton } from './submit-button';
 import { Button } from '@/components/ui/button';
+import { Phrase } from '@/context/TranslationContext';
 
 export type ReferenceRow = {
   id: number;
@@ -231,7 +232,7 @@ export function ReferenceCrud({
                 <SubmitButton>{editing ? 'Update' : 'Save'}</SubmitButton>
                 {editing ? (
                   <Button type="button" variant="outline" onClick={() => setEditing(null)}>
-                    Cancel
+                    <Phrase>Cancel</Phrase>
                   </Button>
                 ) : null}
               </div>
@@ -285,7 +286,7 @@ export function ReferenceCrud({
                       {detailRoute ? (
                         <Button asChild variant="ghost" size="xs">
                           <Link href={detailRoute.replace('{id}', String(row.id))}>
-                            View
+                            <Phrase>View</Phrase>
                           </Link>
                         </Button>
                       ) : null}
@@ -297,7 +298,7 @@ export function ReferenceCrud({
                           className="text-primary hover:bg-primary/10 hover:text-primary"
                           onClick={() => setEditing(row)}
                         >
-                          Edit
+                          <Phrase>Edit</Phrase>
                         </Button>
                       ) : null}
                       {canDelete ? (
@@ -324,7 +325,7 @@ export function ReferenceCrud({
 
         {breadcrumbLabel ? (
           <p className="text-muted-foreground mt-3 text-xs">
-            <Link href="/home">Home</Link> / {breadcrumbLabel}
+            <Link href="/home"><Phrase>Home</Phrase></Link> / {breadcrumbLabel}
           </p>
         ) : null}
       </div>
@@ -333,5 +334,5 @@ export function ReferenceCrud({
 }
 
 function DeleteButton({ name, singular }: { name: string; singular: string }) {
-  return <ActionButton confirm={`Delete ${singular.toLowerCase()} "${name}"?`}>Delete</ActionButton>;
+  return <ActionButton confirm={`Delete ${singular.toLowerCase()} "${name}"?`}><Phrase>Delete</Phrase></ActionButton>;
 }

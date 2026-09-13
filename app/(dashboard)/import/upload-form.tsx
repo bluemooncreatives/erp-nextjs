@@ -10,6 +10,7 @@ import { Card } from '@/components/erp/page';
 import { FormAlert, FormInput } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import type { ImportFormState } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: ImportFormState = {};
 
@@ -70,7 +71,7 @@ export function CsvUploadForm({
             href={backHref}
             className="rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted"
           >
-            Cancel
+            <Phrase>Cancel</Phrase>
           </Link>
         </div>
       </form>

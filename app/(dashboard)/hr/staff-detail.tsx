@@ -25,6 +25,7 @@ import { Tabs } from '@/components/erp/tabs';
 import { ActionButton } from '@/components/erp/submit-button';
 import { removeStaffDocument } from './actions';
 import { StaffDocumentUpload } from './staffs/[id]/document-upload';
+import { Phrase } from '@/context/TranslationContext';
 
 export async function StaffDetail({ id }: { id: number }) {
   const found = await findStaff(id);
@@ -132,13 +133,13 @@ export async function StaffDetail({ id }: { id: number }) {
                       rel="noreferrer"
                       className="rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
                     >
-                      View
+                      <Phrase>View</Phrase>
                     </a>
                   ) : null}
                   {canEdit ? (
                     <form action={removeStaffDocument}>
                       <input type="hidden" name="id" value={doc.id} />
-                      <ActionButton confirm="Delete this document?">Delete</ActionButton>
+                      <ActionButton confirm="Delete this document?"><Phrase>Delete</Phrase></ActionButton>
                     </form>
                   ) : null}
                 </div>
@@ -278,7 +279,7 @@ export async function StaffDetail({ id }: { id: number }) {
               href={route('staffs.edit', { id: staff.id })}
               
             >
-              Edit
+              <Phrase>Edit</Phrase>
             </LinkButton>
           ) : null
         }

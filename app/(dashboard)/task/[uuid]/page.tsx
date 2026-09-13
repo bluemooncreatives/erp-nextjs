@@ -23,6 +23,7 @@ import {
   removeTag,
   updateTaskName,
 } from '../../project/actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Task' };
 
@@ -147,7 +148,7 @@ export default async function TaskShowPage({
                 placeholder="Add a sub-task"
                 className="h-10 flex-1 rounded-lg border border-border bg-transparent px-3 text-sm"
               />
-              <SubmitButton size="sm">Add</SubmitButton>
+              <SubmitButton size="sm"><Phrase>Add</Phrase></SubmitButton>
             </form>
           </Card>
 
@@ -198,7 +199,7 @@ export default async function TaskShowPage({
                       <form action={destroyTaskComment}>
                         <input type="hidden" name="comment_id" value={row.comment.id} />
                         <input type="hidden" name="uuid" value={uuid} />
-                        <ActionButton confirm="Delete this comment?">Delete</ActionButton>
+                        <ActionButton confirm="Delete this comment?"><Phrase>Delete</Phrase></ActionButton>
                       </form>
                     </div>
                   </div>
@@ -254,7 +255,7 @@ export default async function TaskShowPage({
               placeholder="Add a tag"
               className="h-10 flex-1 rounded-lg border border-border bg-transparent px-3 text-sm"
             />
-            <SubmitButton size="sm">Add</SubmitButton>
+            <SubmitButton size="sm"><Phrase>Add</Phrase></SubmitButton>
           </form>
         </Card>
       </div>

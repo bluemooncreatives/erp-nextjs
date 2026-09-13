@@ -22,6 +22,7 @@ import { SubmitButton } from '@/components/erp/submit-button';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import type { AccountFormState } from './actions';
 import { SelectControl } from '@/components/erp/select-control';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: AccountFormState = {};
 
@@ -206,7 +207,7 @@ export function VoucherForm({
                     }
                     className="rounded-lg px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10"
                   >
-                    Remove
+                    <Phrase>Remove</Phrase>
                   </button>
                 ) : null}
               </Td>
@@ -247,7 +248,7 @@ export function VoucherForm({
           href={cancelHref}
           variant="outline"
         >
-          Cancel
+          <Phrase>Cancel</Phrase>
         </LinkButton>
         <SubmitButton disabled={total <= 0}>{submitLabel}</SubmitButton>
       </div>

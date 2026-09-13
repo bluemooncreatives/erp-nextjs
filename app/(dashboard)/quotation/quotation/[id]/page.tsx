@@ -10,6 +10,7 @@ import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card, DetailList } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Quotation' };
 
@@ -49,13 +50,13 @@ export default async function QuotationDetailPage({
               href={route('quotation.order.print_view', { id: quotation.id })}
               variant="outline"
             >
-              Print
+              <Phrase>Print</Phrase>
             </LinkButton>
             <LinkButton
               href={route('quotation.order.pdf', { id: quotation.id })}
               variant="outline"
             >
-              Export
+              <Phrase>Export</Phrase>
             </LinkButton>
             {/* Opens the sale form pre-filled from this quotation, as
                 `QuotationController@convertToSale` did. */}
@@ -89,7 +90,7 @@ export default async function QuotationDetailPage({
                       </Badge>
                     ) : (
                       <Badge size="sm" color="warning">
-                        Open
+                        <Phrase>Open</Phrase>
                       </Badge>
                     ),
                 },

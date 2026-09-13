@@ -12,6 +12,7 @@ import { Wrench, Tags, Coins, ListFilter } from 'lucide-react';
 import { DataTable, Pagination, SearchBar, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { deleteProductAction } from '../../product-actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Service' };
 
@@ -105,14 +106,14 @@ export default async function ServiceListPage({
                       href={route('add_product.edit', { id: row.productId })}
                       
                     >
-                      Edit
+                      <Phrase>Edit</Phrase>
                     </LinkButton>
                   ) : null}
                   {canDelete && row.productId ? (
                     <form action={deleteProductAction}>
                       <input type="hidden" name="id" value={row.productId} />
                       <ActionButton confirm={`Delete "${row.productName}"?`}>
-                        Delete
+                        <Phrase>Delete</Phrase>
                       </ActionButton>
                     </form>
                   ) : null}

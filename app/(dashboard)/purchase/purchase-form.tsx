@@ -19,6 +19,7 @@ import { SubmitButton } from '@/components/erp/submit-button';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ROUTES } from '@/lib/routes';
 import type { PurchaseFormState } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: PurchaseFormState = {};
 
@@ -326,7 +327,7 @@ export function PurchaseForm({
                   }
                   className="rounded-lg px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10"
                 >
-                  Remove
+                  <Phrase>Remove</Phrase>
                 </button>
               </Td>
             </Tr>
@@ -453,7 +454,7 @@ export function PurchaseForm({
           href={ROUTES['purchase_order.index']}
           variant="outline"
         >
-          Cancel
+          <Phrase>Cancel</Phrase>
         </LinkButton>
         <SubmitButton disabled={lines.length === 0}>
           {submitLabel ?? 'Save Purchase Order'}

@@ -7,6 +7,7 @@ import { useActionState, useState } from 'react';
 import { FormInput } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import { receiveSaleOrder, type ReceiveOrderState } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: ReceiveOrderState = {};
 
@@ -21,7 +22,7 @@ export function ReceiveOrderForm({ saleId }: { saleId: number }) {
         onClick={() => setOpen(true)}
         className="rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted"
       >
-        Receive
+        <Phrase>Receive</Phrase>
       </button>
     );
   }
@@ -44,13 +45,13 @@ export function ReceiveOrderForm({ saleId }: { saleId: number }) {
         wrapperClassName="w-44"
         error={state.fieldErrors?.delivery_date}
       />
-      <SubmitButton>Save</SubmitButton>
+      <SubmitButton><Phrase>Save</Phrase></SubmitButton>
       <button
         type="button"
         onClick={() => setOpen(false)}
         className="mb-0.5 rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted"
       >
-        Cancel
+        <Phrase>Cancel</Phrase>
       </button>
     </form>
   );

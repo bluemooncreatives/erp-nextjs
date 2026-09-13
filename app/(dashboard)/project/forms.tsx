@@ -23,6 +23,7 @@ import {
   storeWorkspace,
   type ProjectFormState,
 } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const EMPTY: ProjectFormState = {};
 
@@ -133,7 +134,7 @@ export function ProjectSettingsForm({
       />
 
       <FormActions>
-        <SubmitButton>Save</SubmitButton>
+        <SubmitButton><Phrase>Save</Phrase></SubmitButton>
       </FormActions>
     </form>
   );
@@ -154,7 +155,7 @@ export function ShareProjectForm({ projectId }: { projectId: number }) {
         error={state.fieldErrors?.members}
       />
       <FormActions>
-        <SubmitButton size="sm">Share</SubmitButton>
+        <SubmitButton size="sm"><Phrase>Share</Phrase></SubmitButton>
       </FormActions>
     </form>
   );
@@ -209,7 +210,7 @@ export function TeamSettingsForm({
         defaultValue={team.description}
       />
       <FormActions>
-        <SubmitButton size="sm">Save</SubmitButton>
+        <SubmitButton size="sm"><Phrase>Save</Phrase></SubmitButton>
       </FormActions>
     </form>
   );

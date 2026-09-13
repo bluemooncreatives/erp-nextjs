@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button';
 import { LinkButton } from '@/components/common/link-button';
 import { Banknote, FileText, Filter, Wallet, X } from 'lucide-react';
 import { ReportSummary } from '@/components/erp/report-summary';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Due Invoice List' };
 
@@ -87,7 +88,7 @@ export default async function DueInvoiceListPage({
           {sp.customer ? (
             <LinkButton href={action} variant="ghost">
               <X />
-              Clear
+              <Phrase>Clear</Phrase>
             </LinkButton>
           ) : null}
         </form>

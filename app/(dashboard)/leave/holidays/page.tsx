@@ -26,6 +26,7 @@ import { ActionButton } from '@/components/erp/submit-button';
 import { HolidayYearForm, type HolidayRow } from './holiday-year-form';
 import { AddYearForm } from './add-year-form';
 import { removeHolidayYear } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Holiday Setup' };
 
@@ -121,7 +122,7 @@ export default async function HolidaySetupPage({
                         href={`${SETUP}?year=${year}&mode=view`}
                         className="text-muted-foreground hover:text-primary text-xs font-medium"
                       >
-                        View
+                        <Phrase>View</Phrase>
                       </Link>
                     ) : null}
                     {canDelete ? (

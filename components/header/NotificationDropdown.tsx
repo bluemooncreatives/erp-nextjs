@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { markAllRead, markRead } from '@/app/(dashboard)/notification-actions';
 import { ROUTES } from '@/lib/routes';
+import { Phrase } from '@/context/TranslationContext';
 
 export type HeaderNotification = {
   id: number;
@@ -57,7 +58,7 @@ export default function NotificationDropdown({
 
       <DropdownMenuContent align="end" className="w-90 p-0">
         <div className="flex items-center justify-between border-b px-4 py-3">
-          <span className="text-sm font-medium">Notifications</span>
+          <span className="text-sm font-medium"><Phrase>Notifications</Phrase></span>
           {unreadCount > 0 ? (
             <span className="text-muted-foreground text-xs">{unreadCount} unread</span>
           ) : null}

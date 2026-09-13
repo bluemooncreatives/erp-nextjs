@@ -4,7 +4,7 @@ import { SettingsSection } from '@/components/common/settings-section';
 import type { Metadata } from 'next';
 import { authorize, can } from '@/lib/auth/permissions';
 import { generalSetting } from '@/lib/settings';
-import { assetUrl } from '@/lib/paths';
+import { uploadedAssetUrl } from '@/lib/paths';
 import { envValue } from '@/lib/env-file';
 import {
   activationSettings,
@@ -184,8 +184,8 @@ export async function SettingsScreen({ initialTab }: { initialTab?: string } = {
               preloader: setting.preloader ?? 'infix',
               paymentGateway: String(setting.paymentGateway ?? 1),
             }}
-            logoUrl={assetUrl(setting.logo) ?? '/images/logo/logo.svg'}
-            faviconUrl={assetUrl(setting.favicon) ?? '/images/logo/logo-icon.svg'}
+            logoUrl={uploadedAssetUrl(setting.logo) ?? '/images/logo/logo.svg'}
+            faviconUrl={uploadedAssetUrl(setting.favicon) ?? '/images/logo/logo-icon.svg'}
             languages={languageRows.map((l) => ({ value: l.id, label: l.name }))}
             dateFormats={dateFormatRows.map((d) => ({
               value: d.id,

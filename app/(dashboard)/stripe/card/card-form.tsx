@@ -8,6 +8,7 @@ import { useActionState, useEffect, useRef, useState } from 'react';
 import { Card } from '@/components/erp/page';
 import { FormAlert } from '@/components/erp/fields';
 import { payWithStripe, type StripeFormState } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: StripeFormState = {};
 
@@ -101,7 +102,7 @@ export function StripeCardForm({
             htmlFor="card-holder-name"
             className="mb-1.5 block text-sm font-medium text-foreground"
           >
-            Card Holder Name
+            <Phrase>Card Holder Name</Phrase>
           </label>
           <input
             id="card-holder-name"

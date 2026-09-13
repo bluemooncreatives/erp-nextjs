@@ -17,6 +17,7 @@ import { approveSaleAction } from '../../actions';
 import { PaymentPanel } from './payment-panel';
 import { ReturnPanel } from './return-panel';
 import { ShippingPanel } from './shipping-panel';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Invoice' };
 
@@ -65,19 +66,19 @@ export default async function SaleDetailPage({
               href={route('sale.print_view', { id: sale.id })}
               variant="outline"
             >
-              Print
+              <Phrase>Print</Phrase>
             </LinkButton>
             <LinkButton
               href={route('sale.pdf', { id: sale.id })}
               variant="outline"
             >
-              Pdf
+              <Phrase>Pdf</Phrase>
             </LinkButton>
             <LinkButton
               href={route('sale.challan_pdf', { id: sale.id })}
               variant="outline"
             >
-              Challan
+              <Phrase>Challan</Phrase>
             </LinkButton>
             {sale.isApproved !== 1 && canApprove ? (
               <form action={approveSaleAction}>
@@ -87,7 +88,7 @@ export default async function SaleDetailPage({
                   className="px-4 py-2.5 text-sm"
                   confirm="Approve this invoice? Stock will be deducted and the ledger posted."
                 >
-                  Approve
+                  <Phrase>Approve</Phrase>
                 </ActionButton>
               </form>
             ) : null}
@@ -113,11 +114,11 @@ export default async function SaleDetailPage({
                   value:
                     sale.isApproved === 1 ? (
                       <Badge size="sm" color="success">
-                        Approved
+                        <Phrase>Approved</Phrase>
                       </Badge>
                     ) : (
                       <Badge size="sm" color="warning">
-                        Pending
+                        <Phrase>Pending</Phrase>
                       </Badge>
                     ),
                 },

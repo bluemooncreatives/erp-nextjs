@@ -16,6 +16,7 @@ import { Badge } from '@/components/erp/badge';
 import { ReportSummary } from '@/components/erp/report-summary';
 import { CalendarRange, DoorClosed, DoorOpen } from 'lucide-react';
 import { closeStatement } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Opening Balance' };
 
@@ -97,7 +98,7 @@ export default async function OpeningBalanceIndexPage() {
                       href={route('openning_balance.edit', { id: row.period.id })}
                       className="text-xs font-medium text-primary hover:text-primary"
                     >
-                      Edit
+                      <Phrase>Edit</Phrase>
                     </Link>
                   ) : null}
                   {canClose && row.period.isClosed !== 1 ? (

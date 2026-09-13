@@ -35,6 +35,7 @@ import {
   subtractContactBalance,
 } from './balance-actions';
 import type { ContactsRow } from '@/lib/db/schema';
+import { Phrase } from '@/context/TranslationContext';
 
 function money(symbol: string, value: number | string | null | undefined) {
   return `${symbol} ${numberFormat(value)}`;
@@ -244,7 +245,7 @@ export async function ContactDetail({
               href={route('add_contact.edit', { id: contact.id })}
               
             >
-              Edit
+              <Phrase>Edit</Phrase>
             </LinkButton>
           ) : null
         }
@@ -308,7 +309,7 @@ export async function ContactDetail({
                 }
                 
               >
-                Products
+                <Phrase>Products</Phrase>
               </LinkButton>
             </Card>
 

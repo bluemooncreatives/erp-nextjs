@@ -13,6 +13,7 @@ import { removeHoliday } from '../../leave/actions';
 import { ReportSummary } from '@/components/erp/report-summary';
 import { CalendarDays, CalendarRange, Sun } from 'lucide-react';
 import { HolidayForm } from './holiday-form';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Holiday Setup' };
 
@@ -108,7 +109,7 @@ export default async function HolidaysPage({
                       <form action={removeHoliday}>
                         <input type="hidden" name="id" value={row.id} />
                         <ActionButton confirm={`Delete holiday "${row.name}"?`}>
-                          Delete
+                          <Phrase>Delete</Phrase>
                         </ActionButton>
                       </form>
                     ) : (

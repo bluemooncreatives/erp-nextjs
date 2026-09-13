@@ -8,6 +8,7 @@
 import { useState } from 'react';
 import { FormSelect } from '@/components/erp/fields';
 import { DataTable, Td, Tr } from '@/components/erp/table';
+import { Phrase } from '@/context/TranslationContext';
 
 export type PickableProduct = {
   id: number;
@@ -163,7 +164,7 @@ export function LinePicker({
                 }
                 className="rounded-lg px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10"
               >
-                Remove
+                <Phrase>Remove</Phrase>
               </button>
             </Td>
           </Tr>

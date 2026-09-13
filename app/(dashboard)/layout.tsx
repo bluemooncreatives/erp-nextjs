@@ -12,7 +12,7 @@ import { db } from '@/lib/db/client';
 import { languages, notifications, showRooms } from '@/lib/db/schema';
 import { requireUser, userCan, userCanAny } from '@/lib/auth/permissions';
 import { generalSetting } from '@/lib/settings';
-import { assetUrl, avatarUrl } from '@/lib/paths';
+import { avatarUrl , uploadedAssetUrl } from '@/lib/paths';
 import { getSession } from '@/lib/auth/session';
 import { ROUTES } from '@/lib/routes';
 import {
@@ -109,8 +109,8 @@ export default async function DashboardLayout({
       <AdminShell
       appearance={appearance}
       nav={nav}
-      logo={assetUrl(setting.logo)}
-      logoDark={assetUrl(setting.logo)}
+      logo={uploadedAssetUrl(setting.logo)}
+      logoDark={uploadedAssetUrl(setting.logo)}
       siteTitle={setting.siteTitle ?? setting.companyName ?? 'Infix Biz'}
       user={{
         name: user.name,

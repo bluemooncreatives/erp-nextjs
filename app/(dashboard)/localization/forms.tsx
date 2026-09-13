@@ -7,6 +7,7 @@ import { useActionState, useState } from 'react';
 import { FormAlert, FormInput, FormActions } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import { saveLanguage, type LanguageFormState } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const EMPTY: LanguageFormState = {};
 
@@ -49,7 +50,7 @@ export function LanguageForm({
       />
 
       <FormActions>
-        <SubmitButton>Save</SubmitButton>
+        <SubmitButton><Phrase>Save</Phrase></SubmitButton>
       </FormActions>
     </form>
   );
@@ -114,7 +115,7 @@ export function TranslateForm({
       </div>
 
       <FormActions>
-        <SubmitButton>Save</SubmitButton>
+        <SubmitButton><Phrase>Save</Phrase></SubmitButton>
       </FormActions>
     </form>
   );

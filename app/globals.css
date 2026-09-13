@@ -1530,3 +1530,28 @@ span.flatpickr-weekday,
   .erp-responsive-table tbody td:first-child { font-weight: 500; }
   .erp-responsive-table tbody td[colspan] { grid-column: 1 / -1; }
 }
+
+/* ---------------------------------------------------------------------------
+   Right-to-left
+   ---------------------------------------------------------------------------
+   Layout direction is handled by logical properties throughout, so this is
+   only about the text runs inside a right-to-left page.
+
+   `plaintext` resolves each element's direction from its own first strong
+   character rather than inheriting the page's. Two things need that:
+
+   - A phrase nobody has translated yet is still English. Inherited RTL moves
+     its full stop and any leading number to the wrong end, so "46 approved
+     sales ... branch." renders as ".approved sales ... branch 46". With
+     `plaintext` it reads as written, and a genuinely Arabic phrase still reads
+     right-to-left.
+   - A signed amount has no strong character at all: "-8,370.00 $" inherits RTL
+     and the minus lands after the number. `plaintext` leaves it in front.
+
+   Alignment is left alone - `text-start` still resolves against the page, so
+   columns stay where a right-to-left reader expects them.
+   --------------------------------------------------------------------------- */
+[dir='rtl'] :is(p, span, td, th, li, dd, dt, label, h1, h2, h3, h4, h5, h6, button, a) {
+  unicode-bidi: plaintext;
+  text-align: inherit;
+}

@@ -18,6 +18,7 @@ import { Card } from '@/components/erp/page';
 import { DataTable, Pagination, SearchBar, StatusBadge, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { deleteContactAction, toggleContactActive } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export async function ContactList({
   filters,
@@ -122,7 +123,7 @@ export async function ContactList({
                   href={route(detailRoute, { id: contact.id })}
                   className="rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted"
                 >
-                  View
+                  <Phrase>View</Phrase>
                 </Link>
                 {/* The customer list hid Edit for the walk-in customer. */}
                 {canEdit &&
@@ -131,14 +132,14 @@ export async function ContactList({
                     href={route('add_contact.edit', { id: contact.id })}
                     
                   >
-                    Edit
+                    <Phrase>Edit</Phrase>
                   </LinkButton>
                 ) : null}
                 {canDelete ? (
                   <form action={deleteContactAction}>
                     <input type="hidden" name="id" value={contact.id} />
                     <ActionButton confirm={`Delete "${contact.name}"?`}>
-                      Delete
+                      <Phrase>Delete</Phrase>
                     </ActionButton>
                   </form>
                 ) : null}

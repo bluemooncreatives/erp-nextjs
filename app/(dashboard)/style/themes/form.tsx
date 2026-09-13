@@ -7,6 +7,7 @@ import { FormAlert, FormInput, FormSelect, FormCheckbox } from '@/components/erp
 import { SubmitButton } from '@/components/erp/submit-button';
 import type { ThemesRow } from '@/lib/db/schema';
 import { saveThemeAction } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export function ThemeForm({ theme, colors }: { theme?: ThemesRow; colors: { id: number; name: string | null; value: string }[] }) {
   const [state, action] = useActionState(saveThemeAction, {});
@@ -30,10 +31,10 @@ export function ThemeForm({ theme, colors }: { theme?: ThemesRow; colors: { id: 
         <div className="grid gap-3 sm:grid-cols-[210px_minmax(0,1fr)]">
           <div className="space-y-1 text-sidebar-foreground">
             <p className="px-3 py-3 text-base font-semibold">ERP</p>
-            <div className="flex items-center gap-3 rounded-md bg-sidebar-accent px-3 py-2 text-sm font-medium text-sidebar-accent-foreground"><LayoutDashboard className="size-4" />Dashboard</div>
-            <div className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"><Users className="size-4" />Contacts</div>
-            <div className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"><Package className="size-4" />Products</div>
-            <div className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"><Settings className="size-4" />Settings</div>
+            <div className="flex items-center gap-3 rounded-md bg-sidebar-accent px-3 py-2 text-sm font-medium text-sidebar-accent-foreground"><LayoutDashboard className="size-4" /><Phrase>Dashboard</Phrase></div>
+            <div className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"><Users className="size-4" /><Phrase>Contacts</Phrase></div>
+            <div className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"><Package className="size-4" /><Phrase>Products</Phrase></div>
+            <div className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"><Settings className="size-4" /><Phrase>Settings</Phrase></div>
           </div>
           <div className="rounded-xl bg-card p-5 text-card-foreground shadow-xs">
             <p className="font-semibold">Your workspace</p>
@@ -47,6 +48,6 @@ export function ThemeForm({ theme, colors }: { theme?: ThemesRow; colors: { id: 
       </div>
     </Card>
     <Card title="Colors"><div className="grid gap-5 md:grid-cols-3">{colors.map((color) => <FormInput key={color.id} label={(color.name ?? '').replaceAll('_', ' ')} name={`color_${color.id}`} type="color" required value={palette[color.id]} onChange={(event) => updateColor(color.id, event.currentTarget.value)} onInput={(event) => updateColor(color.id, event.currentTarget.value)} />)}</div></Card>
-    <div className="flex justify-end gap-4"><Link href="/style/themes">Cancel</Link><SubmitButton>{theme ? 'Update Theme' : 'Create Theme'}</SubmitButton></div>
+    <div className="flex justify-end gap-4"><Link href="/style/themes"><Phrase>Cancel</Phrase></Link><SubmitButton>{theme ? 'Update Theme' : 'Create Theme'}</SubmitButton></div>
   </form>;
 }

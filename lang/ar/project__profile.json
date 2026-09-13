@@ -1,11 +1,11 @@
 {
   "Your Full Name": "Your Full Name",
-  "Role": "Role",
+  "Role": "الدور",
   "Department Or Team": "Department Or Team",
-  "Email": "Email",
+  "Email": "البريد الإلكتروني",
   "About me": "About me",
-  "Current Password": "Current Password",
-  "Password": "Password",
-  "New Password": "New Password",
+  "Current Password": "كلمة المرور الحالية",
+  "Password": "كلمة المرور",
+  "New Password": "كلمة المرور الجديدة",
   "Confirm New Password": "Confirm New Password"
 }

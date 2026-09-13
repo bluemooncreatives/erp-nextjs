@@ -14,6 +14,7 @@ import { Badge } from '@/components/erp/badge';
 import { ReportSummary } from '@/components/erp/report-summary';
 import { Bell, BellRing, CheckCheck } from 'lucide-react';
 import { markSelectedRead, markAllRead } from '../notification-actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Notifications' };
 
@@ -101,7 +102,7 @@ export default async function NotificationListPage() {
           {notifications.some((n) => !n.readAt) ? (
             <div className="px-6 pb-6">
               <FormActions>
-                <SubmitButton size="sm">Mark selected as seen</SubmitButton>
+                <SubmitButton size="sm"><Phrase>Mark selected as seen</Phrase></SubmitButton>
               </FormActions>
             </div>
           ) : null}

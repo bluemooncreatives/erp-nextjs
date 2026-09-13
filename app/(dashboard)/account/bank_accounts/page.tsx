@@ -15,6 +15,7 @@ import { deleteBankAccountAction } from '../actions';
 import { ReportSummary } from '@/components/erp/report-summary';
 import { Building2, Landmark, TrendingDown, Wallet } from 'lucide-react';
 import { BankAccountForm } from './bank-account-form';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Bank Accounts' };
 
@@ -106,7 +107,7 @@ export default async function BankAccountsPage() {
                     )}`}
                   </Td>
                   <Td>
-                    {canEdit ? <Link className="me-3 text-primary" href={`/account/bank_accounts/${row.account.id}/edit`}>Edit</Link> : null}
+                    {canEdit ? <Link className="me-3 text-primary" href={`/account/bank_accounts/${row.account.id}/edit`}><Phrase>Edit</Phrase></Link> : null}
                     {canHistory ? <Link className="me-3 text-primary" href={`/account/bank_accounts/history/${row.account.id}`}>History</Link> : null}
                     {canDelete ? (
                       <form action={deleteBankAccountAction}>
@@ -114,7 +115,7 @@ export default async function BankAccountsPage() {
                         <ActionButton
                           confirm={`Delete "${row.account.bankName}" and its ledger account?`}
                         >
-                          Delete
+                          <Phrase>Delete</Phrase>
                         </ActionButton>
                       </form>
                     ) : (

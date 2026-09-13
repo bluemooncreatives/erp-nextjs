@@ -29,6 +29,7 @@ import {
   removeSettingImage,
   type SettingFormState,
 } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const EMPTY: SettingFormState = {};
 
@@ -179,7 +180,7 @@ export function GeneralSettingsForm({
       />
 
       <FormActions>
-        <SubmitButton>Save</SubmitButton>
+        <SubmitButton><Phrase>Save</Phrase></SubmitButton>
       </FormActions>
     </form>
   );
@@ -227,7 +228,7 @@ function RemoveImageButton({ type }: { type: string }) {
       }}
       className="mt-3 text-xs font-medium text-destructive hover:text-destructive"
     >
-      Remove
+      <Phrase>Remove</Phrase>
     </button>
   );
 }
@@ -299,7 +300,7 @@ export function CompanyInformationForm({
       />
 
       <FormActions>
-        <SubmitButton>Save</SubmitButton>
+        <SubmitButton><Phrase>Save</Phrase></SubmitButton>
       </FormActions>
     </form>
   );
@@ -330,7 +331,7 @@ export function InvoiceSettingsForm({
         defaultValue={setting.termsConditions}
       />
       <FormActions>
-        <SubmitButton>Save</SubmitButton>
+        <SubmitButton><Phrase>Save</Phrase></SubmitButton>
       </FormActions>
     </form>
   );
@@ -402,7 +403,7 @@ export function SmtpSettingsForm({
       />
 
       <FormActions>
-        <SubmitButton>Save</SubmitButton>
+        <SubmitButton><Phrase>Save</Phrase></SubmitButton>
       </FormActions>
     </form>
   );
@@ -448,7 +449,7 @@ export function TestMailForm() {
         error={state.fieldErrors?.content}
       />
       <FormActions>
-        <SubmitButton pendingLabel="Sending...">Send Test Mail</SubmitButton>
+        <SubmitButton pendingLabel="Sending..."><Phrase>Send Test Mail</Phrase></SubmitButton>
       </FormActions>
     </form>
   );
@@ -472,7 +473,7 @@ export function SmsSettingsForm({
 
       <div className="space-y-2">
         <p className="text-sm font-medium text-foreground">
-          Activate SMS Gateway
+          <Phrase>Activate SMS Gateway</Phrase>
         </p>
         {gateways.map((gateway) => (
           <FormRadio
@@ -490,7 +491,7 @@ export function SmsSettingsForm({
 
       <div className="space-y-4 rounded-2xl border border-border p-5">
         <p className="text-sm font-medium text-foreground">
-          Twilio Settings
+          <Phrase>Twilio Settings</Phrase>
         </p>
         <div className="grid gap-5 sm:grid-cols-2">
           <EnvField label="Twilio Account SID" name="TWILIO_SID" value={env.TWILIO_SID} />
@@ -509,7 +510,7 @@ export function SmsSettingsForm({
 
       <div className="space-y-4 rounded-2xl border border-border p-5">
         <p className="text-sm font-medium text-foreground">
-          Text To Local Settings
+          <Phrase>Text To Local Settings</Phrase>
         </p>
         <div className="grid gap-5 sm:grid-cols-2">
           <EnvField
@@ -526,7 +527,7 @@ export function SmsSettingsForm({
       </div>
 
       <FormActions>
-        <SubmitButton>Save</SubmitButton>
+        <SubmitButton><Phrase>Save</Phrase></SubmitButton>
       </FormActions>
     </form>
   );
@@ -588,7 +589,7 @@ export function TemplateForm({
       {availableVariable ? (
         <div>
           <p className="text-sm font-medium text-foreground">
-            Available Variables
+            <Phrase>Available Variables</Phrase>
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
             {availableVariable}
@@ -597,7 +598,7 @@ export function TemplateForm({
       ) : null}
 
       <FormActions>
-        <SubmitButton>Save</SubmitButton>
+        <SubmitButton><Phrase>Save</Phrase></SubmitButton>
       </FormActions>
     </form>
   );
@@ -616,7 +617,7 @@ export function MailFooterForm({ mailFooter }: { mailFooter: string }) {
         defaultValue={mailFooter}
       />
       <FormActions>
-        <SubmitButton>Save</SubmitButton>
+        <SubmitButton><Phrase>Save</Phrase></SubmitButton>
       </FormActions>
     </form>
   );
@@ -638,7 +639,7 @@ export function GuestBackgroundForm({
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="rounded-2xl border border-border p-5 text-center">
           <p className="text-sm font-medium text-foreground">
-            Login Background Image
+            <Phrase>Login Background Image</Phrase>
           </p>
           <div className="my-4 flex h-40 items-center justify-center overflow-hidden rounded-lg bg-muted">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -653,7 +654,7 @@ export function GuestBackgroundForm({
         </div>
         <div className="rounded-2xl border border-border p-5 text-center">
           <p className="text-sm font-medium text-foreground">
-            Error Page Background Image
+            <Phrase>Error Page Background Image</Phrase>
           </p>
           <div className="my-4 flex h-40 items-center justify-center overflow-hidden rounded-lg bg-muted">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -668,7 +669,7 @@ export function GuestBackgroundForm({
         </div>
       </div>
       <FormActions>
-        <SubmitButton>Save</SubmitButton>
+        <SubmitButton><Phrase>Save</Phrase></SubmitButton>
       </FormActions>
     </form>
   );
@@ -699,7 +700,7 @@ export function ChangeViewForm({ defaultView }: { defaultView: string }) {
         <p className="text-xs text-destructive">{state.fieldErrors.view}</p>
       ) : null}
       <FormActions>
-        <SubmitButton>Save</SubmitButton>
+        <SubmitButton><Phrase>Save</Phrase></SubmitButton>
       </FormActions>
     </form>
   );
@@ -742,7 +743,7 @@ export function PaymentGatewayForm({
       />
       <FormInput label="Redirect url" name="redirect_url" defaultValue={gateway.redirectUrl} />
       <FormActions>
-        <SubmitButton>Update</SubmitButton>
+        <SubmitButton><Phrase>Update</Phrase></SubmitButton>
       </FormActions>
     </form>
   );

@@ -16,6 +16,7 @@ import { destroyEvent, markToDoComplete, destroyToDo } from './actions';
 import { EventForm, ToDoForm } from './forms';
 import { EventCalendar } from '@/components/erp/event-calendar';
 import { calendarEvents } from '@/lib/dashboard/queries';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Events' };
 
@@ -101,11 +102,11 @@ export default async function EventsPage({
                         href={`${ROUTES['events.index']}?edit=${row.event.id}`}
                         className="text-xs font-medium text-primary hover:text-primary"
                       >
-                        Edit
+                        <Phrase>Edit</Phrase>
                       </Link>
                       <form action={destroyEvent}>
                         <input type="hidden" name="id" value={row.event.id} />
-                        <ActionButton confirm="Delete this event?">Delete</ActionButton>
+                        <ActionButton confirm="Delete this event?"><Phrase>Delete</Phrase></ActionButton>
                       </form>
                     </div>
                   </Td>
@@ -141,12 +142,12 @@ export default async function EventsPage({
                       {row.todo.status !== 1 ? (
                         <form action={markToDoComplete}>
                           <input type="hidden" name="id" value={row.todo.id} />
-                          <ActionButton variant="primary">Complete</ActionButton>
+                          <ActionButton variant="primary"><Phrase>Complete</Phrase></ActionButton>
                         </form>
                       ) : null}
                       <form action={destroyToDo}>
                         <input type="hidden" name="id" value={row.todo.id} />
-                        <ActionButton confirm="Delete this to-do?">Delete</ActionButton>
+                        <ActionButton confirm="Delete this to-do?"><Phrase>Delete</Phrase></ActionButton>
                       </form>
                     </div>
                   </Td>
@@ -180,7 +181,7 @@ export default async function EventsPage({
                   href={ROUTES['events.index']}
                   className="text-xs font-medium text-muted-foreground hover:text-foreground"
                 >
-                  Cancel
+                  <Phrase>Cancel</Phrase>
                 </Link>
               </div>
             ) : null}

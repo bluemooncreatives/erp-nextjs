@@ -12,6 +12,7 @@ import { Hourglass, Wallet, Layers } from 'lucide-react';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { ActionButton, SubmitButton } from '@/components/erp/submit-button';
 import { approveAllVouchersAction, setVoucherApprovalAction } from '../../actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Voucher Approval' };
 
@@ -106,12 +107,12 @@ export default async function VoucherApprovalPage({
                     <form action={setVoucherApprovalAction}>
                       <input type="hidden" name="id" value={voucher.id} />
                       <input type="hidden" name="status" value="1" />
-                      <ActionButton variant="primary">Approve</ActionButton>
+                      <ActionButton variant="primary"><Phrase>Approve</Phrase></ActionButton>
                     </form>
                     <form action={setVoucherApprovalAction}>
                       <input type="hidden" name="id" value={voucher.id} />
                       <input type="hidden" name="status" value="2" />
-                      <ActionButton confirm="Cancel this voucher?">Cancel</ActionButton>
+                      <ActionButton confirm="Cancel this voucher?"><Phrase>Cancel</Phrase></ActionButton>
                     </form>
                   </div>
                 ) : (

@@ -32,6 +32,7 @@ import {
 import { ActionButton } from '@/components/erp/submit-button';
 import { Tabs } from '@/components/erp/tabs';
 import { ToggleSwitch } from '@/components/erp/toggle';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Product List' };
 
@@ -194,7 +195,7 @@ export default async function ProductListPage({
                         href={route('add_product.product_Detail', { id: row.productId })}
                         className="rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted"
                       >
-                        View
+                        <Phrase>View</Phrase>
                       </Link>
                     ) : null}
                     {canEdit && row.productId ? (
@@ -202,14 +203,14 @@ export default async function ProductListPage({
                         href={route('add_product.edit', { id: row.productId })}
                         
                       >
-                        Edit
+                        <Phrase>Edit</Phrase>
                       </LinkButton>
                     ) : null}
                     {canDelete && row.productId ? (
                       <form action={deleteProductAction}>
                         <input type="hidden" name="id" value={row.productId} />
                         <ActionButton confirm={`Delete "${row.productName}"?`}>
-                          Delete
+                          <Phrase>Delete</Phrase>
                         </ActionButton>
                       </form>
                     ) : null}
@@ -296,7 +297,7 @@ export default async function ProductListPage({
                     })}
                     className="rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted"
                   >
-                    View
+                    <Phrase>View</Phrase>
                   </Link>
                 ) : null}
                 {canComboEdit && (comboItemCounts.get(combo.id) ?? 0) > 0 ? (
@@ -304,13 +305,13 @@ export default async function ProductListPage({
                     href={route('add_product.editCombo', { id: combo.id })}
                     
                   >
-                    Edit
+                    <Phrase>Edit</Phrase>
                   </LinkButton>
                 ) : null}
                 {canComboDelete ? (
                   <form action={deleteComboAction}>
                     <input type="hidden" name="id" value={combo.id} />
-                    <ActionButton confirm={`Delete "${combo.name}"?`}>Delete</ActionButton>
+                    <ActionButton confirm={`Delete "${combo.name}"?`}><Phrase>Delete</Phrase></ActionButton>
                   </form>
                 ) : null}
               </div>
@@ -338,7 +339,7 @@ export default async function ProductListPage({
               href={ROUTES['add_product.index']}
               
             >
-              Add Product
+              <Phrase>Add Product</Phrase>
             </LinkButton>
           </div>
         }

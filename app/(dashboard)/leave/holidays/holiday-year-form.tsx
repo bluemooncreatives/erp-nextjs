@@ -16,6 +16,7 @@ import { FormAlert, FormInput, FormSelect } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import { Button } from '@/components/ui/button';
 import { saveHolidays, type HolidayFormState } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: HolidayFormState = {};
 
@@ -195,9 +196,9 @@ export function HolidayYearForm({
               onClick={() => setLines((current) => [...current, blankRow()])}
             >
               <Plus />
-              Add
+              <Phrase>Add</Phrase>
             </Button>
-            <SubmitButton>Submit</SubmitButton>
+            <SubmitButton><Phrase>Submit</Phrase></SubmitButton>
           </div>
         ) : null}
       </form>

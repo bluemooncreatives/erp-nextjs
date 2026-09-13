@@ -18,6 +18,7 @@ import {
   updateOpeningBalances,
   type OpeningBalanceFormState,
 } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const EMPTY: OpeningBalanceFormState = {};
 
@@ -68,7 +69,7 @@ export function OpeningBalanceForm({ accounts }: { accounts: SelectOption[] }) {
       </div>
 
       <FormActions>
-        <SubmitButton>Save</SubmitButton>
+        <SubmitButton><Phrase>Save</Phrase></SubmitButton>
       </FormActions>
     </form>
   );
@@ -132,7 +133,7 @@ function LineTable({
                   onClick={() => setLines((prev) => prev.filter((l) => l.key !== line.key))}
                   className="rounded-lg px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10"
                 >
-                  Remove
+                  <Phrase>Remove</Phrase>
                 </button>
               ) : null}
             </Td>
@@ -210,7 +211,7 @@ export function EditOpeningBalancesForm({
       />
 
       <FormActions>
-        <SubmitButton>Save</SubmitButton>
+        <SubmitButton><Phrase>Save</Phrase></SubmitButton>
       </FormActions>
     </form>
   );

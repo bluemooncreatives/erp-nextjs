@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AuthCard } from './AuthCard';
 import { register, type AuthFormState } from '@/app/(auth)/actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: AuthFormState = {};
 
@@ -53,7 +54,7 @@ export default function SignUpForm({ companyName }: { companyName: string }) {
 
         <div className="space-y-2">
           <Label htmlFor="register-password">
-            Password <span className="text-destructive">*</span>
+            <Phrase>Password</Phrase> <span className="text-destructive">*</span>
           </Label>
           <div className="relative">
             <Input

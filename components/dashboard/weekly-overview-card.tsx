@@ -16,6 +16,7 @@ import { cn } from "@/components/ui/utils";
 
 import { CardOverflowMenu } from "./card-overflow-menu";
 import { formatValue as printValue, type ValueFormat } from "./format";
+import { Phrase } from '@/context/TranslationContext';
 
 export interface WeeklyOverviewPoint {
   day: string;
@@ -140,7 +141,7 @@ export function WeeklyOverviewCard({
           </div>
           {detailsHref ? (
             <Button className="w-full" asChild>
-              <Link href={detailsHref}>Details</Link>
+              <Link href={detailsHref}><Phrase>Details</Phrase></Link>
             </Button>
           ) : null}
         </div>

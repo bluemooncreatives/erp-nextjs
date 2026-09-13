@@ -8,6 +8,7 @@ import { MorphType } from '@/lib/db/morph';
 import { dateConvert, singlePrice } from '@/lib/settings';
 import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
+import { Phrase } from '@/context/TranslationContext';
 
 export default async function BankHistoryPage({ params }: { params: Promise<{ id: string }> }) {
   await authorize('bank.account.history');
@@ -29,7 +30,7 @@ export default async function BankHistoryPage({ params }: { params: Promise<{ id
   const decorated = await Promise.all(running.map(async (row) => ({ ...row, dateLabel: await dateConvert(row.date), amountLabel: await singlePrice(row.amount), balanceLabel: await singlePrice(row.balance) })));
   return <><PageHeader title={`${bank.bankName} — Account History`} /><Card title={`Current Balance: ${await singlePrice(balance)}`} bodyClassName="">
     <DataTable columns={[{ label: 'Date' }, { label: 'Voucher' }, { label: 'Narration' }, { label: 'Debit' }, { label: 'Credit' }, { label: 'Balance' }]} isEmpty={false}>
-      <Tr><Td colSpan={5}>Opening Balance</Td><Td>{await singlePrice(opening?.amount ?? 0)}</Td></Tr>
+      <Tr><Td colSpan={5}><Phrase>Opening Balance</Phrase></Td><Td>{await singlePrice(opening?.amount ?? 0)}</Td></Tr>
       {decorated.map((row) => <Tr key={row.id}><Td>{row.dateLabel}</Td><Td>{row.txId}</Td><Td>{row.narration}</Td><Td>{row.type === 'Dr' ? row.amountLabel : '-'}</Td><Td>{row.type === 'Cr' ? row.amountLabel : '-'}</Td><Td>{row.balanceLabel}</Td></Tr>)}
     </DataTable></Card></>;
 }

@@ -12,6 +12,7 @@ import { DataTable, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
 import { ReportSummary } from '@/components/erp/report-summary';
 import { HandCoins, Users, Wallet } from 'lucide-react';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Loan History' };
 
@@ -109,7 +110,7 @@ export default async function LoanHistoryPage({
                     href={`${ROUTES['apply_loans.history']}?user=${user.id}`}
                     className="text-xs font-medium text-primary hover:text-primary"
                   >
-                    View
+                    <Phrase>View</Phrase>
                   </Link>
                 </Td>
               </Tr>

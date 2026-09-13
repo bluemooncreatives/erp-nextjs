@@ -21,6 +21,7 @@ import { approvePurchaseAction } from '../../actions';
 import { PurchasePaymentPanel } from './payment-panel';
 import { ReceivePanel } from './receive-panel';
 import { PurchaseReturnPanel } from './return-panel';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Purchase Order' };
 
@@ -78,13 +79,13 @@ export default async function PurchaseOrderDetailPage({
               href={route('purchase.order.print_view', { id: order.id })}
               variant="outline"
             >
-              Print
+              <Phrase>Print</Phrase>
             </LinkButton>
             <LinkButton
               href={route('purchase.order.pdf', { id: order.id })}
               variant="outline"
             >
-              Export
+              <Phrase>Export</Phrase>
             </LinkButton>
             {order.status !== PurchaseStatus.Approved && canApprove ? (
             <form action={approvePurchaseAction}>
@@ -94,7 +95,7 @@ export default async function PurchaseOrderDetailPage({
                 className="px-4 py-2.5 text-sm"
                 confirm="Approve this purchase order? The ledger will be posted."
               >
-                Approve
+                <Phrase>Approve</Phrase>
               </ActionButton>
             </form>
             ) : null}
@@ -118,11 +119,11 @@ export default async function PurchaseOrderDetailPage({
                   value:
                     order.status === PurchaseStatus.Approved ? (
                       <Badge size="sm" color="success">
-                        Approved
+                        <Phrase>Approved</Phrase>
                       </Badge>
                     ) : (
                       <Badge size="sm" color="warning">
-                        Pending
+                        <Phrase>Pending</Phrase>
                       </Badge>
                     ),
                 },

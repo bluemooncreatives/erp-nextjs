@@ -19,6 +19,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { AuthCard } from './AuthCard';
 import { login, type AuthFormState } from '@/app/(auth)/actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: AuthFormState = {};
 
@@ -100,7 +101,7 @@ export default function SignInForm({
 
         <div className="space-y-2">
           <Label htmlFor="login-password">
-            Password <span className="text-destructive">*</span>
+            <Phrase>Password</Phrase> <span className="text-destructive">*</span>
           </Label>
           <div className="relative">
             <Input

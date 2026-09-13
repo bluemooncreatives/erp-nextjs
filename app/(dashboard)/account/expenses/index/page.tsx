@@ -15,6 +15,7 @@ import { Badge } from '@/components/erp/badge';
 import { ReportSummary } from '@/components/erp/report-summary';
 import { Files, Wallet, CircleCheck, Hourglass } from 'lucide-react';
 import { deleteExpenseAction } from '../../actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Expense Lists' };
 
@@ -67,7 +68,7 @@ export default async function ExpenseListPage({
               href={ROUTES['expenses.create']}
               
             >
-              Add Expense
+              <Phrase>Add Expense</Phrase>
             </LinkButton>
           ) : null
         }
@@ -114,12 +115,12 @@ export default async function ExpenseListPage({
                 </Badge>
               </Td>
               <Td>
-                {canEdit ? <Link className="me-3 text-primary" href={`/account/expenses/${row.expense.id}/edit`}>Edit</Link> : null}
+                {canEdit ? <Link className="me-3 text-primary" href={`/account/expenses/${row.expense.id}/edit`}><Phrase>Edit</Phrase></Link> : null}
                 {canDelete ? (
                   <form action={deleteExpenseAction}>
                     <input type="hidden" name="id" value={row.expense.id} />
                     <ActionButton confirm="Delete this expense and its voucher?">
-                      Delete
+                      <Phrase>Delete</Phrase>
                     </ActionButton>
                   </form>
                 ) : (

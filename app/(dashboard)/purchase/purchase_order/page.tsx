@@ -19,6 +19,7 @@ import { DataTable, Pagination, SearchBar, Td, Tr } from '@/components/erp/table
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
 import { approvePurchaseAction, deletePurchaseAction } from '../actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Purchase Order' };
 
@@ -65,7 +66,7 @@ export default async function PurchaseOrderListPage({
               href={ROUTES['purchase_order.create']}
               
             >
-              Add Purchase Order
+              <Phrase>Add Purchase Order</Phrase>
             </LinkButton>
           ) : null
         }
@@ -161,7 +162,7 @@ export default async function PurchaseOrderListPage({
                         variant="primary"
                         confirm="Approve this purchase order? The ledger will be posted."
                       >
-                        Approve
+                        <Phrase>Approve</Phrase>
                       </ActionButton>
                     </form>
                   ) : null}
@@ -169,7 +170,7 @@ export default async function PurchaseOrderListPage({
                     <form action={deletePurchaseAction}>
                       <input type="hidden" name="id" value={order.id} />
                       <ActionButton confirm={`Delete order ${order.invoiceNo || order.id}?`}>
-                        Delete
+                        <Phrase>Delete</Phrase>
                       </ActionButton>
                     </form>
                   ) : null}

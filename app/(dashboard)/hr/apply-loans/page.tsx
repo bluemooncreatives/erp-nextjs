@@ -15,6 +15,7 @@ import { Badge } from '@/components/erp/badge';
 import { ReportSummary } from '@/components/erp/report-summary';
 import { BadgeCheck, Clock, HandCoins, Wallet } from 'lucide-react';
 import { destroyLoan } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Apply For Loan' };
 
@@ -54,7 +55,7 @@ export default async function ApplyLoansPage() {
             href={ROUTES['apply_loans.create']}
             
           >
-            Apply For Loan
+            <Phrase>Apply For Loan</Phrase>
           </LinkButton>
         }
       />
@@ -109,11 +110,11 @@ export default async function ApplyLoansPage() {
                           href={`${ROUTES['apply_loans.create']}?id=${row.loan.id}`}
                           className="text-xs font-medium text-primary hover:text-primary"
                         >
-                          Edit
+                          <Phrase>Edit</Phrase>
                         </Link>
                         <form action={destroyLoan}>
                           <input type="hidden" name="id" value={row.loan.id} />
-                          <ActionButton confirm="Delete this loan?">Delete</ActionButton>
+                          <ActionButton confirm="Delete this loan?"><Phrase>Delete</Phrase></ActionButton>
                         </form>
                       </>
                     ) : null}

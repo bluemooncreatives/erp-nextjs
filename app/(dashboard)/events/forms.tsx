@@ -14,6 +14,7 @@ import {
 } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import { storeEvent, saveEvent, storeToDo, type EventFormState } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const EMPTY: EventFormState = {};
 
@@ -83,7 +84,7 @@ export function EventForm({
 
       <div>
         <label className="mb-1.5 block text-sm font-medium text-foreground">
-          Image
+          <Phrase>Image</Phrase>
         </label>
         <input
           type="file"
@@ -94,7 +95,7 @@ export function EventForm({
       </div>
 
       <FormActions>
-        <SubmitButton>Save</SubmitButton>
+        <SubmitButton><Phrase>Save</Phrase></SubmitButton>
       </FormActions>
     </form>
   );
@@ -124,7 +125,7 @@ export function ToDoForm() {
       />
 
       <FormActions>
-        <SubmitButton size="sm">Add</SubmitButton>
+        <SubmitButton size="sm"><Phrase>Add</Phrase></SubmitButton>
       </FormActions>
     </form>
   );

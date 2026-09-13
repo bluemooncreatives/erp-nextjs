@@ -10,6 +10,7 @@ import { FormCheckbox, FormActions } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import { updateActivePaymentMethods } from '../actions';
 import { PaymentGatewayForm } from '../forms';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Payment Method Settings' };
 
@@ -65,7 +66,7 @@ export default async function PaymentMethodSettingsPage() {
               />
             ))}
             <FormActions>
-              <SubmitButton size="sm">Update</SubmitButton>
+              <SubmitButton size="sm"><Phrase>Update</Phrase></SubmitButton>
             </FormActions>
           </form>
         </Card>

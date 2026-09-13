@@ -18,6 +18,7 @@ import {
 import { SubmitButton } from '@/components/erp/submit-button';
 import { ROUTES } from '@/lib/routes';
 import type { HrFormState } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: HrFormState = {};
 
@@ -257,7 +258,7 @@ export function StaffForm({
           href={ROUTES['staffs.index']}
           variant="outline"
         >
-          Cancel
+          <Phrase>Cancel</Phrase>
         </LinkButton>
         <SubmitButton>{isEdit ? 'Update Staff' : 'Save Staff'}</SubmitButton>
       </div>

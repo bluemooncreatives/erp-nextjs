@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/input';
 import { EmptyState } from './page';
 import { LinkButton } from '@/components/common/link-button';
 import { cn } from '@/components/ui/utils';
+import { Phrase } from '@/context/TranslationContext';
 
 export type TableColumn = {
   label: ReactNode;
@@ -119,7 +120,7 @@ export function DataTable({
                         isSorted && 'text-foreground',
                       )}
                     >
-                      {column.label}
+                      <Phrase>{column.label}</Phrase>
                       {direction === 'asc' ? (
                         <ArrowUp className="size-3.5 shrink-0" aria-hidden="true" />
                       ) : direction === 'desc' ? (
@@ -129,7 +130,7 @@ export function DataTable({
                       )}
                     </Link>
                   ) : (
-                    column.label
+                    <Phrase>{column.label}</Phrase>
                   )}
                 </th>
               );
@@ -336,7 +337,7 @@ export function Pagination({
         <nav aria-label="Pagination" className="flex items-center gap-1">
           <PageLink href={pageHref(safePage - 1)} disabled={safePage <= 1} label="Previous page">
             <ChevronLeft className="size-4" aria-hidden="true" />
-            <span className="max-sm:sr-only">Previous</span>
+            <span className="max-sm:sr-only"><Phrase>Previous</Phrase></span>
           </PageLink>
 
           <ul className="flex items-center gap-1 max-sm:hidden">
@@ -369,7 +370,7 @@ export function Pagination({
             disabled={safePage >= totalPages}
             label="Next page"
           >
-            <span className="max-sm:sr-only">Next</span>
+            <span className="max-sm:sr-only"><Phrase>Next</Phrase></span>
             <ChevronRight className="size-4" aria-hidden="true" />
           </PageLink>
         </nav>
@@ -443,14 +444,14 @@ export function SearchBar({
         ),
       )}
       <label className="min-w-0 flex-1 space-y-2 sm:min-w-64">
-        <span className="block text-xs font-medium">Search</span>
+        <span className="block text-xs font-medium"><Phrase>Search</Phrase></span>
         <span className="relative block">
           <Search className="text-muted-foreground pointer-events-none absolute top-1/2 start-3 size-4 -translate-y-1/2" aria-hidden="true" />
           <Input type="search" name={name} defaultValue={defaultValue} placeholder={placeholder} className="ps-9" />
         </span>
       </label>
-      <Button type="submit" variant="soft">Search</Button>
-      {defaultValue ? <LinkButton href={`${action}${Object.entries(hidden).filter(([, v]) => v != null && v !== '').length ? '?' + new URLSearchParams(Object.entries(hidden).filter(([, v]) => v != null && v !== '').map(([k,v]) => [k,String(v)])) : ''}`} variant="ghost" aria-label="Clear search"><X className="size-4" />Clear</LinkButton> : null}
+      <Button type="submit" variant="soft"><Phrase>Search</Phrase></Button>
+      {defaultValue ? <LinkButton href={`${action}${Object.entries(hidden).filter(([, v]) => v != null && v !== '').length ? '?' + new URLSearchParams(Object.entries(hidden).filter(([, v]) => v != null && v !== '').map(([k,v]) => [k,String(v)])) : ''}`} variant="ghost" aria-label="Clear search"><X className="size-4" /><Phrase>Clear</Phrase></LinkButton> : null}
       {children}
     </form>
   );

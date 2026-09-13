@@ -14,6 +14,7 @@ import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
 import { deleteVoucherAction } from '../../actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Payment Vouchers' };
 
@@ -115,12 +116,12 @@ export default async function PaymentVouchersPage({
                 </Badge>
               </Td>
               <Td>
-                {canEdit ? <Link href={route('vouchers.edit', { id: voucher.id })} className="me-3 text-primary">Edit</Link> : null}
+                {canEdit ? <Link href={route('vouchers.edit', { id: voucher.id })} className="me-3 text-primary"><Phrase>Edit</Phrase></Link> : null}
                 {canDelete ? (
                   <form action={deleteVoucherAction}>
                     <input type="hidden" name="id" value={voucher.id} />
                     <ActionButton confirm="Delete this voucher and its postings?">
-                      Delete
+                      <Phrase>Delete</Phrase>
                     </ActionButton>
                   </form>
                 ) : (

@@ -17,6 +17,7 @@ import { ROUTES } from '@/lib/routes';
 import { useLocationProducts } from '../../use-location-products';
 import { LinePicker, type PickableProduct, type PickedLine } from '../../line-picker';
 import { storeStockTransfer, updateTransferAction, type InventoryFormState } from '../../actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: InventoryFormState = {};
 
@@ -98,7 +99,7 @@ export function TransferForm({
           href={ROUTES['stock-transfer.index']}
           variant="outline"
         >
-          Cancel
+          <Phrase>Cancel</Phrase>
         </LinkButton>
         <SubmitButton>Save Transfer</SubmitButton>
       </div>

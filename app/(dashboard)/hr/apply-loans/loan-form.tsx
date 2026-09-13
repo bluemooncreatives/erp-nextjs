@@ -15,6 +15,7 @@ import {
 } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import { storeLoan, saveLoan, type LoanFormState } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const EMPTY: LoanFormState = {};
 
@@ -133,7 +134,7 @@ export function LoanForm({
       <FormTextarea label="Description" name="note" rows={4} defaultValue={loan?.note ?? ''} />
 
       <FormActions>
-        <SubmitButton>Save</SubmitButton>
+        <SubmitButton><Phrase>Save</Phrase></SubmitButton>
       </FormActions>
     </form>
   );

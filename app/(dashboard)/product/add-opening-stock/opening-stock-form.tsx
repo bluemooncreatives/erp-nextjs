@@ -13,6 +13,7 @@ import {
 import { SubmitButton } from '@/components/erp/submit-button';
 import { storeOpeningStock } from '../../purchase/actions';
 import type { PurchaseFormState } from '../../purchase/actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: PurchaseFormState = {};
 
@@ -76,7 +77,7 @@ export function OpeningStockForm({
         </div>
 
         <div className="mt-6">
-          <SubmitButton>Add Opening Stock</SubmitButton>
+          <SubmitButton><Phrase>Add Opening Stock</Phrase></SubmitButton>
         </div>
       </Card>
     </form>

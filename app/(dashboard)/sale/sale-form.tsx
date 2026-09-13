@@ -28,6 +28,7 @@ import { SubmitButton } from '@/components/erp/submit-button';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ROUTES } from '@/lib/routes';
 import type { SaleFormState } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: SaleFormState = {};
 
@@ -399,7 +400,7 @@ export function SaleForm({
                     onClick={() => removeLine(line.key)}
                     className="rounded-lg px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10"
                   >
-                    Remove
+                    <Phrase>Remove</Phrase>
                   </button>
                 </Td>
               </Tr>
@@ -548,7 +549,7 @@ export function SaleForm({
           href={ROUTES['sale.index']}
           variant="outline"
         >
-          Cancel
+          <Phrase>Cancel</Phrase>
         </LinkButton>
         <button
           type="submit"

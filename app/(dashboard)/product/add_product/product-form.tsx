@@ -26,6 +26,7 @@ import { SubmitButton } from '@/components/erp/submit-button';
 import { ROUTES } from '@/lib/routes';
 import { ProductType } from '@/lib/product/constants';
 import type { ProductFormState } from '../product-actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: ProductFormState = {};
 
@@ -251,7 +252,7 @@ export function ProductForm({
           href={ROUTES['add_product.create']}
           variant="outline"
         >
-          Cancel
+          <Phrase>Cancel</Phrase>
         </LinkButton>
         <SubmitButton>{defaults.id ? 'Update Product' : 'Save Product'}</SubmitButton>
       </div>
@@ -444,7 +445,7 @@ function VariableSection({
                     onClick={() => setRows((prev) => prev.filter((_, i) => i !== rowIndex))}
                     className="rounded-lg px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10"
                   >
-                    Remove
+                    <Phrase>Remove</Phrase>
                   </button>
                 </div>
               </div>
@@ -500,7 +501,7 @@ function ComboSection({ skus }: { skus: Array<{ id: number; label: string }> }) 
                   onClick={() => setRows((prev) => prev.filter((_, i) => i !== index))}
                   className="mb-0.5 self-end rounded-lg px-3 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10"
                 >
-                  Remove
+                  <Phrase>Remove</Phrase>
                 </button>
               ) : null}
             </div>

@@ -23,6 +23,7 @@ import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
 import { deleteLeaveApplicationAction } from './actions';
 import { ApplyLeaveForm } from './apply-leave-form';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Apply Leave' };
 
@@ -158,7 +159,7 @@ export default async function ApplyLeavePage({
                           href={`${ROUTES['apply_leave.index']}?edit=${row.leave.id}`}
                           className="text-primary hover:text-primary text-xs font-medium"
                         >
-                          Edit
+                          <Phrase>Edit</Phrase>
                         </Link>
                         <form action={deleteLeaveApplicationAction}>
                           <input type="hidden" name="id" value={row.leave.id} />

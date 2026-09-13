@@ -12,6 +12,7 @@ import { Badge } from '@/components/erp/badge';
 import { ReportSummary } from '@/components/erp/report-summary';
 import { BadgeCheck, Clock, HandCoins, Wallet } from 'lucide-react';
 import { destroyLoan, setLoanApproval } from '../apply-loans/actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Loan Approval' };
 
@@ -102,7 +103,7 @@ export default async function LoanApprovalPage() {
                         <input type="hidden" name="id" value={row.loan.id} />
                         <input type="hidden" name="approval" value={LoanApproval.Approved} />
                         <ActionButton variant="primary" confirm="Approve this loan?">
-                          Approve
+                          <Phrase>Approve</Phrase>
                         </ActionButton>
                       </form>
                     ) : null}
@@ -110,13 +111,13 @@ export default async function LoanApprovalPage() {
                       <form action={setLoanApproval}>
                         <input type="hidden" name="id" value={row.loan.id} />
                         <input type="hidden" name="approval" value={LoanApproval.Rejected} />
-                        <ActionButton confirm="Cancel this loan?">Cancel</ActionButton>
+                        <ActionButton confirm="Cancel this loan?"><Phrase>Cancel</Phrase></ActionButton>
                       </form>
                     ) : null}
                     {row.loan.approval !== LoanApproval.Approved ? (
                       <form action={destroyLoan}>
                         <input type="hidden" name="id" value={row.loan.id} />
-                        <ActionButton confirm="Delete this loan?">Delete</ActionButton>
+                        <ActionButton confirm="Delete this loan?"><Phrase>Delete</Phrase></ActionButton>
                       </form>
                     ) : null}
                   </div>

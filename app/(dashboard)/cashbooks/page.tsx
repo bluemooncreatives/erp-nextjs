@@ -17,6 +17,7 @@ import { PageHeader, Card, EmptyState } from '@/components/erp/page';
 import { ReportSummary } from '@/components/erp/report-summary';
 import { PlayCircle, ArrowDownLeft, ArrowUpRight, Wallet } from 'lucide-react';
 import { DataTable, Td, Tr, SearchBar } from '@/components/erp/table';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Cashbook' };
 
@@ -164,24 +165,24 @@ export default async function CashbookPage({
         <Card title="Summary" bodyClassName="">
           <DataTable columns={[{ label: '' }, { label: '' }]} isEmpty={false}>
             <Tr>
-              <Td>Opening Balance</Td>
+              <Td><Phrase>Opening Balance</Phrase></Td>
               <Td className="text-end">{openingLabel}</Td>
             </Tr>
             <Tr>
-              <Td>Today Total Income</Td>
+              <Td><Phrase>Today Total Income</Phrase></Td>
               <Td className="text-end">{creditLabel}</Td>
             </Tr>
             <Tr>
-              <Td>Today Total Expense</Td>
+              <Td><Phrase>Today Total Expense</Phrase></Td>
               <Td className="text-end">{debitLabel}</Td>
             </Tr>
             <Tr>
-              <Td>Today Balance / Cash in Hand</Td>
+              <Td><Phrase>Today Balance / Cash in Hand</Phrase></Td>
               <Td className="text-end">{inHandLabel}</Td>
             </Tr>
             <Tr>
               <Td className="font-medium text-foreground">
-                Today Closing Balance
+                <Phrase>Today Closing Balance</Phrase>
               </Td>
               <Td className="text-end font-medium text-foreground">
                 {closingLabel}

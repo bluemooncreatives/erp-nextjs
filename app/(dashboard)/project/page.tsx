@@ -13,6 +13,7 @@ import { DataTable, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
 import { ReportSummary } from '@/components/erp/report-summary';
 import { CheckCircle2, FolderKanban, ListTodo, Users } from 'lucide-react';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Projects' };
 
@@ -42,13 +43,13 @@ export default async function ProjectListPage() {
               href={ROUTES['team.index']}
               variant="outline"
             >
-              Teams
+              <Phrase>Teams</Phrase>
             </LinkButton>
             <LinkButton
               href={ROUTES['project.create']}
               
             >
-              New Project
+              <Phrase>New Project</Phrase>
             </LinkButton>
           </div>
         }

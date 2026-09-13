@@ -7,6 +7,7 @@ import { Card } from '@/components/erp/page';
 import { FormAlert, FormInput, FormSelect } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import { storeCoupon, type CouponFormState } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: CouponFormState = {};
 
@@ -54,7 +55,7 @@ export function CouponForm() {
           error={state.fieldErrors?.status}
         />
 
-        <SubmitButton>Save</SubmitButton>
+        <SubmitButton><Phrase>Save</Phrase></SubmitButton>
       </form>
     </Card>
   );

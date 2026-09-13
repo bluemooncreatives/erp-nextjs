@@ -7,7 +7,7 @@ import React from 'react';
 import { BrandLogo } from '@/components/common/BrandLogo';
 import { ThemeToggleButton } from '@/components/common/ThemeToggleButton';
 import { generalSetting } from '@/lib/settings';
-import { assetUrl } from '@/lib/paths';
+import { uploadedAssetUrl } from '@/lib/paths';
 import { themeColors, themeList } from '@/lib/setting/themes';
 import { themeStyle } from '@/lib/setting/theme-style';
 
@@ -20,7 +20,7 @@ export default async function AuthLayout({
   children: React.ReactNode;
 }) {
   const setting = await generalSetting();
-  const logo = assetUrl(setting.logo);
+  const logo = uploadedAssetUrl(setting.logo);
   const companyName = setting.companyName || setting.siteTitle || 'Infix Biz';
 
   // The Blade guest layout was themed too, so the login screen matches the

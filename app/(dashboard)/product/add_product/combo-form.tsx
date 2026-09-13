@@ -17,6 +17,7 @@ import { SubmitButton } from '@/components/erp/submit-button';
 import { ROUTES } from '@/lib/routes';
 import { ProductType } from '@/lib/product/constants';
 import type { ProductFormState } from '../product-actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: ProductFormState = {};
 
@@ -157,12 +158,12 @@ export function ComboForm({
       </Card>
 
       <div className="flex items-center gap-3">
-        <SubmitButton>Update</SubmitButton>
+        <SubmitButton><Phrase>Update</Phrase></SubmitButton>
         <Link
           href={ROUTES['add_product.create']}
           className="rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted"
         >
-          Cancel
+          <Phrase>Cancel</Phrase>
         </Link>
       </div>
     </form>

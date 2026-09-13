@@ -15,6 +15,7 @@ import { deleteChartAccountAction } from './actions';
 import { ReportSummary } from '@/components/erp/report-summary';
 import { FolderTree, ListTree, Power, Wallet } from 'lucide-react';
 import { ChartAccountForm } from './chart-account-form';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Chart Of Accounts' };
 
@@ -119,12 +120,12 @@ export default async function ChartOfAccountsPage() {
                     </Badge>
                   </Td>
                   <Td>
-                    {canEdit ? <Link className="me-3 text-primary" href={`/account/chart-account/${node.id}/edit`}>Edit</Link> : null}
+                    {canEdit ? <Link className="me-3 text-primary" href={`/account/chart-account/${node.id}/edit`}><Phrase>Edit</Phrase></Link> : null}
                     {canDelete && node.isGroup === 0 ? (
                       <form action={deleteChartAccountAction}>
                         <input type="hidden" name="id" value={node.id} />
                         <ActionButton confirm={`Delete account "${node.name}"?`}>
-                          Delete
+                          <Phrase>Delete</Phrase>
                         </ActionButton>
                       </form>
                     ) : (

@@ -14,6 +14,7 @@ import { ReportSummary } from '@/components/erp/report-summary';
 import { PackageOpen, Hourglass, Boxes, Wallet } from 'lucide-react';
 import { DataTable, Pagination, SearchBar, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Recieve Your Product' };
 
@@ -121,7 +122,7 @@ export default async function ReceivePurchasePage({
                   href={route('purchase_order.show', { id: order.id })}
                   
                 >
-                  Receive
+                  <Phrase>Receive</Phrase>
                 </LinkButton>
               </Td>
             </Tr>

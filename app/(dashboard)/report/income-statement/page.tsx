@@ -12,6 +12,7 @@ import { ReportSummary } from '@/components/erp/report-summary';
 import { TrendingUp, Coins, Receipt, Scale } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { PeriodFilter } from '../period-filter';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Income Statement' };
 
@@ -98,7 +99,7 @@ export default async function IncomeStatementPage({
           <Card title="Gross Profit" bodyClassName="">
             <DataTable columns={[{ label: '' }, { label: 'Amount' }]} isEmpty={false}>
               <Tr>
-                <Td>Sales</Td>
+                <Td><Phrase>Sales</Phrase></Td>
                 <Td className="text-end">{salesLabel}</Td>
               </Tr>
               <Tr>

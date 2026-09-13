@@ -13,6 +13,7 @@ import { PageHeader, Card, DetailList } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
 import { EditProfileForm } from '../profile-forms';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Profile' };
 
@@ -118,7 +119,7 @@ export default async function ProfileViewPage() {
                         rel="noreferrer"
                         className="text-xs font-medium text-primary hover:text-primary"
                       >
-                        Download
+                        <Phrase>Download</Phrase>
                       </a>
                     ) : (
                       '-'

@@ -20,6 +20,7 @@ import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ROUTES } from '@/lib/routes';
 import { storeVoucher, updatePaymentVoucher, type AccountFormState } from '../../actions';
 import { SelectControl } from '@/components/erp/select-control';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: AccountFormState = {};
 
@@ -173,7 +174,7 @@ export function PaymentVoucherForm({
                     }
                     className="rounded-lg px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10"
                   >
-                    Remove
+                    <Phrase>Remove</Phrase>
                   </button>
                 ) : null}
               </Td>
@@ -209,7 +210,7 @@ export function PaymentVoucherForm({
           href={ROUTES['vouchers.index']}
           variant="outline"
         >
-          Cancel
+          <Phrase>Cancel</Phrase>
         </LinkButton>
         <SubmitButton disabled={total <= 0}>{defaults ? 'Update Voucher' : 'Save Voucher'}</SubmitButton>
       </div>

@@ -16,6 +16,7 @@ import { Badge } from '@/components/erp/badge';
 import { deletePayrollAction, setPayrollStatusAction } from '../../leave/actions';
 import { GeneratePayrollPanel } from './generate-payroll-panel';
 import { SelectControl } from '@/components/erp/select-control';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Payroll' };
 
@@ -193,7 +194,7 @@ export default async function PayrollPage({
                     target="_blank"
                     className="text-xs font-medium text-primary hover:text-primary"
                   >
-                    Payslip
+                    <Phrase>Payslip</Phrase>
                   </Link>
                   {canEdit && row.payroll.payrollStatus !== 'Paid' ? (
                     <form action={setPayrollStatusAction}>
@@ -205,7 +206,7 @@ export default async function PayrollPage({
                   {canDelete ? (
                     <form action={deletePayrollAction}>
                       <input type="hidden" name="id" value={row.payroll.id} />
-                      <ActionButton confirm="Delete this payroll?">Delete</ActionButton>
+                      <ActionButton confirm="Delete this payroll?"><Phrase>Delete</Phrase></ActionButton>
                     </form>
                   ) : null}
                 </div>

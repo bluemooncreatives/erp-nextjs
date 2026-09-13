@@ -21,6 +21,7 @@ import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card, DetailList } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'My Details' };
 
@@ -151,7 +152,7 @@ export default async function MyDetailsPage() {
                         href={route('contact.my_payment', { id: row.id })}
                         
                       >
-                        Pay
+                        <Phrase>Pay</Phrase>
                       </LinkButton>
                     )}
                   </Td>

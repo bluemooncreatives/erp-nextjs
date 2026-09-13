@@ -12,6 +12,7 @@ import { removeBackup } from './actions';
 import { ReportSummary } from '@/components/erp/report-summary';
 import { Archive, CalendarClock, DatabaseBackup } from 'lucide-react';
 import { ImportBackupForm, GenerateBackupForm } from './forms';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Database Backup' };
 
@@ -93,7 +94,7 @@ export default async function BackupPage() {
                       className="text-xs text-muted-foreground"
                       title="Restricted in demo mode"
                     >
-                      Download
+                      <Phrase>Download</Phrase>
                     </span>
                   ) : (
                     <a
@@ -101,7 +102,7 @@ export default async function BackupPage() {
                       download={backup.fileName}
                       className="text-xs font-medium text-primary hover:text-primary"
                     >
-                      Download
+                      <Phrase>Download</Phrase>
                     </a>
                   )}
                 </Td>
@@ -109,7 +110,7 @@ export default async function BackupPage() {
                   {canDelete ? (
                     <form action={removeBackup}>
                       <input type="hidden" name="dir" value={backup.folder} />
-                      <ActionButton confirm="Delete this backup?">Delete</ActionButton>
+                      <ActionButton confirm="Delete this backup?"><Phrase>Delete</Phrase></ActionButton>
                     </form>
                   ) : null}
                 </Td>

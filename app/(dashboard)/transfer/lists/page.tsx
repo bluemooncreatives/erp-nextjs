@@ -13,6 +13,7 @@ import { DataTable, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
 import { ReportSummary } from '@/components/erp/report-summary';
 import { ArrowLeftRight, CircleCheck, Clock, Wallet } from 'lucide-react';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Money Transfer' };
 
@@ -96,7 +97,7 @@ export default async function TransferListPage() {
                     href={route('transfer_showroom.edit', { id: row.voucher.id })}
                     className="text-xs font-medium text-primary hover:text-primary"
                   >
-                    Edit
+                    <Phrase>Edit</Phrase>
                   </Link>
                 ) : null}
               </Td>

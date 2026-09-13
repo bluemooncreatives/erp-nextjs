@@ -10,6 +10,7 @@ import { Card } from '@/components/erp/page';
 import { FormAlert, FormInput, FormSelect, type SelectOption } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import type { BalanceFormState } from './balance-actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: BalanceFormState = {};
 
@@ -92,7 +93,7 @@ export function AddBalanceForm({
           </div>
         ) : null}
 
-        <SubmitButton>Add Balance</SubmitButton>
+        <SubmitButton><Phrase>Add Balance</Phrase></SubmitButton>
       </form>
     </Card>
   );
@@ -152,7 +153,7 @@ export function SubtractBalanceForm({
           <FormInput label="Narration" name="narration" />
         </div>
 
-        <SubmitButton>Subtract Balance</SubmitButton>
+        <SubmitButton><Phrase>Subtract Balance</Phrase></SubmitButton>
       </form>
     </Card>
   );

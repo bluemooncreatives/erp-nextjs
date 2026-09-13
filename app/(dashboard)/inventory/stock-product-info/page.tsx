@@ -9,6 +9,7 @@ import { PageHeader, Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ReportSummary } from '@/components/erp/report-summary';
 import { Boxes, Package, TrendingUp, Wallet } from 'lucide-react';
+import { Phrase } from '@/context/TranslationContext';
 
 export default async function StockProductInfoPage() {
   await authorize('stock.product.info');
@@ -42,7 +43,7 @@ export default async function StockProductInfoPage() {
     <Card title="Stock Valuation" bodyClassName="">
     <DataTable columns={[{ label: 'Image' }, { label: 'Product' }, { label: 'SKU' }, { label: 'In Stock' }, { label: 'Purchase Value' }, { label: 'Selling Value' }]} isEmpty={!rows.length}>
       {decorated.map((row) => <Tr key={row.id}><Td><Image src={assetUrl(row.image) ?? '/backEnd/img/no_image.png'} alt={row.name ?? 'Product'} width={48} height={48} unoptimized className="object-contain" /></Td><Td>{row.name}</Td><Td>{row.sku}</Td><Td>{row.quantity} {row.unit}</Td><Td>{row.costLabel}</Td><Td>{row.priceLabel}</Td></Tr>)}
-      {rows.length ? <Tr><Td colSpan={3}>Total</Td><Td>{totals.quantity}</Td><Td>{await singlePrice(totals.cost)}</Td><Td>{await singlePrice(totals.price)}</Td></Tr> : null}
+      {rows.length ? <Tr><Td colSpan={3}><Phrase>Total</Phrase></Td><Td>{totals.quantity}</Td><Td>{await singlePrice(totals.cost)}</Td><Td>{await singlePrice(totals.price)}</Td></Tr> : null}
     </DataTable>
   </Card></>;
 }

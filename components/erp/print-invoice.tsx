@@ -9,6 +9,7 @@
 // ---------------------------------------------------------------------------
 
 import type { ReactNode } from 'react';
+import { Phrase } from '@/context/TranslationContext';
 
 export type PrintCompany = {
   name: string;
@@ -104,12 +105,12 @@ export function PrintLines({
       <thead>
         <tr className="border-y border-gray-300 text-start text-gray-600">
           <th className="py-2 pe-2">#</th>
-          <th className="py-2 pe-2">Product</th>
+          <th className="py-2 pe-2"><Phrase>Product</Phrase></th>
           {showPrice ? <th className="py-2 pe-2">{currencyHeading ?? 'Price'}</th> : null}
-          <th className="py-2 pe-2">Qty</th>
-          {showPrice ? <th className="py-2 pe-2">Tax</th> : null}
-          {showPrice ? <th className="py-2 pe-2">Discount</th> : null}
-          {showPrice ? <th className="py-2 text-end">Subtotal</th> : null}
+          <th className="py-2 pe-2"><Phrase>Qty</Phrase></th>
+          {showPrice ? <th className="py-2 pe-2"><Phrase>Tax</Phrase></th> : null}
+          {showPrice ? <th className="py-2 pe-2"><Phrase>Discount</Phrase></th> : null}
+          {showPrice ? <th className="py-2 text-end"><Phrase>Subtotal</Phrase></th> : null}
         </tr>
       </thead>
       <tbody>

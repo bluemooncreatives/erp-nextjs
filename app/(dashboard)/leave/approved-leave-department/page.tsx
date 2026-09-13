@@ -29,6 +29,7 @@ import { ReportSummary } from '@/components/erp/report-summary';
 import { Building2, CalendarCheck, CalendarClock, Users } from 'lucide-react';
 import { ActionButton } from '@/components/erp/submit-button';
 import { deleteLeaveApplicationAction } from '../actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Department Wise Leave' };
 
@@ -106,12 +107,12 @@ export default async function DepartmentWiseLeavePage({
           />
           <Button type="submit" variant="soft">
             <Filter />
-            Search
+            <Phrase>Search</Phrase>
           </Button>
           {filtered ? (
             <LinkButton href={action} variant="ghost">
               <X />
-              Clear
+              <Phrase>Clear</Phrase>
             </LinkButton>
           ) : null}
         </form>
@@ -174,7 +175,7 @@ export default async function DepartmentWiseLeavePage({
                       <form action={deleteLeaveApplicationAction}>
                         <input type="hidden" name="id" value={row.leave.id} />
                         <ActionButton variant="danger" confirm="Delete this application?">
-                          Delete
+                          <Phrase>Delete</Phrase>
                         </ActionButton>
                       </form>
                     </Td>

@@ -13,6 +13,7 @@ import { assetUrl } from '@/lib/paths';
 import { ROUTES, route } from '@/lib/routes';
 import { Card, DetailList, PageHeader } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Product Details' };
 
@@ -146,7 +147,7 @@ export default async function ProductDetailPage({
             href={route('add_product.edit', { id: product.id })}
             
           >
-            Edit
+            <Phrase>Edit</Phrase>
           </LinkButton>
         }
       />

@@ -7,6 +7,7 @@ import {
 
 import { cn } from "./utils";
 import { Button, buttonVariants } from "./button";
+import { Phrase } from '@/context/TranslationContext';
 
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
   return (
@@ -77,7 +78,7 @@ function PaginationPrevious({
       {...props}
     >
       <ChevronLeftIcon />
-      <span className="hidden sm:block">Previous</span>
+      <span className="hidden sm:block"><Phrase>Previous</Phrase></span>
     </PaginationLink>
   );
 }
@@ -93,7 +94,7 @@ function PaginationNext({
       className={cn("gap-1 px-2.5 sm:pe-2.5", className)}
       {...props}
     >
-      <span className="hidden sm:block">Next</span>
+      <span className="hidden sm:block"><Phrase>Next</Phrase></span>
       <ChevronRightIcon />
     </PaginationLink>
   );

@@ -13,6 +13,7 @@ import {
 } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import { updateContactProfile, type ContactProfileState } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const EMPTY: ContactProfileState = {};
 
@@ -62,7 +63,7 @@ export function ContactProfileForm({
         <FormInput label="City" name="city" defaultValue={contact.city} />
         <div>
           <label className="mb-1.5 block text-sm font-medium text-foreground">
-            Avatar
+            <Phrase>Avatar</Phrase>
           </label>
           <input
             type="file"
@@ -93,7 +94,7 @@ export function ContactProfileForm({
       </div>
 
       <FormActions>
-        <SubmitButton>Save</SubmitButton>
+        <SubmitButton><Phrase>Save</Phrase></SubmitButton>
       </FormActions>
     </form>
   );

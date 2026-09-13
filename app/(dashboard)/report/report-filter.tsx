@@ -2,6 +2,7 @@ import { FormInput, FormSelect } from '@/components/erp/fields';
 import { Button } from '@/components/ui/button';
 import { LinkButton } from '@/components/common/link-button';
 import { Filter, X } from 'lucide-react';
+import { Phrase } from '@/context/TranslationContext';
 
 export type FilterOption = { value: number | string; label: string };
 
@@ -35,8 +36,8 @@ export function ReportFilter({ action, from, to, selects = [] }: {
       ))}
       <FormInput type="date" name="from" label="From date" defaultValue={from ?? ''} wrapperClassName="min-w-36 flex-1" />
       <FormInput type="date" name="to" label="To date" defaultValue={to ?? ''} wrapperClassName="min-w-36 flex-1" />
-      <Button type="submit" variant="soft"><Filter />Apply filters</Button>
-      {filtered ? <LinkButton href={action} variant="ghost"><X />Clear</LinkButton> : null}
+      <Button type="submit" variant="soft"><Filter /><Phrase>Apply filters</Phrase></Button>
+      {filtered ? <LinkButton href={action} variant="ghost"><X /><Phrase>Clear</Phrase></LinkButton> : null}
     </form>
   );
 }

@@ -6,8 +6,8 @@ import { cn } from "@/components/ui/utils";
 
 interface EmptyStateProps {
   icon: LucideIcon;
-  title: string;
-  description?: string;
+  title: ReactNode;
+  description?: ReactNode;
   actionLabel?: string;
   onAction?: () => void;
   /** Custom action content — a text link, for instance — in place of `actionLabel`/`onAction`'s button. */

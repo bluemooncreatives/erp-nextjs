@@ -17,6 +17,7 @@ import { ROUTES } from '@/lib/routes';
 import { useLocationProducts } from '../../use-location-products';
 import { LinePicker, type PickableProduct, type PickedLine } from '../../line-picker';
 import { storeStockAdjustment, updateAdjustmentAction, type InventoryFormState } from '../../actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: InventoryFormState = {};
 
@@ -102,7 +103,7 @@ export function AdjustmentForm({
           href={ROUTES['stock_adjustment.index']}
           variant="outline"
         >
-          Cancel
+          <Phrase>Cancel</Phrase>
         </LinkButton>
         <SubmitButton>Save Adjustment</SubmitButton>
       </div>

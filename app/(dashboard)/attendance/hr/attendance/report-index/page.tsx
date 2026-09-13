@@ -11,6 +11,7 @@ import { ROUTES, route } from '@/lib/routes';
 import { PageHeader, Card, EmptyState } from '@/components/erp/page';
 import { Badge } from '@/components/erp/badge';
 import { SelectControl } from '@/components/erp/select-control';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Attendance Report' };
 
@@ -122,7 +123,7 @@ export default async function AttendanceReportPage({
               <thead className="border-b border-border">
                 <tr>
                   <th className="px-4 py-3 text-start text-xs font-medium text-muted-foreground">
-                    Staff
+                    <Phrase>Staff</Phrase>
                   </th>
                   {days.map((d) => (
                     <th

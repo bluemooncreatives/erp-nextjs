@@ -6,6 +6,7 @@ import { authorize } from '@/lib/auth/permissions';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader } from '@/components/erp/page';
 import { ContactList } from '../contact-list';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Contacts' };
 
@@ -34,7 +35,7 @@ export default async function ContactsPage({
               href={ROUTES['add_contact.create']}
               
             >
-              Add Contact
+              <Phrase>Add Contact</Phrase>
             </LinkButton>
           </div>
         }

@@ -15,6 +15,7 @@ import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
 import { approveAdjustmentAction, deleteAdjustmentAction } from '../../actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Stock Adjustment' };
 
@@ -107,8 +108,8 @@ export default async function StockAdjustmentListPage({
               </Td>
               <Td>
                 <div className="flex items-center gap-2">
-                  {canEdit && adjustment.status !== 1 && <Link className="text-primary hover:underline" href={`/inventory/stock-adjustment/edit/${adjustment.id}`}>Edit</Link>}
-                  {canShow && <Link className="text-primary hover:underline" href={`/inventory/stock-adjustment/show/${adjustment.id}`}>Details</Link>}
+                  {canEdit && adjustment.status !== 1 && <Link className="text-primary hover:underline" href={`/inventory/stock-adjustment/edit/${adjustment.id}`}><Phrase>Edit</Phrase></Link>}
+                  {canShow && <Link className="text-primary hover:underline" href={`/inventory/stock-adjustment/show/${adjustment.id}`}><Phrase>Details</Phrase></Link>}
                   {adjustment.status !== 1 && canApprove ? (
                     <form action={approveAdjustmentAction}>
                       <input type="hidden" name="id" value={adjustment.id} />
@@ -116,14 +117,14 @@ export default async function StockAdjustmentListPage({
                         variant="primary"
                         confirm="Apply this adjustment? The stock will be written off."
                       >
-                        Approve
+                        <Phrase>Approve</Phrase>
                       </ActionButton>
                     </form>
                   ) : null}
                   {canDelete && adjustment.status !== 1 ? (
                     <form action={deleteAdjustmentAction}>
                       <input type="hidden" name="id" value={adjustment.id} />
-                      <ActionButton confirm="Delete this adjustment?">Delete</ActionButton>
+                      <ActionButton confirm="Delete this adjustment?"><Phrase>Delete</Phrase></ActionButton>
                     </form>
                   ) : null}
                 </div>

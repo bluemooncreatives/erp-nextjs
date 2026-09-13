@@ -8,6 +8,7 @@ import { SubmitButton } from '@/components/erp/submit-button';
 import { ROUTES } from '@/lib/routes';
 import { loadReceiptInvoices, saveReceiptVoucher } from './actions';
 import type { AccountFormState } from '../../actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export type ReceiptDefaults = {
   id?: number;
@@ -76,7 +77,7 @@ export function ReceiptVoucherForm({ fromAccounts, byAccounts, defaults }: {
       <FormInput label="Cheque Date" name="cheque_date" type="date" required defaultValue={defaults.chequeDate ?? ''} />
     </div></Card> : null}
     <div className="flex items-center justify-end gap-4">
-      <Link href={ROUTES['voucher_recieve.index']} className="text-sm text-muted-foreground">Cancel</Link>
+      <Link href={ROUTES['voucher_recieve.index']} className="text-sm text-muted-foreground"><Phrase>Cancel</Phrase></Link>
       <SubmitButton disabled={loading || !!invoiceError}>{defaults.id ? 'Update Receipt' : 'Save Receipt'}</SubmitButton>
     </div>
   </form>;

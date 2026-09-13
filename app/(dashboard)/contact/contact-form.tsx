@@ -18,6 +18,7 @@ import {
 import { SubmitButton } from '@/components/erp/submit-button';
 import { ROUTES } from '@/lib/routes';
 import type { ContactFormState } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: ContactFormState = {};
 
@@ -234,7 +235,7 @@ export function ContactForm({
           href={ROUTES['add_contact.index']}
           variant="outline"
         >
-          Cancel
+          <Phrase>Cancel</Phrase>
         </LinkButton>
         <SubmitButton>{isEdit ? 'Update Contact':'Save Contact'}</SubmitButton>
       </div>

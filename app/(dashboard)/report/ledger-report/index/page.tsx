@@ -14,6 +14,7 @@ import { ArrowDownLeft, ArrowUpRight, PlayCircle, Scale } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { FormAlert } from '@/components/erp/fields';
 import { SelectControl } from '@/components/erp/select-control';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Ledger Report' };
 
@@ -90,7 +91,7 @@ export default async function LedgerReportPage({
               type="submit"
               className="h-10 rounded-lg bg-primary px-4 text-sm font-medium text-white transition hover:bg-primary"
             >
-              Search
+              <Phrase>Search</Phrase>
             </button>
           </form>
         }
@@ -144,7 +145,7 @@ export default async function LedgerReportPage({
           >
             <Tr>
               <Td className="font-medium text-foreground">
-                Opening Balance
+                <Phrase>Opening Balance</Phrase>
               </Td>
               <Td />
               <Td />

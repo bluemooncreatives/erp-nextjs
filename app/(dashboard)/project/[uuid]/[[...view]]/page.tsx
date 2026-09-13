@@ -30,6 +30,7 @@ import {
 } from '../../actions';
 import { ProjectSettingsForm, ShareProjectForm } from '../../forms';
 import { SelectControl } from '@/components/erp/select-control';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Project' };
 
@@ -148,7 +149,7 @@ export default async function ProjectShowPage({
                       <form action={destroyProjectComment}>
                         <input type="hidden" name="comment_id" value={row.comment.id} />
                         <input type="hidden" name="project_id" value={project.id} />
-                        <ActionButton confirm="Delete this comment?">Delete</ActionButton>
+                        <ActionButton confirm="Delete this comment?"><Phrase>Delete</Phrase></ActionButton>
                       </form>
                     </div>
                     <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
@@ -242,7 +243,7 @@ export default async function ProjectShowPage({
                               <form action={destroyTask}>
                                 <input type="hidden" name="task_id" value={row.task.id} />
                                 <input type="hidden" name="project_id" value={project.id} />
-                                <ActionButton confirm="Delete this task?">Delete</ActionButton>
+                                <ActionButton confirm="Delete this task?"><Phrase>Delete</Phrase></ActionButton>
                               </form>
                             </div>
                           </Td>
@@ -339,7 +340,7 @@ export default async function ProjectShowPage({
                       <form action={removeProjectMember}>
                         <input type="hidden" name="project_id" value={project.id} />
                         <input type="hidden" name="user_id" value={member.id} />
-                        <ActionButton confirm="Remove this member?">Remove</ActionButton>
+                        <ActionButton confirm="Remove this member?"><Phrase>Remove</Phrase></ActionButton>
                       </form>
                     ) : null}
                   </Td>

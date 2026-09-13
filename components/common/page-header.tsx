@@ -7,7 +7,7 @@ import { cn } from "@/components/ui/utils";
 /** The page-context block every screen opens with — 30-odd pages used to hand-roll their own heading, no two agreeing on spacing. */
 
 export interface Crumb {
-  label: string;
+  label: ReactNode;
   /** Omit on the current page — the last crumb renders as plain text. */
   to?: string;
 }

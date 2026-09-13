@@ -22,6 +22,7 @@ import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
 import { approveSaleAction } from '../sale/actions';
 import { ReceiveOrderForm } from './receive-form';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Sale on Condition' };
 
@@ -134,7 +135,7 @@ export default async function ConditionalSalePage({
                       href={route('sale.show', { id: sale.id })}
                       className="rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted"
                     >
-                      Order Details
+                      <Phrase>Order Details</Phrase>
                     </Link>
                   ) : null}
                   {canEdit ? (
@@ -142,7 +143,7 @@ export default async function ConditionalSalePage({
                       href={route('sale.edit', { id: sale.id })}
                       
                     >
-                      Edit
+                      <Phrase>Edit</Phrase>
                     </LinkButton>
                   ) : null}
                   {canApprove && sale.isApproved !== 1 ? (
@@ -152,7 +153,7 @@ export default async function ConditionalSalePage({
                         variant="primary"
                         confirm="Approve this sale? Stock will be deducted and the ledger posted."
                       >
-                        Approve
+                        <Phrase>Approve</Phrase>
                       </ActionButton>
                     </form>
                   ) : null}

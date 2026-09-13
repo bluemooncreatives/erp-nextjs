@@ -11,6 +11,7 @@ import { PackageCheck, ShoppingCart, Undo2, Barcode } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { Badge } from '@/components/erp/badge';
 import { SelectControl } from '@/components/erp/select-control';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Product Serial Report' };
 
@@ -84,7 +85,7 @@ export default async function SerialReportPage({
               type="submit"
               className="h-10 rounded-lg bg-primary px-4 text-sm font-medium text-white hover:bg-primary"
             >
-              Search
+              <Phrase>Search</Phrase>
             </button>
           </form>
         }
@@ -115,7 +116,7 @@ export default async function SerialReportPage({
               <Td>
                 {r.serial.isReturned === 1 ? (
                   <Badge size="sm" color="warning">
-                    Returned
+                    <Phrase>Returned</Phrase>
                   </Badge>
                 ) : (
                   '-'

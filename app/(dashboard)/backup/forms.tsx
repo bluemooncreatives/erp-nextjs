@@ -7,6 +7,7 @@ import { useActionState } from 'react';
 import { FormAlert, FormActions } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import { generateBackup, importBackup, type BackupFormState } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const EMPTY: BackupFormState = {};
 
@@ -27,7 +28,7 @@ export function ImportBackupForm() {
       />
 
       <FormActions>
-        <SubmitButton pendingLabel="Importing...">Update</SubmitButton>
+        <SubmitButton pendingLabel="Importing..."><Phrase>Update</Phrase></SubmitButton>
       </FormActions>
     </form>
   );
@@ -41,7 +42,7 @@ export function GenerateBackupForm() {
       <FormAlert variant="error" message={state.error} />
       <FormAlert variant="success" message={state.success} />
       <SubmitButton size="sm" pendingLabel="Backing up...">
-        Generate New Backup
+        <Phrase>Generate New Backup</Phrase>
       </SubmitButton>
     </form>
   );

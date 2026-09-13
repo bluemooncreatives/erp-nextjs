@@ -17,6 +17,7 @@ import { ROUTES, route } from '@/lib/routes';
 import { Card, DetailList, PageHeader } from '@/components/erp/page';
 import { DataTable, StatusBadge, Td, Tr } from '@/components/erp/table';
 import { ShowroomOpeningBalanceForm } from './opening-balance-form';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Branch Details' };
 
@@ -109,7 +110,7 @@ export default async function ShowroomDetailsPage({
             href={route('product_movement.index', {}, { showroom_id: showroom.id })}
             
           >
-            Products
+            <Phrase>Products</Phrase>
           </LinkButton>
         }
       />

@@ -15,6 +15,7 @@ import { deleteRole } from '../../actions';
 import { ReportSummary } from '@/components/erp/report-summary';
 import { KeyRound, Shield, UserCog, Users } from 'lucide-react';
 import { RoleForm } from './role-form';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Role' };
 
@@ -113,7 +114,7 @@ export default async function RolesPage() {
                         <form action={deleteRole}>
                           <input type="hidden" name="id" value={row.role.id} />
                           <ActionButton confirm={`Delete role "${row.role.name}"?`}>
-                            Delete
+                            <Phrase>Delete</Phrase>
                           </ActionButton>
                         </form>
                       ) : null}

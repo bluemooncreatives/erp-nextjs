@@ -3,6 +3,7 @@
 
 import { FormInput, FormSelect, type SelectOption } from '@/components/erp/fields';
 import { Button } from '@/components/ui/button';
+import { Phrase } from '@/context/TranslationContext';
 
 export function PeriodFilter({
   action,
@@ -57,7 +58,7 @@ export function DateRangeFilter({
         defaultValue={to ?? ''}
         wrapperClassName="min-w-36 flex-1"
       />
-      <Button type="submit" variant="soft">Search</Button>
+      <Button type="submit" variant="soft"><Phrase>Search</Phrase></Button>
     </form>
   );
 }
@@ -80,7 +81,7 @@ export function SingleDateFilter({
         defaultValue={date ?? ''}
         wrapperClassName="min-w-36 flex-1"
       />
-      <Button type="submit" variant="soft">Search</Button>
+      <Button type="submit" variant="soft"><Phrase>Search</Phrase></Button>
     </form>
   );
 }

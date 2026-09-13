@@ -22,6 +22,7 @@ import {
 } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { deleteStaffAction, toggleStaffActive } from '../actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Staff' };
 
@@ -73,7 +74,7 @@ export default async function StaffListPage({
                 href={ROUTES['staffs.create']}
                 
               >
-                Add Staff
+                <Phrase>Add Staff</Phrase>
               </LinkButton>
             </div>
           ) : null
@@ -154,7 +155,7 @@ export default async function StaffListPage({
                       href={route('staffs.view', { id: row.staff.id })}
                       className="rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted"
                     >
-                      View
+                      <Phrase>View</Phrase>
                     </Link>
                   ) : null}
                   {canEdit ? (
@@ -162,7 +163,7 @@ export default async function StaffListPage({
                       href={route('staffs.edit', { id: row.staff.id })}
                       
                     >
-                      Edit
+                      <Phrase>Edit</Phrase>
                     </LinkButton>
                   ) : null}
                   {canDelete ? (
@@ -171,7 +172,7 @@ export default async function StaffListPage({
                       <ActionButton
                         confirm={`Delete "${row.user.name}" and their login?`}
                       >
-                        Delete
+                        <Phrase>Delete</Phrase>
                       </ActionButton>
                     </form>
                   ) : null}

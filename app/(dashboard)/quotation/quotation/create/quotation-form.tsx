@@ -23,6 +23,7 @@ import {
   updateQuotationAction,
   type QuotationFormState,
 } from '../../actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: QuotationFormState = {};
 
@@ -319,7 +320,7 @@ export function QuotationForm({
                     onClick={() => setLines((prev) => prev.filter((l) => l.key !== line.key))}
                     className="rounded-lg px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10"
                   >
-                    Remove
+                    <Phrase>Remove</Phrase>
                   </button>
                 </Td>
               </Tr>
@@ -409,7 +410,7 @@ export function QuotationForm({
           href={ROUTES['quotation.index']}
           variant="outline"
         >
-          Cancel
+          <Phrase>Cancel</Phrase>
         </LinkButton>
         <button
           type="submit"

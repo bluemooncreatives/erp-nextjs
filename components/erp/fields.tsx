@@ -20,6 +20,7 @@ import { AlertCircle, CheckCircle2, Info, TriangleAlert } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/components/ui/utils';
+import { Phrase } from '@/context/TranslationContext';
 import { SelectControl, type SelectOption } from './select-control';
 
 export type { SelectOption };
@@ -70,7 +71,7 @@ export function Field({
     <div className={className}>
       {label ? (
         <FieldLabel htmlFor={htmlFor} required={required}>
-          {label}
+          <Phrase>{label}</Phrase>
         </FieldLabel>
       ) : null}
       {children}

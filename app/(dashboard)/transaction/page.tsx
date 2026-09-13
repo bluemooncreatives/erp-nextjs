@@ -10,6 +10,7 @@ import { PageHeader, Card } from '@/components/erp/page';
 import { ReportSummary } from '@/components/erp/report-summary';
 import { PlayCircle, ArrowDownLeft, ArrowUpRight, Scale } from 'lucide-react';
 import { DataTable, Td, Tr } from '@/components/erp/table';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'My Transactions' };
 
@@ -69,7 +70,7 @@ export default async function ContactTransactionPage() {
           isEmpty={false}
         >
           <Tr>
-            <Td className="font-medium text-foreground">Openning Balance</Td>
+            <Td className="font-medium text-foreground"><Phrase>Openning Balance</Phrase></Td>
             <Td />
             <Td />
             <Td />

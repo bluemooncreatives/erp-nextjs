@@ -14,6 +14,7 @@ import { DataTable, Pagination, SearchBar, Td, Tr } from '@/components/erp/table
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
 import { approveSaleAction, deleteSaleAction } from '../actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Sale' };
 
@@ -64,7 +65,7 @@ export default async function SaleListPage({
               href={ROUTES['sale.create']}
               
             >
-              Add Sale
+              <Phrase>Add Sale</Phrase>
             </LinkButton>
           ) : null
         }
@@ -140,7 +141,7 @@ export default async function SaleListPage({
               <Td>
                 {sale.isApproved === 1 ? (
                   <Badge size="sm" color="success">
-                    Approved
+                    <Phrase>Approved</Phrase>
                   </Badge>
                 ) : canApprove ? (
                   <form action={approveSaleAction}>
@@ -149,12 +150,12 @@ export default async function SaleListPage({
                       variant="primary"
                       confirm={`Approve invoice ${sale.invoiceNo ?? sale.id}? This posts the ledger entries and deducts stock.`}
                     >
-                      Approve
+                      <Phrase>Approve</Phrase>
                     </ActionButton>
                   </form>
                 ) : (
                   <Badge size="sm" color="warning">
-                    Pending
+                    <Phrase>Pending</Phrase>
                   </Badge>
                 )}
               </Td>
@@ -162,7 +163,7 @@ export default async function SaleListPage({
                 <div className="flex items-center gap-2">
                   {canEdit && sale.isApproved !== 1 ? (
                     <LinkButton href={route('sale.edit', { id: sale.id })}>
-                      Edit
+                      <Phrase>Edit</Phrase>
                     </LinkButton>
                   ) : null}
                   {/* The Blade's "Clone to Sale" and "Clone to Quotation" -
@@ -191,7 +192,7 @@ export default async function SaleListPage({
                       <ActionButton
                         confirm={`Delete invoice ${sale.invoiceNo ?? sale.id}? Stock will be returned.`}
                       >
-                        Delete
+                        <Phrase>Delete</Phrase>
                       </ActionButton>
                     </form>
                   ) : null}

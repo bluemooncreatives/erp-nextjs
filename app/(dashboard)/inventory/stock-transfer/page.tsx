@@ -20,6 +20,7 @@ import {
   sendTransferAction,
   changeTransferStatusAction,
 } from '../actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Stock Transfer' };
 
@@ -117,9 +118,9 @@ export default async function StockTransferListPage({
               </Td>
               <Td>
                 <div className="flex items-center gap-2">
-                  {canEdit && transfer.status === 0 && !transfer.receivedAt && <Link className="text-primary hover:underline" href={`/inventory/stock-transfer/${transfer.id}/edit`}>Edit</Link>}
-                  {canApprove && transfer.status === 0 && <form action={changeTransferStatusAction}><input type="hidden" name="id" value={transfer.id} /><ActionButton variant="primary">Approve</ActionButton></form>}
-                  {canShow && <Link className="text-primary hover:underline" href={`/inventory/stock-transfer/${transfer.id}`}>Details</Link>}
+                  {canEdit && transfer.status === 0 && !transfer.receivedAt && <Link className="text-primary hover:underline" href={`/inventory/stock-transfer/${transfer.id}/edit`}><Phrase>Edit</Phrase></Link>}
+                  {canApprove && transfer.status === 0 && <form action={changeTransferStatusAction}><input type="hidden" name="id" value={transfer.id} /><ActionButton variant="primary"><Phrase>Approve</Phrase></ActionButton></form>}
+                  {canShow && <Link className="text-primary hover:underline" href={`/inventory/stock-transfer/${transfer.id}`}><Phrase>Details</Phrase></Link>}
                   {!transfer.sentAt && canSend ? (
                     <form action={sendTransferAction}>
                       <input type="hidden" name="id" value={transfer.id} />
@@ -133,14 +134,14 @@ export default async function StockTransferListPage({
                         variant="primary"
                         confirm="Receive this transfer? Stock moves between the locations."
                       >
-                        Receive
+                        <Phrase>Receive</Phrase>
                       </ActionButton>
                     </form>
                   ) : null}
                   {canDelete && !transfer.receivedAt ? (
                     <form action={deleteTransferAction}>
                       <input type="hidden" name="id" value={transfer.id} />
-                      <ActionButton confirm="Delete this transfer?">Delete</ActionButton>
+                      <ActionButton confirm="Delete this transfer?"><Phrase>Delete</Phrase></ActionButton>
                     </form>
                   ) : null}
                 </div>

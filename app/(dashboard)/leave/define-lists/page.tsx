@@ -14,6 +14,7 @@ import { removeLeaveDefine } from '../actions';
 import { ReportSummary } from '@/components/erp/report-summary';
 import { CalendarCheck, Repeat, Shield, Tags } from 'lucide-react';
 import { LeaveDefineForm } from './leave-define-form';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Leave Define' };
 
@@ -98,7 +99,7 @@ export default async function LeaveDefinePage() {
                       <form action={removeLeaveDefine}>
                         <input type="hidden" name="id" value={row.define.id} />
                         <ActionButton confirm="Delete this leave definition?">
-                          Delete
+                          <Phrase>Delete</Phrase>
                         </ActionButton>
                       </form>
                     ) : (

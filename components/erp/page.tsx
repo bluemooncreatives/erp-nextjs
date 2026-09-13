@@ -19,6 +19,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { cn } from '@/components/ui/utils';
+import { Phrase } from '@/context/TranslationContext';
 
 export type Crumb = { label: string; href?: string };
 
@@ -30,10 +31,10 @@ export function PageHeader({ title, breadcrumb = [], actions, description, child
   children?: ReactNode;
 }) {
   return <ProductPageHeader
-    title={title}
-    description={description}
+    title={<Phrase>{title}</Phrase>}
+    description={<Phrase>{description}</Phrase>}
     className="mb-6"
-    breadcrumbs={[{ label: 'Home', to: '/home' }, ...(breadcrumb.length ? breadcrumb.map((crumb) => ({ label: crumb.label, to: crumb.href })) : [{ label: title }])]}
+    breadcrumbs={[{ label: <Phrase><Phrase>Home</Phrase></Phrase>, to: '/home' }, ...(breadcrumb.length ? breadcrumb.map((crumb) => ({ label: <Phrase>{crumb.label}</Phrase>, to: crumb.href })) : [{ label: <Phrase>{title}</Phrase> }])]}
     actions={actions}
   >{children}</ProductPageHeader>;
 }
@@ -49,7 +50,7 @@ export function Card({
   noBodyBorder = false,
 }: {
   title?: ReactNode;
-  desc?: string;
+  desc?: ReactNode;
   actions?: ReactNode;
   children: ReactNode;
   className?: string;
@@ -72,8 +73,8 @@ export function Card({
           )}
         >
           <div className="min-w-0 space-y-1">
-            {title ? <CardTitle className="text-lg font-semibold">{title}</CardTitle> : null}
-            {desc ? <CardDescription>{desc}</CardDescription> : null}
+            {title ? <CardTitle className="text-lg font-semibold"><Phrase>{title}</Phrase></CardTitle> : null}
+            {desc ? <CardDescription><Phrase>{desc}</Phrase></CardDescription> : null}
           </div>
           {actions ? (
             <CardAction className="flex flex-wrap gap-2">{actions}</CardAction>
@@ -109,5 +110,5 @@ export function DetailList({
 }
 
 export function EmptyState({ message, description, action }: { message: string; description?: string; action?: ReactNode }) {
-  return <ProductEmptyState icon={Inbox} title={message} description={description} action={action} variant="bare" />;
+  return <ProductEmptyState icon={Inbox} title={<Phrase>{message}</Phrase>} description={<Phrase>{description}</Phrase>} action={action} variant="bare" />;
 }

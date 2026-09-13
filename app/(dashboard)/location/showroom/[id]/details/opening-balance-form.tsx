@@ -7,6 +7,7 @@ import { Card } from '@/components/erp/page';
 import { FormAlert, FormInput } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import { storeShowroomOpeningBalance, type OpeningBalanceState } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: OpeningBalanceState = {};
 
@@ -31,7 +32,7 @@ export function ShowroomOpeningBalanceForm({ showroomId }: { showroomId: number 
           error={state.fieldErrors?.opening_balance}
         />
 
-        <SubmitButton>Save</SubmitButton>
+        <SubmitButton><Phrase>Save</Phrase></SubmitButton>
       </form>
     </Card>
   );

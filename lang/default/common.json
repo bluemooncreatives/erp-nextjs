@@ -433,5 +433,21 @@
   "Sent By": "Sent By",
   "Recieve Transfer Product": "Receive Transfer Product",
   "Mark selected as seen": "Mark selected as seen",
-  "Selected notification marked as seen": "Selected notification marked as seen"
+  "Selected notification marked as seen": "Selected notification marked as seen",
+  "Home": "Home",
+  "Summary": "Summary",
+  "Project Management": "Project Management",
+  "Projects": "Projects",
+  "Teams": "Teams",
+  "Setup": "Setup",
+  "Currencies": "Currencies",
+  "Today Balance / Cash in Hand": "Today Balance / Cash in Hand",
+  "Matching records": "Matching records",
+  "Showing now": "Showing now",
+  "Records on this page": "Records on this page",
+  "Across all result pages": "Across all result pages",
+  "Value on this page": "Value on this page",
+  "Apply filters": "Apply filters",
+  "Previous": "Previous",
+  "Next": "Next"
 }

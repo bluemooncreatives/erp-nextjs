@@ -3,6 +3,7 @@
 
 import { Card } from '@/components/erp/page';
 import { DataTable, Td, Tr } from '@/components/erp/table';
+import { Phrase } from '@/context/TranslationContext';
 
 export type LedgerRow = {
   id: number;
@@ -41,7 +42,7 @@ export function LedgerTable({
         isEmpty={false}
       >
         <Tr>
-          <Td className="font-medium">Openning Balance</Td>
+          <Td className="font-medium"><Phrase>Openning Balance</Phrase></Td>
           <Td />
           <Td />
           <Td />

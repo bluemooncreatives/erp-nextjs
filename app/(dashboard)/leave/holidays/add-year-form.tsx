@@ -7,6 +7,7 @@ import { Plus } from 'lucide-react';
 import { FormInput } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import { addHolidayYear, type HolidayFormState } from './actions';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: HolidayFormState = {};
 
@@ -27,7 +28,7 @@ export function AddYearForm() {
       />
       <SubmitButton size="sm" pendingLabel="Adding...">
         <Plus className="size-3.5" />
-        Add
+        <Phrase>Add</Phrase>
       </SubmitButton>
     </form>
   );

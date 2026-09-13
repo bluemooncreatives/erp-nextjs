@@ -15,6 +15,7 @@ import { ToggleSwitch } from '@/components/erp/toggle';
 import { ActionButton } from '@/components/erp/submit-button';
 import { toggleLanguageStatus, toggleLanguageRtl, deleteLanguage } from './actions';
 import { LanguageForm } from './forms';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Language List' };
 
@@ -107,7 +108,7 @@ export default async function LocalizationPage({
                         href={`${ROUTES['languages.index']}?edit=${language.id}`}
                         className="text-xs font-medium text-primary hover:text-primary"
                       >
-                        Edit
+                        <Phrase>Edit</Phrase>
                       </Link>
                     ) : null}
                     {canTranslate ? (
@@ -115,14 +116,14 @@ export default async function LocalizationPage({
                         href={route('language.translate_view', { id: language.id })}
                         className="text-xs font-medium text-muted-foreground hover:text-foreground"
                       >
-                        Translation
+                        <Phrase>Translation</Phrase>
                       </Link>
                     ) : null}
                     {/* The Blade only offered Delete beyond the seeded 114 rows. */}
                     {canDelete && language.id > 114 ? (
                       <form action={deleteLanguage}>
                         <input type="hidden" name="id" value={language.id} />
-                        <ActionButton confirm="Delete this language?">Delete</ActionButton>
+                        <ActionButton confirm="Delete this language?"><Phrase>Delete</Phrase></ActionButton>
                       </form>
                     ) : null}
                   </div>
@@ -141,7 +142,7 @@ export default async function LocalizationPage({
                   href={ROUTES['languages.index']}
                   className="text-xs font-medium text-muted-foreground hover:text-foreground"
                 >
-                  Cancel
+                  <Phrase>Cancel</Phrase>
                 </Link>
               </div>
             ) : null}

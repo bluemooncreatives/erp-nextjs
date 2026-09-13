@@ -14,6 +14,7 @@ import { DataTable, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { removeFromTeam } from '../../project/actions';
 import { TeamSettingsForm, TeamInviteForm } from '../../project/forms';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Team' };
 
@@ -54,7 +55,7 @@ export default async function TeamShowPage({
             href={`${ROUTES['project.create']}?team_id=${team.id}`}
             
           >
-            New Project
+            <Phrase>New Project</Phrase>
           </LinkButton>
         }
       />
@@ -111,7 +112,7 @@ export default async function TeamShowPage({
                       <form action={removeFromTeam}>
                         <input type="hidden" name="team_id" value={team.id} />
                         <input type="hidden" name="user_id" value={member.id} />
-                        <ActionButton confirm="Remove this member?">Remove</ActionButton>
+                        <ActionButton confirm="Remove this member?"><Phrase>Remove</Phrase></ActionButton>
                       </form>
                     ) : null}
                   </Td>

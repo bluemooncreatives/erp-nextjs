@@ -12,6 +12,7 @@ import { Badge } from '@/components/erp/badge';
 import { ReportSummary } from '@/components/erp/report-summary';
 import { Files, Wallet, CircleCheck, CircleX, Hourglass } from 'lucide-react';
 import { deleteVoucherAction } from '../../actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Receipt Vouchers' };
 
@@ -54,8 +55,8 @@ export default async function ReceiptVouchersPage({ searchParams }: { searchPara
           <Td>{voucher.amountLabel}</Td>
           <Td><Badge size="sm" color={voucher.isApprove === 1 ? 'success' : voucher.isApprove === 2 ? 'error' : 'warning'}>{voucher.isApprove === 1 ?'Approved': voucher.isApprove === 2 ?'Cancelled':'Pending'}</Badge></Td>
           <Td><div className="flex items-center gap-3">
-            {canEdit ? <Link className="text-primary" href={route('voucher_recieve.edit', { id: voucher.id })}>Edit</Link> : null}
-            {canDelete ? <form action={deleteVoucherAction}><input type="hidden" name="id" value={voucher.id} /><ActionButton confirm="Delete this receipt and its postings?">Delete</ActionButton></form> : null}
+            {canEdit ? <Link className="text-primary" href={route('voucher_recieve.edit', { id: voucher.id })}><Phrase>Edit</Phrase></Link> : null}
+            {canDelete ? <form action={deleteVoucherAction}><input type="hidden" name="id" value={voucher.id} /><ActionButton confirm="Delete this receipt and its postings?"><Phrase>Delete</Phrase></ActionButton></form> : null}
           </div></Td>
         </Tr>)}
       </DataTable>

@@ -14,6 +14,7 @@ import { DataTable, Pagination, SearchBar, Td, Tr } from '@/components/erp/table
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
 import { deleteQuotationAction } from '../actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Quotation' };
 
@@ -61,7 +62,7 @@ export default async function QuotationListPage({
               href={ROUTES['quotation.create']}
               
             >
-              Add Quotation
+              <Phrase>Add Quotation</Phrase>
             </LinkButton>
           ) : null
         }
@@ -136,13 +137,13 @@ export default async function QuotationListPage({
                       href={route('quotation.edit', { id: q.id })}
                       
                     >
-                      Edit
+                      <Phrase>Edit</Phrase>
                     </LinkButton>
                   ) : null}
                   {canDelete ? (
                     <form action={deleteQuotationAction}>
                       <input type="hidden" name="id" value={q.id} />
-                      <ActionButton confirm="Delete this quotation?">Delete</ActionButton>
+                      <ActionButton confirm="Delete this quotation?"><Phrase>Delete</Phrase></ActionButton>
                     </form>
                   ) : null}
                 </div>

@@ -14,6 +14,7 @@ import { Files, Wallet, ListFilter } from 'lucide-react';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { deleteIncomeAction } from '../actions';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Income Lists' };
 
@@ -58,7 +59,7 @@ export default async function IncomeListPage({
               href={ROUTES['income.create']}
               
             >
-              Add Income
+              <Phrase>Add Income</Phrase>
             </LinkButton>
           ) : null
         }
@@ -97,12 +98,12 @@ export default async function IncomeListPage({
               <Td className="max-w-xs truncate">{row.voucher?.narration ?? '-'}</Td>
               <Td>{`${symbol} ${numberFormat(row.voucher?.amount ?? 0)}`}</Td>
               <Td>
-                {canEdit ? <Link className="me-3 text-primary" href={`/account/income/${row.income.id}/edit`}>Edit</Link> : null}
+                {canEdit ? <Link className="me-3 text-primary" href={`/account/income/${row.income.id}/edit`}><Phrase>Edit</Phrase></Link> : null}
                 {canDelete ? (
                   <form action={deleteIncomeAction}>
                     <input type="hidden" name="id" value={row.income.id} />
                     <ActionButton confirm="Delete this income and its voucher?">
-                      Delete
+                      <Phrase>Delete</Phrase>
                     </ActionButton>
                   </form>
                 ) : (

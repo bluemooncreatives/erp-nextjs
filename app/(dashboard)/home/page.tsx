@@ -74,6 +74,7 @@ import { StatusBadge } from '@/components/common/status-badge';
 import { DashboardActions, DashboardLink } from '@/components/dashboard/dashboard-actions';
 import { Card as UICard } from '@/components/ui/card';
 import { Card } from '@/components/erp/page';
+import { Phrase } from '@/context/TranslationContext';
 
 export const metadata: Metadata = { title: 'Dashboard' };
 
@@ -532,19 +533,19 @@ export default async function DashboardPage() {
                   <thead>
                     <tr>
                       <th scope="col" className="h-14 ps-4 text-start sm:ps-6">
-                        Customer
+                        <Phrase>Customer</Phrase>
                       </th>
                       <th scope="col" className="h-14 text-start">
-                        Invoice
+                        <Phrase>Invoice</Phrase>
                       </th>
                       <th scope="col" className="h-14 text-start">
-                        Date
+                        <Phrase>Date</Phrase>
                       </th>
                       <th scope="col" className="h-14 text-end">
                         Payable
                       </th>
                       <th scope="col" className="h-14 text-center">
-                        Status
+                        <Phrase>Status</Phrase>
                       </th>
                       <th
                         scope="col"
@@ -574,7 +575,7 @@ export default async function DashboardPage() {
                         </td>
                         <td className="pe-4 text-end sm:pe-6">
                           <DashboardLink variant="ghost" size="sm" href={ROUTES['sale.show'].replace('{id}', String(due.id))}>
-                              Open
+                              <Phrase>Open</Phrase>
                             </DashboardLink>
                         </td>
                       </tr>
@@ -600,7 +601,7 @@ export default async function DashboardPage() {
                 <table className="table-unified w-full">
                   <thead>
                     <tr>
-                      <th className="text-start">SKU</th>
+                      <th className="text-start"><Phrase>SKU</Phrase></th>
                       <th className="text-end">In stock</th>
                       <th className="text-end">Alert at</th>
                     </tr>
@@ -675,7 +676,7 @@ export default async function DashboardPage() {
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-medium">{module.label}</span>
-                <span className="text-muted-foreground mt-0.5 block text-xs">Open</span>
+                <span className="text-muted-foreground mt-0.5 block text-xs"><Phrase>Open</Phrase></span>
               </span>
             </Link>
           );

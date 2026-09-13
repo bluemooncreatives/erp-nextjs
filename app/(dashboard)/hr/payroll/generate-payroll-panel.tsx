@@ -12,6 +12,7 @@ import { SubmitButton } from '@/components/erp/submit-button';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { storePayroll, type LeaveFormState } from '../../leave/actions';
 import { isEarningLine } from '@/lib/hr/payroll-lines';
+import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: LeaveFormState = {};
 
@@ -149,7 +150,7 @@ export function GeneratePayrollPanel({
                   }
                   className="rounded-lg px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10"
                 >
-                  Remove
+                  <Phrase>Remove</Phrase>
                 </button>
               </div>
             </div>
@@ -234,7 +235,7 @@ export function GeneratePayrollPanel({
         </DataTable>
 
         <div className="mt-5">
-          <SubmitButton disabled={!staffId}>Generate Payroll</SubmitButton>
+          <SubmitButton disabled={!staffId}><Phrase>Generate Payroll</Phrase></SubmitButton>
         </div>
       </Card>
     </form>
