@@ -368,7 +368,9 @@ export async function switchShowroom(showroomId: number): Promise<void> {
  * `VerifyEmail::verificationUrl()` - a temporary signed link to
  * `verification.verify` carrying the user id and `sha1(email)`.
  */
-export async function sendVerificationLink(userId: number, email: string): Promise<void> {
+// Not exported: nothing outside this file sends a verification link, and an
+// exported function in a `'use server'` module is a public endpoint.
+async function sendVerificationLink(userId: number, email: string): Promise<void> {
   const { temporarySignedUrl } = await import('@/lib/auth/signed-url');
   const { sendVerifyEmailMail } = await import('@/lib/mail');
   const hash = createHash('sha1').update(email).digest('hex');

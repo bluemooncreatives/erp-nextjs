@@ -17,7 +17,6 @@ import {
   findQuotation,
   markQuotationMailed,
 } from '@/lib/quotation/repository';
-import { quotationToSale } from '@/lib/sale/repository';
 import { sendQuotationMail } from '@/lib/mail';
 import { config } from '@/lib/config';
 import { actionFormData } from '@/lib/forms';

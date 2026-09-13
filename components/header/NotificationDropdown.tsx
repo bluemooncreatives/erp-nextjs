@@ -13,7 +13,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { markAllRead } from '@/app/(dashboard)/notification-actions';
+import { markAllRead, markRead } from '@/app/(dashboard)/notification-actions';
 import { ROUTES } from '@/lib/routes';
 
 export type HeaderNotification = {
@@ -74,6 +74,11 @@ export default function NotificationDropdown({
                 <Link
                   href={item.url ?? ROUTES['all_notifications']}
                   className="hover:bg-muted block px-4 py-3"
+                  // `notification.update` - opening one marks it read, which
+                  // is what the Blade's click handler posted.
+                  onClick={() => {
+                    if (!item.readAt) void markRead(item.id);
+                  }}
                 >
                   <span className="block text-sm font-medium">
                     {item.type ?? 'Notification'}

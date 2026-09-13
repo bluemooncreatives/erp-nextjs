@@ -11,14 +11,12 @@ import { errorLog, successLog } from '@/lib/activity-log';
 import { ROUTES, route } from '@/lib/routes';
 import {
   INSUFFICIENT_STOCK,
-  acceptSaleDelivery,
   approveSale,
   approveSaleReturn,
   createSale,
   updateSale,
   deleteSale,
   markSaleMailed,
-  quotationToSale,
   recordSalePayments,
   recordSaleReturn,
   saveShipping,
