@@ -11,6 +11,7 @@ import { FormAlert, FormInput, FormSelect } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { storePayroll, type LeaveFormState } from '../../leave/actions';
+import { isEarningLine } from '@/lib/hr/payroll-lines';
 
 const INITIAL: LeaveFormState = {};
 
@@ -47,12 +48,14 @@ export function GeneratePayrollPanel({
   const selected = staff.find((s) => String(s.id) === staffId) ?? null;
   const basic = selected?.basicSalary ?? 0;
 
+  // The preview has to total the same way the action does, so it shares the
+  // server's reading of `earn_dedc_type`.
   const earnings = lines
-    .filter((l) => l.kind === 'earn')
-    .reduce((sum, l) => sum + l.amount, 0);
+    .filter((line) => isEarningLine(line.kind))
+    .reduce((sum, line) => sum + line.amount, 0);
   const deductions = lines
-    .filter((l) => l.kind !== 'earn')
-    .reduce((sum, l) => sum + l.amount, 0);
+    .filter((line) => !isEarningLine(line.kind))
+    .reduce((sum, line) => sum + line.amount, 0);
 
   const gross = basic + earnings;
   const net = gross - deductions - tax;
@@ -122,9 +125,11 @@ export function GeneratePayrollPanel({
                 name="earn_dedc_type"
                 value={line.kind}
                 onChange={(e) => patch(line.key, { kind: e.target.value })}
+                // 'E' / 'D' are what `payroll_earn_deducs.earn_dedc_type`
+                // holds and what the payroll reports filter on.
                 options={[
-                  { value: 'earn', label:'Earning' },
-                  { value: 'dedc', label:'Deduction' },
+                  { value: 'E', label: 'Earning' },
+                  { value: 'D', label: 'Deduction' },
                 ]}
               />
               <FormInput
@@ -156,7 +161,7 @@ export function GeneratePayrollPanel({
           onClick={() =>
             setLines((prev) => [
               ...prev,
-              { key: Date.now(), typeName: '', amount: 0, kind: 'earn' },
+              { key: Date.now(), typeName: '', amount: 0, kind: 'E' },
             ])
           }
           className="mt-4 rounded-lg px-4 py-2.5 text-sm font-medium text-primary ring-1 ring-inset ring-ring/50 hover:bg-primary/10"

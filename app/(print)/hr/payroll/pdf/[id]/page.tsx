@@ -8,7 +8,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { requireUser } from '@/lib/auth/permissions';
-import { findPayroll } from '@/lib/hr/leave';
+import { findPayroll, isEarningLine } from '@/lib/hr/leave';
 import { formatPrice, generalSetting } from '@/lib/settings';
 import { assetUrl } from '@/lib/paths';
 import { PrintButton } from '@/components/erp/print-button';
@@ -34,8 +34,8 @@ export default async function PayslipPage({
   const logo = assetUrl(setting.logo);
 
   // `payrollEarnDetails` / `payrollDedcDetails` - the same rows split by type.
-  const earnings = lines.filter((line) => line.earnDedcType === 'ERN');
-  const deductions = lines.filter((line) => line.earnDedcType !== 'ERN');
+  const earnings = lines.filter((line) => isEarningLine(line.earnDedcType));
+  const deductions = lines.filter((line) => !isEarningLine(line.earnDedcType));
 
   return (
     <>

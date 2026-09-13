@@ -27,6 +27,7 @@ import {
   setPayrollStatus,
   updateLeaveApplication,
   type LeaveInput,
+  PayrollLineKind,
   type PayrollLine,
 } from '@/lib/hr/leave';
 import type { ReferenceFormState } from '@/components/erp/reference-crud';
@@ -326,7 +327,7 @@ export async function storePayroll(
     .map((typeName, i) => ({
       typeName,
       amount: amounts[i] ?? 0,
-      earnDedcType: kinds[i] ?? 'earn',
+      earnDedcType: kinds[i] ?? PayrollLineKind.Earning,
     }))
     .filter((l) => l.typeName && l.amount > 0);
 

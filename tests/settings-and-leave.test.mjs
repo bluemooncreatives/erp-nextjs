@@ -109,3 +109,24 @@ test('carry-forward toggles use the staff ID and compute the balance on the serv
   assert.equal(f.updates[1].values.isCarryActive, 0);
   await assert.rejects(f.setCarryForward(3, true), /not found/);
 });
+
+// `payroll_earn_deducs.earn_dedc_type` is the letter 'E' or 'D' - the payroll
+// reports filter on exactly that, so a longer spelling makes rows invisible.
+const payrollLines = load('lib/hr/payroll-lines.ts');
+
+test('an earnings line is recognised however the form spelt it', () => {
+  for (const spelling of ['E', 'e', 'earn', 'Earning', ' E ']) {
+    assert.equal(payrollLines.isEarningLine(spelling), true, spelling);
+  }
+});
+
+test('a deduction line is never mistaken for an earning', () => {
+  for (const spelling of ['D', 'd', 'dedc', 'Deduction', '', null, undefined]) {
+    assert.equal(payrollLines.isEarningLine(spelling), false, String(spelling));
+  }
+});
+
+test('the stored kinds are the single letters Laravel writes', () => {
+  assert.equal(payrollLines.PayrollLineKind.Earning, 'E');
+  assert.equal(payrollLines.PayrollLineKind.Deduction, 'D');
+});

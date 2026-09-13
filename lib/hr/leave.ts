@@ -10,6 +10,7 @@
 // ---------------------------------------------------------------------------
 
 import 'server-only';
+import { PayrollLineKind, isEarningLine } from '@/lib/hr/payroll-lines';
 import { and, desc, eq, sql, type SQL } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import {
@@ -505,7 +506,7 @@ export async function deleteHoliday(id: number): Promise<void> {
 export type PayrollLine = {
   typeName: string;
   amount: number;
-  /** 'earn' or 'dedc'. */
+  /** `PayrollLineKind.Earning` or `PayrollLineKind.Deduction`. */
   earnDedcType: string;
 };
 
@@ -617,11 +618,11 @@ export async function createPayroll(
   actorId: number,
 ): Promise<number> {
   const totalEarning = data.lines
-    .filter((l) => l.earnDedcType === 'earn')
-    .reduce((sum, l) => sum + l.amount, 0);
+    .filter((line) => isEarningLine(line.earnDedcType))
+    .reduce((sum, line) => sum + line.amount, 0);
   const totalDeduction = data.lines
-    .filter((l) => l.earnDedcType !== 'earn')
-    .reduce((sum, l) => sum + l.amount, 0);
+    .filter((line) => !isEarningLine(line.earnDedcType))
+    .reduce((sum, line) => sum + line.amount, 0);
 
   const grossSalary = data.basicSalary + totalEarning;
   const tax = data.tax ?? 0;
@@ -659,7 +660,10 @@ export async function createPayroll(
       data.lines.map((line) => ({
         typeName: line.typeName,
         amount: line.amount,
-        earnDedcType: line.earnDedcType,
+        // Normalised, so a row written here reads the same as one Laravel wrote.
+        earnDedcType: isEarningLine(line.earnDedcType)
+          ? PayrollLineKind.Earning
+          : PayrollLineKind.Deduction,
         payrollId,
         activeStatus: 1,
         createdBy: actorId,
@@ -708,3 +712,4 @@ export async function payableStaff(roleId?: number | null) {
     .orderBy(users.name);
 }
 
+export { PayrollLineKind, isEarningLine };
