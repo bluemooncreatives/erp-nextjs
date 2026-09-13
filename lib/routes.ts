@@ -198,6 +198,11 @@ export const ROUTES = {
   "customerSaleProductList": '/contact/customer/sale-porduct-list/{id}',
   "customer_report.history": '/report/customer-report/history/{id}',
   "customer_report.index": '/report/customer-report/index',
+  // Net-new: PHP's `?print=1` on `customer_report.history` returns a print
+  // view from the same route rather than a distinct one; this port's print
+  // pages are chrome-less and live in their own route group, so they need
+  // their own name - the same pattern POS's synthetic routes already use.
+  "customer_report.print": '/report/customer-report/print/{id}',
   "dashboard": '/',
   "dashboard.card.info": '/dashboard-cards-info/{type}',
   "departments.delete": '/hr/departments-delete',
@@ -534,6 +539,7 @@ export const ROUTES = {
   "staff_document.store": '/staff-document/store',
   "staff_report.history": '/report/staff-report/history/{id}',
   "staff_report.index": '/report/staff-report/index',
+  "staff_report.print": '/report/staff-report/print/{id}',
   "staff_report.search_index": '/report/staff-report/search',
   "staff_search_for_payroll": '/hr/payroll',
   "staffs.create": '/hr/staffs/create',
@@ -593,6 +599,7 @@ export const ROUTES = {
   "supplierPurchaseProductList": '/contact/supplier/purchase-porduct-list/{id}',
   "supplier_report.history": '/report/supplier-report/history/{id}',
   "supplier_report.index": '/report/supplier-report/index',
+  "supplier_report.print": '/report/supplier-report/print/{id}',
   "task-check-like": '/task-chek-like',
   "task-comment": '/task-comment',
   "task-complete": '/task-complete',

@@ -17,7 +17,7 @@ import {
 } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import { DataTable, Td, Tr } from '@/components/erp/table';
-import { ROUTES } from '@/lib/routes';
+import { ROUTES, route } from '@/lib/routes';
 import {
   storeQuotation,
   updateQuotationAction,
@@ -436,6 +436,20 @@ export function QuotationForm({
       <input type="hidden" name="preview_status" value={preview ? '1' : ''} />
 
       <div className="flex items-center justify-end gap-3">
+        {defaults?.id ? (
+          // Port of `quotation::quotation.edit`'s "Preview" button
+          // (`getPreview` / `quotation.order.preview`) - a modal in the Blade,
+          // showing the quotation as currently saved. This port already has a
+          // real print-styled view for the same document, so Preview opens
+          // that instead of a third, duplicate layout.
+          <button
+            type="button"
+            onClick={() => window.open(route('quotation.order.print_view', { id: defaults.id }), '_blank', 'noopener')}
+            className="rounded-lg px-5 py-3 text-sm font-medium text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted"
+          >
+            <Phrase>Preview</Phrase>
+          </button>
+        ) : null}
         <LinkButton
           href={ROUTES['quotation.index']}
           variant="outline"

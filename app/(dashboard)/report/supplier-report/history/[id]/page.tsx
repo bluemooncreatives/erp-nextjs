@@ -12,6 +12,8 @@ import { PageHeader } from '@/components/erp/page';
 import { ReportSummary } from '@/components/erp/report-summary';
 import { PlayCircle, ArrowDownLeft, ArrowUpRight, Scale } from 'lucide-react';
 import { LedgerTable } from '@/components/erp/ledger-table';
+import { LinkButton } from '@/components/common/link-button';
+import { route } from '@/lib/routes';
 
 export const metadata: Metadata = { title: 'Supplier History' };
 
@@ -58,6 +60,11 @@ export default async function SupplierHistoryPage({
       <PageHeader
         title={`Supplier History - ${contact.name}`}
         breadcrumb={[{ label: 'Reports' }, { label: 'Supplier History' }]}
+        actions={
+          <LinkButton href={route('supplier_report.print', { id: contact.id })} target="_blank" variant="outline">
+            Print
+          </LinkButton>
+        }
       />
       <ReportSummary
         figures={[

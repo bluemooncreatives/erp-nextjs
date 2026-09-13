@@ -13,6 +13,8 @@ import { PageHeader } from '@/components/erp/page';
 import { ReportSummary } from '@/components/erp/report-summary';
 import { PlayCircle, ArrowDownLeft, ArrowUpRight, Scale } from 'lucide-react';
 import { LedgerTable } from '@/components/erp/ledger-table';
+import { LinkButton } from '@/components/common/link-button';
+import { route } from '@/lib/routes';
 
 export const metadata: Metadata = { title: 'Staff History' };
 
@@ -64,6 +66,11 @@ export default async function StaffHistoryPage({
       <PageHeader
         title={`Staff History - ${staff.user.name}`}
         breadcrumb={[{ label: 'Reports' }, { label: 'Staff History' }]}
+        actions={
+          <LinkButton href={route('staff_report.print', { id })} target="_blank" variant="outline">
+            Print
+          </LinkButton>
+        }
       />
       <ReportSummary
         figures={[

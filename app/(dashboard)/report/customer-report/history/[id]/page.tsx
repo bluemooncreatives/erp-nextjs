@@ -12,6 +12,8 @@ import { PageHeader } from '@/components/erp/page';
 import { ReportSummary } from '@/components/erp/report-summary';
 import { PlayCircle, ArrowDownLeft, ArrowUpRight, Scale } from 'lucide-react';
 import { LedgerTable } from '@/components/erp/ledger-table';
+import { LinkButton } from '@/components/common/link-button';
+import { route } from '@/lib/routes';
 
 export const metadata: Metadata = { title: 'Customer History' };
 
@@ -58,6 +60,11 @@ export default async function CustomerHistoryPage({
       <PageHeader
         title={`Customer History - ${contact.name}`}
         breadcrumb={[{ label: 'Reports' }, { label: 'Customer History' }]}
+        actions={
+          <LinkButton href={route('customer_report.print', { id: contact.id })} target="_blank" variant="outline">
+            Print
+          </LinkButton>
+        }
       />
       <ReportSummary
         figures={[
