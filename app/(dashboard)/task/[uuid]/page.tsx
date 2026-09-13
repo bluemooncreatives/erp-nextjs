@@ -24,6 +24,12 @@ import {
   updateTaskName,
 } from '../../project/actions';
 import { Phrase } from '@/context/TranslationContext';
+import {
+  ALLOWED_EXTENSIONS,
+  MAX_FILES_PER_TASK,
+  taskAttachments,
+} from '@/lib/project/attachments';
+import { TaskAttachments } from './attachments';
 
 export const metadata: Metadata = { title: 'Task' };
 
@@ -40,6 +46,7 @@ export default async function TaskShowPage({
 
   const { task, subTasks, comments, tags, likes } = record;
   const project = task.projectId ? await findProject(task.projectId) : null;
+  const files = await taskAttachments(task.id);
 
   return (
     <>
@@ -258,6 +265,17 @@ export default async function TaskShowPage({
             <SubmitButton size="sm"><Phrase>Add</Phrase></SubmitButton>
           </form>
         </Card>
+
+        <TaskAttachments
+          taskId={task.id}
+          files={files.map((file) => ({
+            id: file.id,
+            userFilename: file.userFilename,
+            filename: file.filename,
+          }))}
+          limit={MAX_FILES_PER_TASK}
+          allowed={ALLOWED_EXTENSIONS}
+        />
       </div>
     </>
   );

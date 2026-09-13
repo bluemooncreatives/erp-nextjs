@@ -4,6 +4,8 @@
 // Task, Team, Workspace and Tag controllers.
 
 import { revalidatePath } from 'next/cache';
+import { addTaskAttachment, deleteTaskAttachment } from '@/lib/project/attachments';
+import { fileFrom } from '@/lib/uploads';
 import { redirect } from 'next/navigation';
 import { requireUser } from '@/lib/auth/permissions';
 import { errorLog, successLog } from '@/lib/activity-log';
@@ -22,6 +24,7 @@ import {
   renameSection,
   deleteSection,
   createTask,
+  findTask,
   moveTask,
   renameTask,
   setTaskComplete,
@@ -445,6 +448,47 @@ export async function moveTaskToSection(formData: FormData): Promise<void> {
 
   const project = await findProject(Number(formData.get('project_id')));
   if (project?.uuid) revalidatePath(projectPath(project.uuid));
+}
+
+// --- task attachments ------------------------------------------------------
+
+export type AttachmentState = { error?: string; success?: string };
+
+/** `Upload/UploadController@upload`, scoped to one task. */
+export async function uploadTaskAttachment(
+  _previous: AttachmentState,
+  formData?: FormData,
+): Promise<AttachmentState> {
+  formData = actionFormData(_previous, formData);
+  const user = await requireUser();
+
+  const taskId = Number(formData.get('task_id'));
+  const file = fileFrom(formData, 'file');
+  if (!taskId || !file) return { error: 'Choose a file to attach.' };
+
+  const result = await addTaskAttachment(taskId, file, user.id);
+  if (!result.ok) return { error: result.message };
+
+  await revalidateTask(taskId);
+  return { success: 'File attached.' };
+}
+
+/** `Upload/UploadController@destroy` */
+export async function removeTaskAttachment(formData: FormData): Promise<void> {
+  await requireUser();
+
+  const taskId = await deleteTaskAttachment(Number(formData.get('upload_id')));
+  if (taskId != null) await revalidateTask(taskId);
+}
+
+/** The task screen and the project's Files view both list attachments. */
+async function revalidateTask(taskId: number): Promise<void> {
+  const task = await findTask(taskId);
+  if (task?.uuid) revalidatePath(route('task.show', { uuid: task.uuid }));
+  if (task?.projectId) {
+    const project = await findProject(task.projectId);
+    if (project?.uuid) revalidatePath(projectPath(project.uuid));
+  }
 }
 
 /** `TaskController@taskLike` */

@@ -599,6 +599,16 @@ export async function createTask(
   return taskId;
 }
 
+/** One task by id - what an attachment needs to find its project again. */
+export async function findTask(id: number) {
+  const [task] = await db
+    .select({ id: tasks.id, uuid: tasks.uuid, projectId: tasks.projectId })
+    .from(tasks)
+    .where(eq(tasks.id, id))
+    .limit(1);
+  return task ?? null;
+}
+
 export async function findTaskByUuid(uuid: string) {
   const [task] = await db.select().from(tasks).where(eq(tasks.uuid, uuid)).limit(1);
   if (!task) return null;
