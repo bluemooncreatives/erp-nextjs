@@ -474,6 +474,85 @@ await scenario('header: choosing a language switches the interface', async () =>
   await page.waitUntil(`document.documentElement.dir === 'ltr'`, { timeout: 15000 });
 });
 
+await scenario('payroll: the payment panel shows bank fields only for a bank payment', async () => {
+  const staff = await one('select id from staffs limit 1');
+  const [inserted] = await connection.query(
+    `insert into payrolls
+       (staff_id, role_id, basic_salary, total_earning, total_deduction, gross_salary, tax, net_salary,
+        payroll_month, payroll_year, payroll_status, active_status, created_at, updated_at)
+     values (?, 1, 15000, 0, 0, 15000, 0, 15000, 'April', '2093', 'Generated', 1, now(), now())`,
+    [staff?.id ?? 1],
+  );
+  const payrollId = inserted.insertId;
+
+  try {
+    await page.goto(`${base}/hr/payroll`);
+    await page.waitUntil(`document.body.textContent.includes('April 2093')`);
+
+    const openPanel = `
+      (() => {
+        const row = [...document.querySelectorAll('tr')]
+          .find((tr) => tr.textContent.includes('April 2093'));
+        if (!row) throw new Error('payroll row not found');
+        const summary = row.querySelector('summary');
+        if (!summary) throw new Error('no Pay disclosure on the row');
+        summary.click();
+        return true;
+      })()
+    `;
+    await page.interactUntil(openPanel, `document.querySelector('#payment_mode-${payrollId}')`);
+
+    // Cash is the default - no bank fields until a bank payment is chosen.
+    assert.equal(
+      await page.evaluate(`Boolean(document.querySelector('#bank_name-${payrollId}'))`),
+      false,
+      'bank fields are not shown for a cash payment',
+    );
+
+    await pickOption(page, `payment_mode-${payrollId}`, "return option.textContent.trim() === 'Bank';");
+    await page.waitUntil(`document.querySelector('#bank_name-${payrollId}')`);
+
+    await page.evaluate(setValue(`#payment_date-${payrollId}`, '2093-04-30'));
+    await page.evaluate(setValue(`#bank_name-${payrollId}`, 'Verify Bank'));
+    await page.evaluate(setValue(`#bank_branch_name-${payrollId}`, 'Verify Branch'));
+    await page.evaluate(setValue(`#account_no-${payrollId}`, '000111222'));
+
+    await page.evaluate(`
+      (() => {
+        const form = document.querySelector('#bank_name-${payrollId}').closest('form');
+        [...form.querySelectorAll('button')].find((b) => b.textContent.includes('Pay Now')).click();
+      })()
+    `);
+
+    await page.waitUntil(
+      `document.body.textContent.includes('April 2093') && !document.querySelector('#payment_mode-${payrollId}')`,
+      { timeout: 15000 },
+    );
+
+    const payroll = await one('select * from payrolls where id = ?', [payrollId]);
+    assert.equal(payroll.payroll_status, 'Paid', 'the payroll shows paid after the round trip');
+    assert.equal(payroll.payment_mode, 'Bank', 'the chosen method was recorded');
+    assert.equal(payroll.bank_name, 'Verify Bank', 'the bank fields shown in the UI were the ones saved');
+  } finally {
+    const voucher = await one(
+      `select id from vouchers where payment_type = 'journal_voucher' and amount = 15000
+         and date = curdate() order by id desc limit 1`,
+    );
+    if (voucher) {
+      await rows(
+        'delete from tranaction_account where tranaction_id in (select id from transactions where voucherable_id = ? and voucherable_type = ?)',
+        [voucher.id, 'Modules\\Account\\Entities\\Voucher'],
+      );
+      await rows('delete from transactions where voucherable_id = ? and voucherable_type = ?', [
+        voucher.id,
+        'Modules\\Account\\Entities\\Voucher',
+      ]);
+      await rows('delete from vouchers where id = ?', [voucher.id]);
+    }
+    await rows('delete from payroll_earn_deducs where payroll_id = ?', [payrollId]);
+    await rows('delete from payrolls where id = ?', [payrollId]);
+  }
+});
 
 // Additional migration workflows use fixtures created by verify-migration.mjs.
 if (process.env.DB_DATABASE?.startsWith('erp_migration_') && existsSync('artifacts/migration-fixture.json')) {

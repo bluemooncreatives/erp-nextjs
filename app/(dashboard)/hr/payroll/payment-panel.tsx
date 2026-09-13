@@ -45,6 +45,7 @@ export function PayrollPaymentPanel({
         <FormInput
           label="Payment Date"
           name="payment_date"
+          id={`payment_date-${payrollId}`}
           type="date"
           required
           defaultValue={new Date().toISOString().slice(0, 10)}
@@ -54,6 +55,7 @@ export function PayrollPaymentPanel({
         <FormSelect
           label="Payment Method"
           name="payment_mode"
+          id={`payment_mode-${payrollId}`}
           required
           value={mode}
           onChange={(e) => setMode(e.target.value as typeof mode)}
@@ -67,17 +69,17 @@ export function PayrollPaymentPanel({
 
         {mode === 'Bank' ? (
           <>
-            <FormInput label="Bank Name" name="bank_name" required />
-            <FormInput label="Branch Name" name="bank_branch_name" required />
-            <FormInput label="Account No" name="account_no" required />
+            <FormInput label="Bank Name" name="bank_name" id={`bank_name-${payrollId}`} required />
+            <FormInput label="Branch Name" name="bank_branch_name" id={`bank_branch_name-${payrollId}`} required />
+            <FormInput label="Account No" name="account_no" id={`account_no-${payrollId}`} required />
           </>
         ) : null}
 
         {mode === 'Cheque' ? (
-          <FormInput label="Cheque No" name="cheque_no" required />
+          <FormInput label="Cheque No" name="cheque_no" id={`cheque_no-${payrollId}`} required />
         ) : null}
 
-        <FormInput label="Note" name="note" />
+        <FormInput label="Note" name="note" id={`note-${payrollId}`} />
 
         <SubmitButton size="sm" className="w-full justify-center">
           Pay Now

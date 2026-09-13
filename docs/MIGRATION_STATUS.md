@@ -347,9 +347,16 @@ genuinely missing, both now ported (see below).
   `purchase.order.pdf`, `quotation.order.pdf`, `payroll.pdf`, `attendance_report_print`,
   `staffs.report_print`, `leadger_report.print_view` and
   `leave.application.download` open the browser's print dialog on the same document.
-- **`verify:browser` does not click through every interactive screen.** What it
-  misses is exercised by the HTTP sweep, which loads a screen but does not
-  operate it.
+- **`verify:browser` does not click through every interactive screen** - hundreds of
+  pages, most of them plain forms already covered by `verify:actions`' no-JS post. What
+  it misses is exercised by the HTTP sweep, which loads a screen but does not operate it.
+  This pass added the one interactive surface it was missing that mattered: the payroll
+  payment panel built in this pass has its own click-through scenario (opens the
+  disclosure, confirms bank fields are absent for a cash payment and appear for a bank
+  one, submits, and checks the row reads paid). It also caught a real bug the no-JS post
+  couldn't have: every row's panel shared the same `payment_mode` / `bank_name` / etc.
+  ids, invalid HTML the moment two unpaid payrolls are on the same page - each is now
+  suffixed with its payroll id.
 
 ### A correction
 
