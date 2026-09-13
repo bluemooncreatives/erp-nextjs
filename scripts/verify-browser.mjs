@@ -88,7 +88,8 @@ async function scenario(name, run) {
     results.push({ name, ok: true });
     console.log('ok', name);
   } catch (error) {
-    console.log('FAIL', name, String(error?.message ?? error).split('\n')[0]);
+    console.log('FAIL', name, String(error?.message ?? error));
+    console.log('alerts', await page.evaluate("Array.from(document.querySelectorAll('[role=alert]')).map(e=>e.textContent)"));
     results.push({ name, ok: false, error: String(error?.message ?? error).split('\n')[0] });
   }
 }
@@ -581,13 +582,13 @@ if (process.env.DB_DATABASE?.startsWith('erp_migration_') && existsSync('artifac
     await page.goto(`${base}/project/${fixture.projectUuid}/board`);
     await page.evaluate(`(() => {
       const card = [...document.querySelectorAll('article[draggable]')].find(a => a.textContent.includes('First task'));
-      const column = [...document.querySelectorAll('div.w-80')].find(d => d.textContent.includes('To do'));
+      const column = [...document.querySelectorAll('div.w-80')].find(d => d.querySelector('[data-slot=card-title]')?.textContent.includes('To do'));
       if(!card || !column) throw new Error('board card or column missing');
       const transfer = new DataTransfer();
       card.dispatchEvent(new DragEvent('dragstart',{bubbles:true,dataTransfer:transfer}));
       column.dispatchEvent(new DragEvent('drop',{bubbles:true,dataTransfer:transfer}));
     })()`);
-    await page.waitUntil(`Array.from(document.querySelectorAll('div.w-80')).some(d => d.textContent.includes('To do') && d.textContent.includes('First task'))`, {timeout:30000});
+    await page.waitUntil(`Array.from(document.querySelectorAll('div.w-80')).some(d => d.querySelector('[data-slot=card-title]')?.textContent.includes('To do') && d.textContent.includes('First task'))`, {timeout:30000});
     assert.equal((await one('select section_id from tasks where id=?',[fixture.taskIds[0]])).section_id,fixture.sectionIds[0]);
     assert.deepEqual(await page.errors(),[]);
   });

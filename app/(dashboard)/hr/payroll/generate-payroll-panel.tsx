@@ -5,7 +5,7 @@
 // Selecting a staff member fills the basic salary and bank details from their
 // record, then earning and deduction lines are added before saving.
 
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useState } from 'react';
 import { Card } from '@/components/erp/page';
 import { FormAlert, FormInput, FormSelect } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
@@ -68,8 +68,9 @@ export function GeneratePayrollPanel({
   // deduction row already sitting in the table per unpaid loan they carry,
   // pre-filled with that loan's monthly installment. Switching staff here
   // does the same - old lines are staff-specific and don't carry over.
-  useEffect(() => {
-    const loans = staff.find((s) => String(s.id) === staffId)?.loans ?? [];
+  function selectStaff(id: string) {
+    setStaffId(id);
+    const loans = staff.find((s) => String(s.id) === id)?.loans ?? [];
     setLines(
       loans.map((loan) => ({
         key: loan.id,
@@ -79,7 +80,7 @@ export function GeneratePayrollPanel({
         loanId: loan.id,
       })),
     );
-  }, [staffId, staff]);
+  }
 
   // The preview has to total the same way the action does, so it shares the
   // server's reading of `earn_dedc_type`.
@@ -114,7 +115,7 @@ export function GeneratePayrollPanel({
             required
             placeholder="Select staff"
             value={staffId}
-            onChange={(e) => setStaffId(e.target.value)}
+            onChange={(e) => selectStaff(e.target.value)}
             options={staff.map((s) => ({
               value: s.id,
               label: `${s.name}${s.employeeId ? ` (${s.employeeId})` : ''}`,

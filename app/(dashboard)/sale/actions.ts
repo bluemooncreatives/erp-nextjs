@@ -132,6 +132,7 @@ async function mailSaleInvoice(saleId: number, userId: number): Promise<void> {
   }
 
   const sent = await sendSaleMail({
+    saleId,
     to: email,
     customerName: record.customer?.name ?? '',
     invoiceNo: record.sale.invoiceNo ?? String(saleId),

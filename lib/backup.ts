@@ -77,7 +77,8 @@ export async function createBackup(): Promise<{ ok: boolean; message: string }> 
   ];
 
   return new Promise((resolve) => {
-    const child = spawn('mysqldump', args, {
+    const child = spawn(process.env.MYSQLDUMP_PATH || 'mysqldump', args, {
+      windowsHide: true,
       env: { ...process.env, MYSQL_PWD: config.db.password },
     });
 
@@ -101,8 +102,12 @@ export async function createBackup(): Promise<{ ok: boolean; message: string }> 
         resolve({ ok: false, message: stderr.trim() || `mysqldump exited with ${code}.` });
         return;
       }
-      await writeFile(target, Buffer.concat(chunks));
-      resolve({ ok: true, message: 'New database backup has been created' });
+      try {
+        await writeFile(target, Buffer.concat(chunks));
+        resolve({ ok: true, message: 'New database backup has been created' });
+      } catch (error) {
+        resolve({ ok: false, message: `Could not save backup: ${String(error)}` });
+      }
     });
   });
 }

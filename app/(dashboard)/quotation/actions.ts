@@ -167,6 +167,7 @@ async function mailQuotation(quotationId: number, userId: number): Promise<void>
   }
 
   const sent = await sendQuotationMail({
+    quotationId,
     to: email,
     customerName: record.customer?.name ?? '',
     invoiceNo: record.quotation.invoiceNo ?? String(quotationId),

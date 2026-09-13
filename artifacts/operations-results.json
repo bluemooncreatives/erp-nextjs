@@ -1,0 +1,47 @@
+[
+  {
+    "name": "PDF /sale/sale-pdf/75",
+    "ok": true
+  },
+  {
+    "name": "PDF /sale/sale-challan-pdf/75",
+    "ok": true
+  },
+  {
+    "name": "PDF /purchase/purchase-order-pdf/27",
+    "ok": true
+  },
+  {
+    "name": "PDF /quotation/quotation-order-pdf/4",
+    "ok": true
+  },
+  {
+    "name": "PDF /hr/payroll/pdf/1",
+    "ok": true
+  },
+  {
+    "name": "PDF /attendance/attendance/attendence-report-print/1/9/2026",
+    "ok": true
+  },
+  {
+    "name": "PDF /hr/staff/report-print/2",
+    "ok": true
+  },
+  {
+    "name": "PDF /report/ledger-report/print-view-ledger/113",
+    "ok": true
+  },
+  {
+    "name": "PDF /leave/leave-application/download/1",
+    "ok": true
+  },
+  {
+    "name": "Customer portal renders with a contact-linked session",
+    "ok": true
+  },
+  {
+    "name": "Backup action creates SQL and restore action restores the isolated database",
+    "ok": false,
+    "error": "AssertionError [ERR_ASSERTION]: dump was not created"
+  }
+]

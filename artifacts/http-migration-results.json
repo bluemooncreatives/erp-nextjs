@@ -1,0 +1,901 @@
+{
+  "routes": [
+    {
+      "route": "/",
+      "status": 307
+    },
+    {
+      "route": "/account",
+      "status": 200
+    },
+    {
+      "route": "/account-balance",
+      "status": 200
+    },
+    {
+      "route": "/account/bank-accounts/csv-upload-page",
+      "status": 200
+    },
+    {
+      "route": "/account/bank_accounts",
+      "status": 200
+    },
+    {
+      "route": "/account/bank_accounts/1/edit",
+      "status": 200
+    },
+    {
+      "route": "/account/bank_accounts/history/1",
+      "status": 200
+    },
+    {
+      "route": "/account/chart-account-list",
+      "status": 200
+    },
+    {
+      "route": "/account/chart-account/1/edit",
+      "status": 200
+    },
+    {
+      "route": "/account/expenses/1/edit",
+      "status": 200
+    },
+    {
+      "route": "/account/expenses/create",
+      "status": 200
+    },
+    {
+      "route": "/account/expenses/index",
+      "status": 200
+    },
+    {
+      "route": "/account/income",
+      "status": 200
+    },
+    {
+      "route": "/account/income/1/edit",
+      "status": 200
+    },
+    {
+      "route": "/account/income/create",
+      "status": 200
+    },
+    {
+      "route": "/account/profit",
+      "status": 200
+    },
+    {
+      "route": "/account/statement",
+      "status": 200
+    },
+    {
+      "route": "/account/tranactions",
+      "status": 200
+    },
+    {
+      "route": "/account/voucher/approval-list",
+      "status": 200
+    },
+    {
+      "route": "/account/voucher/contra-voucher",
+      "status": 200
+    },
+    {
+      "route": "/account/voucher/contra-voucher-create",
+      "status": 200
+    },
+    {
+      "route": "/account/voucher/contra-voucher/28/edit",
+      "status": 200
+    },
+    {
+      "route": "/account/voucher/detail/1/show",
+      "status": 200
+    },
+    {
+      "route": "/account/voucher/journal",
+      "status": 200
+    },
+    {
+      "route": "/account/voucher/journal-create",
+      "status": 200
+    },
+    {
+      "route": "/account/voucher/journal/3/edit",
+      "status": 200
+    },
+    {
+      "route": "/account/voucher/openning-balance",
+      "status": 200
+    },
+    {
+      "route": "/account/voucher/openning-balance-create",
+      "status": 200
+    },
+    {
+      "route": "/account/voucher/openning-balance/1/edit",
+      "status": 200
+    },
+    {
+      "route": "/account/voucher/payment",
+      "status": 200
+    },
+    {
+      "route": "/account/voucher/payment-create",
+      "status": 200
+    },
+    {
+      "route": "/account/voucher/payments/26/edit",
+      "status": 200
+    },
+    {
+      "route": "/account/voucher/recieve",
+      "status": 200
+    },
+    {
+      "route": "/account/voucher/recieve-create",
+      "status": 200
+    },
+    {
+      "route": "/account/voucher/recieve/1/edit",
+      "status": 200
+    },
+    {
+      "route": "/attendance/holidays",
+      "status": 200
+    },
+    {
+      "route": "/attendance/hr/attendance",
+      "status": 200
+    },
+    {
+      "route": "/attendance/hr/attendance/report-index",
+      "status": 200
+    },
+    {
+      "route": "/backup",
+      "status": 200
+    },
+    {
+      "route": "/cashbooks",
+      "status": 200
+    },
+    {
+      "route": "/change-password",
+      "status": 200
+    },
+    {
+      "route": "/company_info",
+      "status": 200
+    },
+    {
+      "route": "/conditional-sales",
+      "status": 200
+    },
+    {
+      "route": "/contact/add_contact",
+      "status": 200
+    },
+    {
+      "route": "/contact/add_contact/1",
+      "status": 200
+    },
+    {
+      "route": "/contact/add_contact/1/edit",
+      "status": 200
+    },
+    {
+      "route": "/contact/add_contact/create",
+      "status": 200
+    },
+    {
+      "route": "/contact/csv-upload-create",
+      "status": 200
+    },
+    {
+      "route": "/contact/customer",
+      "status": 200
+    },
+    {
+      "route": "/contact/customer/details/1",
+      "status": 200
+    },
+    {
+      "route": "/contact/customer/sale-porduct-list/1",
+      "status": 200
+    },
+    {
+      "route": "/contact/settings",
+      "status": 200
+    },
+    {
+      "route": "/contact/supplier",
+      "status": 200
+    },
+    {
+      "route": "/contact/supplier/1/details",
+      "status": 200
+    },
+    {
+      "route": "/contact/supplier/purchase-porduct-list/1",
+      "status": 200
+    },
+    {
+      "route": "/coupons/lists",
+      "status": 200
+    },
+    {
+      "route": "/email/verify",
+      "status": 307
+    },
+    {
+      "route": "/events",
+      "status": 200
+    },
+    {
+      "route": "/expense-by-supplier",
+      "status": 200
+    },
+    {
+      "route": "/home",
+      "status": 200
+    },
+    {
+      "route": "/hr/apply-loans",
+      "status": 200
+    },
+    {
+      "route": "/hr/apply-loans/create",
+      "status": 200
+    },
+    {
+      "route": "/hr/apply-loans/history",
+      "status": 200
+    },
+    {
+      "route": "/hr/departments",
+      "status": 200
+    },
+    {
+      "route": "/hr/loan-approval",
+      "status": 200
+    },
+    {
+      "route": "/hr/payroll",
+      "status": 200
+    },
+    {
+      "route": "/hr/payroll/pdf/1",
+      "status": 200
+    },
+    {
+      "route": "/hr/payroll/reports",
+      "status": 200
+    },
+    {
+      "route": "/hr/role-permission/permissions",
+      "status": 200
+    },
+    {
+      "route": "/hr/role-permission/roles",
+      "status": 200
+    },
+    {
+      "route": "/hr/staff/csv-upload-page",
+      "status": 200
+    },
+    {
+      "route": "/hr/staff/report-print/1",
+      "status": 200
+    },
+    {
+      "route": "/hr/staff/view/1",
+      "status": 200
+    },
+    {
+      "route": "/hr/staffs",
+      "status": 200
+    },
+    {
+      "route": "/hr/staffs/1",
+      "status": 200
+    },
+    {
+      "route": "/hr/staffs/1/edit",
+      "status": 200
+    },
+    {
+      "route": "/hr/staffs/create",
+      "status": 200
+    },
+    {
+      "route": "/income-by-customer",
+      "status": 200
+    },
+    {
+      "route": "/inventory/inventory/cost-of-goods-history",
+      "status": 200
+    },
+    {
+      "route": "/inventory/product-movement",
+      "status": 200
+    },
+    {
+      "route": "/inventory/purchase-order-recieve",
+      "status": 200
+    },
+    {
+      "route": "/inventory/stock-adjustment/create",
+      "status": 200
+    },
+    {
+      "route": "/inventory/stock-adjustment/edit/1",
+      "status": 200
+    },
+    {
+      "route": "/inventory/stock-adjustment/lists",
+      "status": 200
+    },
+    {
+      "route": "/inventory/stock-adjustment/show/1",
+      "status": 200
+    },
+    {
+      "route": "/inventory/stock-product-info",
+      "status": 200
+    },
+    {
+      "route": "/inventory/stock-report",
+      "status": 200
+    },
+    {
+      "route": "/inventory/stock-transfer",
+      "status": 200
+    },
+    {
+      "route": "/inventory/stock-transfer/1",
+      "status": 200
+    },
+    {
+      "route": "/inventory/stock-transfer/1/edit",
+      "status": 200
+    },
+    {
+      "route": "/inventory/stock-transfer/create",
+      "status": 200
+    },
+    {
+      "route": "/invoice",
+      "status": 404
+    },
+    {
+      "route": "/leave",
+      "status": 200
+    },
+    {
+      "route": "/leave/approved",
+      "status": 200
+    },
+    {
+      "route": "/leave/approved-leave-department",
+      "status": 200
+    },
+    {
+      "route": "/leave/carry-forward",
+      "status": 200
+    },
+    {
+      "route": "/leave/define-lists",
+      "status": 200
+    },
+    {
+      "route": "/leave/holidays",
+      "status": 200
+    },
+    {
+      "route": "/leave/leave-application/download/1",
+      "status": 200
+    },
+    {
+      "route": "/leave/pending",
+      "status": 200
+    },
+    {
+      "route": "/leave/types",
+      "status": 200
+    },
+    {
+      "route": "/localization",
+      "status": 200
+    },
+    {
+      "route": "/localization/translate-view/1",
+      "status": 200
+    },
+    {
+      "route": "/location/showroom",
+      "status": 200
+    },
+    {
+      "route": "/location/showroom/1/details",
+      "status": 200
+    },
+    {
+      "route": "/location/warehouse",
+      "status": 200
+    },
+    {
+      "route": "/my-details",
+      "status": 404
+    },
+    {
+      "route": "/my-details/sale/payment/1",
+      "status": 404
+    },
+    {
+      "route": "/my-products",
+      "status": 404
+    },
+    {
+      "route": "/notification-lists",
+      "status": 200
+    },
+    {
+      "route": "/password/reset",
+      "status": 307
+    },
+    {
+      "route": "/password/reset/sample-token",
+      "status": 307
+    },
+    {
+      "route": "/pos/pos-order-products",
+      "status": 200
+    },
+    {
+      "route": "/pos/receipt/71",
+      "status": 200
+    },
+    {
+      "route": "/product/1/selling-price-history",
+      "status": 200
+    },
+    {
+      "route": "/product/1/serial-keys",
+      "status": 200
+    },
+    {
+      "route": "/product/add-opening-stock",
+      "status": 200
+    },
+    {
+      "route": "/product/add_product",
+      "status": 200
+    },
+    {
+      "route": "/product/add_product/1",
+      "status": 200
+    },
+    {
+      "route": "/product/add_product/1/edit",
+      "status": 200
+    },
+    {
+      "route": "/product/add_product/create",
+      "status": 200
+    },
+    {
+      "route": "/product/add_product/service",
+      "status": 200
+    },
+    {
+      "route": "/product/brand",
+      "status": 200
+    },
+    {
+      "route": "/product/brand/csv-upload-page",
+      "status": 200
+    },
+    {
+      "route": "/product/category",
+      "status": 200
+    },
+    {
+      "route": "/product/combo-edit/1",
+      "status": 200
+    },
+    {
+      "route": "/product/csv-upload-page",
+      "status": 200
+    },
+    {
+      "route": "/product/model",
+      "status": 200
+    },
+    {
+      "route": "/product/model/csv-upload-page",
+      "status": 200
+    },
+    {
+      "route": "/product/print-labels",
+      "status": 200
+    },
+    {
+      "route": "/product/unit-type/csv-upload-page",
+      "status": 200
+    },
+    {
+      "route": "/product/unit_type",
+      "status": 200
+    },
+    {
+      "route": "/product/variant",
+      "status": 200
+    },
+    {
+      "route": "/product/view",
+      "status": 404
+    },
+    {
+      "route": "/profile",
+      "status": 404
+    },
+    {
+      "route": "/profile-view",
+      "status": 200
+    },
+    {
+      "route": "/project",
+      "status": 200
+    },
+    {
+      "route": "/project/18f750c1-6d11-422e-a08f-55590fd442a9",
+      "status": 200
+    },
+    {
+      "route": "/project/18f750c1-6d11-422e-a08f-55590fd442a9/board",
+      "status": 200
+    },
+    {
+      "route": "/project/18f750c1-6d11-422e-a08f-55590fd442a9/conversation",
+      "status": 200
+    },
+    {
+      "route": "/project/18f750c1-6d11-422e-a08f-55590fd442a9/files",
+      "status": 200
+    },
+    {
+      "route": "/project/create",
+      "status": 200
+    },
+    {
+      "route": "/purchase/cnf",
+      "status": 200
+    },
+    {
+      "route": "/purchase/purchase-order-pdf/1",
+      "status": 200
+    },
+    {
+      "route": "/purchase/purchase-order-print-view/1",
+      "status": 200
+    },
+    {
+      "route": "/purchase/purchase-return-list",
+      "status": 200
+    },
+    {
+      "route": "/purchase/purchase_order",
+      "status": 200
+    },
+    {
+      "route": "/purchase/purchase_order/1",
+      "status": 200
+    },
+    {
+      "route": "/purchase/purchase_order/1/edit",
+      "status": 200
+    },
+    {
+      "route": "/purchase/purchase_order/create",
+      "status": 200
+    },
+    {
+      "route": "/purchase/suggested-list",
+      "status": 200
+    },
+    {
+      "route": "/quotation/quotation",
+      "status": 200
+    },
+    {
+      "route": "/quotation/quotation-order-pdf/1",
+      "status": 200
+    },
+    {
+      "route": "/quotation/quotation-order-print-view/1",
+      "status": 200
+    },
+    {
+      "route": "/quotation/quotation-sale-convert/1",
+      "status": 200
+    },
+    {
+      "route": "/quotation/quotation/1",
+      "status": 200
+    },
+    {
+      "route": "/quotation/quotation/1/edit",
+      "status": 200
+    },
+    {
+      "route": "/quotation/quotation/create",
+      "status": 200
+    },
+    {
+      "route": "/register",
+      "status": 307
+    },
+    {
+      "route": "/report/accounts/customer-bill-index",
+      "status": 200
+    },
+    {
+      "route": "/report/accounts/supplier-bill-index",
+      "status": 200
+    },
+    {
+      "route": "/report/balance-statement",
+      "status": 200
+    },
+    {
+      "route": "/report/cashflow/index",
+      "status": 200
+    },
+    {
+      "route": "/report/customer-report/history/1",
+      "status": 200
+    },
+    {
+      "route": "/report/customer-report/index",
+      "status": 200
+    },
+    {
+      "route": "/report/history/purchase-index",
+      "status": 200
+    },
+    {
+      "route": "/report/history/sale-index",
+      "status": 200
+    },
+    {
+      "route": "/report/income-expense-statement/daily",
+      "status": 200
+    },
+    {
+      "route": "/report/income-statement",
+      "status": 200
+    },
+    {
+      "route": "/report/ledger-report/index",
+      "status": 200
+    },
+    {
+      "route": "/report/opening-balance-report/index",
+      "status": 200
+    },
+    {
+      "route": "/report/purchase-report/index",
+      "status": 200
+    },
+    {
+      "route": "/report/purchase-report/product-purchase",
+      "status": 200
+    },
+    {
+      "route": "/report/purchase-report/return-report",
+      "status": 200
+    },
+    {
+      "route": "/report/retailer-report/index",
+      "status": 200
+    },
+    {
+      "route": "/report/sales-report/index",
+      "status": 200
+    },
+    {
+      "route": "/report/sales-report/product-sales",
+      "status": 200
+    },
+    {
+      "route": "/report/sales-report/return-report",
+      "status": 200
+    },
+    {
+      "route": "/report/serial-no-index",
+      "status": 200
+    },
+    {
+      "route": "/report/showroom-income-expense",
+      "status": 200
+    },
+    {
+      "route": "/report/staff-report/history/1",
+      "status": 307
+    },
+    {
+      "route": "/report/staff-report/index",
+      "status": 200
+    },
+    {
+      "route": "/report/supplier-report/history/1",
+      "status": 200
+    },
+    {
+      "route": "/report/supplier-report/index",
+      "status": 200
+    },
+    {
+      "route": "/return",
+      "status": 404
+    },
+    {
+      "route": "/sale-tax",
+      "status": 200
+    },
+    {
+      "route": "/sale/due/invoice-list",
+      "status": 200
+    },
+    {
+      "route": "/sale/sale",
+      "status": 200
+    },
+    {
+      "route": "/sale/sale-challan-pdf/1",
+      "status": 200
+    },
+    {
+      "route": "/sale/sale-challan-print-view/1",
+      "status": 200
+    },
+    {
+      "route": "/sale/sale-clone/1",
+      "status": 200
+    },
+    {
+      "route": "/sale/sale-configurations",
+      "status": 200
+    },
+    {
+      "route": "/sale/sale-due-list",
+      "status": 200
+    },
+    {
+      "route": "/sale/sale-pdf/1",
+      "status": 200
+    },
+    {
+      "route": "/sale/sale-print-view/1",
+      "status": 200
+    },
+    {
+      "route": "/sale/sale-quotation-convert/1",
+      "status": 200
+    },
+    {
+      "route": "/sale/sale-return-list",
+      "status": 200
+    },
+    {
+      "route": "/sale/sale/1",
+      "status": 200
+    },
+    {
+      "route": "/sale/sale/1/edit",
+      "status": 200
+    },
+    {
+      "route": "/sale/sale/create",
+      "status": 200
+    },
+    {
+      "route": "/setting",
+      "status": 200
+    },
+    {
+      "route": "/setting/currencies",
+      "status": 200
+    },
+    {
+      "route": "/setting/payment-method-settings",
+      "status": 200
+    },
+    {
+      "route": "/setting/updateSystem",
+      "status": 200
+    },
+    {
+      "route": "/setup/country",
+      "status": 200
+    },
+    {
+      "route": "/setup/introPrefix",
+      "status": 200
+    },
+    {
+      "route": "/setup/printer",
+      "status": 200
+    },
+    {
+      "route": "/setup/tax",
+      "status": 200
+    },
+    {
+      "route": "/stripe/card",
+      "status": 200
+    },
+    {
+      "route": "/style/themes",
+      "status": 200
+    },
+    {
+      "route": "/style/themes/1/edit",
+      "status": 200
+    },
+    {
+      "route": "/style/themes/change_view",
+      "status": 200
+    },
+    {
+      "route": "/style/themes/create",
+      "status": 200
+    },
+    {
+      "route": "/style/update-bg",
+      "status": 200
+    },
+    {
+      "route": "/task/50dd802b-41b1-487d-88aa-f2e15a8eb161",
+      "status": 200
+    },
+    {
+      "route": "/team",
+      "status": 200
+    },
+    {
+      "route": "/team/1",
+      "status": 200
+    },
+    {
+      "route": "/transaction",
+      "status": 404
+    },
+    {
+      "route": "/transfer/1/edit",
+      "status": 200
+    },
+    {
+      "route": "/transfer/create",
+      "status": 200
+    },
+    {
+      "route": "/transfer/lists",
+      "status": 200
+    },
+    {
+      "route": "/useractivitylog",
+      "status": 200
+    },
+    {
+      "route": "/useractivitylog/user-login",
+      "status": 200
+    },
+    {
+      "route": "/workspaces",
+      "status": 200
+    }
+  ],
+  "failures": []
+}

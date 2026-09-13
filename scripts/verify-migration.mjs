@@ -20,6 +20,7 @@ if (!process.env.DB_DATABASE?.startsWith('erp_migration_')) throw new Error('Set
 
 const require = createRequire(import.meta.url);
 const mysql = require('mysql2/promise');
+const spreadsheet = require('xlsx');
 
 const base = process.env.BASE_URL ?? 'http://localhost:3100';
 const secret = requireSessionSecret();
@@ -231,7 +232,7 @@ await scenario('Project text, number, date and person fields preserve typed valu
   await submit(fieldAction,{project_id:projectId,task_id:taskIds[0],field_id:field.id,operation:'value',value},{url:`/task/${taskUuids[0]}`});
   const stored=await one('SELECT * FROM field_task WHERE field_id=? AND task_id=?',[field.id,taskIds[0]]);
   assert.ok(stored,`${type} value created`);
-  if (type==='date') assert.equal(new Date(stored.date).toISOString().slice(0,10),value);
+  if (type==='date') assert.equal((await one("SELECT DATE_FORMAT(date,'%Y-%m-%d') value FROM field_task WHERE field_id=? AND task_id=?",[field.id,taskIds[0]])).value,value);
   else assert.equal(String(stored[column]),value);
  }
 });
@@ -254,9 +255,12 @@ await scenario('Project attachment larger than 1 MB uploads and deletes through 
 });
 await scenario('Binary XLS imports through the existing brand upload action',async()=>{
  const target=action('uploadBrandCsv');
- const response=await submit(target,{file:new Blob([fs.readFileSync('tests/fixtures/legacy-import.xls')],{type:'application/vnd.ms-excel'})},{filename:'brands.xls'});
+ const workbook=spreadsheet.read(readFileSync('tests/fixtures/legacy-import.xls'),{type:'buffer'});
+ const brandName=`Caf\u00e9 ${stamp}`;workbook.Sheets[workbook.SheetNames[0]].A2.v=brandName;
+ const bytes=spreadsheet.write(workbook,{type:'buffer',bookType:'biff8'});
+ const response=await submit(target,{file:new Blob([bytes],{type:'application/vnd.ms-excel'})},{filename:'brands.xls'});
  assert.ok(response.status<400,`XLS upload returned ${response.status}`);
- assert.ok(await one('SELECT id FROM brands WHERE name=?',['Caf\u00e9']),'brand imported from binary workbook');
+ assert.ok(await one('SELECT id FROM brands WHERE name=?',[brandName]),'brand imported from binary workbook');
 });
 fs.writeFileSync('artifacts/migration-fixture.json',JSON.stringify({projectId,projectUuid,taskIds,taskUuids,sectionIds,customerId:customer.id,stock,price},null,2));
 fs.writeFileSync('artifacts/migration-results.json',JSON.stringify(results,null,2));

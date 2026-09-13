@@ -1,3 +1,6 @@
+import { renderPdf } from '@/lib/pdf/build';
+import { saleInvoice } from '@/lib/pdf/sale-document';
+import { quotationInvoice } from '@/lib/pdf/quotation-document';
 // ---------------------------------------------------------------------------
 // Mail - ports app/Mail/SendMail.php, SendSmtpMail.php, TestSmtpMail.php and
 // the two notifications (PasswordResetNotification, VerifyEmail).
@@ -195,20 +198,22 @@ export async function sendTestMail(to: string): Promise<boolean> {
  * `SaleController@send_mail_quotation($id)` - mails the invoice to the customer
  * from the `sale_template` row, substituting the same tokens the PHP did.
  *
- * The PHP attached a dompdf rendering of `sale::sale.pdf`; there is no PDF
- * engine here, so the message carries a link to the invoice's print view
- * instead of an attachment.
+ * Attach the same PDF document served by the invoice download route.
  */
 export async function sendSaleMail(options: {
+  saleId: number;
   to: string;
   customerName: string;
   invoiceNo: string;
   invoiceUrl: string;
 }): Promise<boolean> {
   const setting = await generalSetting();
+  const document = await saleInvoice(options.saleId);
+  const content = await renderPdf(document.definition);
 
   return sendTemplateMail({
     type: EmailTemplateType.Sale,
+    attachments: [{ filename: document.filename, content }],
     to: options.to,
     variables: {
       USER_FIRST_NAME: options.customerName,
@@ -230,15 +235,19 @@ export async function sendSaleMail(options: {
  * `sendSaleMail`, from the `quotation_template` row.
  */
 export async function sendQuotationMail(options: {
+  quotationId: number;
   to: string;
   customerName: string;
   invoiceNo: string;
   quotationUrl: string;
 }): Promise<boolean> {
   const setting = await generalSetting();
+  const document = await quotationInvoice(options.quotationId);
+  const content = await renderPdf(document.definition);
 
   return sendTemplateMail({
     type: EmailTemplateType.Quotation,
+    attachments: [{ filename: document.filename, content }],
     to: options.to,
     variables: {
       USER_FIRST_NAME: options.customerName,

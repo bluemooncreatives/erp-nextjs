@@ -26,5 +26,21 @@
   {
     "name": "Project refuses a task move to a section outside its project",
     "ok": true
+  },
+  {
+    "name": "Project text, number, date and person fields preserve typed values",
+    "ok": true
+  },
+  {
+    "name": "Project sub-task order persists independently of board cards",
+    "ok": true
+  },
+  {
+    "name": "Project attachment larger than 1 MB uploads and deletes through server actions",
+    "ok": true
+  },
+  {
+    "name": "Binary XLS imports through the existing brand upload action",
+    "ok": true
   }
 ]

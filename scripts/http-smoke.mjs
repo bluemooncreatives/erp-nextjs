@@ -127,7 +127,6 @@ const ids = {
   expense: await firstId('expenses'),
   income: await firstId('incomes'),
   project: await firstId('projects', 'uuid'),
-  task: await firstId('project_task', 'id'),
   team: await firstId('teams'),
   pos: (await connection.query('select id from sales where type=2 order by id desc limit 1'))[0][0]?.id,
   task: (await connection.query('select uuid from tasks limit 1'))[0][0]?.uuid,
