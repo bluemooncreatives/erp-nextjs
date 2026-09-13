@@ -212,15 +212,5 @@ export async function deleteQuotationAction(formData: FormData): Promise<void> {
   revalidatePath(ROUTES['quotation.index']);
 }
 
-/** `quotation.to.sale` - convert an accepted quotation into a sale. */
-export async function convertQuotation(formData: FormData): Promise<void> {
-  const id = Number(formData.get('id'));
-  const user = await authorize('sale.store');
-
-  const saleId = await quotationToSale(id, user.id);
-  if (!saleId) return;
-
-  await successLog(`Quotation ${id} converted to sale ${saleId}`, user.id);
-  revalidatePath(ROUTES['quotation.index']);
-  redirect(route('sale.show', { id: saleId }));
-}
+// Conversion goes through the pre-filled sale form, not a one-shot action -
+// see the note in `sale/actions.ts`.

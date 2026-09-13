@@ -13,13 +13,23 @@
 import React, { useEffect, useRef, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search } from 'lucide-react';
+import { NotebookText, Plus, Search } from 'lucide-react';
 import { ThemeToggleButton } from '@/components/common/ThemeToggleButton';
 import NotificationDropdown from '@/components/header/NotificationDropdown';
 import UserDropdown from '@/components/header/UserDropdown';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { ROUTES } from '@/lib/routes';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Select,
   SelectContent,
@@ -40,6 +50,7 @@ export type HeaderUser = {
 
 export default function AppHeader({
   user,
+  quickAdd,
   branches,
   currentBranchId,
   canSwitchBranch,
@@ -50,6 +61,7 @@ export default function AppHeader({
   showNotifications,
 }: {
   user: HeaderUser;
+  quickAdd: Array<{ heading: string; label: string; href: string }>;
   branches: Array<{ id: number; name: string }>;
   currentBranchId: number | null;
   canSwitchBranch: boolean;
@@ -82,6 +94,7 @@ export default function AppHeader({
         </div>
 
         <div className="flex items-center gap-1.5">
+          <QuickAdd items={quickAdd} />
           <BranchSelect
             branches={branches}
             current={currentBranchId}
@@ -89,6 +102,21 @@ export default function AppHeader({
           />
           <LanguageSelect languages={languages} current={currentLocale} />
           <ThemeToggleButton />
+          {/* The Blade put the cashbook behind an icon in the header, next to
+              the notification bell, and hid it from a `normal_user` - the same
+              condition `showNotifications` carries. */}
+          {showNotifications ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button asChild variant="ghost" size="icon" aria-label="Cashbook">
+                  <Link href={ROUTES['cashbook.index']}>
+                    <NotebookText />
+                  </Link>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Cashbook</TooltipContent>
+            </Tooltip>
+          ) : null}
           {showNotifications ? (
             <NotificationDropdown items={notifications} unreadCount={unreadCount} />
           ) : null}
@@ -180,6 +208,52 @@ function MenuSearch() {
         </div>
       ) : null}
     </div>
+  );
+}
+
+/**
+ * The header's "+" menu - the Blade's quick-add dropdown.
+ *
+ * Each create action sits under its own heading, which is how the Blade
+ * grouped them; the list arrives already filtered by permission, so an empty
+ * one means this user may create nothing and the button is not drawn.
+ */
+function QuickAdd({
+  items,
+}: {
+  items: Array<{ heading: string; label: string; href: string }>;
+}) {
+  if (!items.length) return null;
+
+  return (
+    <DropdownMenu>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" aria-label="Create">
+              <Plus />
+            </Button>
+          </DropdownMenuTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Create</TooltipContent>
+      </Tooltip>
+
+      <DropdownMenuContent align="end" className="w-56">
+        {items.map((item) => (
+          <div key={item.href}>
+            <DropdownMenuLabel className="text-muted-foreground text-xs font-normal">
+              {item.heading}
+            </DropdownMenuLabel>
+            <DropdownMenuItem asChild>
+              <Link href={item.href}>
+                <Plus className="size-3.5" />
+                {item.label}
+              </Link>
+            </DropdownMenuItem>
+          </div>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 

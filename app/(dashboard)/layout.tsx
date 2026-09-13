@@ -14,7 +14,14 @@ import { requireUser, userCan, userCanAny } from '@/lib/auth/permissions';
 import { generalSetting } from '@/lib/settings';
 import { assetUrl, avatarUrl } from '@/lib/paths';
 import { getSession } from '@/lib/auth/session';
-import { NAVIGATION, navHref, navPermission } from '@/lib/navigation';
+import { ROUTES } from '@/lib/routes';
+import {
+  NAVIGATION,
+  QUICK_ADD,
+  navHref,
+  navPermission,
+  navVisible,
+} from '@/lib/navigation';
 import { unreadNotificationCount } from '@/lib/notifications';
 import { AdminShell } from './admin-shell';
 import { themeList, themeColors } from '@/lib/setting/themes';
@@ -37,6 +44,17 @@ export default async function DashboardLayout({
   const appearance = currentTheme ? themeStyle(currentTheme, await themeColors(currentTheme.id)) : undefined;
 
   const nav = resolveNavigation(user);
+
+  // The header's "+" dropdown, filtered by the same permissions the Blade
+  // checked. A `normal_user` never saw it.
+  const quickAdd =
+    user.role.type === 'normal_user'
+      ? []
+      : QUICK_ADD.filter((item) => userCan(user, item.permission)).map((item) => ({
+          heading: item.heading,
+          label: item.label,
+          href: ROUTES[item.route],
+        }));
 
   const branches =
     user.role.type === 'system_user'
@@ -89,6 +107,7 @@ export default async function DashboardLayout({
         email: user.email,
         avatar: avatarUrl(user.avatar ?? user.photo, user.name),
       }}
+      quickAdd={quickAdd}
       branches={branches}
       currentBranchId={session?.showroomId ?? user.showroomId}
       canSwitchBranch={user.role.type === 'system_user'}
@@ -115,7 +134,8 @@ function resolveNavigation(
 
   for (const item of NAVIGATION) {
     if (item.kind === 'link') {
-      if (!userCan(user, navPermission(item))) continue;
+      if (!navVisible(item, user.role.type)) continue;
+      if (!item.ungated && !userCan(user, navPermission(item))) continue;
       out.push({ kind: 'link', label: item.label, href: navHref(item), icon: item.icon });
       continue;
     }
@@ -134,7 +154,8 @@ function resolveNavigation(
         children.push({ kind: 'heading', label: child.label });
         continue;
       }
-      if (!userCan(user, navPermission(child))) continue;
+      if (!navVisible(child, user.role.type)) continue;
+      if (!child.ungated && !userCan(user, navPermission(child))) continue;
       children.push({ kind: 'link', label: child.label, href: navHref(child) });
     }
 

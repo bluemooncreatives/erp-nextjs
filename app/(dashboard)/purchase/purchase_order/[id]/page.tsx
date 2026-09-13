@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { authorize, can } from '@/lib/auth/permissions';
 import {
   PurchaseStatus,
+  PurchaseReturnStatus,
   PurchaseStock,
   findPurchaseOrder,
 } from '@/lib/purchase/repository';
@@ -19,6 +20,7 @@ import { Badge } from '@/components/erp/badge';
 import { approvePurchaseAction } from '../../actions';
 import { PurchasePaymentPanel } from './payment-panel';
 import { ReceivePanel } from './receive-panel';
+import { PurchaseReturnPanel } from './return-panel';
 
 export const metadata: Metadata = { title: 'Purchase Order' };
 
@@ -52,10 +54,11 @@ export default async function PurchaseOrderDetailPage({
     );
   }
 
-  const [canApprove, canPay, canReceive] = await Promise.all([
+  const [canApprove, canPay, canReceive, canReturn] = await Promise.all([
     can('purchase.approve'),
     can('purchase.payment'),
     can('purchase.add.stock'),
+    can('purchase.return.index'),
   ]);
 
   const accounts = await paymentAccountOptions();
@@ -177,6 +180,21 @@ export default async function PurchaseOrderDetailPage({
                 ordered: i.quantity,
                 received: receivedBySku.get(i.productSkuId) ?? 0,
               }))}
+            />
+          ) : null}
+
+          {/* `purchaseReturn` was only offered once the order was approved -
+              there is nothing to send back before then. */}
+          {canReturn && order.status === PurchaseStatus.Approved ? (
+            <PurchaseReturnPanel
+              purchaseId={order.id}
+              items={items.map((item) => ({
+                id: item.id,
+                name: item.productName ?? item.sku ?? String(item.productSkuId),
+                quantity: item.quantity,
+                returnQuantity: item.returnQuantity ?? 0,
+              }))}
+              disabled={order.returnStatus === PurchaseReturnStatus.Approved}
             />
           ) : null}
         </div>

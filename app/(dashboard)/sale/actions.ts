@@ -448,30 +448,13 @@ export async function storeShipping(
   return { success: 'Shipping saved.' };
 }
 
-/** `acceptOrder()` - the customer confirms delivery. */
-export async function acceptDelivery(formData: FormData): Promise<void> {
-  const saleId = Number(formData.get('id'));
-  await authorize('sale.order.receive');
-
-  await acceptSaleDelivery(
-    saleId,
-    String(formData.get('name') ?? ''),
-    String(formData.get('delivery_date') ?? ''),
-  );
-
-  revalidatePath(route('sale.show', { id: saleId }));
-}
+// `acceptOrder()` - the customer confirming delivery - is `receiveSaleOrder`
+// on the Sale On Condition screen, which also records who received it and the
+// delivery note. The duplicate that used to sit here was wired to nothing.
 
 // --- Quotation conversion --------------------------------------------------
 
-export async function convertQuotationToSale(formData: FormData): Promise<void> {
-  const quotationId = Number(formData.get('quotation_id'));
-  const user = await authorize('sale.store');
-
-  const saleId = await quotationToSale(quotationId, user.id);
-  if (!saleId) return;
-
-  await successLog(`Quotation ${quotationId} converted to sale ${saleId}`, user.id);
-  revalidatePath(ROUTES['sale.index']);
-  redirect(route('sale.show', { id: saleId }));
-}
+// Converting a quotation opens the sale form pre-filled from it, at
+// `/quotation/quotation-sale-convert/[id]`, so the totals can be adjusted
+// before saving rather than written unseen. The one-shot action that used to
+// sit here was wired to nothing.

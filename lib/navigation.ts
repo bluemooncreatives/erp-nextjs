@@ -30,6 +30,18 @@ export type NavLeaf = {
   permission?: RouteName | string;
   /** Extra path prefixes that should also mark this item active. */
   activePaths?: string[];
+  /**
+   * Restrict the entry to these `roles.type` values. The Blade gated the
+   * customer-portal items on `role_id == 4 or 5`, which are exactly the two
+   * `normal_user` roles; naming the type rather than the ids survives an
+   * install that numbers its roles differently.
+   */
+  roleTypes?: string[];
+  /**
+   * The Blade wrapped most items in `permissionCheck(...)`; a few it did not.
+   * Those are visible to anyone the `roleTypes` gate lets through.
+   */
+  ungated?: boolean;
 };
 
 export type NavHeading = {
@@ -324,6 +336,43 @@ export const NAVIGATION: NavItem[] = [
     ],
   },
 
+  // --------------------------------------------------- Customer / supplier
+  // `Modules/Contact/Resources/views/menu.blade.php` shows these four as
+  // top-level items, ungated by permission, to `role_id == 4 or 5`. Without
+  // them a signed-in contact gets a sidebar with nothing in it.
+  {
+    kind: 'link',
+    label: 'My Details',
+    icon: 'id-card',
+    route: 'contact.my_details',
+    ungated: true,
+    roleTypes: ['normal_user'],
+  },
+  {
+    kind: 'link',
+    label: 'Invoice',
+    icon: 'file-text',
+    route: 'contact.invoice',
+    ungated: true,
+    roleTypes: ['normal_user'],
+  },
+  {
+    kind: 'link',
+    label: 'Return',
+    icon: 'truck',
+    route: 'contact.return',
+    ungated: true,
+    roleTypes: ['normal_user'],
+  },
+  {
+    kind: 'link',
+    label: 'Transaction',
+    icon: 'wallet',
+    route: 'contact.transaction',
+    ungated: true,
+    roleTypes: ['normal_user'],
+  },
+
   // ---------------------------------------------------------------- Setting
   {
     kind: 'group',
@@ -350,6 +399,7 @@ export const NAVIGATION: NavItem[] = [
 
       { kind: 'heading', label: 'Styles' },
       { kind: 'link', label: 'Theme Customization', route: 'themes.index' },
+      { kind: 'link', label: 'Change View', route: 'themes.change_view' },
       { kind: 'link', label: 'Background', route: 'guest-background' },
     ],
   },
@@ -379,6 +429,88 @@ export const NAVIGATION: NavItem[] = [
 /** The permission a nav entry is guarded by. */
 export function navPermission(item: NavLeaf): string {
   return item.permission ?? item.route;
+}
+
+/**
+ * The header's "+" dropdown - `resources/views/backEnd/partials/menu.blade.php`.
+ *
+ * Each entry is one create action under a heading, gated by the permission the
+ * Blade checked. Three of them check a `.create` permission but link to the
+ * index, because those screens are inline forms rather than separate pages;
+ * that is the Blade's own pairing, kept.
+ */
+export type QuickAddItem = {
+  heading: string;
+  label: string;
+  route: RouteName;
+  permission: RouteName | string;
+};
+
+export const QUICK_ADD: QuickAddItem[] = [
+  { heading: 'Sales', label: 'Add Sale', route: 'sale.create', permission: 'sale.create' },
+  {
+    heading: 'Contact',
+    label: 'Add Contact',
+    // The Blade linked `route('add_contact.store')`, which is the POST target -
+    // following it in Laravel is a 405. The create screen is what it meant.
+    route: 'add_contact.create',
+    permission: 'add_contact.store',
+  },
+  {
+    heading: 'Products',
+    label: 'Recieve Product',
+    route: 'purchase_order.recieve.index',
+    permission: 'purchase_order.recieve.index',
+  },
+  {
+    heading: 'Purchase',
+    label: 'Add Purchase',
+    route: 'purchase_order.create',
+    permission: 'purchase_order.create',
+  },
+  {
+    heading: 'Money Transfer',
+    label: 'Add Money Transfer',
+    route: 'transfer_showroom.create',
+    permission: 'transfer_showroom.create',
+  },
+  { heading: 'Staff', label: 'Add Staff', route: 'staffs.create', permission: 'staffs.create' },
+  {
+    heading: 'Intro Prefix',
+    label: 'Add Intro Prefix',
+    route: 'introPrefix.index',
+    permission: 'introPrefix.create',
+  },
+  { heading: 'Tax', label: 'Add Tax', route: 'tax.index', permission: 'tax.create' },
+  {
+    heading: 'Printer',
+    label: 'Add Printer',
+    route: 'printer.index',
+    permission: 'printer.create',
+  },
+  {
+    heading: 'Payments',
+    label: 'Add Payments',
+    route: 'vouchers.create',
+    permission: 'vouchers.create',
+  },
+  {
+    heading: 'Recieve',
+    label: 'Add Recieve',
+    route: 'voucher_recieve.create',
+    permission: 'voucher_recieve.create',
+  },
+];
+
+/**
+ * Whether a leaf is offered to this kind of user at all.
+ *
+ * Unset `roleTypes` means every role, which is what the Blade's unwrapped
+ * items did; a set one is the `role_id == 4 or 5` gate the customer-portal
+ * entries carried, named by `roles.type` instead of by id.
+ */
+export function navVisible(item: NavLeaf, roleType: string): boolean {
+  return !item.roleTypes || item.roleTypes.includes(roleType);
 }
 
 /** Resolve a leaf's href. */

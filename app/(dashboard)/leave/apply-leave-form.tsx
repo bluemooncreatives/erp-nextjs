@@ -16,9 +16,27 @@ import {
   type SelectOption,
 } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
-import { storeLeaveApplication, type LeaveFormState } from './actions';
+import {
+  storeLeaveApplication,
+  updateLeaveApplicationAction,
+  type LeaveFormState,
+} from './actions';
 
 const INITIAL: LeaveFormState = {};
+
+/** A submitted application being amended - `apply_leave.edit` / `.update`. */
+export type EditingLeave = {
+  id: number;
+  leaveTypeId: number;
+  day: number;
+  applyDate: string;
+  startDate: string;
+  endDate: string | null;
+  reason: string;
+  makeupLeave: number;
+  makeupDate: string | null;
+  makeupHalf: number;
+};
 
 export function ApplyLeaveForm({
   leaveTypes,
@@ -26,24 +44,31 @@ export function ApplyLeaveForm({
   /** Staff to apply on behalf of - the Blade only showed this to system users. */
   users,
   currentUserId,
+  editing,
 }: {
   leaveTypes: SelectOption[];
   balance: { entitlement: number; taken: number; remaining: number };
   users?: SelectOption[];
   currentUserId?: number;
+  editing?: EditingLeave | null;
 }) {
-  const [state, formAction] = useActionState(storeLeaveApplication, INITIAL);
-  const [day, setDay] = useState('1');
-  const [makeup, setMakeup] = useState(false);
+  const [state, formAction] = useActionState(
+    editing ? updateLeaveApplicationAction : storeLeaveApplication,
+    INITIAL,
+  );
+  const [day, setDay] = useState(editing ? String(editing.day) : '1');
+  const [makeup, setMakeup] = useState(Boolean(editing?.makeupLeave));
 
   const isRange = day === '2';
 
   return (
     <Card
-      title="Apply for Leave"
+      title={editing ? 'Edit Leave Application' : 'Apply for Leave'}
       desc={`Entitlement ${balance.entitlement} / taken ${balance.taken} / remaining ${balance.remaining}`}
     >
       <form action={formAction} className="space-y-4">
+        {editing ? <input type="hidden" name="id" value={editing.id} /> : null}
+
         <FormAlert variant="error" message={state.error} />
 
         {users?.length ? (
@@ -62,6 +87,7 @@ export function ApplyLeaveForm({
           required
           placeholder="Select type"
           options={leaveTypes}
+          defaultValue={editing ? String(editing.leaveTypeId) : ''}
           error={state.fieldErrors?.leave_type_id}
         />
 
@@ -82,7 +108,7 @@ export function ApplyLeaveForm({
           name="apply_date"
           type="date"
           required
-          defaultValue={new Date().toISOString().slice(0, 10)}
+          defaultValue={editing?.applyDate ?? new Date().toISOString().slice(0, 10)}
         />
 
         <FormInput
@@ -90,6 +116,7 @@ export function ApplyLeaveForm({
           name="start_date"
           type="date"
           required
+          defaultValue={editing?.startDate ?? ''}
           error={state.fieldErrors?.start_date}
         />
 
@@ -100,6 +127,7 @@ export function ApplyLeaveForm({
               name="end_date"
               type="date"
               required
+              defaultValue={editing?.endDate ?? ''}
               error={state.fieldErrors?.end_date}
             />
             <FormCheckbox label="First day is a half day" name="half" value="1" />
@@ -111,6 +139,7 @@ export function ApplyLeaveForm({
           label="Reason"
           name="reason"
           required
+          defaultValue={editing?.reason ?? ''}
           error={state.fieldErrors?.reason}
         />
 
@@ -124,11 +153,17 @@ export function ApplyLeaveForm({
 
         {makeup ? (
           <>
-            <FormInput label="Makeup Date" name="makeup_date" type="date" />
+            <FormInput
+              label="Makeup Date"
+              name="makeup_date"
+              type="date"
+              defaultValue={editing?.makeupDate ?? ''}
+            />
             {/* `makeup_half` - which half of the makeup day is worked. */}
             <FormSelect
               label="Makeup Half"
               name="makeup_half"
+              defaultValue={editing?.makeupHalf ? String(editing.makeupHalf) : ''}
               placeholder="Full day"
               options={[
                 { value: 1, label: 'First Half' },
@@ -140,7 +175,9 @@ export function ApplyLeaveForm({
 
         <FormInput label="Attachment" name="file" type="file" />
 
-        <SubmitButton>Submit Application</SubmitButton>
+        <SubmitButton>
+          {editing ? 'Update Application' : 'Submit Application'}
+        </SubmitButton>
       </form>
     </Card>
   );

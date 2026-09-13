@@ -19,6 +19,7 @@ export function AdminShell({
   logoDark,
   siteTitle,
   user,
+  quickAdd,
   branches,
   currentBranchId,
   canSwitchBranch,
@@ -35,6 +36,7 @@ export function AdminShell({
   logoDark: string | null;
   siteTitle: string;
   user: HeaderUser;
+  quickAdd: Array<{ heading: string; label: string; href: string }>;
   branches: Array<{ id: number; name: string }>;
   currentBranchId: number | null;
   canSwitchBranch: boolean;
@@ -80,6 +82,7 @@ export function AdminShell({
         <SidebarInset className="@container/content flex min-w-0 flex-1 flex-col">
           <AppHeader
             user={user}
+            quickAdd={quickAdd}
             branches={branches}
             currentBranchId={currentBranchId}
             canSwitchBranch={canSwitchBranch}

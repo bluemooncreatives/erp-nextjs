@@ -14,6 +14,8 @@ import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
 import { destroyEvent, markToDoComplete, destroyToDo } from './actions';
 import { EventForm, ToDoForm } from './forms';
+import { EventCalendar } from '@/components/erp/event-calendar';
+import { calendarEvents } from '@/lib/dashboard/queries';
 
 export const metadata: Metadata = { title: 'Events' };
 
@@ -22,14 +24,17 @@ export default async function EventsPage({
 }: {
   searchParams: Promise<{ edit?: string }>;
 }) {
-  await requireUser();
+  const user = await requireUser();
   const sp = await searchParams;
 
-  const [events, roles, todos, editing] = await Promise.all([
+  const [events, roles, todos, editing, calendar] = await Promise.all([
     listEvents(),
     normalRoles(),
     listToDos(),
     sp.edit ? findEvent(Number(sp.edit)) : Promise.resolve(null),
+    // `roleWiseEvents()` - a system user sees every event, everyone else sees
+    // those addressed to all or to their own role.
+    calendarEvents(user.role.type === 'system_user' ? null : user.role.name),
   ]);
 
   const rows = await Promise.all(
@@ -50,6 +55,12 @@ export default async function EventsPage({
 
       <div className="grid gap-5 lg:grid-cols-[1fr_380px]">
         <div className="space-y-5">
+          {/* The Blade's FullCalendar view, which the port had dropped to a
+              table. Holidays and events share it, as they did there. */}
+          <Card title="Calendar" bodyClassName="p-4 sm:p-5">
+            <EventCalendar events={calendar} />
+          </Card>
+
           <Card title={`Events (${rows.length})`} bodyClassName="">
             <DataTable
               columns={[

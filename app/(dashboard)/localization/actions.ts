@@ -115,32 +115,8 @@ export async function deleteLanguage(formData: FormData): Promise<void> {
   revalidatePath(ROUTES['languages.index']);
 }
 
-/**
- * `LanguageController@changeLanguage` - the header's language picker, which
- * both stored the choice on the settings row and put it in the session.
- */
-export async function changeSystemLanguage(formData: FormData): Promise<void> {
-  const code = str(formData, 'code');
-  await authorize('language.change');
-
-  const [language] = await db
-    .select()
-    .from(languages)
-    .where(eq(languages.code, code))
-    .limit(1);
-  if (!language) return;
-
-  const [setting] = await db.select({ id: generalSettings.id }).from(generalSettings).limit(1);
-  if (setting) {
-    await db
-      .update(generalSettings)
-      .set({ languageId: language.id, languageName: code, updatedAt: new Date() })
-      .where(eq(generalSettings.id, setting.id));
-  }
-
-  await patchSession({ locale: code });
-  revalidatePath('/', 'layout');
-}
+// Switching the active language is `changeLocale` in `locale-actions.ts`,
+// which is what the header's language select posts to.
 
 /**
  * `LanguageController@key_value_store` - writes the locale's copy of one phrase

@@ -10,8 +10,10 @@ import {
   leaveBalance,
   leaveTypeRepository,
   listLeaveApplications,
+  findLeaveApplication,
 } from '@/lib/hr/leave';
 import { dateConvert } from '@/lib/settings';
+import Link from 'next/link';
 import { ROUTES } from '@/lib/routes';
 import { PageHeader, Card } from '@/components/erp/page';
 import { ReportSummary } from '@/components/erp/report-summary';
@@ -27,7 +29,7 @@ export const metadata: Metadata = { title: 'Apply Leave' };
 export default async function ApplyLeavePage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; edit?: string }>;
 }) {
   const user = await authorize('apply_leave.index');
   const sp = await searchParams;
@@ -35,7 +37,7 @@ export default async function ApplyLeavePage({
   // Approvers see every application; everyone else sees only their own.
   const canApprove = await can('set_approval_leave');
 
-  const [{ rows, total, page, perPage }, types, balance, staffUsers] = await Promise.all([
+  const [{ rows, total, page, perPage }, types, balance, staffUsers, editing] = await Promise.all([
     listLeaveApplications({
       userId: canApprove ? undefined : user.id,
       page: Number(sp.page ?? 1),
@@ -43,6 +45,8 @@ export default async function ApplyLeavePage({
     leaveTypeRepository.all(),
     leaveBalance(user.id),
     user.isSystemUser ? activeUserOptions() : Promise.resolve([]),
+    // `apply_leave.edit` - amending an application that has not been decided.
+    sp.edit ? findLeaveApplication(Number(sp.edit)) : Promise.resolve(null),
   ]);
 
   const leaveRows = await Promise.all(
@@ -86,6 +90,22 @@ export default async function ApplyLeavePage({
                 : undefined
             }
             currentUserId={user.id}
+            editing={
+              editing
+                ? {
+                    id: editing.leave.id,
+                    leaveTypeId: editing.leave.leaveTypeId,
+                    day: editing.leave.day,
+                    applyDate: editing.leave.applyDate,
+                    startDate: editing.leave.startDate,
+                    endDate: editing.leave.endDate,
+                    reason: editing.leave.reason,
+                    makeupLeave: editing.leave.makeupLeave,
+                    makeupDate: editing.leave.makeupDate,
+                    makeupHalf: editing.leave.makeupHalf,
+                  }
+                : null
+            }
           />
         </div>
 
@@ -133,12 +153,20 @@ export default async function ApplyLeavePage({
                   </Td>
                   <Td>
                     {row.leave.status === LeaveStatus.Pending ? (
-                      <form action={deleteLeaveApplicationAction}>
-                        <input type="hidden" name="id" value={row.leave.id} />
-                        <ActionButton confirm="Withdraw this application?">
-                          Withdraw
-                        </ActionButton>
-                      </form>
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`${ROUTES['apply_leave.index']}?edit=${row.leave.id}`}
+                          className="text-primary hover:text-primary text-xs font-medium"
+                        >
+                          Edit
+                        </Link>
+                        <form action={deleteLeaveApplicationAction}>
+                          <input type="hidden" name="id" value={row.leave.id} />
+                          <ActionButton confirm="Withdraw this application?">
+                            Withdraw
+                          </ActionButton>
+                        </form>
+                      </div>
                     ) : (
                       '-'
                     )}

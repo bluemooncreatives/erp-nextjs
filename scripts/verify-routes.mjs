@@ -257,6 +257,27 @@ for (const match of routesTs.matchAll(/^\s*"([^"]+)":\s*'([^']+)'/gm)) {
 const servedUrls = new Set([...pageUrls].flatMap(variants));
 
 /**
+ * Route names the port mentions anywhere but its own route table - a `can()`,
+ * an `authorize()`, a `ROUTES['x']` in a form or link. `lib/routes.ts` lists
+ * every name by construction, so a hit there proves nothing.
+ */
+const wiredNames = new Set();
+for (const file of appFiles.concat(
+  walk(path.join(root, 'lib')),
+  walk(path.join(root, 'components')),
+  walk(path.join(root, 'layout')),
+)) {
+  if (path.relative(root, file) === path.join('lib', 'routes.ts')) continue;
+  for (const match of readFileSync(file, 'utf8').matchAll(
+    /['"`]([a-z][\w.-]*\.[\w.-]+)['"`]/gi,
+  )) {
+    wiredNames.add(match[1]);
+  }
+}
+
+
+
+/**
  * Not every GET route was a page. Checking the rest for a page url is noise:
  *   - destructive and state-changing GETs, which Laravel guarded with a modal
  *     and a confirm and which are server actions here
@@ -298,6 +319,40 @@ const missingName = results.filter((route) => route.name && !route.named);
 const pageGaps = results.filter(
   (route) => route.named && route.kind === 'page' && !route.served,
 );
+
+/**
+ * Server actions nothing can reach.
+ *
+ * Next binds an action as a function reference, so a writing route has no URL
+ * to check and this used to be skipped entirely - an endpoint passed the
+ * parity check by existing as a string in `lib/routes.ts`, whether or not
+ * anything called it. That exemption hid every unreachable capability in the
+ * port: a purchase return that could be approved but never created, a leave
+ * application that could be deleted but never amended.
+ *
+ * What is checkable, and exactly, is reachability: an exported action that no
+ * other file imports is wired to nothing. `'use server'` requires the export,
+ * so the export alone is not evidence - a reference from somewhere else is.
+ */
+const actionExports = new Map(); // name -> defining file
+for (const file of appFiles) {
+  const source = readFileSync(file, 'utf8');
+  if (!source.includes("'use server'") && !source.includes('"use server"')) continue;
+  for (const match of source.matchAll(/export\s+async\s+function\s+(\w+)/g)) {
+    actionExports.set(match[1], path.relative(root, file).split(path.sep).join('/'));
+  }
+}
+
+const orphanActions = [];
+for (const [name, definedIn] of actionExports) {
+  const referenced = [...appFiles, ...walk(path.join(root, 'components')), ...walk(path.join(root, 'layout'))].some(
+    (file) => {
+      if (path.relative(root, file).split(path.sep).join('/') === definedIn) return false;
+      return new RegExp(String.raw`\b${name}\b`).test(readFileSync(file, 'utf8'));
+    },
+  );
+  if (!referenced) orphanActions.push({ name, definedIn });
+}
 
 /**
  * Routes whose controller method exists but whose dependencies do not, so the
@@ -344,6 +399,12 @@ for (const route of dead) {
 }
 
 console.log('');
+console.log(`server actions nothing references: ${orphanActions.length}`);
+for (const entry of orphanActions) {
+  console.log(`  ${entry.name.padEnd(34)} ${entry.definedIn}`);
+}
+
+console.log('');
 console.log(`page routes with no page serving their url: ${missingPage.length}`);
 for (const route of missingPage) {
   console.log(`  ${route.name.padEnd(42)} ${route.url}  ${route.action ?? '-'}`);
@@ -357,6 +418,6 @@ if (process.argv.includes('--all')) {
   }
 }
 
-const gaps = missingName.length + missingPage.length;
+const gaps = missingName.length + missingPage.length + orphanActions.length;
 console.log('');
 console.log(gaps === 0 ? 'no gaps found' : `${gaps} routes to review`);

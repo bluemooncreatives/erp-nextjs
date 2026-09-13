@@ -16,6 +16,7 @@ import { Badge } from '@/components/erp/badge';
 import { approveSaleAction } from '../../actions';
 import { PaymentPanel } from './payment-panel';
 import { ReturnPanel } from './return-panel';
+import { ShippingPanel } from './shipping-panel';
 
 export const metadata: Metadata = { title: 'Invoice' };
 
@@ -41,10 +42,11 @@ export default async function SaleDetailPage({
   );
   const dueAmount = Number(sale.payableAmount) - paidAmount;
 
-  const [canApprove, canPay, canReturn] = await Promise.all([
+  const [canApprove, canPay, canReturn, canShip] = await Promise.all([
     can('conditional.sale.approve'),
     can('sale.payment'),
     can('sale.return'),
+    can('store.shipping'),
   ]);
 
   const accounts = await paymentAccountOptions();
@@ -250,6 +252,24 @@ export default async function SaleDetailPage({
                 value: a.id,
                 label: `${a.name}${a.code ? ` (${a.code})` : ''}`,
               }))}
+            />
+          ) : null}
+
+          {canShip ? (
+            <ShippingPanel
+              saleId={sale.id}
+              shipping={
+                shipping
+                  ? {
+                      id: shipping.id,
+                      shippingName: shipping.shippingName,
+                      shippingRef: shipping.shippingRef,
+                      date: shipping.date,
+                      receivedDate: shipping.receivedDate,
+                      receivedBy: shipping.receivedBy,
+                    }
+                  : null
+              }
             />
           ) : null}
 

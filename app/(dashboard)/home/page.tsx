@@ -35,9 +35,11 @@ import { generalSetting, numberFormat } from '@/lib/settings';
 import { dateConvert } from '@/lib/settings';
 import { ROUTES } from '@/lib/routes';
 import { periodOverPeriod } from '@/lib/trend';
+import { EventCalendar } from '@/components/erp/event-calendar';
 import { NAVIGATION, navHref, navPermission } from '@/lib/navigation';
 import {
   approvedPurchaseCount,
+  calendarEvents,
   approvedSalesCount,
   expenseTotal,
   monthlyPurchases,
@@ -101,6 +103,12 @@ export default async function DashboardPage() {
   const compactFormat = { symbol, compact: true };
 
   const firstName = user.name.split(' ')[0] || 'there';
+
+  // `roleWiseEvents()` - a system user sees every event, everyone else only
+  // those addressed to all or to their own role.
+  const calendar = await calendarEvents(
+    user.role.type === 'system_user' ? null : user.role.name,
+  );
 
   // --- Figures ------------------------------------------------------------
   const [purchase, sale, expense, saleDue, purchaseDue, bank, cash] = await Promise.all([
@@ -640,6 +648,16 @@ export default async function DashboardPage() {
             </Card>
           ) : null}
         </div>
+      ) : null}
+
+      {/* The Blade dashboard carried a FullCalendar widget of holidays and
+          events; the port had the query but no calendar. */}
+      {calendar.length > 0 ? (
+        <Section title="Calendar" headingLevel="h2">
+          <Card bodyClassName="p-4 sm:p-5">
+            <EventCalendar events={calendar} height={520} />
+          </Card>
+        </Section>
       ) : null}
 
       <Section title="Workspace" headingLevel="h2">
