@@ -27,7 +27,12 @@ import type { Content, TDocumentDefinitions } from 'pdfmake/interfaces';
 export type { TDocumentDefinitions, Content, Table, TableCell, Style } from 'pdfmake/interfaces';
 
 const FONT_DIR = path.join(process.cwd(), 'lib', 'pdf', 'fonts');
-const font = (name: string) => readFileSync(path.join(FONT_DIR, name));
+// A path, not a Buffer: pdfmake's own `resolveUrls()` treats every font
+// descriptor as a possible remote URL first (`typeof value === 'object'` is
+// true for a Buffer too, so it gets handed to the URL resolver and crashes
+// reading a property that only a URL descriptor has). A plain path string
+// skips that branch outright and is what `provideFont()` reads the file from.
+const font = (name: string) => path.join(FONT_DIR, name);
 
 let fontsRegistered = false;
 function ensureFonts() {
