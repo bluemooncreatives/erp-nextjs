@@ -48,7 +48,7 @@ function namePrefixAt(source, offset) {
   // opened at so it can be dropped when that brace closes.
   const tokens = source
     .slice(0, offset)
-    .matchAll(/(?:::|->)name\(\s*'([^']*)'\s*\)\s*->group|\{|\}/g);
+    .matchAll(/(?:::|->)name\(\s*['"]([^'"]*)['"]\s*\)\s*->group|\{|\}/g);
   for (const token of tokens) {
     if (token[0] === '{') depth += 1;
     else if (token[0] === '}') {
@@ -63,26 +63,31 @@ function namePrefixAt(source, offset) {
   return prefixes.map((entry) => entry.name).join('');
 }
 
-/** `Route::get('x', 'C@m')->name('n')` and the `Route::resource` shorthand. */
+/**
+ * `Route::get('x', 'C@m')->name('n')` and the `Route::resource` shorthand.
+ *
+ * Both quote styles: this source names 81 of its routes with double quotes, and
+ * a single-quote-only parser reported every one of them as absent from the PHP.
+ */
 function parseRoutes(source, file) {
   const found = [];
 
   const verbs = 'get|post|put|patch|delete|any|match';
   const pattern = new RegExp(
-    `Route::(${verbs})\\s*\\(\\s*'([^']*)'\\s*,([^;]*?)\\)\\s*((?:->[^;]*)?);`,
+    `Route::(${verbs})\\s*\\(\\s*['"]([^'"]*)['"]\\s*,([^;]*?)\\)\\s*((?:->[^;]*)?);`,
     'gs',
   );
 
   for (const match of source.matchAll(pattern)) {
     const [, verb, uri, target, chain] = match;
-    const own = /->name\(\s*'([^']+)'\s*\)/.exec(chain ?? '')?.[1] ?? null;
-    const action = /'([^']*@[^']*)'/.exec(target)?.[1] ?? null;
+    const own = /->name\(\s*['"]([^'"]+)['"]\s*\)/.exec(chain ?? '')?.[1] ?? null;
+    const action = /['"]([^'"]*@[^'"]*)['"]/.exec(target)?.[1] ?? null;
     const name = own === null ? null : namePrefixAt(source, match.index) + own;
     found.push({ verb: verb.toUpperCase(), uri, name, action, file });
   }
 
   for (const match of source.matchAll(
-    /Route::resource\s*\(\s*'([^']+)'\s*,\s*'([^']+)'/g,
+    /Route::resource\s*\(\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]+)['"]/g,
   )) {
     const [, uri, controller] = match;
     const prefix = namePrefixAt(source, match.index);
@@ -286,8 +291,9 @@ for (const file of appFiles.concat(
  *     AJAX feeds and are server-rendered data or a route handler here
  */
 const ACTION_SHAPED =
-  /(^|\.)(destroy\d*|delete|remove|approve|status|sent|send|receive|clone|copy|default|add\.stock|complete|read|mail|send_mail)($|\.)/;
-const FEED_SHAPED = /(get_list|getdata|_all$|\.all$|suggestion|^team-user$|^project-user$)/;
+  /(^|\.)(destroy\d*|delete|remove|approve|approval|status|sent|send|receive|clone|copy|default|add\.stock|complete|read|mail|send_mail)($|\.)/;
+const FEED_SHAPED =
+  /(get_list|getdata|_all$|\.all$|suggestion|^team-user$|^project-user$|\.parent$|_list$|_with_values$)/;
 const SEARCH_SHAPED = /(\.search$|\.search_index$|search$|_search$|\.daily_search$)/;
 
 function classify(route) {
@@ -305,6 +311,20 @@ const results = laravelRoutes.map((route) => {
   const kind = route.name ? classify(route) : 'unnamed';
   return { ...route, named, url, served, kind };
 });
+
+/**
+ * Names in `lib/routes.ts` that no Laravel route defines.
+ *
+ * The table is documented as a port of Laravel's, and everything above trusts
+ * it as such - `verify-coverage` resolves URLs through it, and the gap lists
+ * are keyed by its names. Nothing, until now, noticed an entry that the source
+ * never had, so a screen invented here would read as ported. An entry listed
+ * below is net-new: legitimate, perhaps, but not migration.
+ */
+const laravelNames = new Set(
+  laravelRoutes.filter((route) => route.name).map((route) => route.name),
+);
+const invented = [...portedNames].filter((name) => !laravelNames.has(name)).sort();
 
 const unnamed = results.filter((route) => !route.name);
 const missingName = results.filter((route) => route.name && !route.named);
@@ -396,6 +416,12 @@ console.log(`dead in the source (no such controller method): ${dead.length}`);
 for (const route of dead) {
   const why = DEAD_BY_DEPENDENCY[route.name] ?? `no ${route.action}`;
   console.log(`  ${route.name.padEnd(42)} ${why}`);
+}
+
+console.log('');
+console.log(`route names the PHP router does not define: ${invented.length}`);
+for (const name of invented) {
+  console.log(`  ${name.padEnd(40)} ${portedUrls.get(name) ?? ''}`);
 }
 
 console.log('');

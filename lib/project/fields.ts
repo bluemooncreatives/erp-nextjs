@@ -33,10 +33,15 @@ export async function saveField(projectId: number, data: FormData) {
   const current = (await projectFields(projectId)).find((r) => r.field.id === id);
   if (id && (!current || current.field.default === 1)) throw new Error('This field cannot be edited.');
   if (current && current.field.type !== type) throw new Error('Existing field types cannot be changed.');
+  const format = String(data.get('format') ?? current?.field.format ?? 'unformat');
+  const decimals = Number(data.get('decimals') ?? current?.field.decimal ?? 2);
+  const label = String(data.get('label') ?? current?.field.label ?? '');
+  const position = String(data.get('position') ?? current?.field.position ?? 'right');
+  if (!['unformat', 'number', 'percent', 'usd', 'custom'].includes(format.toLowerCase()) || !Number.isInteger(decimals) || decimals < 0 || decimals > 6 || label.length > 50 || !['left', 'right'].includes(position)) throw new Error('Invalid number format.');
   const labels = String(data.get('options') ?? '').split('\n').map((s) => s.trim()).filter(Boolean);
   if (type === 'dropdown' && (!labels.length || labels.some((s) => s.length > 191))) throw new Error('Enter dropdown options, one per line.');
   await transaction(async (tx) => {
-    const values = { name, type, description: String(data.get('description') ?? ''), editable: 1, updatedAt: new Date() };
+    const values = { name, type, format, decimal: String(decimals), label, position, description: String(data.get('description') ?? ''), editable: 1, updatedAt: new Date() };
     let fieldId = id;
     if (id) await tx.update(fields).set(values).where(eq(fields.id, id));
     else {

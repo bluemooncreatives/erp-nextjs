@@ -1,0 +1,30 @@
+[
+  {
+    "name": "POS checkout posts server totals, stock, payment, vouchers and a receipt",
+    "ok": true
+  },
+  {
+    "name": "POS rejects invalid quantity without writes",
+    "ok": true
+  },
+  {
+    "name": "POS rollback removes sale, payment and stock writes when ledger is missing",
+    "ok": true
+  },
+  {
+    "name": "Project custom fields create, update a task value and render on board",
+    "ok": true
+  },
+  {
+    "name": "Project moves and orders cards, then persists after reload",
+    "ok": true
+  },
+  {
+    "name": "Project field visibility and removal clean up task values",
+    "ok": true
+  },
+  {
+    "name": "Project refuses a task move to a section outside its project",
+    "ok": true
+  }
+]

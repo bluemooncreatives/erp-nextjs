@@ -43,6 +43,7 @@ import { ProjectPreferences } from './project-preferences';
 import { TaskBoard } from './task-board';
 import { projectAttachments } from '@/lib/project/attachments';
 import { assetUrl } from '@/lib/paths';
+import { formatFieldNumber } from '@/lib/project/field-format';
 import { CustomFields } from '../../custom-fields';
 import { projectFields, projectFieldValues, requireProjectAccess } from '@/lib/project/fields';
 
@@ -75,12 +76,12 @@ export default async function ProjectShowPage({
   const filter = await searchParams;
   const definitions = (await projectFields(project.id)).filter((r) => r.link.visibility === 1);
   const values = await projectFieldValues(project.id);
-  const fieldValue = (taskId: number, fieldId: number) => {
+  const fieldValue = (taskId: number, fieldId: number, formatted = false) => {
     const definition = definitions.find((r) => r.field.id === fieldId);
     const value = values.find((r) => r.value.taskId === taskId && r.value.fieldId === fieldId)?.value;
     if (!definition || !value) return '';
     const type = definition.field.type;
-    if (type === 'number') return value.number ?? '';
+    if (type === 'number') return value.number == null ? '' : formatted ? formatFieldNumber(value.number, definition.field) : value.number;
     if (type === 'date') return value.date?.toISOString().slice(0, 10) ?? '';
     if (type === 'dropdown') return definition.options.find((o) => o.id === value.optionId)?.option ?? '';
     if (type === 'user_id') return board.members.find((m) => m.id === value.userId)?.name ?? '';
@@ -280,7 +281,7 @@ export default async function ProjectShowPage({
                   name: row.task.name,
                   completed: row.task.completed,
                   createdByName: row.createdByName,
-                  fields: definitions.map((r) => ({ name: r.field.name ?? 'Field', value: String(fieldValue(row.task.id, r.field.id)) })),
+                  fields: definitions.map((r) => ({ name: r.field.name ?? 'Field', value: String(fieldValue(row.task.id, r.field.id, true)) })),
                 })),
               }))}
             />
@@ -345,7 +346,7 @@ export default async function ProjectShowPage({
                               {row.task.completed === 1 ? 'Complete':'Open'}
                             </Badge>
                           </Td>
-                          {definitions.map((r) => <Td key={r.field.id}>{String(fieldValue(row.task.id, r.field.id)) || '-'}</Td>)}
+                          {definitions.map((r) => <Td key={r.field.id}>{String(fieldValue(row.task.id, r.field.id, true)) || '-'}</Td>)}
                           <Td>
                             <div className="flex items-center gap-2">
                               <form action={toggleTaskComplete}>

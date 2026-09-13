@@ -4,7 +4,7 @@ import { updateFieldAction } from './field-actions';
 import { FormAlert, FormInput, FormSelect, FormTextarea } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 
-export type FieldControlRow = { id: number; name: string; type: string; visibility: number; isDefault: boolean; options: { id: number; label: string }[]; value: string };
+export type FieldControlRow = { id: number; name: string; type: string; visibility: number; isDefault: boolean; options: { id: number; label: string }[]; value: string; format: string; decimals: string; label: string; position: string };
 
 export function FieldControl({ projectId, field, taskId, members = [] }: { projectId: number; field?: FieldControlRow; taskId?: number; members?: { id: number; name: string }[] }) {
   const [state, action] = useActionState(updateFieldAction, {});
@@ -21,6 +21,12 @@ export function FieldControl({ projectId, field, taskId, members = [] }: { proje
     </> : <>
       <FormInput label="Field name" name="name" defaultValue={field?.name} required maxLength={191} readOnly={field?.isDefault} />
       {field ? <><input type="hidden" name="type" value={field.type} /><p className="text-sm text-muted-foreground">{field.type}</p></> : <FormSelect label="Type" name="type" options={['text', 'number', 'date', 'dropdown', 'user_id'].map((type) => ({ value: type, label: type === 'user_id' ? 'Person' : type }))} />}
+      {!field || field.type === 'number' ? <details><summary className="cursor-pointer text-sm">Number formatting</summary><div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <FormSelect label="Number format" name="format" defaultValue={field?.format ?? 'unformat'} options={['unformat', 'number', 'percent', 'usd', 'custom'].map((value) => ({ value, label: value }))} />
+        <FormInput label="Decimal places" name="decimals" type="number" min="0" max="6" defaultValue={field?.decimals ?? '2'} />
+        <FormInput label="Custom label" name="label" maxLength={50} defaultValue={field?.label ?? ''} />
+        <FormSelect label="Label position" name="position" defaultValue={field?.position ?? 'right'} options={[{ value: 'left', label: 'Before value' }, { value: 'right', label: 'After value' }]} />
+      </div></details> : null}
       {!field || field.type === 'dropdown' ? <FormTextarea label="Dropdown options (one per line)" name="options" defaultValue={field?.options.map((o) => o.label).join('\n')} /> : null}
       <div className="flex gap-2">
         {!field?.isDefault ? <SubmitButton name="operation" value="save" size="sm">{field ? 'Save field' : 'Add field'}</SubmitButton> : null}

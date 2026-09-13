@@ -17,6 +17,7 @@
 // no-op - a failure that looks like broken application code.
 
 import { createRequire } from 'node:module';
+import { readFileSync, existsSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { SignJWT } from 'jose';
 import { launchBrowser, openPage, findBrowser, sleep } from './lib/cdp.mjs';
@@ -81,6 +82,7 @@ const stamp = Date.now().toString().slice(-6);
 const results = [];
 
 async function scenario(name, run) {
+  if (process.env.SCENARIO_PATTERN && !name.includes(process.env.SCENARIO_PATTERN)) return;
   try {
     await run();
     results.push({ name, ok: true });
@@ -471,6 +473,60 @@ await scenario('header: choosing a language switches the interface', async () =>
   await pickOption(page, 'locale', "return option.textContent.trim() === 'English';");
   await page.waitUntil(`document.documentElement.dir === 'ltr'`, { timeout: 15000 });
 });
+
+
+// Additional migration workflows use fixtures created by verify-migration.mjs.
+if (process.env.DB_DATABASE?.startsWith('erp_migration_') && existsSync('artifacts/migration-fixture.json')) {
+  const fixture = JSON.parse(readFileSync('artifacts/migration-fixture.json', 'utf8'));
+  await scenario('POS: select product, take cash, print receipt, and deduct stock', async () => {
+    const location = `${fixture.stock.houseable_type === 'Modules\\Inventory\\Entities\\ShowRoom' ? 'showroom' : 'warehouse'}-${fixture.stock.houseable_id}`;
+    await page.goto(`${base}/pos/pos-order-products?location=${location}`);
+    const customer = await one('select name from contacts where id=?', [fixture.customerId]);
+    await pickOption(page, 'customer_id', `return option.textContent.includes(${JSON.stringify(customer.name)});`);
+    await page.interactUntil(`(() => { const button = [...document.querySelectorAll('button')].find(b => b.className.includes('text-start') && b.textContent.includes(${JSON.stringify(fixture.stock.product_name)})); if(!button) throw new Error('product tile missing'); button.click(); })()`, `document.querySelector('input[name="items"][value="${fixture.stock.product_sku_id}"]')`);
+    await page.evaluate(setValue('input[name="item_price"]', String(fixture.price)));
+    await page.evaluate(setValue('input[name="product_tax"]', '0'));
+    await page.evaluate(setValue('input[name="ref_no"]', `BROWSER-POS-${stamp}`));
+    await page.evaluate(setValue('input[name="payment_amount"]', String(fixture.price + 25)));
+    const before = Number((await one('select stock from stock_reports where id=?',[fixture.stock.id])).stock);
+    await page.evaluate(clickText('Complete checkout'));
+    await page.waitUntil('location.pathname.startsWith("/pos/receipt/")', {timeout:30000});
+    const saved = await one('select * from sales where ref_no=?', [`BROWSER-POS-${stamp}`]);
+    assert.ok(saved); assert.equal(Number(saved.type),2); assert.equal(Number(saved.is_approved),1);
+    assert.equal(Number((await one('select stock from stock_reports where id=?',[fixture.stock.id])).stock),before-1);
+    assert.ok(await page.evaluate('document.body.innerText.includes("Change")'));
+  });
+  await scenario('Project: drag a task between board columns', async () => {
+    await page.goto(`${base}/project/${fixture.projectUuid}/board`);
+    await page.evaluate(`(() => {
+      const card = [...document.querySelectorAll('article[draggable]')].find(a => a.textContent.includes('First task'));
+      const column = [...document.querySelectorAll('div.w-80')].find(d => d.textContent.includes('To do'));
+      if(!card || !column) throw new Error('board card or column missing');
+      const transfer = new DataTransfer();
+      card.dispatchEvent(new DragEvent('dragstart',{bubbles:true,dataTransfer:transfer}));
+      column.dispatchEvent(new DragEvent('drop',{bubbles:true,dataTransfer:transfer}));
+    })()`);
+    await page.waitUntil(`Array.from(document.querySelectorAll('div.w-80')).some(d => d.textContent.includes('To do') && d.textContent.includes('First task'))`, {timeout:30000});
+    assert.equal((await one('select section_id from tasks where id=?',[fixture.taskIds[0]])).section_id,fixture.sectionIds[0]);
+    assert.deepEqual(await page.errors(),[]);
+  });
+  await scenario('Project: create numeric field and edit its value through the UI', async () => {
+    await page.goto(`${base}/project/${fixture.projectUuid}/board`);
+    await page.evaluate(`(() => { const details=[...document.querySelectorAll('details')].find(d=>d.textContent.includes('Manage custom fields')); details.open=true; })()`);
+    const name = `Browser score ${stamp}`;
+    const newField = `Array.from(document.forms).find(f => f.querySelector('input[name="field_id"]')?.value === '' && f.querySelector('input[name="project_id"]'))`;
+    await page.evaluate(`(() => {const f=${newField}; const el=f.querySelector('input[name="name"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(el,${JSON.stringify(name)}); el.dispatchEvent(new Event('input',{bubbles:true})); })()`);
+    await pickOption(page,'type',"return option.textContent.trim() === 'number';");
+    await page.evaluate(`(${newField}).querySelector('button[value="save"]').click()`);
+    await page.waitUntil(`Array.from(document.forms).some(f=>f.querySelector('input[name="field_id"]')?.value && f.querySelector('input[name="name"]')?.value===${JSON.stringify(name)})`,{timeout:30000});
+    const field = await one('select id from fields where name=?',[name]); assert.ok(field,'field saved by form');
+    await page.goto(`${base}/task/${fixture.taskUuids[0]}`);
+    const valueForm=`Array.from(document.forms).find(f=>f.querySelector('input[name="field_id"]')?.value==='${field.id}')`;
+    await page.evaluate(`(() => {const el=(${valueForm}).querySelector('input[name="value"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(el,'42'); el.dispatchEvent(new Event('input',{bubbles:true})); (${valueForm}).querySelector('button[value="value"]').click();})()`);
+    await page.waitUntil(`(${valueForm}).textContent.includes('Saved.')`,{timeout:30000});
+    assert.equal(Number((await one('select number from field_task where field_id=? AND task_id=?',[field.id,fixture.taskIds[0]])).number),42);
+  });
+}
 
 const failed = results.filter((r) => !r.ok);
 console.log(

@@ -59,6 +59,7 @@ export async function checkoutPos(previous: SaleFormState, data: FormData): Prom
       const paid = Math.round(payments.reduce((sum, p) => sum + p.amount, 0) * 100) / 100;
       if (paid < input.totalAmount) throw new Error('Enter payment covering the full checkout amount.');
       if (paid > input.totalAmount && !payments.some((p) => p.paymentMethod === 'quick cash')) throw new Error('Use Quick Cash for cash tendered with change.');
+      if (payments.filter((p) => p.paymentMethod !== 'quick cash').reduce((sum, p) => sum + p.amount, 0) > input.totalAmount) throw new Error('Non-cash payments exceed the checkout amount.');
       if (payments.filter((p) => p.paymentMethod === 'quick cash').length > 1) throw new Error('Use a single Quick Cash payment for change.');
       if (payments.some((p) => ['cash', 'quick cash'].includes(p.paymentMethod))) {
         const [cashAccount] = await tx.select({ id: chartAccounts.id }).from(chartAccounts).where(and(eq(chartAccounts.contactableId, location.id), eq(chartAccounts.contactableType, location.type))).limit(1);

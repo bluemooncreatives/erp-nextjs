@@ -129,10 +129,13 @@ const ids = {
   project: await firstId('projects', 'uuid'),
   task: await firstId('project_task', 'id'),
   team: await firstId('teams'),
+  pos: (await connection.query('select id from sales where type=2 order by id desc limit 1'))[0][0]?.id,
+  task: (await connection.query('select uuid from tasks limit 1'))[0][0]?.uuid,
 };
 
 /** Which sample id a given route should use for its `[id]`. */
 function idFor(route) {
+  if (route.startsWith('/pos/receipt')) return ids.pos;
   if (route.startsWith('/sale/') || route.startsWith('/my-details/sale')) return ids.sale;
   if (route.startsWith('/purchase/purchase_order')) return ids.purchase;
   if (route.startsWith('/quotation')) return ids.quotation;
@@ -182,7 +185,7 @@ const routes = discovered
   .filter((route) => !route.includes('[[') && route !== '/login')
   .map((route) =>
     route
-      .replace(/\[uuid\]/g, ids.project ?? '')
+      .replace(/\[uuid\]/g, route.startsWith('/task/') ? ids.task ?? '' : ids.project ?? '')
       .replace(/\[token\]/g, 'sample-token')
       .replace(/\[hash\]/g, 'sample-hash')
       .replace(/\[id\]/g, (m, offset, whole) => String(idFor(whole) ?? 1)),
