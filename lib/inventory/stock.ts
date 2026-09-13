@@ -82,6 +82,24 @@ export async function currentStock(
   return row ? stockValue(row.stock) : 0;
 }
 
+/**
+ * Serializes writers at one location behind its `stock_reports` rows, inside
+ * an open transaction. The PHP had no such lock either - stock could already
+ * be oversold by two concurrent regular sales there - but this port added one
+ * to POS's checkout only; a POS sale and a regular sale (or two regular
+ * sales) racing the same location still had the plain read-then-write TOCTOU
+ * gap. Call this once, right after opening the transaction and before any
+ * `currentStock()` check, everywhere a sale/purchase/transfer/adjustment
+ * writes stock at a location.
+ */
+export async function lockLocationStock(location: StockLocation, tx: Tx): Promise<void> {
+  await tx
+    .select({ id: stockReports.id })
+    .from(stockReports)
+    .where(and(eq(stockReports.houseableId, location.id), eq(stockReports.houseableType, location.type)))
+    .for('update');
+}
+
 /** On-hand for many SKUs at one location, in a single query. */
 export async function stockLevels(
   location: StockLocation,

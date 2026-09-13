@@ -5,8 +5,9 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { authorize } from '@/lib/auth/permissions';
 import { transaction } from '@/lib/db/client';
-import { partNumbers, contacts, taxes, productSku, comboProducts, comboProductDetails, products, stockReports, sales, chartAccounts } from '@/lib/db/schema';
-import { currentStock, parseLocation } from '@/lib/inventory/stock';
+import { partNumbers, contacts, taxes, productSku, comboProducts, comboProductDetails, products, sales, chartAccounts } from '@/lib/db/schema';
+import { currentStock, lockLocationStock, parseLocation } from '@/lib/inventory/stock';
+import { MorphType } from '@/lib/db/morph';
 import { ProductType } from '@/lib/product/constants';
 import { posInput } from '@/lib/sale/pos-input';
 import { approveSale, createSale, INSUFFICIENT_STOCK, recordSalePayments } from '@/lib/sale/repository';
@@ -14,9 +15,29 @@ import { route } from '@/lib/routes';
 import type { SaleFormState } from '../sale/actions';
 import { actionFormData } from '@/lib/forms';
 
+// A double-click or a dropped-response retry resubmits the same form under
+// the same `checkout_nonce`; without this, each POST would honestly pass
+// every validation and ring up a second, identical sale. Keyed in memory
+// rather than a new DB column - this port must not alter Laravel's own table
+// shapes - so it only protects a single server process and a short window,
+// which is what a double-click / retry actually needs.
+const recentCheckouts = new Map<string, { saleId: number; at: number }>();
+const CHECKOUT_NONCE_TTL_MS = 5 * 60 * 1000;
+
+function recallCheckout(nonce: string): number | undefined {
+  const cutoff = Date.now() - CHECKOUT_NONCE_TTL_MS;
+  for (const [key, entry] of recentCheckouts) if (entry.at < cutoff) recentCheckouts.delete(key);
+  return recentCheckouts.get(nonce)?.saleId;
+}
+
 export async function checkoutPos(previous: SaleFormState, data: FormData): Promise<SaleFormState> {
   const user = await authorize('sale.store');
   data = actionFormData(previous, data);
+  const nonce = String(data.get('checkout_nonce') ?? '').trim();
+  if (nonce) {
+    const already = recallCheckout(nonce);
+    if (already) redirect(route('pos.receipt', { id: already }));
+  }
   let saleId: number;
   try {
     const { input, payments, taxId } = posInput(data);
@@ -24,8 +45,16 @@ export async function checkoutPos(previous: SaleFormState, data: FormData): Prom
       const [customer] = await tx.select().from(contacts).where(eq(contacts.id, Number(input.customerRef.split('-')[1]))).limit(1);
       if (!customer) throw new Error('Customer no longer exists.');
       const location = parseLocation(input.locationRef)!;
+      // A branch-scoped user (anyone but a system user) may only check out
+      // against their own showroom - the PHP header never gave a regular_user
+      // a location picker at all (it renders their showroom name read-only),
+      // so the equivalent guard here is refusing any other location server-side
+      // rather than trusting the posted `locationRef`.
+      if (!user.isSystemUser && (location.type !== MorphType.ShowRoom || location.id !== user.showroomId)) {
+        throw new Error('You are not authorized to check out for this location.');
+      }
       // Serialize checkouts at this location before stock checks and deductions.
-      await tx.select({ id: stockReports.id }).from(stockReports).where(and(eq(stockReports.houseableId, location.id), eq(stockReports.houseableType, location.type))).for('update');
+      await lockLocationStock(location, tx);
       const requiredStock = new Map<number, number>();
       for (const line of input.lines) {
         const table = line.isCombo ? comboProducts : productSku;
@@ -80,6 +109,7 @@ export async function checkoutPos(previous: SaleFormState, data: FormData): Prom
   } catch (error) {
     return { error: error instanceof Error ? error.message : 'Checkout failed.' };
   }
+  if (nonce) recentCheckouts.set(nonce, { saleId, at: Date.now() });
   revalidatePath('/sale');
   revalidatePath('/pos/pos-order-products');
   redirect(route('pos.receipt', { id: saleId }));

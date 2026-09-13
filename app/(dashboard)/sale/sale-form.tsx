@@ -16,6 +16,7 @@ import { LinkButton } from '@/components/common/link-button';
 // ---------------------------------------------------------------------------
 
 import { useActionState, useMemo, useState } from 'react';
+import { nanoid } from 'nanoid';
 import { Card } from '@/components/erp/page';
 import {
   FormAlert,
@@ -122,6 +123,12 @@ export function SaleForm({
   pos?: boolean;
 }) {
   const [state, formAction] = useActionState(action, INITIAL);
+  // One id per mount, not per submit - a double-click or a dropped-response
+  // retry resubmits the same in-flight checkout under the same id, so the
+  // action can recognise it as the same attempt instead of ringing it up
+  // twice. A genuinely new checkout only happens after the page remounts
+  // (the previous one redirected to its receipt), which mints a new id.
+  const [checkoutNonce] = useState(() => (pos ? nanoid() : ''));
 
   // Which button submitted the form - the Blade set these hidden fields from
   // its three save buttons.
@@ -230,6 +237,7 @@ export function SaleForm({
     <form action={formAction} className="space-y-6">
       <FormAlert variant="error" message={state.error} />
 
+      {pos ? <input type="hidden" name="checkout_nonce" value={checkoutNonce} /> : null}
       {defaults?.id ? <input type="hidden" name="id" value={defaults.id} /> : null}
       {quotationId ? (
         <input type="hidden" name="quotation_id" value={quotationId} />

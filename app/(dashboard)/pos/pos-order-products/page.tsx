@@ -26,9 +26,17 @@ export default async function PosPage({ searchParams }: { searchParams: Promise<
 
   const showroomId = session?.showroomId ?? user.showroomId ?? null;
 
-  const locations = await locationOptions();
+  // A branch-scoped user gets no picker at all - matching the PHP header,
+  // which renders a regular_user's showroom name read-only rather than a
+  // <select>. `checkoutPos` refuses any other location server-side too.
+  const allLocations = await locationOptions();
+  const locations = user.isSystemUser
+    ? allLocations
+    : allLocations.filter((l) => l.value === `showroom-${showroomId}`);
   const query = await searchParams;
-  const requested = query.location ?? (showroomId ? `showroom-${showroomId}` : String(locations[0]?.value ?? ''));
+  const requested = user.isSystemUser
+    ? (query.location ?? (showroomId ? `showroom-${showroomId}` : String(locations[0]?.value ?? '')))
+    : `showroom-${showroomId}`;
   const selected = locations.find((l) => String(l.value) === requested) ?? locations[0];
   const locationRef = String(selected?.value ?? '');
   const location = parseLocation(locationRef);
@@ -71,10 +79,14 @@ export default async function PosPage({ searchParams }: { searchParams: Promise<
         title="POS"
         breadcrumb={[{ label: 'Sale' }, { label: 'POS' }]}
       />
-      <form method="get" className="mb-5 flex items-end gap-3">
-        <label className="text-sm">Stock location<select name="location" defaultValue={locationRef} className="ms-2 rounded border border-border bg-background p-2">{locations.map((l) => <option key={l.value} value={l.value}>{l.label}</option>)}</select></label>
-        <SubmitButton size="sm">Load location</SubmitButton>
-      </form>
+      {user.isSystemUser ? (
+        <form method="get" className="mb-5 flex items-end gap-3">
+          <label className="text-sm">Stock location<select name="location" defaultValue={locationRef} className="ms-2 rounded border border-border bg-background p-2">{locations.map((l) => <option key={l.value} value={l.value}>{l.label}</option>)}</select></label>
+          <SubmitButton size="sm">Load location</SubmitButton>
+        </form>
+      ) : (
+        <p className="mb-5 text-sm text-muted-foreground">Stock location: {selected?.label ?? 'None assigned'}</p>
+      )}
       <SaleForm
         key={locationRef}
         action={checkoutPos}

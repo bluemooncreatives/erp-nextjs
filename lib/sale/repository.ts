@@ -30,6 +30,7 @@ import {
   quotations,
   sales,
   shippings,
+  stockReports,
 } from '@/lib/db/schema';
 import { MorphType } from '@/lib/db/morph';
 import {
@@ -37,6 +38,7 @@ import {
   adjustStock,
   currentStock,
   deleteMovementsFor,
+  lockLocationStock,
   parseLocation,
   recordMovement,
   type StockLocation,
@@ -178,6 +180,10 @@ export async function createSale(
   const tax = parseTotalTax(data.totalTax);
 
   return withConnection(connection, async (tx) => {
+    // Close the TOCTOU window between this sale's stock checks below and a
+    // concurrent POS checkout or another regular sale at the same location.
+    await lockLocationStock(location, tx);
+
     const [inserted] = await tx.insert(sales).values({
       customerId,
       agentUserId,
@@ -230,13 +236,17 @@ export async function createSale(
       });
     }
 
-    // Serial numbers chosen anywhere on the form are marked sold.
+    // Serial numbers chosen anywhere on the form are marked sold - guarded by
+    // `isSold = 0` and the affected-row count, so a concurrent sale (POS or
+    // regular) that already claimed one of these serials loses this sale
+    // rather than both silently thinking they own it.
     const allPartNumbers = data.lines.flatMap((l) => l.partNumberIds ?? []);
     if (allPartNumbers.length) {
-      await tx
+      const [result] = await tx
         .update(partNumbers)
         .set({ isSold: 1, updatedAt: new Date() })
-        .where(inArray(partNumbers.id, allPartNumbers));
+        .where(and(inArray(partNumbers.id, allPartNumbers), eq(partNumbers.isSold, 0)));
+      if (result.affectedRows !== allPartNumbers.length) throw new InsufficientStockError();
     }
 
     for (const line of data.lines) {
@@ -417,6 +427,10 @@ export async function updateSale(
     const [sale] = await tx.select().from(sales).where(eq(sales.id, id)).limit(1);
     if (!sale) throw new InsufficientStockError();
 
+    // Close the TOCTOU window between this edit's stock/serial checks and a
+    // concurrent POS checkout or another sale at the same location.
+    await lockLocationStock(location, tx);
+
     await tx
       .update(sales)
       .set({
@@ -468,6 +482,19 @@ export async function updateSale(
         item,
       ]),
     );
+
+    // Serials already attached to this sale's own lines - re-affirming these
+    // must always succeed, since nothing else could have taken a serial this
+    // sale already owns.
+    const existingItemIds = existing.map((item) => item.id);
+    const previousPartNumberIds = existingItemIds.length
+      ? (
+          await tx
+            .select({ id: productItemDetailsPartNumbers.partNumberId })
+            .from(productItemDetailsPartNumbers)
+            .where(inArray(productItemDetailsPartNumbers.productItemDetailId, existingItemIds))
+        ).map((r) => r.id)
+      : [];
 
     const seen = new Set<string>();
 
@@ -568,13 +595,19 @@ export async function updateSale(
       await tx.delete(productItemDetails).where(eq(productItemDetails.id, item.id));
     }
 
-    // Serial numbers selected anywhere on the form are marked sold.
+    // Serial numbers newly attached in this edit must still be available;
+    // ones already on this sale are skipped rather than re-guarded, since
+    // they are already `isSold = 1` from when this sale first claimed them -
+    // guarding those too would spuriously fail an edit that leaves them
+    // untouched.
     const allPartNumbers = data.lines.flatMap((l) => l.partNumberIds ?? []);
-    if (allPartNumbers.length) {
-      await tx
+    const newPartNumbers = allPartNumbers.filter((pid) => !previousPartNumberIds.includes(pid));
+    if (newPartNumbers.length) {
+      const [result] = await tx
         .update(partNumbers)
         .set({ isSold: 1, updatedAt: new Date() })
-        .where(inArray(partNumbers.id, allPartNumbers));
+        .where(and(inArray(partNumbers.id, newPartNumbers), eq(partNumbers.isSold, 0)));
+      if (result.affectedRows !== newPartNumbers.length) throw new InsufficientStockError();
     }
 
     return id;
@@ -877,6 +910,11 @@ export async function approveSale(saleId: number, userId: number, connection?: T
   const saleTaxAccount = sale.taxId ? await taxAccountId(sale.taxId) : null;
 
   await withConnection(connection, async (tx) => {
+    // This is where stock actually leaves the location (`adjustStock` below) -
+    // lock it here too, not just at creation, so an approval racing a POS
+    // checkout or another approval at the same location serializes correctly.
+    await lockLocationStock(location, tx);
+
     // Mark the sale's serial numbers sold.
     const serials = await tx
       .select({ partNumberId: productItemDetailsPartNumbers.partNumberId })

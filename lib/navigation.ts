@@ -48,6 +48,12 @@ export type NavLeaf = {
    * Those are visible to anyone the `roleTypes` gate lets through.
    */
   ungated?: boolean;
+  /**
+   * An outer `@if(permissionCheck(...))` the Blade wrapped this item in, on
+   * top of its own permission - e.g. the Style items each also need
+   * `style.index` in the PHP menu, not just their own permission.
+   */
+  requires?: string;
 };
 
 export type NavHeading = {
@@ -63,6 +69,12 @@ export type NavGroup = {
   icon: string;
   /** Permission guarding the whole group - the type-1 "main menu" permission. */
   permission: string;
+  /**
+   * An outer `@if(permissionCheck(...))` the Blade wrapped this whole group
+   * in, on top of the permission/children check above - e.g. Location is
+   * only shown at all when `human_resource` is also granted in the PHP menu.
+   */
+  requires?: string;
   /** URL prefix that marks the group expanded. */
   match: string[];
   children: Array<NavLeaf | NavHeading>;
@@ -289,6 +301,9 @@ export const NAVIGATION: NavItem[] = [
     label: 'Location', labelKey: 'event.Location',
     icon: 'map-pin',
     permission: 'showroom.index',
+    // The Blade wraps this whole block in `@if(permissionCheck('human_resource'))`
+    // before its own showroom/warehouse check.
+    requires: 'human_resource',
     match: ['/setup/showroom', '/setup/warehouse'],
     children: [
       { kind: 'link', label: 'Branch', labelKey: 'inventory.Branch', route: 'showroom.index' },
@@ -407,9 +422,11 @@ export const NAVIGATION: NavItem[] = [
       { kind: 'link', label: 'Printer', labelKey: 'common.Printer', route: 'printer.index', permission: 'printer.create' },
 
       { kind: 'heading', label: 'Styles' },
-      { kind: 'link', label: 'Theme Customization', labelKey: 'setting.Theme Customization', route: 'themes.index' },
-      { kind: 'link', label: 'Change View', labelKey: 'common.Change View', route: 'themes.change_view' },
-      { kind: 'link', label: 'Background', labelKey: 'setting.Background', route: 'guest-background' },
+      // The Blade wraps all three in a separate `@if(permissionCheck('style.index'))`,
+      // on top of each item's own permission.
+      { kind: 'link', label: 'Theme Customization', labelKey: 'setting.Theme Customization', route: 'themes.index', requires: 'style.index' },
+      { kind: 'link', label: 'Change View', labelKey: 'common.Change View', route: 'themes.change_view', requires: 'style.index' },
+      { kind: 'link', label: 'Background', labelKey: 'setting.Background', route: 'guest-background', requires: 'style.index' },
     ],
   },
 

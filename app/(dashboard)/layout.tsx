@@ -156,6 +156,7 @@ async function resolveNavigation(
   for (const item of NAVIGATION) {
     if (item.kind === 'link') {
       if (!navVisible(item, user.role.type)) continue;
+      if (item.requires && !userCan(user, item.requires)) continue;
       if (!item.ungated && !userCan(user, navPermission(item))) continue;
       out.push({
         kind: 'link',
@@ -173,6 +174,7 @@ async function resolveNavigation(
     if (!userCan(user, item.permission) && !userCanAny(user, childPermissions)) {
       continue;
     }
+    if (item.requires && !userCan(user, item.requires)) continue;
 
     const children: Array<SidebarLink | SidebarHeading> = [];
     for (const child of item.children) {
@@ -181,6 +183,7 @@ async function resolveNavigation(
         continue;
       }
       if (!navVisible(child, user.role.type)) continue;
+      if (child.requires && !userCan(user, child.requires)) continue;
       if (!child.ungated && !userCan(user, navPermission(child))) continue;
       children.push({ kind: 'link', label: await label(child), href: navHref(child) });
     }
