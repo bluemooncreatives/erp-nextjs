@@ -82,13 +82,13 @@ export const NAVIGATION: NavItem[] = [
   // ---------------------------------------------------------------- Project
   {
     kind: 'group',
-    label: 'Project Management',
+    label: 'Project Management', labelKey: 'common.Project Management',
     icon: 'briefcase',
     permission: 'project',
     match: ['/project', '/projects', '/tasks', '/teams'],
     children: [
-      { kind: 'link', label: 'Projects', route: 'project.index' },
-      { kind: 'link', label: 'Teams', route: 'team.index' },
+      { kind: 'link', label: 'Projects', labelKey: 'common.Projects', route: 'project.index' },
+      { kind: 'link', label: 'Teams', labelKey: 'common.Teams', route: 'team.index' },
     ],
   },
 
@@ -400,7 +400,7 @@ export const NAVIGATION: NavItem[] = [
       { kind: 'heading', label: 'Setup' },
       { kind: 'link', label: 'Tax', labelKey: 'common.Tax', route: 'tax.index' },
       { kind: 'link', label: 'Intro Prefix', labelKey: 'common.Intro Prefix', route: 'introPrefix.index' },
-      { kind: 'link', label: 'Currencies', route: 'currencies.index' },
+      { kind: 'link', label: 'Currencies', labelKey: 'common.Currencies', route: 'currencies.index' },
       { kind: 'link', label: 'Language', labelKey: 'common.Language', route: 'languages.index' },
       { kind: 'link', label: 'Country', labelKey: 'contact.Country', route: 'country.index' },
       { kind: 'link', label: 'Printer', labelKey: 'common.Printer', route: 'printer.index', permission: 'printer.create' },

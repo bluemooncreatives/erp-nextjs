@@ -5,7 +5,10 @@
 // "Receive"). So switching to Arabic translated nothing. These are Modern
 // Standard Arabic terms as used in accounting and ERP software.
 //
-//   node scripts/_ar.mjs
+//   node scripts/seed-arabic.mjs
+//
+// Re-running it is safe: it only fills a key still holding the English source,
+// so anything edited in the Localization screen afterwards survives.
 
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
@@ -277,6 +280,66 @@ const EXTRA = {
 // for it. These are added to `common` on both sides: the English goes in
 // `default` so a translator can find it, the Arabic in `ar`.
 const NEW_KEYS = {
+  'Cash position': 'الوضع النقدي',
+  'Payment due list': 'قائمة المستحقات',
+  'Welcome back': 'أهلاً بعودتك',
+  'Review sales': 'مراجعة المبيعات',
+  'New sale': 'عملية بيع جديدة',
+  'Net profit': 'صافي الربح',
+  'after costs': 'بعد التكاليف',
+  'owed to you': 'مستحق لك',
+  'approved vouchers': 'سندات معتمدة',
+  'Received to date': 'المحصّل حتى تاريخه',
+  'Across every open invoice': 'عبر كل الفواتير المفتوحة',
+  'Invoiced per month, this year': 'المفوتر شهرياً هذا العام',
+  'Highest spend': 'الأعلى إنفاقاً',
+  'Average customer': 'متوسط العميل',
+  'Alert at': 'التنبيه عند',
+  'In stock': 'المتوفر',
+  'Actions': 'الإجراءات',
+  'Payable': 'المستحق الدفع',
+  'Unpaid': 'غير مدفوع',
+  'Partial': 'جزئي',
+  'Paid': 'مدفوع',
+
+  'Closing': 'الإقفال',
+  'Opening': 'الافتتاح',
+  'Paid today': 'المدفوع اليوم',
+  'Received today': 'المقبوض اليوم',
+  'Cash in hand before today': 'النقد بالصندوق قبل اليوم',
+  'No payments on this date.': 'لا توجد مدفوعات في هذا التاريخ.',
+  'Nothing on the list.': 'لا يوجد شيء في القائمة.',
+  'No sales found.': 'لا توجد مبيعات.',
+  'Search or type command...': 'ابحث أو اكتب أمراً...',
+  'Main Branch': 'الفرع الرئيسي',
+  'Arabic': 'العربية',
+  'English': 'الإنجليزية',
+  'Super admin': 'مدير النظام',
+  'Sign out': 'تسجيل الخروج',
+  'Create': 'إنشاء',
+  'Branch': 'الفرع',
+  'Add Sale': 'إضافة عملية بيع',
+  'To do list': 'قائمة المهام',
+  'Stock alert list': 'قائمة تنبيه المخزون',
+  'Payment due list': 'قائمة المستحقات',
+  'Top customers': 'أفضل العملاء',
+  'Stock by branch': 'المخزون حسب الفرع',
+  'Sales vs purchases': 'المبيعات مقابل المشتريات',
+  'Cash position': 'الوضع النقدي',
+  'Sales throughput': 'حركة المبيعات',
+  'Workspace': 'مساحة العمل',
+  'In bank': 'في البنك',
+  'In cash': 'نقداً',
+  'Invoice due': 'فواتير مستحقة',
+  'Purchase due': 'مشتريات مستحقة',
+  'Total sale': 'إجمالي المبيعات',
+  'Total purchase': 'إجمالي المشتريات',
+  'Invoiced': 'مُفوتر',
+  'Outstanding': 'غير محصّل',
+  'All time': 'كل الفترات',
+  'View all': 'عرض الكل',
+  'Details': 'التفاصيل',
+
   'Home': 'الرئيسية',
   'Summary': 'الملخص',
   'Project Management': 'إدارة المشاريع',

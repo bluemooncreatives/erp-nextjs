@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/components/ui/utils";
+import { Phrase } from "@/context/TranslationContext";
 
 /** The page-context block every screen opens with — 30-odd pages used to hand-roll their own heading, no two agreeing on spacing. */
 
@@ -144,9 +145,13 @@ export function Section({
     <section className={cn("space-y-3", className)}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="min-w-0 space-y-0.5">
-          <Heading className="text-base font-semibold text-foreground">{title}</Heading>
+          <Heading className="text-base font-semibold text-foreground">
+            <Phrase>{title}</Phrase>
+          </Heading>
           {description ? (
-            <p className="text-sm text-muted-foreground">{description}</p>
+            <p className="text-sm text-muted-foreground">
+              <Phrase>{description}</Phrase>
+            </p>
           ) : null}
         </div>
         {action ? <div className="shrink-0">{action}</div> : null}

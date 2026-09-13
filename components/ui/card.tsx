@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import { cn } from "./utils";
+import { Phrase } from "@/context/TranslationContext";
 
 /**
  * Card — copied from admin-main's `src/components/ui/card.tsx`.
@@ -43,7 +44,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
+function CardTitle({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-title"
@@ -52,17 +53,23 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
         className,
       )}
       {...props}
-    />
+    >
+      {/* Every card heading in the application passes through here, including
+          the dashboard's own cards, which do not use the ERP `Card` wrapper. */}
+      <Phrase>{children}</Phrase>
+    </div>
   );
 }
 
-function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
+function CardDescription({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-description"
       className={cn("text-muted-foreground text-sm", className)}
       {...props}
-    />
+    >
+      <Phrase>{children}</Phrase>
+    </div>
   );
 }
 

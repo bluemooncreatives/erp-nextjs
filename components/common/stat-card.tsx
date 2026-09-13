@@ -3,6 +3,7 @@ import { ArrowDownRight, ArrowRight, ArrowUpRight, type LucideIcon } from "lucid
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/components/ui/utils";
+import { Phrase } from "@/context/TranslationContext";
 
 /** Summary tile with states inline copies never had (loading, trend, link).
  *  Trend is typed, not a pre-formatted string — old cards coloured "-8.7%"
@@ -11,7 +12,7 @@ import { cn } from "@/components/ui/utils";
 export type TrendDirection = "up" | "down" | "flat";
 
 export interface StatCardProps {
-  label: string;
+  label: ReactNode;
   value: ReactNode;
   /** Secondary line under the value — "of 500", "UTC month", etc. */
   detail?: ReactNode;
@@ -58,7 +59,7 @@ export function StatCard({
     <div className="flex items-stretch gap-3">
       <div className="min-w-0 flex-1">
         <span className="block text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {label}
+          <Phrase>{label}</Phrase>
         </span>
 
         {loading ? (
@@ -99,7 +100,7 @@ export function StatCard({
               <span className="text-xs text-muted-foreground">
                 {trend?.label ?? (trend ? "vs last period" : null)}
                 {trend?.label && detail ? " · " : null}
-                {detail}
+                <Phrase>{detail}</Phrase>
               </span>
             ) : null}
           </div>
