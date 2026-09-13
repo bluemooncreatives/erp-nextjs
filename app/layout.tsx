@@ -4,6 +4,7 @@ import './globals.css';
 import 'flatpickr/dist/flatpickr.css';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { config } from '@/lib/config';
+import { documentLocale } from '@/lib/i18n';
 
 // The design system asks for DM Sans and JetBrains Mono. `next/font` self-hosts
 // and preloads both, and exposes them as the variables `--font-sans` and
@@ -33,12 +34,19 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // `ltr_rtl` on the language row - the Blade put `dir="rtl"` and an `rtl`
+  // class on <html> for a right-to-left language, which is what flips the
+  // layout. Without this the Arabic pack translated the words and left the
+  // page the wrong way round.
+  const { lang, dir } = await documentLocale();
+
   return (
     <html
-      lang="en"
+      lang={lang}
+      dir={dir}
       className={`${dmSans.variable} ${jetBrainsMono.variable}`}
       suppressHydrationWarning
     >

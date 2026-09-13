@@ -24,6 +24,8 @@ import {
 } from '@/lib/navigation';
 import { unreadNotificationCount } from '@/lib/notifications';
 import { AdminShell } from './admin-shell';
+import { TranslationProvider } from '@/context/TranslationContext';
+import { activeLocale, localeDictionary, trans } from '@/lib/i18n';
 import { themeList, themeColors } from '@/lib/setting/themes';
 import { themeStyle } from '@/lib/setting/theme-style';
 import type { SidebarItem, SidebarLink, SidebarHeading } from '@/layout/AppSidebar';
@@ -43,18 +45,26 @@ export default async function DashboardLayout({
   const currentTheme = (await themeList()).find((theme) => theme.isDefault === 1);
   const appearance = currentTheme ? themeStyle(currentTheme, await themeColors(currentTheme.id)) : undefined;
 
-  const nav = resolveNavigation(user);
+  const nav = await resolveNavigation(user);
+
+  // Client components cannot await `trans()`, so the active locale's phrases
+  // travel with this shared layout and are read from context.
+  const dictionary = await localeDictionary(await activeLocale());
 
   // The header's "+" dropdown, filtered by the same permissions the Blade
   // checked. A `normal_user` never saw it.
   const quickAdd =
     user.role.type === 'normal_user'
       ? []
-      : QUICK_ADD.filter((item) => userCan(user, item.permission)).map((item) => ({
-          heading: item.heading,
-          label: item.label,
-          href: ROUTES[item.route],
-        }));
+      : await Promise.all(
+          QUICK_ADD.filter((item) => userCan(user, item.permission)).map(
+            async (item) => ({
+              heading: item.headingKey ? await trans(item.headingKey) : item.heading,
+              label: await label(item),
+              href: ROUTES[item.route],
+            }),
+          ),
+        );
 
   const branches =
     user.role.type === 'system_user'
@@ -95,7 +105,8 @@ export default async function DashboardLayout({
   const unread = showNotifications ? await unreadNotificationCount(user.id) : 0;
 
   return (
-    <AdminShell
+    <TranslationProvider dictionary={dictionary}>
+      <AdminShell
       appearance={appearance}
       nav={nav}
       logo={assetUrl(setting.logo)}
@@ -118,8 +129,17 @@ export default async function DashboardLayout({
       showNotifications={showNotifications}
     >
       {children}
-    </AdminShell>
+      </AdminShell>
+    </TranslationProvider>
   );
+}
+
+/**
+ * `__('group.Phrase')` for a navigation entry, falling back to the English
+ * label the entry already carries.
+ */
+async function label(item: { label: string; labelKey?: string }): Promise<string> {
+  return item.labelKey ? trans(item.labelKey) : item.label;
 }
 
 /**
@@ -127,16 +147,21 @@ export default async function DashboardLayout({
  * with no visible children - what the nested `@if` blocks in the Blade menu
  * partials produced.
  */
-function resolveNavigation(
+async function resolveNavigation(
   user: Awaited<ReturnType<typeof requireUser>>,
-): SidebarItem[] {
+): Promise<SidebarItem[]> {
   const out: SidebarItem[] = [];
 
   for (const item of NAVIGATION) {
     if (item.kind === 'link') {
       if (!navVisible(item, user.role.type)) continue;
       if (!item.ungated && !userCan(user, navPermission(item))) continue;
-      out.push({ kind: 'link', label: item.label, href: navHref(item), icon: item.icon });
+      out.push({
+        kind: 'link',
+        label: await label(item),
+        href: navHref(item),
+        icon: item.icon,
+      });
       continue;
     }
 
@@ -151,12 +176,12 @@ function resolveNavigation(
     const children: Array<SidebarLink | SidebarHeading> = [];
     for (const child of item.children) {
       if (child.kind === 'heading') {
-        children.push({ kind: 'heading', label: child.label });
+        children.push({ kind: 'heading', label: await label(child) });
         continue;
       }
       if (!navVisible(child, user.role.type)) continue;
       if (!child.ungated && !userCan(user, navPermission(child))) continue;
-      children.push({ kind: 'link', label: child.label, href: navHref(child) });
+      children.push({ kind: 'link', label: await label(child), href: navHref(child) });
     }
 
     // Drop headings left with nothing under them.
@@ -170,7 +195,7 @@ function resolveNavigation(
 
     out.push({
       kind: 'group',
-      label: item.label,
+      label: await label(item),
       icon: item.icon,
       match: item.match,
       children: pruned,

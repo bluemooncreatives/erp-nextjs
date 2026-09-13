@@ -136,6 +136,37 @@ export async function isRtl(): Promise<boolean> {
   return lang?.rtl === 1;
 }
 
+/**
+ * Every phrase of a locale, flattened to `group.key`, for handing to the
+ * client.
+ *
+ * Server components can `await trans()`, but a client component cannot - so
+ * the dashboard layout loads this once and puts it in context. It is about
+ * 20KB gzipped for the whole application, and it travels in the shared
+ * layout's payload rather than each page's.
+ */
+export const localeDictionary = cache(
+  async (locale: string): Promise<Record<string, string>> => {
+    const groups = await translatableGroups();
+    const out: Record<string, string> = {};
+
+    for (const group of groups) {
+      const phrases = await loadGroup(locale, group);
+      for (const [key, value] of Object.entries(phrases)) {
+        if (typeof value === 'string') out[`${group}.${key}`] = value;
+      }
+    }
+
+    return out;
+  },
+);
+
+/** The `dir` and `lang` the document should carry for the active locale. */
+export async function documentLocale(): Promise<{ lang: string; dir: 'ltr' | 'rtl' }> {
+  const locale = await activeLocale();
+  return { lang: locale === DEFAULT_LOCALE ? 'en' : locale, dir: (await isRtl()) ? 'rtl' : 'ltr' };
+}
+
 // --- the Localization screen ----------------------------------------------
 
 /** `glob(resource_path('lang/default/*.php'))` - the translatable group names. */
