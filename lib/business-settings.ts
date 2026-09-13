@@ -54,6 +54,7 @@ export const VoucherApproval = {
   RetailerSubtractBalance: 'retailer_substraction_balance_voucher_approval',
   AddBalance: 'add_balance_voucher_approval',
   Loan: 'loan_voucher_approval',
+  Payroll: 'payroll_voucher_approval',
 } as const;
 
 export async function voucherAutoApproved(

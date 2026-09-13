@@ -13,8 +13,9 @@ import { Hourglass, CircleCheck, Wallet, Users } from 'lucide-react';
 import { DataTable, Pagination, Td, Tr } from '@/components/erp/table';
 import { ActionButton } from '@/components/erp/submit-button';
 import { Badge } from '@/components/erp/badge';
-import { deletePayrollAction, setPayrollStatusAction } from '../../leave/actions';
+import { deletePayrollAction } from '../../leave/actions';
 import { GeneratePayrollPanel } from './generate-payroll-panel';
+import { PayrollPaymentPanel } from './payment-panel';
 import { SelectControl } from '@/components/erp/select-control';
 import { Phrase } from '@/context/TranslationContext';
 
@@ -197,11 +198,11 @@ export default async function PayrollPage({
                     <Phrase>Payslip</Phrase>
                   </Link>
                   {canEdit && row.payroll.payrollStatus !== 'Paid' ? (
-                    <form action={setPayrollStatusAction}>
-                      <input type="hidden" name="id" value={row.payroll.id} />
-                      <input type="hidden" name="status" value="Paid" />
-                      <ActionButton variant="primary">Mark paid</ActionButton>
-                    </form>
+                    <PayrollPaymentPanel
+                      payrollId={row.payroll.id}
+                      netSalary={Number(row.payroll.netSalary ?? 0)}
+                      currencySymbol={symbol}
+                    />
                   ) : null}
                   {canDelete ? (
                     <form action={deletePayrollAction}>

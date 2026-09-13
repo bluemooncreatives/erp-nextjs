@@ -990,6 +990,83 @@ await scenario('localization: a saved phrase reaches the interface', async () =>
   }
 });
 
+await scenario('payroll payment: records the payment and posts a balanced journal voucher', async () => {
+  const pay = action('payPayrollAction');
+
+  const staff = await one(
+    'select s.id, u.role_id from staffs s join users u on u.id = s.user_id limit 1',
+  );
+  assert.ok(staff, 'a staff fixture exists');
+
+  const [inserted] = await connection.query(
+    `insert into payrolls
+       (staff_id, role_id, basic_salary, total_earning, total_deduction, gross_salary, tax, net_salary,
+        payroll_month, payroll_year, payroll_status, active_status, created_at, updated_at)
+     values (?, ?, 20000, 2000, 1000, 22000, 0, 21000, 'January', '2092', 'Generated', 1, now(), now())`,
+    [staff.id, staff.role_id ?? 1],
+  );
+  const payrollId = inserted.insertId;
+
+  await connection.query(
+    `insert into payroll_earn_deducs
+       (payroll_id, type_name, amount, earn_dedc_type, active_status, loan_status, created_at, updated_at)
+     values (?, 'Bonus', 2000, 'E', 1, 0, now(), now()),
+            (?, 'Advance', 1000, 'D', 1, 0, now(), now())`,
+    [payrollId, payrollId],
+  );
+
+  try {
+    const response = await submit(pay, {
+      payroll_generate_id: String(payrollId),
+      payment_date: '2092-01-31',
+      payment_mode: 'Cash',
+      note: 'Verify payroll payment',
+    });
+    assert.ok(response.status < 400, `payment returned ${response.status}`);
+
+    const payroll = await one('select * from payrolls where id = ?', [payrollId]);
+    assert.equal(payroll.payroll_status, 'Paid', 'the payroll is marked paid');
+    assert.equal(payroll.payment_mode, 'Cash', 'the payment mode was recorded');
+    // mysql2 hands DATE columns back as a local-midnight Date, not a string.
+    const paidOn = payroll.payment_date;
+    assert.equal(
+      `${paidOn.getFullYear()}-${paidOn.getMonth() + 1}-${paidOn.getDate()}`,
+      '2092-1-31',
+      'the payment date was recorded',
+    );
+
+    // basic_salary(20000) + earning(2000) - deduction(1000) = 21000, the same
+    // figure this fixture's net_salary already holds.
+    const voucher = await one(
+      `select * from vouchers where payment_type = 'journal_voucher' and voucher_type = 'JV'
+        order by id desc limit 1`,
+    );
+    assert.ok(voucher, 'a journal voucher was posted');
+    assert.equal(Number(voucher.amount), 21000, 'the voucher amount is the adjusted basic salary');
+
+    const legs = await rows(
+      `select t.type, t.amount, a.code from transactions t
+         join chart_accounts a on a.id = t.account_id
+        where t.voucherable_id = ? and t.voucherable_type = ?`,
+      [voucher.id, MORPH.voucher],
+    );
+    assert.equal(legs.length, 2, 'two legs were posted');
+    const dr = legs.find((l) => l.type === 'Dr');
+    const cr = legs.find((l) => l.type === 'Cr');
+    assert.equal(dr?.code, '03-18', 'Salary & Allowance is debited');
+    assert.equal(Number(dr?.amount), 21000, 'debited for the adjusted basic salary');
+    assert.equal(cr?.code, '01-01-02', 'Cash is credited');
+    assert.equal(Number(cr?.amount), 21000, 'credited for the net salary actually paid');
+
+    await rows('delete from tranaction_account where tranaction_id in (select id from transactions where voucherable_id = ? and voucherable_type = ?)', [voucher.id, MORPH.voucher]);
+    await rows('delete from transactions where voucherable_id = ? and voucherable_type = ?', [voucher.id, MORPH.voucher]);
+    await rows('delete from vouchers where id = ?', [voucher.id]);
+  } finally {
+    await rows('delete from payroll_earn_deducs where payroll_id = ?', [payrollId]);
+    await rows('delete from payrolls where id = ?', [payrollId]);
+  }
+});
+
 const failed = results.filter((r) => !r.ok);
 console.log(
   `ran ${results.length} action scenarios: ${results.length - failed.length} ok, ${failed.length} failed`,

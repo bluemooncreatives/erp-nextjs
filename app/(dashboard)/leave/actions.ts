@@ -20,15 +20,16 @@ import {
   deleteLeaveDefine,
   deletePayroll,
   leaveTypeRepository,
+  payPayroll,
   saveAttendance,
   saveHoliday,
   saveLeaveDefine,
   setLeaveApproval,
-  setPayrollStatus,
   updateLeaveApplication,
   type LeaveInput,
   PayrollLineKind,
   type PayrollLine,
+  type PayrollPaymentInput,
 } from '@/lib/hr/leave';
 import type { ReferenceFormState } from '@/components/erp/reference-crud';
 import { actionFormData } from '@/lib/forms';
@@ -376,14 +377,53 @@ export async function storePayroll(
   redirect(ROUTES['payroll.index']);
 }
 
-export async function setPayrollStatusAction(formData: FormData): Promise<void> {
-  const id = Number(formData.get('id'));
-  const status = String(formData.get('status') ?? 'Paid');
-  const user = await authorize('save_payroll');
+/** `PayrollController@paymentPayroll` / `savePayrollPaymentData` - the "Pay Now" form. */
+export async function payPayrollAction(
+  _prev: LeaveFormState,
+  formData: FormData,
+): Promise<LeaveFormState> {
+  formData = actionFormData(_prev, formData);
+  const user = await authorize('payroll_payment_store');
 
-  await setPayrollStatus(id, status, user.id);
-  await successLog(`Payroll ${id} marked ${status}`, user.id);
+  const id = num(formData, 'payroll_generate_id');
+  if (!id) return { error: 'Something Went Wrong' };
+
+  const paymentDate = str(formData, 'payment_date');
+  if (!paymentDate) return { fieldErrors: { payment_date: 'Set the payment date.' } };
+
+  const mode = str(formData, 'payment_mode');
+  if (mode !== 'Cash' && mode !== 'Bank' && mode !== 'Cheque') {
+    return { fieldErrors: { payment_mode: 'Choose a payment method.' } };
+  }
+
+  const input: PayrollPaymentInput = {
+    paymentDate,
+    paymentMode: mode,
+    note: str(formData, 'note'),
+  };
+
+  if (mode === 'Bank') {
+    input.bankName = str(formData, 'bank_name');
+    input.bankBranchName = str(formData, 'bank_branch_name');
+    input.accountNo = str(formData, 'account_no');
+    if (!input.bankName || !input.bankBranchName || !input.accountNo) {
+      return { error: 'Bank name, branch and account number are required for a bank payment.' };
+    }
+  } else if (mode === 'Cheque') {
+    input.chequeNo = str(formData, 'cheque_no');
+    if (!input.chequeNo) return { error: 'Cheque number is required for a cheque payment.' };
+  }
+
+  try {
+    await payPayroll(id, input, user.id);
+    await successLog(`Payroll ${id} paid`, user.id);
+  } catch (error) {
+    await errorLog(String(error), user.id);
+    return { error: 'Something Went Wrong' };
+  }
+
   revalidatePath(ROUTES['payroll.index']);
+  return { success: 'Payment recorded.' };
 }
 
 export async function deletePayrollAction(formData: FormData): Promise<void> {

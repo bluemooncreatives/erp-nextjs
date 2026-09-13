@@ -259,6 +259,35 @@ were jQuery AJAX are server actions or query parameters. `route()` has to produc
 that answers, so those entries name the screen that does, and `verify:routes` checks
 they still do.
 
+## Completed in this pass (payroll payment)
+
+`verify:coverage` lists `PayrollController@paymentPayroll` among the routed methods the
+port never names, and files it under "naming, not absent behaviour" because
+`payroll_payment_store` was already referenced - by a `can()` check gating a "Mark paid"
+button. It wasn't naming: that button called `setPayrollStatus`, which only flipped
+`payroll_status`. Marking a payroll paid never recorded how (cash, bank or cheque - the
+columns for all three already existed on `payrolls`, unwritten), and never posted the
+journal voucher `PayrollRepository::savePayrollPaymentData()` posts alongside it. Every
+other document that changes money in this port posts its voucher; payroll paid out did
+not.
+
+`payPayroll()` (`lib/hr/leave.ts`) now does what the PHP method does: it writes the
+payment date, method and (for bank or cheque) the supporting fields, then debits
+Salary & Allowance (`03-18`) and credits Cash (`01-01-02`) for the net amount paid,
+adjusted leg-for-leg by each earning and deduction line - including the loan-linked
+deduction branch, which credits the staff's own chart account instead of Cash so a
+salary-deducted loan repayment retires the loan rather than paying cash for it twice.
+`payroll_voucher_approval` gates whether it posts pre-approved, matching every other
+voucher-approval toggle. The "Mark paid" button is now `PayrollPaymentPanel`, an inline
+disclosure modelled on the purchase order payment panel; `setPayrollStatus` is gone; a new
+`verify:actions` scenario posts a real payment and asserts the two legs land balanced.
+
+Not carried over, and out of scope for this pass: `PayrollRepository::create()` lets
+payroll generation itself attach a loan repayment (reducing `apply_loans.paid_loan_amount`
+and flagging the deduction line `loan_status = 1`); the port's `createPayroll()` has no
+loan-linking UI, so that flag is never set today and the loan-linked posting branch above,
+while correct, is not yet reachable. Recorded here so it doesn't read as fixed.
+
 ## Logic parity
 
 `npm run verify:routes` answers "does a URL resolve". It says nothing about the
@@ -301,9 +330,23 @@ genuinely missing, both now ported (see below).
   `purchase.order.pdf`, `quotation.order.pdf`, `payroll.pdf`, `attendance_report_print`,
   `staffs.report_print`, `leadger_report.print_view` and
   `leave.application.download` open the browser's print dialog on the same document.
-- **`verify:browser` covers 7 scenarios, not every interactive screen.** Serial-number
-  entry, the POS screen and the project board are exercised only by the HTTP sweep,
-  which loads them but does not click through them.
+- **`verify:browser` does not click through every interactive screen.** What it
+  misses is exercised by the HTTP sweep, which loads a screen but does not
+  operate it.
+
+### A correction
+
+An earlier version of this document listed "the POS screen" among the screens
+the HTTP sweep loads. That was wrong when written: **the PHP source has no POS
+module at all** - no `Modules/Pos`, no route, no seeded permission, and no
+`type = 2` sale in the dump. The only traces are a `PosProductSelect` trait
+nothing calls and menu conditions that hide chrome on a URL nothing serves.
+
+A POS screen exists in this port now, but it is **net-new work, not a
+migration**: there was nothing to port. `verify:routes` reports it, with the
+Project and Team resource routes, under "route names the PHP router does not
+define", so the distinction stays visible rather than dissolving into the
+parity numbers.
 
 Publication: the work is committed on `main` **and has been pushed to `origin/main`** - the
 reflog shows the pushes were made by this workspace's own tooling, not by a deliberate

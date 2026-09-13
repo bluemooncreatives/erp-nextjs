@@ -28,6 +28,11 @@ import {
 } from '@/lib/db/schema';
 import { createReferenceRepository } from '@/lib/crud/reference-entity';
 import { diffInDays, today, toDateString } from '@/lib/php-date';
+import { MorphType } from '@/lib/db/morph';
+import { findAccountByCode, findContactAccount } from '@/lib/accounting/accounts';
+import { createJournalVoucher } from '@/lib/accounting/journal';
+import { VoucherType } from '@/lib/accounting/vouchers';
+import { VoucherApproval, voucherAutoApproved } from '@/lib/business-settings';
 
 /** `apply_leaves.status` - 0 pending, 1 approved, 2 rejected. */
 export const LeaveStatus = { Pending: 0, Approved: 1, Rejected: 2 } as const;
@@ -676,15 +681,136 @@ export async function createPayroll(
   return payrollId;
 }
 
-export async function setPayrollStatus(
+// The two accounts every payroll payment touches - both installer-seeded, so
+// a missing one means the chart of accounts was edited, not that this is
+// reachable in the ordinary case.
+const SALARY_ALLOWANCE_CODE = '03-18';
+const CASH_ACCOUNT_CODE = '01-01-02';
+
+export type PayrollPaymentInput = {
+  paymentDate: string;
+  paymentMode: 'Cash' | 'Bank' | 'Cheque';
+  note?: string | null;
+  bankName?: string | null;
+  bankBranchName?: string | null;
+  accountNo?: string | null;
+  chequeNo?: string | null;
+};
+
+/**
+ * `PayrollController@savePayrollPaymentData` ->
+ * `PayrollRepository::savePayrollPaymentData()`.
+ *
+ * Records how the payroll was paid and posts the journal voucher the PHP
+ * posted alongside it: Salary & Allowance is debited for the basic pay
+ * (adjusted by every non-loan earning/deduction line) and Cash is credited
+ * for the net amount actually paid out. A deduction line flagged
+ * `loan_status` does not touch Cash at all - it credits the staff's own
+ * chart account instead, the same account `changeLoanApproval` debited when
+ * the loan was paid out, so the salary retires part of that loan rather than
+ * paying cash for it twice. A payroll with no earning/deduction lines posts
+ * the simpler two-leg voucher the PHP falls back to.
+ */
+export async function payPayroll(
   id: number,
-  status: string,
+  data: PayrollPaymentInput,
   actorId: number,
 ): Promise<void> {
+  const [row] = await db
+    .select({ payroll: payrolls, userId: staffs.userId })
+    .from(payrolls)
+    .leftJoin(staffs, eq(staffs.id, payrolls.staffId))
+    .where(eq(payrolls.id, id))
+    .limit(1);
+  if (!row) return;
+
+  const lines = await db
+    .select()
+    .from(payrollEarnDeducs)
+    .where(eq(payrollEarnDeducs.payrollId, id));
+
   await db
     .update(payrolls)
-    .set({ payrollStatus: status, updatedBy: actorId, updatedAt: new Date() })
+    .set({
+      paymentDate: toDateString(data.paymentDate),
+      paymentMode: data.paymentMode,
+      note: data.note ?? null,
+      bankName: data.paymentMode === 'Bank' ? (data.bankName ?? null) : null,
+      bankBranchName:
+        data.paymentMode === 'Bank' ? (data.bankBranchName ?? null) : null,
+      accountNo: data.paymentMode === 'Bank' ? (data.accountNo ?? null) : null,
+      chequeNo: data.paymentMode === 'Cheque' ? (data.chequeNo ?? null) : null,
+      payrollStatus: 'Paid',
+      updatedBy: actorId,
+      updatedAt: new Date(),
+    })
     .where(eq(payrolls.id, id));
+
+  const salaryAccount = await findAccountByCode(SALARY_ALLOWANCE_CODE);
+  const cashAccount = await findAccountByCode(CASH_ACCOUNT_CODE);
+  if (!salaryAccount || !cashAccount) return;
+
+  const isApprove = (await voucherAutoApproved(VoucherApproval.Payroll)) ? 1 : 0;
+  const basicSalary = Number(row.payroll.basicSalary ?? 0);
+  const netSalary = Number(row.payroll.netSalary ?? 0);
+
+  if (lines.length > 0) {
+    let mainAmount = basicSalary;
+    const subAccountId: number[] = [cashAccount.id];
+    const subAmount: number[] = [netSalary];
+    const subNarration: Array<string | null> = ['Salary Pay'];
+
+    for (const line of lines) {
+      const amount = Number(line.amount ?? 0);
+      const isDeduction = !isEarningLine(line.earnDedcType);
+      if (line.loanStatus === 1 && isDeduction) {
+        const staffAccount = row.userId
+          ? await findContactAccount(row.userId, MorphType.User)
+          : null;
+        if (staffAccount) {
+          subAccountId.push(staffAccount.id);
+          subAmount.push(amount);
+          subNarration.push(line.typeName);
+        }
+      } else if (isDeduction) {
+        mainAmount -= amount;
+      } else {
+        mainAmount += amount;
+      }
+    }
+
+    await createJournalVoucher({
+      voucherType: VoucherType.Journal,
+      amount: mainAmount,
+      date: today(),
+      accountType: 'debit',
+      paymentType: 'journal_voucher',
+      accountId: salaryAccount.id,
+      mainAmount,
+      narration: 'Staff Salary',
+      subAccountId,
+      subAmount,
+      subNarration,
+      isApprove,
+      createdBy: actorId,
+    });
+  } else {
+    await createJournalVoucher({
+      voucherType: VoucherType.Journal,
+      amount: basicSalary,
+      date: today(),
+      accountType: 'credit',
+      paymentType: 'journal_voucher',
+      accountId: cashAccount.id,
+      mainAmount: basicSalary,
+      narration: 'Staff Salary',
+      subAccountId: [salaryAccount.id],
+      subAmount: [netSalary],
+      subNarration: ['Salary Pay'],
+      isApprove,
+      createdBy: actorId,
+    });
+  }
 }
 
 export async function deletePayroll(id: number): Promise<void> {

@@ -10,7 +10,6 @@
 // It WRITES. Point it at a scratch database, never at production.
 
 import fs, { readFileSync } from 'node:fs';
-import path from 'node:path';
 import { createRequire } from 'node:module';
 import assert from 'node:assert/strict';
 import { SignJWT } from 'jose';
@@ -70,29 +69,6 @@ const connection = await mysql.createConnection({
 });
 
 /** The same session, in a chosen locale - for the translation check. */
-async function cookieFor(locale) {
-  const [[user]] = await connection.query(
-    `select u.id, u.role_id, r.type from users u
-       left join roles r on r.id = u.role_id
-      order by u.role_id asc limit 1`,
-  );
-  const [[showroom]] = await connection.query('select id from show_rooms limit 1');
-
-  const token = await new SignJWT({
-    uid: user.id,
-    roleId: user.role_id,
-    roleType: user.type ?? 'system_user',
-    showroomId: showroom?.id ?? 1,
-    staffId: null,
-    locale,
-  })
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime('2h')
-    .sign(new TextEncoder().encode(secret));
-
-  return `${cookieName}=${token}`;
-}
 
 async function sessionFor(roleId) {
   const [[user]] = await connection.query(
