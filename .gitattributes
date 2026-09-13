@@ -1,0 +1,34 @@
+# ---------------------------------------------------------------------------
+# Line endings.
+#
+# Without this file the only thing deciding line endings was each developer's
+# `core.autocrlf`, which on Windows is `true`: every checkout rewrote LF to
+# CRLF and every commit rewrote it back, announcing itself with a
+# "LF will be replaced by CRLF the next time Git touches it" warning on each
+# file. Tools that write files directly (scripts, formatters, generators) do
+# not take part in that dance, so the working tree drifted into a mix - and
+# some files ended up with both endings inside the one file.
+#
+# LF is canonical here, in the repository and in the working tree on every
+# platform, which is what Node, Next.js, ESLint and Prettier all assume.
+# `eol=lf` takes precedence over `core.autocrlf`, so no one has to change
+# their local Git config for this to hold.
+# ---------------------------------------------------------------------------
+
+* text=auto eol=lf
+
+# Binary formats: never eligible for end-of-line conversion. `text=auto` would
+# detect most of these anyway, but xlsx in particular is a zip archive that
+# corrupts silently if anything rewrites bytes inside it.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.ico  binary
+*.xlsx binary
+*.pdf  binary
+*.woff binary
+*.woff2 binary
+*.ttf  binary
+
+# Lockfiles are generated: keep them out of diffs and merge conflicts.
+package-lock.json -diff linguist-generated

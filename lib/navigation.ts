@@ -300,7 +300,18 @@ export const NAVIGATION: NavItem[] = [
       { kind: 'link', label: 'Apply Leave', route: 'apply_leave.index' },
       { kind: 'link', label: 'Approve Leave Request', route: 'approved_index' },
       { kind: 'link', label: 'Pending Leave', route: 'pending_index' },
-      { kind: 'link', label: 'Holiday Setup', route: 'holidays.index' },
+      // Both Attendance and Leave register a `holidays` resource, so
+      // `holidays.index` is ambiguous in Laravel. The Blade's own active check
+      // is `request()->is('leave/holidays')`, which settles it: this item is
+      // the Leave module's Holiday Setup, not the Attendance list. It is also
+      // the one entry the Blade left ungated.
+      {
+        kind: 'link',
+        label: 'Holiday Setup',
+        route: 'year.data',
+        permission: 'leave',
+        activePaths: ['/leave/holidays'],
+      },
       { kind: 'link', label: 'Carry Forward', route: 'carry.forward' },
     ],
   },

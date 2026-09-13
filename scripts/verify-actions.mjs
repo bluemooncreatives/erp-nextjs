@@ -844,6 +844,85 @@ await scenario('notifications: a sale and a contact raise in-app notices', async
   assert.ok(String(notice.type).includes('Added'), `unexpected subject ${notice.type}`);
 });
 
+await scenario('holiday setup: saving a year marks everyone on holiday', async () => {
+  const save = action('saveHolidays');
+  const year = 2091; // far enough out that no seeded row uses it
+  const date = `${year}-03-17`;
+
+  await rows('delete from holidays where year = ?', [year]);
+  await rows('delete from attendances where date = ?', [date]);
+
+  // One attendance already recorded on that date: the PHP clears the day before
+  // marking it, so this row must not survive.
+  const [victim] = await rows(
+    `select u.id, u.role_id from users u
+       join roles r on r.id = u.role_id
+      where r.type != 'system_user' limit 1`,
+  );
+  assert.ok(victim, 'the database has a non-system user to mark');
+
+  await rows(
+    `insert into attendances (user_id, role_id, date, day, month, year, attendance, note)
+     values (?, ?, ?, 'Saturday', 'March', ?, 'A', 'seeded absence')`,
+    [victim.id, victim.role_id, date, year],
+  );
+
+  const response = await submit(save, {
+    year: String(year),
+    holiday_name: 'Verify Holiday',
+    type: '0',
+    date,
+    start_date: '',
+    end_date: '',
+  });
+  assert.ok(response.status < 400, `save returned ${response.status}`);
+
+  const holiday = await one('select * from holidays where year = ? and name = ?', [
+    year,
+    'Verify Holiday',
+  ]);
+  assert.ok(holiday, 'the holiday was written');
+  assert.equal(holiday.date, date, 'a single-day holiday stores one date');
+
+  const marked = await rows('select attendance from attendances where date = ?', [date]);
+  assert.ok(marked.length > 0, 'attendance was marked for the holiday');
+  assert.ok(
+    marked.every((row) => row.attendance === 'H'),
+    'every attendance row on a holiday reads H',
+  );
+
+  const stale = await rows(
+    `select id from attendances where date = ? and note = 'seeded absence'`,
+    [date],
+  );
+  assert.equal(stale.length, 0, 'the attendance already on that date was cleared');
+
+  await rows('delete from holidays where year = ?', [year]);
+  await rows('delete from attendances where date = ?', [date]);
+});
+
+await scenario('holiday setup: a year can be added and deleted', async () => {
+  const add = action('addHolidayYear');
+  const remove = action('removeHolidayYear');
+  const year = 2092;
+
+  await rows('delete from holidays where year = ?', [year]);
+
+  const created = await submit(add, { year: String(year) });
+  assert.ok(created.status < 400, `add returned ${created.status}`);
+  assert.ok(
+    await one('select * from holidays where year = ?', [year]),
+    'the year was created',
+  );
+
+  await submit(remove, { year: String(year) });
+  assert.equal(
+    await one('select * from holidays where year = ?', [year]),
+    undefined,
+    'deleting the year removed it',
+  );
+});
+
 const failed = results.filter((r) => !r.ok);
 console.log(
   `ran ${results.length} action scenarios: ${results.length - failed.length} ok, ${failed.length} failed`,
