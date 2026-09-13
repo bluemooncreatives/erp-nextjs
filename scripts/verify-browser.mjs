@@ -443,6 +443,35 @@ await scenario('the main screens load without logging a client-side error', asyn
   assert.deepEqual(noisy, [], 'no screen logged an error');
 });
 
+await scenario('header: choosing a language switches the interface', async () => {
+  await page.goto(`${base}/home`);
+
+  // The switcher is a Radix listbox like every other select here.
+  await pickOption(page, 'locale', "return option.textContent.trim() === 'Arabic';");
+
+  // `changeLocale` writes the session and the router refreshes, so the next
+  // paint is the whole shell in the chosen language.
+  await page.waitUntil(`document.documentElement.dir === 'rtl'`, { timeout: 15000 });
+
+  const after = await page.evaluate(`JSON.stringify({
+    dir: document.documentElement.dir,
+    lang: document.documentElement.lang,
+    sidebar: document.querySelector('[data-slot="sidebar"]').innerText,
+  })`);
+  const state = JSON.parse(after);
+
+  assert.equal(state.dir, 'rtl', 'the document flipped to right-to-left');
+  assert.equal(state.lang, 'ar', 'the document language followed');
+  assert.ok(
+    state.sidebar.includes('لوحة التحكم'),
+    'the navigation is in the chosen language',
+  );
+
+  // Put it back, so the rest of the run is unaffected.
+  await pickOption(page, 'locale', "return option.textContent.trim() === 'English';");
+  await page.waitUntil(`document.documentElement.dir === 'ltr'`, { timeout: 15000 });
+});
+
 const failed = results.filter((r) => !r.ok);
 console.log(
   `ran ${results.length} browser scenarios: ${results.length - failed.length} ok, ${failed.length} failed`,

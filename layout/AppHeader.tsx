@@ -290,7 +290,7 @@ function BranchSelect({
         });
       }}
     >
-      <SelectTrigger aria-label="Branch" className="hidden h-9 w-40 sm:flex">
+      <SelectTrigger id="branch" aria-label="Branch" className="hidden h-9 w-40 sm:flex">
         <SelectValue placeholder="Branch" />
       </SelectTrigger>
       <SelectContent>
@@ -327,7 +327,7 @@ function LanguageSelect({
         });
       }}
     >
-      <SelectTrigger aria-label="Language" className="hidden h-9 w-32 sm:flex">
+      <SelectTrigger id="locale" aria-label="Language" className="hidden h-9 w-32 sm:flex">
         <SelectValue placeholder="Language" />
       </SelectTrigger>
       <SelectContent>
