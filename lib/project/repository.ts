@@ -377,6 +377,25 @@ export async function updateProjectElement(
     .where(and(eq(projectUser.projectId, projectId), eq(projectUser.userId, userId)));
 }
 
+/**
+ * This user's own `project_user` row - the colour, icon and favourite flag the
+ * Vue sidebar let each member set for themselves. The project is shared; these
+ * three are not.
+ */
+export async function projectPreference(projectId: number, userId: number) {
+  const [row] = await db
+    .select({
+      icon: projectUser.icon,
+      color: projectUser.color,
+      favourite: projectUser.favourite,
+      defaultView: projectUser.defaultView,
+    })
+    .from(projectUser)
+    .where(and(eq(projectUser.projectId, projectId), eq(projectUser.userId, userId)))
+    .limit(1);
+  return row ?? null;
+}
+
 /** `ProjectService::defaultView()` */
 export async function setProjectDefaultView(projectId: number, view: string): Promise<void> {
   await db

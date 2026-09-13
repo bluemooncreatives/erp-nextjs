@@ -22,6 +22,7 @@ import {
   renameSection,
   deleteSection,
   createTask,
+  moveTask,
   renameTask,
   setTaskComplete,
   deleteTask,
@@ -418,6 +419,29 @@ export async function toggleTaskComplete(formData: FormData): Promise<void> {
 export async function destroyTask(formData: FormData): Promise<void> {
   await requireUser();
   await deleteTask(Number(formData.get('task_id')));
+
+  const project = await findProject(Number(formData.get('project_id')));
+  if (project?.uuid) revalidatePath(projectPath(project.uuid));
+}
+
+/**
+ * `TaskController@setTasks` - moving a task between sections.
+ *
+ * The Vue board did this by dragging, and persisted the new section and order
+ * in one request. There is no drag here: each card names the section it should
+ * move to, which works from the keyboard and without JavaScript, and reaches
+ * the same `moveTask`. The order is the end of the target section, because a
+ * select has no notion of where in the column the card was dropped.
+ */
+export async function moveTaskToSection(formData: FormData): Promise<void> {
+  await requireUser();
+
+  const taskId = Number(formData.get('task_id'));
+  const raw = String(formData.get('section_id') ?? '');
+  const sectionId = raw === '' ? null : Number(raw);
+  if (!taskId) return;
+
+  await moveTask(taskId, sectionId, Number(formData.get('order') ?? 0));
 
   const project = await findProject(Number(formData.get('project_id')));
   if (project?.uuid) revalidatePath(projectPath(project.uuid));

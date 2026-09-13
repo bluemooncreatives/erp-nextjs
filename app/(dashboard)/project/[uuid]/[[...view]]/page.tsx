@@ -1,14 +1,20 @@
 // Project screen - port of ProjectController@show, which picked one of the
 // `project::project.show{blade}` views (list, board, files, conversation).
 //
-// The PHP shipped a Vue board with drag-and-drop reordering; the port keeps the
-// same data and the same writes, driven by server actions.
+// The PHP shipped a Vue board with drag-and-drop reordering. The data and the
+// writes are the same here; the board moves a card by naming its destination
+// rather than by dragging, which is also the only form of it a keyboard can
+// operate.
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { requireUser } from '@/lib/auth/permissions';
-import { findProjectByUuid, projectBoard } from '@/lib/project/repository';
+import {
+  findProjectByUuid,
+  projectBoard,
+  projectPreference,
+} from '@/lib/project/repository';
 import { dateConvert } from '@/lib/settings';
 import { toDateTimeString } from '@/lib/php-date';
 import { route } from '@/lib/routes';
@@ -31,6 +37,10 @@ import {
 import { ProjectSettingsForm, ShareProjectForm } from '../../forms';
 import { SelectControl } from '@/components/erp/select-control';
 import { Phrase } from '@/context/TranslationContext';
+import { SectionName } from './section-name';
+import { CommentBody } from './comment-body';
+import { ProjectPreferences } from './project-preferences';
+import { TaskBoard } from './task-board';
 
 export const metadata: Metadata = { title: 'Project' };
 
@@ -55,6 +65,7 @@ export default async function ProjectShowPage({
       : project.defaultView || 'list';
 
   const board = await projectBoard(project.id);
+  const preference = await projectPreference(project.id, user.id);
 
   const tasksBySection = new Map<number | null, typeof board.tasks>();
   for (const row of board.tasks) {
@@ -94,6 +105,11 @@ export default async function ProjectShowPage({
         ]}
         actions={
           <div className="flex flex-wrap items-center gap-2">
+            <ProjectPreferences
+              projectId={project.id}
+              colour={preference?.color ?? null}
+              favourite={preference?.favourite === 1}
+            />
             {VIEWS.map((name) => (
               <Link
                 key={name}
@@ -152,9 +168,12 @@ export default async function ProjectShowPage({
                         <ActionButton confirm="Delete this comment?"><Phrase>Delete</Phrase></ActionButton>
                       </form>
                     </div>
-                    <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
-                      {row.comment.comment}
-                    </p>
+                    <CommentBody
+                      commentId={row.comment.id}
+                      projectId={project.id}
+                      comment={row.comment.comment ?? ''}
+                      editable={row.comment.createdBy === user.id}
+                    />
                     <p className="mt-2 text-xs text-muted-foreground">{row.when}</p>
                   </li>
                 ))}
@@ -176,14 +195,40 @@ export default async function ProjectShowPage({
             </Card>
           ) : null}
 
-          {active === 'list' || active === 'board' ? (
-            <div className={active === 'board' ? 'grid gap-5 md:grid-cols-2' : 'space-y-5'}>
+          {active === 'board' ? (
+            <TaskBoard
+              projectId={project.id}
+              columns={sectionGroups.map((section) => ({
+                id: section.id,
+                name: section.name,
+                deletable: section.deletable,
+                tasks: (tasksBySection.get(section.id) ?? []).map((row) => ({
+                  id: row.task.id,
+                  uuid: row.task.uuid,
+                  name: row.task.name,
+                  completed: row.task.completed,
+                  createdByName: row.createdByName,
+                })),
+              }))}
+            />
+          ) : null}
+
+          {active === 'list' ? (
+            <div className="space-y-5">
               {sectionGroups.map((section) => {
                 const rows = tasksBySection.get(section.id) ?? [];
                 return (
                   <Card
                     key={section.id ?? 'none'}
-                    title={`${section.name} (${rows.length})`}
+                    title={
+                      <SectionName
+                        sectionId={section.id}
+                        projectId={project.id}
+                        name={section.name}
+                        count={rows.length}
+                        editable={section.deletable}
+                      />
+                    }
                     bodyClassName=""
                     actions={
                       section.deletable ? (
