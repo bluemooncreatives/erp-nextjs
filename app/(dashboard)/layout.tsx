@@ -116,7 +116,7 @@ function resolveNavigation(
   for (const item of NAVIGATION) {
     if (item.kind === 'link') {
       if (!userCan(user, navPermission(item))) continue;
-      out.push({ kind: 'link', label: item.label, href: navHref(item) });
+      out.push({ kind: 'link', label: item.label, href: navHref(item), icon: item.icon });
       continue;
     }
 

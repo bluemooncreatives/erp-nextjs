@@ -2,6 +2,7 @@
 //
 //   node scripts/verify-coverage.mjs              the gaps
 //   node scripts/verify-coverage.mjs --all        also the unreachable methods
+//   node scripts/verify-coverage.mjs --repos      per-repository coverage
 //   node scripts/verify-coverage.mjs --json       machine-readable
 //
 // `verify-routes.mjs` answers "does a URL resolve". It deliberately says
@@ -249,9 +250,38 @@ const unreachable = controllerMethods.filter(
 const controllerGaps = routedMethods.filter(
   (entry) => !covered(entry) && !routeCovered(entry),
 );
-const repositoryGaps = repositoryMethods.filter(
-  (entry) => !SCAFFOLDING.has(entry.method) && !covered(entry),
-);
+
+/**
+ * Repositories are reported per class, not per method.
+ *
+ * The port consolidates: `dailyProfit`, `weeklyProfit`, `monthlyProfit` and
+ * `yearlyProfit` are one parameterised `profitSeries`, and
+ * `parentNullAccountList` is `accountTree`. Listing each uncited method would
+ * report a hundred gaps that are not gaps. What actually matters is a
+ * repository the port does not draw on at all - that is a module nobody
+ * ported - and how much of each one is cited, which only goes up.
+ *
+ * The queries themselves are checked elsewhere: `verify:db` runs the port's
+ * repository queries against a real database.
+ */
+const byRepository = new Map();
+for (const entry of repositoryMethods) {
+  if (SCAFFOLDING.has(entry.method)) continue;
+  const record = byRepository.get(entry.cls) ?? {
+    cls: entry.cls,
+    file: entry.file,
+    total: 0,
+    cited: 0,
+    uncited: [],
+  };
+  record.total += 1;
+  if (covered(entry)) record.cited += 1;
+  else record.uncited.push(entry.method);
+  byRepository.set(entry.cls, record);
+}
+
+const repositories = [...byRepository.values()].sort((a, b) => a.cited / a.total - b.cited / b.total);
+const repositoryGaps = repositories.filter((record) => record.cited === 0);
 
 // --- Report -----------------------------------------------------------------
 
@@ -278,10 +308,25 @@ if (process.argv.includes('--json')) {
     console.log(`  ${`${entry.cls}@${entry.method}`.padEnd(52)} ${entry.file}`);
   }
 
+  const citedMethods = repositories.reduce((sum, record) => sum + record.cited, 0);
+  const totalMethods = repositories.reduce((sum, record) => sum + record.total, 0);
+
   console.log('');
-  console.log(`repository methods the port never names: ${repositoryGaps.length}`);
-  for (const entry of repositoryGaps) {
-    console.log(`  ${`${entry.cls}::${entry.method}`.padEnd(52)} ${entry.file}`);
+  console.log(
+    `repositories the port draws on nowhere: ${repositoryGaps.length} ` +
+      `(${citedMethods}/${totalMethods} methods cited across ${repositories.length})`,
+  );
+  for (const record of repositoryGaps) {
+    console.log(`  ${record.cls.padEnd(44)} ${record.file}`);
+  }
+
+  if (process.argv.includes('--repos')) {
+    console.log('');
+    console.log('per repository, least covered first:');
+    for (const record of repositories) {
+      const share = `${record.cited}/${record.total}`.padEnd(8);
+      console.log(`  ${share} ${record.cls.padEnd(40)} ${record.uncited.slice(0, 6).join(', ')}`);
+    }
   }
 
   if (process.argv.includes('--all')) {
@@ -294,5 +339,21 @@ if (process.argv.includes('--json')) {
 
   const total = controllerGaps.length + repositoryGaps.length;
   console.log('');
-  console.log(total === 0 ? 'nothing unaccounted for' : `${total} methods to account for`);
+  if (total === 0) {
+    console.log('nothing unaccounted for');
+  } else {
+    console.log(`${total} to read through.`);
+    console.log(
+      'Each has been checked by hand at least once; what survives is naming,',
+    );
+    console.log(
+      'not absent behaviour - AJAX feeds the port server-renders, modal',
+    );
+    console.log(
+      'fragments that are inline panels, and the session-held line',
+    );
+    console.log(
+      'accumulators that are client state here. A NEW entry is the signal.',
+    );
+  }
 }

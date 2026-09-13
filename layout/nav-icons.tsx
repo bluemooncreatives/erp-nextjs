@@ -12,9 +12,11 @@ import {
   Boxes,
   Briefcase,
   CalendarDays,
+  DatabaseBackup,
   FileText,
   History,
   IdCard,
+  LayoutDashboard,
   LayoutGrid,
   MapPin,
   Package,
@@ -29,6 +31,8 @@ import {
 
 export const NAV_ICONS: Record<string, LucideIcon> = {
   grid: LayoutGrid,
+  'layout-dashboard': LayoutDashboard,
+  'database-backup': DatabaseBackup,
   briefcase: Briefcase,
   store: Store,
   users: Users,

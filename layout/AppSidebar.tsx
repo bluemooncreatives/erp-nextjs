@@ -35,7 +35,7 @@ import {
 } from '@/components/ui/collapsible';
 import { NAV_ICONS } from './nav-icons';
 
-export type SidebarLink = { kind: 'link'; label: string; href: string };
+export type SidebarLink = { kind: 'link'; label: string; href: string; icon?: string };
 export type SidebarHeading = { kind: 'heading'; label: string };
 
 export type SidebarGroupItem = {
@@ -116,17 +116,11 @@ export default function AppSidebar({
           <SidebarMenu>
             {items.map((item, index) =>
               item.kind === 'link' ? (
-                <SidebarMenuItem key={`${item.label}-${index}`}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.href)}
-                    tooltip={item.label}
-                  >
-                    <Link href={item.href}>
-                      <span className="truncate">{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                <TopLevelLink
+                  key={`${item.label}-${index}`}
+                  item={item}
+                  isActive={isActive(item.href)}
+                />
               ) : (
                 <NavGroup
                   key={`${item.label}-${index}`}
@@ -145,6 +139,30 @@ export default function AppSidebar({
 
       <SidebarRail />
     </Sidebar>
+  );
+}
+
+/** A top-level leaf - Dashboard, Backup. It shares the groups' icon column, so
+ *  it draws its own icon; without one it sat text-only against a row of icons,
+ *  and the collapsed rail had nothing at all to show for it. */
+function TopLevelLink({
+  item,
+  isActive,
+}: {
+  item: SidebarLink;
+  isActive: boolean;
+}) {
+  const Icon = item.icon ? NAV_ICONS[item.icon] : undefined;
+
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild isActive={isActive} tooltip={item.label}>
+        <Link href={item.href}>
+          {Icon ? <Icon /> : null}
+          <span className="truncate">{item.label}</span>
+        </Link>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
   );
 }
 

@@ -278,7 +278,8 @@ export default async function DashboardPage() {
           ),
     )
     .map((item) => {
-      if (item.kind === 'link') return { label: item.label, href: navHref(item), icon: 'grid' };
+      if (item.kind === 'link')
+        return { label: item.label, href: navHref(item), icon: item.icon ?? 'grid' };
       const first = item.children.find(
         (child) => child.kind === 'link' && userCan(user, navPermission(child)),
       );

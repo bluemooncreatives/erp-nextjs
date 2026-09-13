@@ -17,6 +17,13 @@ import { ROUTES, type RouteName } from './routes';
 export type NavLeaf = {
   kind: 'link';
   label: string;
+  /**
+   * Icon name from `layout/nav-icons.tsx`. Only top-level leaves need one -
+   * they sit in the same column as the groups' icons, and the collapsed rail
+   * has nothing but the icon to go on. Leaves nested inside a group are drawn
+   * as text under their parent, so they leave this unset.
+   */
+  icon?: string;
   /** Route name used both for the href and the permission check. */
   route: RouteName;
   /** Override when the link target differs from the permission being checked. */
@@ -47,6 +54,7 @@ export const NAVIGATION: NavItem[] = [
   {
     kind: 'link',
     label: 'Dashboard',
+    icon: 'layout-dashboard',
     route: 'home',
     permission: 'dashboard',
   },
@@ -350,6 +358,7 @@ export const NAVIGATION: NavItem[] = [
   {
     kind: 'link',
     label: 'Backup',
+    icon: 'database-backup',
     route: 'backup.index',
   },
 

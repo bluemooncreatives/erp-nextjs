@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "verify:routes": "node scripts/verify-routes.mjs",
+    "verify:coverage": "node scripts/verify-coverage.mjs",
     "verify:permissions": "node scripts/verify-permissions.mjs",
     "verify:schema": "node scripts/verify-schema.mjs",
     "verify:db": "node scripts/db-smoke.mjs",
