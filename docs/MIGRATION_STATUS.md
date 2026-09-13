@@ -145,6 +145,7 @@ from `software_erp.sql`, plus the usual static checks.
 | Lint | `npx eslint .` | clean, no warnings |
 | Production build | `npm run build` | compiled |
 | Route parity | `npm run verify:routes` | all 591 named Laravel routes present; 0 page routes unserved |
+| Logic parity | `npm run verify:coverage` | 289 routed controller methods and 70 repositories audited; every remaining entry accounted for by hand |
 | Permission names | `npm run verify:permissions` | 320 guarded names, all resolve to a route name or a known module permission |
 | Schema parity | `npm run verify:schema <url>` | 107 tables / 1180 columns, no missing tables, columns or type mismatches |
 | Query layer | `npm run verify:db` | 103 repository queries executed, 0 failures |
@@ -153,7 +154,7 @@ from `software_erp.sql`, plus the usual static checks.
 | Pages, as super admin | `npm run verify:http` | 216 routes, 0 server errors (201 rendered, 8 not-found for the portal pages an admin has no contact for, 7 expected redirects) |
 | Pages, as staff | `ROLE_ID=3 npm run verify:http` | 216 routes, 0 server errors (134 rendered, 68 permission denials handled) |
 | Pages, as a portal customer | `USER_ID=4 npm run verify:http` | 216 routes, 0 server errors (35 rendered, 174 correctly refused) |
-| Server actions over HTTP | `npm run verify:actions` | 21 scenarios passed, including the in-app notification a contact raises |
+| Server actions over HTTP | `npm run verify:actions` | 23 scenarios passed, including the in-app notification a contact raises and the attendance a holiday marks |
 | In a real browser | `npm run verify:browser` | 7 scenarios passed - hydration, the product picker and running totals, the product type selector, adding a voucher line, list search, and the reference Edit round-trip |
 
 The write scenarios assert the behaviour the PHP relied on: a receipt posts one Dr and one Cr
@@ -206,7 +207,23 @@ Closing the route-parity gaps the audit found:
   **ledger report** and **leave application**.
 - **File download** (`file.download`), with the path traversal the PHP allowed refused.
 
-Two defects were found and fixed in the process:
+**Holiday Setup** (Modules/Leave), which `verify:coverage` found. Both
+Attendance and Leave register a `holidays` resource against the same table, so
+`holidays.index` is ambiguous in Laravel itself; the port had only the
+Attendance screen, a flat list of holidays, while the Leave menu item points at
+the other one. There a year is the unit: you add a year, fill in its holidays
+(optionally copying another year's), and deleting a year removes all of them.
+The Blade's own active check, `request()->is('leave/holidays')`, settles which
+screen that menu entry meant.
+
+Saving a year also does more than write `holidays`: for each holiday the PHP
+clears any attendance already recorded on those dates and marks every user of
+every non-system role as `H`. The port's `saveHoliday` wrote only the holiday
+row, so **a declared holiday still counted as an absence** on the attendance
+report. `saveHolidayYear` carries that behaviour, batching the inserts rather
+than saving a model per user per day, and two action scenarios cover it.
+
+Two further defects were found and fixed in the process:
 
 - `payroll_earn_deducs.earn_dedc_type` holds the letters `'E'` and `'D'` - what
   `PayrollRepository` writes and what the reports filter on. The port was writing `'earn'`
@@ -241,6 +258,32 @@ routed to; the payment and return panels sit on the document itself; and endpoin
 were jQuery AJAX are server actions or query parameters. `route()` has to produce a URL
 that answers, so those entries name the screen that does, and `verify:routes` checks
 they still do.
+
+## Logic parity
+
+`npm run verify:routes` answers "does a URL resolve". It says nothing about the
+260 writing routes, because Next binds a server action as a function reference
+and there is no URL to check. `npm run verify:coverage` asks the other question:
+is the behaviour behind each PHP method present here at all? It reads all 96
+controllers and 70 repositories, works out which methods a route can actually
+reach, and checks each against the port both by name and by whether its route is
+wired to anything.
+
+It reports **289 routed controller methods** (72 more are defined but
+unreachable by any route) and **174 of 310 repository methods cited by name**,
+with 9 repositories the port never cites.
+
+Those counts read worse than they are, and the script says so. Every remaining
+entry has been checked by hand: what is left is naming, not absent behaviour.
+The port consolidates - `dailyProfit`, `weeklyProfit`, `monthlyProfit` and
+`yearlyProfit` are one parameterised `profitSeries`; `parentNullAccountList` is
+`accountTree` - and it replaces whole categories of endpoint: AJAX feeds are
+server-rendered data, modal fragments are inline panels, and the `session('sku')`
+line accumulators are client state. **A new entry in that list is the signal**,
+not the total.
+
+Its first run earned its keep by finding a screen and a behaviour that were
+genuinely missing, both now ported (see below).
 
 ## Remaining work
 
