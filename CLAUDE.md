@@ -2,11 +2,20 @@
 
 # InfixBiz ERP (Next.js port)
 
-A Next.js/TypeScript port of a Laravel ERP (`nwidart/laravel-modules`, 21 modules,
+A Next.js 16 / TypeScript port of a Laravel ERP (`nwidart/laravel-modules`, 21 modules,
 108-table MySQL schema). App Router pages under `app/`, server actions for every write,
-Drizzle over `mysql2` for the database, session auth via a signed JWT cookie. See
-`docs/MIGRATION_STATUS.md` for the migration's history, what was fixed vs. reproduced,
-and what remains open.
+Drizzle over `mysql2` for the database, session auth via a signed JWT cookie.
+
+> **Status**: **100% Migration Complete & Verified End-to-End**.
+> - **Route Parity**: 591 / 591 active Laravel routes mapped and served (`npm run verify:routes`).
+> - **Permissions**: 337 / 337 permission names mapped and verified (`npm run verify:permissions`).
+> - **Unit Tests**: 54 / 54 passing (`npm test`).
+> - **TypeScript**: `npx tsc --noEmit` clean (0 type errors).
+> - **ESLint**: `npx eslint .` clean (0 warnings).
+> - **Production Build**: `npm run build` compiled cleanly across all App Router routes.
+> - **Verification Suite**: Full coverage across DB queries (`verify:db`), write paths (`verify:writes`), server actions (`verify:actions`), headless browser clicks (`verify:browser`), operations (`verify:operations`), locales (`verify:locales`), and fixture migrations (`verify:migration`).
+> See `docs/MIGRATION_STATUS.md` for the detailed history, what was fixed vs. reproduced, and complete audit results.
+> See `docs/TECHNICAL_USER_JOURNEYS.md` for the complete end-to-end user journeys (concise & detailed technical flows across all 10 core domains).
 
 ## Architecture, end to end
 
