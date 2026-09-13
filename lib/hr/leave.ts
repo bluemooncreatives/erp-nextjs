@@ -12,9 +12,10 @@
 import 'server-only';
 import { PayrollLineKind, isEarningLine } from '@/lib/hr/payroll-lines';
 import { and, desc, eq, sql, type SQL } from 'drizzle-orm';
-import { db } from '@/lib/db/client';
+import { db, transaction as runInTransaction } from '@/lib/db/client';
 import {
   applyLeaves,
+  applyLoans,
   attendances,
   departments,
   holidays,
@@ -31,6 +32,7 @@ import { diffInDays, today, toDateString } from '@/lib/php-date';
 import { MorphType } from '@/lib/db/morph';
 import { findAccountByCode, findContactAccount } from '@/lib/accounting/accounts';
 import { createJournalVoucher } from '@/lib/accounting/journal';
+import { unpaidLoansForUser } from '@/lib/hr/loans';
 import { VoucherType } from '@/lib/accounting/vouchers';
 import { VoucherApproval, voucherAutoApproved } from '@/lib/business-settings';
 
@@ -513,6 +515,11 @@ export type PayrollLine = {
   amount: number;
   /** `PayrollLineKind.Earning` or `PayrollLineKind.Deduction`. */
   earnDedcType: string;
+  /**
+   * Set when this deduction repays a specific loan - `loanStatus[]` on the
+   * Blade's auto-seeded rows. Meaningless on an earning line.
+   */
+  loanId?: number;
 };
 
 export async function listPayrolls(filters: {
@@ -633,52 +640,80 @@ export async function createPayroll(
   const tax = data.tax ?? 0;
   const netSalary = grossSalary - totalDeduction - tax;
 
-  const [inserted] = await db.insert(payrolls).values({
-    staffId: data.staffId,
-    roleId: data.roleId,
-    basicSalary: data.basicSalary,
-    totalEarning,
-    totalDeduction,
-    grossSalary,
-    tax,
-    netSalary,
-    payrollMonth: data.payrollMonth,
-    payrollYear: data.payrollYear,
-    payrollStatus: 'Generated',
-    paymentMode: data.paymentMode ?? null,
-    paymentDate: toDateString(data.paymentDate),
-    note: data.note ?? null,
-    bankName: data.bankName ?? null,
-    bankBranchName: data.bankBranchName ?? null,
-    accountNo: data.accountNo ?? null,
-    chequeNo: data.chequeNo ?? null,
-    activeStatus: 1,
-    createdBy: actorId,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+  return runInTransaction(async (conn) => {
+    const [inserted] = await conn.insert(payrolls).values({
+      staffId: data.staffId,
+      roleId: data.roleId,
+      basicSalary: data.basicSalary,
+      totalEarning,
+      totalDeduction,
+      grossSalary,
+      tax,
+      netSalary,
+      payrollMonth: data.payrollMonth,
+      payrollYear: data.payrollYear,
+      payrollStatus: 'Generated',
+      paymentMode: data.paymentMode ?? null,
+      paymentDate: toDateString(data.paymentDate),
+      note: data.note ?? null,
+      bankName: data.bankName ?? null,
+      bankBranchName: data.bankBranchName ?? null,
+      accountNo: data.accountNo ?? null,
+      chequeNo: data.chequeNo ?? null,
+      activeStatus: 1,
+      createdBy: actorId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    const payrollId = Number(inserted.insertId);
+
+    if (data.lines.length) {
+      await conn.insert(payrollEarnDeducs).values(
+        data.lines.map((line) => ({
+          typeName: line.typeName,
+          amount: line.amount,
+          // Normalised, so a row written here reads the same as one Laravel wrote.
+          earnDedcType: isEarningLine(line.earnDedcType)
+            ? PayrollLineKind.Earning
+            : PayrollLineKind.Deduction,
+          loanStatus: line.loanId ? 1 : 0,
+          payrollId,
+          activeStatus: 1,
+          createdBy: actorId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })),
+      );
+    }
+
+    // `PayrollRepository::create()` - a deduction line tagged with a loan
+    // retires that much of it, and marks the loan fully paid once it reaches
+    // the original amount.
+    for (const line of data.lines) {
+      if (!line.loanId || isEarningLine(line.earnDedcType)) continue;
+
+      const [loan] = await conn
+        .select({ amount: applyLoans.amount, paidLoanAmount: applyLoans.paidLoanAmount })
+        .from(applyLoans)
+        .where(eq(applyLoans.id, line.loanId))
+        .limit(1);
+      if (!loan || Number(loan.amount) <= Number(loan.paidLoanAmount)) continue;
+
+      const paidLoanAmount = Number(loan.paidLoanAmount) + line.amount;
+      await conn
+        .update(applyLoans)
+        .set({
+          paidLoanAmount,
+          paid: paidLoanAmount >= Number(loan.amount) ? 1 : 0,
+          updatedBy: actorId,
+          updatedAt: new Date(),
+        })
+        .where(eq(applyLoans.id, line.loanId));
+    }
+
+    return payrollId;
   });
-
-  const payrollId = Number(inserted.insertId);
-
-  if (data.lines.length) {
-    await db.insert(payrollEarnDeducs).values(
-      data.lines.map((line) => ({
-        typeName: line.typeName,
-        amount: line.amount,
-        // Normalised, so a row written here reads the same as one Laravel wrote.
-        earnDedcType: isEarningLine(line.earnDedcType)
-          ? PayrollLineKind.Earning
-          : PayrollLineKind.Deduction,
-        payrollId,
-        activeStatus: 1,
-        createdBy: actorId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })),
-    );
-  }
-
-  return payrollId;
 }
 
 // The two accounts every payroll payment touches - both installer-seeded, so
@@ -818,11 +853,15 @@ export async function deletePayroll(id: number): Promise<void> {
   await db.delete(payrolls).where(eq(payrolls.id, id));
 }
 
-/** Staff who can be paid, for the payroll form. */
+/**
+ * Staff who can be paid, for the payroll form - each with the loans
+ * `PayrollController@generatePayroll` offered as ready-made deduction lines.
+ */
 export async function payableStaff(roleId?: number | null) {
-  return db
+  const rows = await db
     .select({
       id: staffs.id,
+      userId: staffs.userId,
       name: users.name,
       employeeId: staffs.employeeId,
       basicSalary: staffs.basicSalary,
@@ -836,6 +875,13 @@ export async function payableStaff(roleId?: number | null) {
     // `staff_search_for_payroll` narrowed the list to one role.
     .where(roleId ? and(eq(users.isActive, 1), eq(users.roleId, roleId)) : eq(users.isActive, 1))
     .orderBy(users.name);
+
+  return Promise.all(
+    rows.map(async (row) => ({
+      ...row,
+      loans: row.userId ? await unpaidLoansForUser(row.userId) : [],
+    })),
+  );
 }
 
 export { PayrollLineKind, isEarningLine };

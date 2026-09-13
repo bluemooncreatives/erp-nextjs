@@ -133,6 +133,13 @@ export default async function PayrollPage({
               bankName: s.bankName,
               bankBranchName: s.bankBranchName,
               accountNo: s.accountNo,
+              loans: s.loans.map((loan) => ({
+                id: loan.id,
+                title: loan.title,
+                amount: Number(loan.amount ?? 0),
+                paidLoanAmount: Number(loan.paidLoanAmount ?? 0),
+                monthlyInstallment: Number(loan.monthlyInstallment ?? 0),
+              })),
             }))}
             currencySymbol={symbol}
           />

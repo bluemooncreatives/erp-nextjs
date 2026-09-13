@@ -259,7 +259,7 @@ were jQuery AJAX are server actions or query parameters. `route()` has to produc
 that answers, so those entries name the screen that does, and `verify:routes` checks
 they still do.
 
-## Completed in this pass (payroll payment)
+## Completed in this pass (payroll payment and loan-linked deductions)
 
 `verify:coverage` lists `PayrollController@paymentPayroll` among the routed methods the
 port never names, and files it under "naming, not absent behaviour" because
@@ -282,11 +282,28 @@ voucher-approval toggle. The "Mark paid" button is now `PayrollPaymentPanel`, an
 disclosure modelled on the purchase order payment panel; `setPayrollStatus` is gone; a new
 `verify:actions` scenario posts a real payment and asserts the two legs land balanced.
 
-Not carried over, and out of scope for this pass: `PayrollRepository::create()` lets
-payroll generation itself attach a loan repayment (reducing `apply_loans.paid_loan_amount`
-and flagging the deduction line `loan_status = 1`); the port's `createPayroll()` has no
-loan-linking UI, so that flag is never set today and the loan-linked posting branch above,
-while correct, is not yet reachable. Recorded here so it doesn't read as fixed.
+**Loan-linked deductions, closed in the same pass.** `PayrollRepository::create()` lets
+payroll generation attach a loan repayment: the Blade pre-seeded one deduction row per
+loan `ApplyLoan::Nonpaid()` returned for that staff member (title and monthly instalment
+filled in, a checked `loanStatus[]` box), and saving reduced `apply_loans.paid_loan_amount`
+by each such row's amount, marking the loan `paid` once it reached the original amount.
+The port's `createPayroll()` had no loan-linking at all, so the branch `payPayroll()`
+posts for a loan-flagged deduction (crediting the staff's own chart account instead of
+Cash) was correct but unreachable - nothing ever set `loan_status = 1`.
+
+`payableStaff()` now carries each staff member's unpaid, approved loans
+(`unpaidLoansForUser()`, `lib/hr/loans.ts`); `GeneratePayrollPanel` seeds one deduction
+line per loan when a staff member is selected, pre-filled the same way the Blade did, with
+a "Loan repayment" label in place of the readonly styling and a per-line hidden `loan_id`
+that survives to the action. `createPayroll()` runs inside one transaction: it writes the
+payroll and its lines (`loan_status = 1` on a loan-linked one), then for each such line
+loads the loan, adds the amount to `paid_loan_amount`, and marks it `paid` once that
+reaches the loan's `amount` - the same guard and arithmetic as the PHP method. A new
+`verify:actions` scenario generates a payroll with a loan-linked deduction that exactly
+repays a loan and asserts the loan comes back `paid = 1`.
+
+With this, the payroll module is at full logic parity: generation, payment, the ledger
+postings on both sides, and the loan linkage between them.
 
 ## Logic parity
 

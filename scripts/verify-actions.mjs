@@ -1067,6 +1067,60 @@ await scenario('payroll payment: records the payment and posts a balanced journa
   }
 });
 
+await scenario('payroll generation: a loan-linked deduction retires the loan', async () => {
+  const store = action('storePayroll');
+
+  const staff = await one(
+    'select s.id, s.user_id, u.role_id from staffs s join users u on u.id = s.user_id limit 1',
+  );
+  assert.ok(staff, 'a staff fixture exists');
+
+  const [loanInsert] = await connection.query(
+    `insert into apply_loans
+       (department_id, user_id, title, loan_type, apply_date, loan_date, amount, paid_loan_amount,
+        total_month, monthly_installment, approval, paid, created_at, updated_at)
+     values (1, ?, 'Verify Loan', 'personal', curdate(), curdate(), 500, 0, 1, 500, 1, 0, now(), now())`,
+    [staff.user_id],
+  );
+  const loanId = loanInsert.insertId;
+
+  try {
+    const response = await submit(store, {
+      staff_id: String(staff.id),
+      role_id: String(staff.role_id ?? 1),
+      basic_salary: '20000',
+      payroll_month: 'February',
+      payroll_year: '2092',
+      tax: '0',
+      type_name: 'Verify Loan - Loan',
+      amount: '500',
+      earn_dedc_type: 'D',
+      loan_id: String(loanId),
+    });
+    assert.ok(response.status < 400, `generate returned ${response.status}`);
+
+    const payroll = await one(
+      "select * from payrolls where payroll_year = '2092' and payroll_month = 'February' and staff_id = ?",
+      [staff.id],
+    );
+    assert.ok(payroll, 'the payroll was generated');
+    assert.equal(Number(payroll.net_salary), 19500, 'the deduction reduced net salary');
+
+    const line = await one('select * from payroll_earn_deducs where payroll_id = ?', [payroll.id]);
+    assert.ok(line, 'the deduction line was written');
+    assert.equal(line.loan_status, 1, 'the line is flagged as a loan repayment');
+
+    const loan = await one('select * from apply_loans where id = ?', [loanId]);
+    assert.equal(Number(loan.paid_loan_amount), 500, 'the loan balance absorbed the deduction');
+    assert.equal(loan.paid, 1, 'the loan is marked fully paid');
+
+    await rows('delete from payroll_earn_deducs where payroll_id = ?', [payroll.id]);
+    await rows('delete from payrolls where id = ?', [payroll.id]);
+  } finally {
+    await rows('delete from apply_loans where id = ?', [loanId]);
+  }
+});
+
 const failed = results.filter((r) => !r.ok);
 console.log(
   `ran ${results.length} action scenarios: ${results.length - failed.length} ok, ${failed.length} failed`,

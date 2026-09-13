@@ -5,13 +5,13 @@
 // Selecting a staff member fills the basic salary and bank details from their
 // record, then earning and deduction lines are added before saving.
 
-import { useActionState, useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { Card } from '@/components/erp/page';
 import { FormAlert, FormInput, FormSelect } from '@/components/erp/fields';
 import { SubmitButton } from '@/components/erp/submit-button';
 import { DataTable, Td, Tr } from '@/components/erp/table';
 import { storePayroll, type LeaveFormState } from '../../leave/actions';
-import { isEarningLine } from '@/lib/hr/payroll-lines';
+import { PayrollLineKind, isEarningLine } from '@/lib/hr/payroll-lines';
 import { Phrase } from '@/context/TranslationContext';
 
 const INITIAL: LeaveFormState = {};
@@ -25,9 +25,24 @@ export type PayableStaff = {
   bankName: string | null;
   bankBranchName: string | null;
   accountNo: string | null;
+  /** `ApplyLoan::Nonpaid()` - offered as ready-made deduction lines below. */
+  loans: Array<{
+    id: number;
+    title: string | null;
+    amount: number;
+    paidLoanAmount: number;
+    monthlyInstallment: number;
+  }>;
 };
 
-type Line = { key: number; typeName: string; amount: number; kind: string };
+type Line = {
+  key: number;
+  typeName: string;
+  amount: number;
+  kind: string;
+  /** Set for a loan-seeded row; ties this deduction back to that loan. */
+  loanId?: number;
+};
 
 const MONTHS = [
   'January','February','March','April','May','June',
@@ -48,6 +63,23 @@ export function GeneratePayrollPanel({
 
   const selected = staff.find((s) => String(s.id) === staffId) ?? null;
   const basic = selected?.basicSalary ?? 0;
+
+  // The Blade reloaded the whole form for the chosen staff, with one
+  // deduction row already sitting in the table per unpaid loan they carry,
+  // pre-filled with that loan's monthly installment. Switching staff here
+  // does the same - old lines are staff-specific and don't carry over.
+  useEffect(() => {
+    const loans = staff.find((s) => String(s.id) === staffId)?.loans ?? [];
+    setLines(
+      loans.map((loan) => ({
+        key: loan.id,
+        typeName: `${loan.title ?? 'Loan'} - Loan`,
+        amount: Math.min(loan.monthlyInstallment, loan.amount - loan.paidLoanAmount),
+        kind: PayrollLineKind.Deduction,
+        loanId: loan.id,
+      })),
+    );
+  }, [staffId, staff]);
 
   // The preview has to total the same way the action does, so it shares the
   // server's reading of `earn_dedc_type`.
@@ -115,12 +147,21 @@ export function GeneratePayrollPanel({
         <div className="mt-5 space-y-3">
           {lines.map((line) => (
             <div key={line.key} className="grid gap-3 md:grid-cols-4">
-              <FormInput
-                label="Description"
-                name="type_name"
-                value={line.typeName}
-                onChange={(e) => patch(line.key, { typeName: e.target.value })}
-              />
+              <input type="hidden" name="loan_id" value={line.loanId ?? ''} />
+              <div>
+                <FormInput
+                  label="Description"
+                  name="type_name"
+                  value={line.typeName}
+                  readOnly={Boolean(line.loanId)}
+                  onChange={(e) => patch(line.key, { typeName: e.target.value })}
+                />
+                {line.loanId ? (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    <Phrase>Loan repayment</Phrase>
+                  </p>
+                ) : null}
+              </div>
               <FormSelect
                 label="Type"
                 name="earn_dedc_type"
@@ -150,7 +191,7 @@ export function GeneratePayrollPanel({
                   }
                   className="rounded-lg px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10"
                 >
-                  <Phrase>Remove</Phrase>
+                  <Phrase>{line.loanId ? "Don't deduct this month" : 'Remove'}</Phrase>
                 </button>
               </div>
             </div>

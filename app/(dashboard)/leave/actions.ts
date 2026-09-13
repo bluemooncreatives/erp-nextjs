@@ -323,12 +323,14 @@ export async function storePayroll(
   const typeNames = formData.getAll('type_name').map(String);
   const amounts = formData.getAll('amount').map((v) => Number(v));
   const kinds = formData.getAll('earn_dedc_type').map(String);
+  const loanIds = formData.getAll('loan_id').map(String);
 
   const lines: PayrollLine[] = typeNames
     .map((typeName, i) => ({
       typeName,
       amount: amounts[i] ?? 0,
       earnDedcType: kinds[i] ?? PayrollLineKind.Earning,
+      loanId: loanIds[i] ? Number(loanIds[i]) : undefined,
     }))
     .filter((l) => l.typeName && l.amount > 0);
 

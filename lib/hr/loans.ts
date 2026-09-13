@@ -76,6 +76,30 @@ export async function staffLoans(userId: number) {
     .orderBy(desc(applyLoans.createdAt));
 }
 
+/**
+ * `ApplyLoan::Nonpaid()->where('user_id', $id)->get()` - the loans
+ * `PayrollController@generatePayroll` offers as ready-made deduction lines.
+ */
+export async function unpaidLoansForUser(userId: number) {
+  return db
+    .select({
+      id: applyLoans.id,
+      title: applyLoans.title,
+      amount: applyLoans.amount,
+      paidLoanAmount: applyLoans.paidLoanAmount,
+      monthlyInstallment: applyLoans.monthlyInstallment,
+    })
+    .from(applyLoans)
+    .where(
+      and(
+        eq(applyLoans.userId, userId),
+        eq(applyLoans.approval, LoanApproval.Approved),
+        eq(applyLoans.paid, 0),
+      ),
+    )
+    .orderBy(desc(applyLoans.createdAt));
+}
+
 export async function findLoan(id: number) {
   const [row] = await db
     .select(loanSelect)
