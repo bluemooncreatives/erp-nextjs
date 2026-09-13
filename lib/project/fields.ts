@@ -1,7 +1,7 @@
 import 'server-only';
 import { and, asc, eq } from 'drizzle-orm';
 import { db, transaction } from '@/lib/db/client';
-import { fields, fieldOptions, fieldProject, fieldTask, projects, projectUser, teamUser, tasks } from '@/lib/db/schema';
+import { fields, fieldOptions, fieldProject, fieldTask, projects, projectUser, teamUser, taskComments, tasks } from '@/lib/db/schema';
 import { requireUser } from '@/lib/auth/permissions';
 
 export async function requireProjectAccess(projectId: number) {
@@ -61,7 +61,7 @@ export async function saveField(projectId: number, data: FormData) {
 }
 
 export async function saveFieldValue(projectId: number, taskId: number, fieldId: number, raw: string) {
-  await requireProjectAccess(projectId);
+  const { user } = await requireProjectAccess(projectId);
   const [task] = await db.select().from(tasks).where(and(eq(tasks.id, taskId), eq(tasks.projectId, projectId))).limit(1);
   const row = (await projectFields(projectId, taskId)).find((r) => r.field.id === fieldId);
   if (!task || !row) throw new Error('Task or field not found in this project.');
@@ -80,8 +80,11 @@ export async function saveFieldValue(projectId: number, taskId: number, fieldId:
       default: throw new Error('Unsupported field type.');
     }
   }
-  if (row.value) await db.update(fieldTask).set(value).where(eq(fieldTask.id, row.value.id));
-  else await db.insert(fieldTask).values({ ...value, taskId, fieldId });
+  await transaction(async (tx) => {
+    if (row.value) await tx.update(fieldTask).set(value).where(eq(fieldTask.id, row.value.id));
+    else await tx.insert(fieldTask).values({ ...value, taskId, fieldId });
+    await tx.insert(taskComments).values({ taskId, fieldId, createdBy: user.id, event: 'update_field', comment: `${row.field.name ?? 'Field'}: ${raw || 'cleared'}`, oldValue: row.value ? JSON.stringify({ text: row.value.text, number: row.value.number, date: row.value.date, optionId: row.value.optionId, userId: row.value.userId }) : null, createdAt: new Date(), updatedAt: new Date() });
+  });
 }
 
 export async function changeField(projectId: number, fieldId: number, operation: string) {

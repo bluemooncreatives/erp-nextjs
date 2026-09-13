@@ -1,0 +1,10 @@
+import mysql from 'mysql2/promise';
+import {loadEnv} from './lib/env.mjs';
+import {readFileSync} from 'node:fs';
+loadEnv();
+const test=JSON.parse(readFileSync('artifacts/migration-test-db.json'));
+const c=await mysql.createConnection({host:process.env.DB_HOST,port:Number(process.env.DB_PORT),user:process.env.DB_USERNAME,password:process.env.DB_PASSWORD,database:test.database});
+for(const table of ['contacts','product_sku','stock_reports','chart_accounts','projects','tasks','sales']) console.log(table,(await c.query('SELECT COUNT(*) n FROM '+table))[0][0].n);
+console.log('availableStock',(await c.query('SELECT s.product_sku_id, s.houseable_id, s.houseable_type, s.stock, p.selling_price, p.min_selling_price FROM stock_reports s JOIN product_sku p ON p.id=s.product_sku_id WHERE CAST(s.stock AS DECIMAL(20,2))>10 LIMIT 3'))[0]);
+console.log('accountGroups',(await c.query('SELECT configuration_group_id, COUNT(*) n FROM chart_accounts GROUP BY configuration_group_id'))[0]);
+await c.end();

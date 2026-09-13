@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { DM_Sans, JetBrains_Mono } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
 import 'flatpickr/dist/flatpickr.css';
 import { ThemeProvider } from '@/context/ThemeContext';
@@ -7,16 +7,18 @@ import { config } from '@/lib/config';
 import { documentLocale } from '@/lib/i18n';
 
 // The design system asks for DM Sans and JetBrains Mono. `next/font` self-hosts
-// and preloads both, and exposes them as the variables `--font-sans` and
+// and preloads both from versioned local files, and exposes them as the variables `--font-sans` and
 // `--font-mono` are built from in globals.css.
-const dmSans = DM_Sans({
-  subsets: ['latin'],
+const dmSans = localFont({
+  src: '../public/fonts/dm-sans.ttf',
+  weight: '100 1000',
   variable: '--font-dm-sans',
   display: 'swap',
 });
 
-const jetBrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
+const jetBrainsMono = localFont({
+  src: '../public/fonts/jetbrains-mono.ttf',
+  weight: '100 800',
   variable: '--font-jetbrains-mono',
   display: 'swap',
 });
