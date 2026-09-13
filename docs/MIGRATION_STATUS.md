@@ -1,9 +1,14 @@
 # Laravel to Next.js migration status
 
-Updated 2026-09-12. The port now covers every screen reachable from the sidebar plus the
-secondary screens listed below, and it has been validated against a real MySQL-compatible
-database for the first time. The remaining gaps are listed under **Remaining work**; read
-that section before treating the migration as finished.
+Updated 2026-09-13. **Every route in the Laravel router now resolves in this port.**
+`npm run verify:routes` reads the PHP route files and reports 591 named routes, all
+present, with no page route left unserved - see **Route parity** for how that is measured
+and for the 16 routes that are dead in the source itself.
+
+The port has been validated against a real MySQL-compatible database: schema, queries,
+write paths, permission names, every page as three different roles, server actions posted
+as forms, and seven scenarios driven in a real browser. What is still open is listed under
+**Remaining work**; read it before treating the migration as finished.
 
 ## What was completed earlier
 
@@ -135,19 +140,21 @@ from `software_erp.sql`, plus the usual static checks.
 
 | Check | Command | Result |
 | --- | --- | --- |
-| Unit tests | `npm test` | 43 passed |
+| Unit tests | `npm test` | 46 passed |
 | Type check | `npx tsc --noEmit` | clean |
-| Lint | `npx eslint app lib components scripts` | no errors (17 unused-symbol warnings) |
+| Lint | `npx eslint .` | clean, no warnings |
 | Production build | `npm run build` | compiled |
-| Permission names | `npm run verify:permissions` | 313 guarded names, all resolve to a route name or a known module permission |
+| Route parity | `npm run verify:routes` | all 591 named Laravel routes present; 0 page routes unserved |
+| Permission names | `npm run verify:permissions` | 320 guarded names, all resolve to a route name or a known module permission |
 | Schema parity | `npm run verify:schema <url>` | 107 tables / 1180 columns, no missing tables, columns or type mismatches |
 | Query layer | `npm run verify:db` | 103 repository queries executed, 0 failures |
 | Write paths | `npm run verify:writes` | 9 scenarios passed |
-| Seeded end-to-end | `node scripts/seed-demo.mjs` | products, contacts, purchase (approved + received), sale (approved + paid), conditional sale, 4 vouchers, transfer, adjustment |
-| Pages, as super admin | `npm run verify:http` | 202 routes, 0 server errors (177 rendered, 18 not-found for absent rows, 7 expected redirects) |
-| Pages, as staff with no permissions | `ROLE_ID=3 npm run verify:http` | 202 routes, 0 server errors (135 permission denials handled, 51 rendered) |
-| Pages, as staff holding every seeded permission | `ROLE_ID=3 npm run verify:http` | 202 routes, 0 server errors (120 rendered, 62 denied for permissions this dump does not seed) |
-| Server actions over HTTP | `npm run verify:actions` | 20 scenarios passed, including the in-app notification a contact raises |
+| Seeded end-to-end | `node scripts/seed-demo.mjs` | products, contacts, purchase (approved + received), sale (approved + paid), conditional sale, 4 vouchers, transfer, adjustment, leave type / define / approved application, payroll |
+| Pages, as super admin | `npm run verify:http` | 216 routes, 0 server errors (201 rendered, 8 not-found for the portal pages an admin has no contact for, 7 expected redirects) |
+| Pages, as staff | `ROLE_ID=3 npm run verify:http` | 216 routes, 0 server errors (134 rendered, 68 permission denials handled) |
+| Pages, as a portal customer | `USER_ID=4 npm run verify:http` | 216 routes, 0 server errors (35 rendered, 174 correctly refused) |
+| Server actions over HTTP | `npm run verify:actions` | 21 scenarios passed, including the in-app notification a contact raises |
+| In a real browser | `npm run verify:browser` | 7 scenarios passed - hydration, the product picker and running totals, the product type selector, adding a voucher line, list search, and the reference Edit round-trip |
 
 The write scenarios assert the behaviour the PHP relied on: a receipt posts one Dr and one Cr
 leg; editing a voucher **replaces** its transactions and its cheque document instead of
@@ -175,29 +182,85 @@ given install has not seeded.
 The database used for this pass was a disposable MariaDB on port 3307 created from
 `software_erp.sql`; nothing was pointed at the configured `DB_HOST`.
 
+## Completed in this pass
+
+Closing the route-parity gaps the audit found:
+
+- **Payment Due List** (`sale.due.list`), which the dashboard already linked to and which
+  404'd. `dueList('all')` is `is_approved = 1 and status != 1`, the filter `listSales`
+  already supports.
+- **Due Invoice List** (`due.invoice.list`). `dueInvoiceList()` read `session('customer')`,
+  a `"<prefix>-<id>"` string the sale and POS forms set over AJAX. A session value set by
+  one screen and read by another has no equivalent here, so the party travels on the query
+  string in that same spelling.
+- **Sale and Purchase Auto Approval** (`sale.configurations`), over the
+  `sale&purchase_type` business settings and the same toggle action the Settings
+  Activation tab posts to.
+- **Company Information** (`company_info`). `HomeController@company` renders the settings
+  view with `$company` set, which the Blade reads only to mark the Company tab active, so
+  this is the settings screen opened on that tab.
+- **Serial keys** and **selling price history** for a SKU, and **My Products** for a
+  signed-in contact.
+- **Department Wise Leave** (`approve.leave.department` / `search.leave.department`).
+- The print sheets: **staff account statement**, **payslip**, **attendance report**,
+  **ledger report** and **leave application**.
+- **File download** (`file.download`), with the path traversal the PHP allowed refused.
+
+Two defects were found and fixed in the process:
+
+- `payroll_earn_deducs.earn_dedc_type` holds the letters `'E'` and `'D'` - what
+  `PayrollRepository` writes and what the reports filter on. The port was writing `'earn'`
+  and `'dedc'`, so any payroll it generated showed no earnings and no deductions in either
+  application, and rows Laravel had written were equally unreadable here.
+- `SelectControl` had replaced the native `<select>` with a Radix listbox and a hidden
+  input, which silently cost eight plain `<form method="get">` filter screens their
+  no-JavaScript operation. A `<noscript>` now carries a real `<select>` under the same
+  name.
+
+## Route parity
+
+`npm run verify:routes` reads `routes/web.php` and every `Modules/*/Routes/web.php`,
+resolves Laravel's `->name('x.')->group()` prefixes and its `Route::resource` shorthand,
+ignores commented-out routes, and checks each one against this port. It reports:
+
+- **591 named routes, all present in `lib/routes.ts`.**
+- **0 page routes without a page serving their URL.**
+- **16 routes that are dead in the source.** Thirteen point at a controller method no
+  controller defines, so the route 500s in Laravel too: `income.show`, `to_dos.index`
+  / `.create` / `.show` / `.edit`, `suggest.create`, `stock-transfer.excel`,
+  `purchase.order.download` / `.excel`, `purchase.return.excel`, `quotation.file`,
+  `sale.excel`, and `showroom_wise.expense.daily`. The three `packing.*` report routes
+  reach for a Packing module whose entities and tables are in neither the codebase nor
+  the database dump, so they fatal as well. None was invented here.
+
+Some entries in `lib/routes.ts` point at a different URL from the PHP one, because the
+port serves that screen somewhere else: the reference tables (brand, category, model,
+unit type, variant, tax, currency, printer, CNF, holidays, events, bank accounts, roles,
+permissions, themes) are inline forms on their index rather than the modals Laravel
+routed to; the payment and return panels sit on the document itself; and endpoints that
+were jQuery AJAX are server actions or query parameters. `route()` has to produce a URL
+that answers, so those entries name the screen that does, and `verify:routes` checks
+they still do.
+
 ## Remaining work
 
-- **No production data has been touched.** The validation ran against a copy of the schema with
-  seeded rows, not against the live database, and the live database may hold data shapes this
-  dump does not (legacy rows, other branches, partially migrated records).
-- **A browser pass is still worth doing.** `verify:actions` posts 20 real forms - printer,
-  coupon, branch, contact, receipt voucher, CSV upload, sale (create, edit, approve), purchase,
-  stock transfer and adjustment, plus permission-denied and signed-out cases - and checks the
-  rows they wrote, but it drives them without JavaScript. The client-side behaviour of the
-  bigger forms (the product picker, totals, serial numbers) is not covered by it.
-- **Legacy PHP update packages** remain unimplemented: they extract PHP files and run Artisan.
-  The system-update screen explains this rather than pretending to install.
-- **The Packing module referenced by the source is absent**, so `report/packing-report` has no
-  implementation and none was invented.
-- Routes that exist in the PHP router but have no controller method - `suggest.create`,
-  `to_dos.*` beyond store/complete, `coupon.edit/update/destroy`, `income.show`,
-  `apply_loans.show/edit` as pages - are intentionally not ported; they are dead in the source.
-- Reference screens that the PHP served as modals (brand, category, model, unit type, variant,
-  tax, country, currency, language, holiday, event, role, permission, CNF, printer) are inline
-  forms here. That is a deliberate interface change, not a missing screen.
-- Audit note: `node scripts/audit-pages.mjs` reports 204 page files and 92 sidebar links, with
-  every sidebar link resolving. Its "missing screen candidates" list is structural only; each
-  remaining entry is one of the dead or inline cases above.
+- **No production data has been touched.** The validation ran against a copy of the
+  schema with seeded rows, not against the live database, and the live database may hold
+  data shapes this dump does not (legacy rows, other branches, partially migrated
+  records).
+- **Legacy PHP update packages** remain unimplemented: they extract PHP files and run
+  Artisan. The system-update screen explains this rather than pretending to install.
+- **Two behaviours were fixed rather than reproduced**, each noted in the code:
+  `HomeController@fileDownload` let a crafted path walk out of `public/`, and
+  `LeaveController@departmentWiseSearch` calls a repository method that does not exist,
+  so submitting that form 500s in Laravel.
+- **PDF routes render a print sheet.** dompdf has no equivalent here, so `sale.pdf`,
+  `purchase.order.pdf`, `quotation.order.pdf`, `payroll.pdf`, `attendance_report_print`,
+  `staffs.report_print`, `leadger_report.print_view` and
+  `leave.application.download` open the browser's print dialog on the same document.
+- **`verify:browser` covers 7 scenarios, not every interactive screen.** Serial-number
+  entry, the POS screen and the project board are exercised only by the HTTP sweep,
+  which loads them but does not click through them.
 
 Publication: the work is committed on `main` **and has been pushed to `origin/main`** - the
 reflog shows the pushes were made by this workspace's own tooling, not by a deliberate
